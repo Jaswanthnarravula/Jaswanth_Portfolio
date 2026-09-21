@@ -1,0 +1,347 @@
+/*
+ * OS chooser — plans/04-os-chooser.md. A neutral foyer in Jaswanth's own glass brand (the Hello stage's light field),
+ * the only place all five identities appear side by side. Cards carry no device outline: each snapshot is a small
+ * copy of the full page in the visitor's viewport shape. No backdrop blur here (the cards are opaque images).
+ */
+
+.root {
+  --c-stage: oklch(0.14 0.022 268);
+  --c-ink: oklch(0.97 0.006 260);
+  --c-ink-2: oklch(0.82 0.016 262);
+  --c-line: oklch(1 0 0 / 0.14);
+  --c-ease: cubic-bezier(0.2, 0.9, 0.3, 1);
+  --focus-ring: oklch(0.84 0.12 240);
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-stage) - 1);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  color: var(--c-ink);
+  background: var(--c-stage);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+.root[data-covered] {
+  visibility: hidden;
+}
+
+.field {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.field::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(34% 40% at 20% 18%, oklch(0.58 0.19 262 / 0.5), transparent 70%),
+    radial-gradient(30% 36% at 84% 14%, oklch(0.56 0.2 300 / 0.36), transparent 70%),
+    radial-gradient(34% 40% at 70% 92%, oklch(0.66 0.13 210 / 0.26), transparent 70%);
+  animation: drift 32s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  to {
+    transform: translate3d(2.5%, 2%, 0) rotate(6deg) scale(1.06);
+  }
+}
+
+.inner {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: clamp(16px, 3svh, 32px);
+  width: min(100%, 1360px);
+  min-height: 100%;
+  margin-inline: auto;
+  padding: max(28px, calc(var(--sa-t) + 20px)) max(20px, calc(var(--sa-r) + 16px)) max(20px, calc(var(--sa-b) + 12px))
+    max(20px, calc(var(--sa-l) + 16px));
+}
+
+/* Heading and cards read as one block, centred in the space above the footer. */
+.main {
+  display: grid;
+  align-content: center;
+  gap: clamp(24px, 5svh, 56px);
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.avatar {
+  flex: none;
+  width: 44px;
+  overflow: hidden;
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px oklch(1 0 0 / 0.85);
+}
+.avatarFlying {
+  z-index: calc(var(--z-stage) + 1);
+  overflow: hidden;
+  border-radius: 999px;
+  pointer-events: none;
+}
+.heading {
+  margin: 0;
+  font-size: clamp(24px, 3.2vw, 40px);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  text-align: center;
+  text-wrap: balance;
+}
+.heading:focus {
+  outline: none;
+}
+
+.nav {
+  display: grid;
+  align-content: center;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-content: center;
+  gap: clamp(14px, 1.8vw, 26px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  perspective: 1200px;
+}
+.cards[data-count='1'],
+.cards[data-count='2'],
+.cards[data-count='3'],
+.cards[data-count='4'] {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.cards[data-count='1'] .item,
+.cards[data-count='2'] .item,
+.cards[data-count='3'] .item,
+.cards[data-count='4'] .item {
+  width: min(100%, 300px);
+}
+.item {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.card {
+  display: grid;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+  transform-style: preserve-3d;
+  -webkit-tap-highlight-color: transparent;
+}
+.shot {
+  position: relative;
+  display: block;
+  aspect-ratio: var(--viewport-aspect, 16 / 10);
+  overflow: hidden;
+  border: 1px solid var(--c-line);
+  border-radius: 12px;
+  background: oklch(1 0 0 / 0.06);
+  box-shadow: 0 18px 44px oklch(0 0 0 / 0.4);
+  transition: box-shadow 240ms var(--c-ease);
+}
+.shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Preview brightens on hover and focus (an overlay's opacity — never a filter on the image). */
+.shot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, oklch(1 0 0 / 0.16), transparent 55%);
+  opacity: 0;
+  transition: opacity 240ms var(--c-ease);
+}
+.card:hover .shot,
+.card:focus-visible .shot {
+  box-shadow:
+    0 0 0 1px oklch(1 0 0 / 0.3),
+    0 26px 60px oklch(0 0 0 / 0.5);
+}
+.card:hover .shot::after,
+.card:focus-visible .shot::after {
+  opacity: 1;
+}
+.card:focus-visible {
+  outline: none;
+}
+.card:focus-visible .shot {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+.card:active .shot {
+  transform: scale(0.98);
+}
+
+.label {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+}
+.name {
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.character {
+  color: var(--c-ink-2);
+  font-size: 14px;
+}
+.badge {
+  margin-top: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: oklch(0.54 0.19 262);
+  color: oklch(0.99 0 0);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.failure {
+  margin: 0;
+  color: var(--c-ink);
+  font-size: 13px;
+}
+.failure button {
+  padding: 2px 10px;
+  border: 1px solid var(--c-line);
+  border-radius: 999px;
+  background: oklch(1 0 0 / 0.08);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.failure a {
+  color: var(--c-ink-2);
+}
+
+.empty {
+  max-width: 44ch;
+  margin: 0 auto;
+  align-self: center;
+  color: var(--c-ink-2);
+  font-size: 17px;
+  text-align: center;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+}
+.footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--c-ink-2);
+  font-size: 15px;
+  text-decoration: none;
+}
+.footer a:hover {
+  color: var(--c-ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* The flying snapshot (shared element) sits on the stage layer, above every OS layer. */
+.stage {
+  z-index: var(--z-stage);
+  overflow: hidden;
+  background: var(--c-stage, oklch(0.14 0.022 268));
+  pointer-events: none;
+}
+.stage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Tablet: 3 + 2. */
+@media (max-width: 1023px) {
+  .cards {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .cards .item {
+    grid-column: span 2;
+  }
+  .cards .item:nth-child(4) {
+    grid-column: 2 / span 2;
+  }
+}
+/* Phone portrait: two columns, the fifth spans both; snapshots are cropped to the card. */
+@media (max-width: 599px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+  }
+  .cards .item,
+  .cards .item:nth-child(4) {
+    grid-column: auto;
+  }
+  .cards .item:nth-child(5) {
+    grid-column: 1 / -1;
+  }
+  .shot {
+    aspect-ratio: 4 / 3;
+    min-height: 88px;
+  }
+  .cards .item:nth-child(5) .shot {
+    aspect-ratio: 8 / 3;
+  }
+  .heading {
+    font-size: 24px;
+  }
+  .main {
+    gap: 22px;
+  }
+  .label {
+    gap: 0;
+  }
+}
+/* Phone landscape: five compact tiles in one row. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .cards,
+  .cards[data-count] {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .cards .item,
+  .cards .item:nth-child(n) {
+    grid-column: auto;
+  }
+  .character,
+  .badge {
+    display: none;
+  }
+}
+
+:global(html[data-motion='reduced']) .field::before,
+:global(html[data-tier='0']) .field::before {
+  animation: none;
+}
+:global(html[data-motion='reduced']) .shot,
+:global(html[data-motion='reduced']) .shot::after {
+  transition: none;
+}
+
+@media (forced-colors: active) {
+  .shot {
+    border-color: CanvasText;
+  }
+  .card:focus-visible .shot {
+    outline-color: Highlight;
+  }
+}

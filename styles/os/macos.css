@@ -1,0 +1,114 @@
+/* macOS skin — values owned by plans/macos/01-identity.md. Vibrancy, 12 px windows, 13 px SF, left traffic lights. */
+
+[data-os='macos'] {
+  color-scheme: light;
+  --surface-base: oklch(1 0 0);
+  --surface-raised: oklch(0.975 0 0);
+  --surface-overlay: oklch(0.975 0.002 260 / 0.82);
+  --surface-chrome: oklch(0.955 0.003 260 / 0.7);
+  --text-primary: oklch(0.2 0 0 / 0.9);
+  --text-secondary: oklch(0.47 0 0);
+  --text-tertiary: oklch(0.54 0 0);
+  --text-on-accent: oklch(1 0 0);
+  --border-subtle: oklch(0 0 0 / 0.1);
+  --border-strong: oklch(0 0 0 / 0.22);
+  --accent: oklch(0.62 0.19 255);
+  --focus-ring: oklch(0.62 0.19 255);
+  --scrim-dark: oklch(0.14 0.01 260 / 0.64);
+  --scrim-light: oklch(0.99 0 0 / 0.7);
+  --radius-control: 6px;
+  --radius-card: 10px;
+  --radius-window: 12px;
+  --radius-icon: 22.37%;
+  --radius-sheet: 10px;
+  --radius-menu: 8px;
+  --target-min: 24px;
+  --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--font-inter), sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', var(--font-inter), sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-size-caption: 11px;
+  --font-size-body: 13px;
+  --font-size-title: 15px;
+  --font-size-large: 26px;
+  --elevation-1: 0 1px 1px oklch(0 0 0 / 0.08);
+  --elevation-2: 0 4px 14px oklch(0 0 0 / 0.14), 0 0 0 0.5px oklch(0 0 0 / 0.12);
+  --elevation-3: 0 10px 28px oklch(0 0 0 / 0.18), 0 0 0 0.5px oklch(0 0 0 / 0.14);
+  --elevation-4: 0 16px 48px 2px oklch(0 0 0 / 0.22), 0 0 0 0.5px oklch(0 0 0 / 0.16);
+  --elevation-5: 0 22px 70px 4px oklch(0 0 0 / 0.3), 0 0 0 0.5px oklch(0 0 0 / 0.2);
+  --material-thin: oklch(0.99 0 0 / 0.36);
+  --material-regular: oklch(0.975 0.002 260 / 0.62);
+  --material-thick: oklch(0.975 0.002 260 / 0.8);
+  --material-chrome: oklch(0.97 0.003 260 / 0.58);
+  --material-blur: blur(30px) saturate(180%);
+  --hairline: oklch(0 0 0 / 0.1);
+  --light-close: #ff5f57;
+  --light-minimize: #febc2e;
+  --light-zoom: #28c840;
+  --wallpaper-macos:
+    radial-gradient(120% 90% at 18% 100%, oklch(0.86 0.09 55) 0%, transparent 55%),
+    radial-gradient(110% 80% at 85% 92%, oklch(0.8 0.1 20) 0%, transparent 60%),
+    radial-gradient(140% 90% at 50% 0%, oklch(0.83 0.08 240) 0%, transparent 65%),
+    linear-gradient(170deg, oklch(0.8 0.07 250) 0%, oklch(0.84 0.07 300) 48%, oklch(0.88 0.08 50) 100%);
+  --wallpaper-macos-worst: oklch(0.9 0.06 60);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) [data-os='macos'] {
+    color-scheme: dark;
+    --surface-base: oklch(0.235 0.004 265);
+    --surface-raised: oklch(0.27 0.004 265);
+    --surface-overlay: oklch(0.24 0.006 265 / 0.8);
+    --surface-chrome: oklch(0.2 0.006 265 / 0.62);
+    --text-primary: oklch(0.97 0 0 / 0.92);
+    --text-secondary: oklch(0.78 0 0);
+    --text-tertiary: oklch(0.7 0 0);
+    --border-subtle: oklch(1 0 0 / 0.1);
+    --border-strong: oklch(1 0 0 / 0.2);
+    --accent: oklch(0.66 0.18 255);
+    --focus-ring: oklch(0.7 0.16 255);
+    --elevation-5: 0 22px 70px 4px oklch(0 0 0 / 0.56), 0 0 0 0.5px oklch(0 0 0 / 0.4);
+    --material-thin: oklch(0.24 0.01 265 / 0.38);
+    --material-regular: oklch(0.22 0.008 265 / 0.62);
+    --material-thick: oklch(0.22 0.008 265 / 0.8);
+    --material-chrome: oklch(0.18 0.008 265 / 0.55);
+    --hairline: oklch(1 0 0 / 0.1);
+    --wallpaper-macos:
+      radial-gradient(120% 90% at 18% 100%, oklch(0.36 0.1 30) 0%, transparent 55%),
+      radial-gradient(110% 80% at 85% 92%, oklch(0.3 0.12 330) 0%, transparent 60%),
+      radial-gradient(140% 90% at 50% 0%, oklch(0.3 0.1 265) 0%, transparent 65%),
+      linear-gradient(170deg, oklch(0.2 0.06 265) 0%, oklch(0.24 0.08 300) 50%, oklch(0.3 0.09 20) 100%);
+    --wallpaper-macos-worst: oklch(0.38 0.1 30);
+  }
+}
+:root[data-theme='dark'] [data-os='macos'] {
+  color-scheme: dark;
+  --surface-base: oklch(0.235 0.004 265);
+  --surface-raised: oklch(0.27 0.004 265);
+  --surface-overlay: oklch(0.24 0.006 265 / 0.8);
+  --surface-chrome: oklch(0.2 0.006 265 / 0.62);
+  --text-primary: oklch(0.97 0 0 / 0.92);
+  --text-secondary: oklch(0.78 0 0);
+  --text-tertiary: oklch(0.7 0 0);
+  --border-subtle: oklch(1 0 0 / 0.1);
+  --border-strong: oklch(1 0 0 / 0.2);
+  --accent: oklch(0.66 0.18 255);
+  --focus-ring: oklch(0.7 0.16 255);
+  --elevation-5: 0 22px 70px 4px oklch(0 0 0 / 0.56), 0 0 0 0.5px oklch(0 0 0 / 0.4);
+  --material-thin: oklch(0.24 0.01 265 / 0.38);
+  --material-regular: oklch(0.22 0.008 265 / 0.62);
+  --material-thick: oklch(0.22 0.008 265 / 0.8);
+  --material-chrome: oklch(0.18 0.008 265 / 0.55);
+  --hairline: oklch(1 0 0 / 0.1);
+  --wallpaper-macos:
+    radial-gradient(120% 90% at 18% 100%, oklch(0.36 0.1 30) 0%, transparent 55%),
+    radial-gradient(110% 80% at 85% 92%, oklch(0.3 0.12 330) 0%, transparent 60%),
+    radial-gradient(140% 90% at 50% 0%, oklch(0.3 0.1 265) 0%, transparent 65%),
+    linear-gradient(170deg, oklch(0.2 0.06 265) 0%, oklch(0.24 0.08 300) 50%, oklch(0.3 0.09 20) 100%);
+  --wallpaper-macos-worst: oklch(0.38 0.1 30);
+}
+
+@media (any-pointer: coarse) {
+  [data-os='macos'] {
+    --target-min: 44px;
+  }
+}

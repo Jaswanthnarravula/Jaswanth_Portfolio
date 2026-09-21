@@ -1,0 +1,128 @@
+/*
+ * Android skin — values owned by plans/android/01-identity.md. Material 3: tonal surfaces, no blur anywhere,
+ * 48 dp targets, 28 dp extra-large corners, Roboto. The build-time dynamic palette (AND-ID-02) replaces these
+ * baseline tones in P6; until then they are the M3 scheme for the default wallpaper seed.
+ */
+
+[data-os='android'] {
+  color-scheme: light;
+  --md-primary: oklch(0.47 0.13 258);
+  --md-on-primary: oklch(1 0 0);
+  --md-primary-container: oklch(0.9 0.05 258);
+  --md-on-primary-container: oklch(0.25 0.09 258);
+  --md-secondary-container: oklch(0.91 0.03 258);
+  --md-surface: oklch(0.985 0.004 258);
+  --md-surface-container-lowest: oklch(1 0 0);
+  --md-surface-container-low: oklch(0.965 0.008 258);
+  --md-surface-container: oklch(0.945 0.01 258);
+  --md-surface-container-high: oklch(0.925 0.012 258);
+  --md-surface-container-highest: oklch(0.905 0.014 258);
+  --md-on-surface: oklch(0.2 0.01 258);
+  --md-on-surface-variant: oklch(0.42 0.015 258);
+  --md-outline: oklch(0.55 0.015 258);
+  --md-outline-variant: oklch(0.82 0.012 258);
+
+  --surface-base: var(--md-surface);
+  --surface-raised: var(--md-surface-container-low);
+  --surface-overlay: var(--md-surface-container-high);
+  --surface-chrome: var(--md-surface-container);
+  --text-primary: var(--md-on-surface);
+  --text-secondary: var(--md-on-surface-variant);
+  --text-tertiary: oklch(0.46 0.015 258);
+  --text-on-accent: var(--md-on-primary);
+  --border-subtle: var(--md-outline-variant);
+  --border-strong: var(--md-outline);
+  --accent: var(--md-primary);
+  --focus-ring: var(--md-primary);
+  /* Text protection over wallpaper; M3's 32 % sheet scrim is --md-scrim. */
+  --scrim-dark: oklch(0 0 0 / 0.62);
+  --md-scrim: oklch(0 0 0 / 0.32);
+  --scrim-light: oklch(1 0 0 / 0.72);
+  --radius-control: 999px;
+  --radius-card: 12px;
+  --radius-window: 0px;
+  --radius-icon: 50%;
+  --radius-sheet: 28px;
+  --target-min: 48px;
+  --font-ui: Roboto, 'Roboto Flex', var(--font-inter), sans-serif;
+  --font-display: Roboto, 'Roboto Flex', var(--font-inter), sans-serif;
+  --font-mono: 'Roboto Mono', ui-monospace, monospace;
+  --font-size-caption: 12px;
+  --font-size-body: 14px;
+  --font-size-title: 22px;
+  --font-size-large: 36px;
+  --elevation-1: none;
+  --elevation-2: 0 1px 2px oklch(0 0 0 / 0.3), 0 2px 6px 2px oklch(0 0 0 / 0.15);
+  --elevation-3: 0 4px 8px 3px oklch(0 0 0 / 0.15), 0 1px 3px oklch(0 0 0 / 0.3);
+  --elevation-4: 0 6px 10px 4px oklch(0 0 0 / 0.15), 0 2px 3px oklch(0 0 0 / 0.3);
+  --elevation-5: 0 8px 12px 6px oklch(0 0 0 / 0.15), 0 4px 4px oklch(0 0 0 / 0.3);
+  /* No blur anywhere on Android (AND-ID-04): materials are tonal surfaces. */
+  --material-thin: var(--md-surface-container-low);
+  --material-regular: var(--md-surface-container);
+  --material-thick: var(--md-surface-container-high);
+  --material-chrome: var(--md-surface-container);
+  --material-blur: none;
+  --state-hover: 0.08;
+  --state-focus: 0.1;
+  --state-pressed: 0.1;
+  --state-dragged: 0.16;
+  --wallpaper-android:
+    radial-gradient(circle at 78% 22%, oklch(0.78 0.09 258) 0 22%, transparent 22.3%),
+    radial-gradient(circle at 18% 70%, oklch(0.84 0.07 200) 0 30%, transparent 30.3%),
+    radial-gradient(circle at 70% 88%, oklch(0.72 0.1 280) 0 18%, transparent 18.3%),
+    linear-gradient(160deg, oklch(0.9 0.04 245) 0%, oklch(0.82 0.06 262) 100%);
+  --wallpaper-android-worst: oklch(0.9 0.04 245);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) [data-os='android'] {
+    color-scheme: dark;
+    --md-primary: oklch(0.82 0.09 258);
+    --md-on-primary: oklch(0.28 0.09 258);
+    --md-primary-container: oklch(0.38 0.11 258);
+    --md-on-primary-container: oklch(0.92 0.04 258);
+    --md-secondary-container: oklch(0.36 0.03 258);
+    --md-surface: oklch(0.17 0.01 258);
+    --md-surface-container-lowest: oklch(0.14 0.008 258);
+    --md-surface-container-low: oklch(0.2 0.012 258);
+    --md-surface-container: oklch(0.22 0.012 258);
+    --md-surface-container-high: oklch(0.26 0.014 258);
+    --md-surface-container-highest: oklch(0.3 0.014 258);
+    --md-on-surface: oklch(0.92 0.008 258);
+    --md-on-surface-variant: oklch(0.8 0.012 258);
+    --md-outline: oklch(0.64 0.014 258);
+    --md-outline-variant: oklch(0.4 0.014 258);
+    --text-tertiary: oklch(0.74 0.012 258);
+    --wallpaper-android:
+      radial-gradient(circle at 78% 22%, oklch(0.4 0.1 258) 0 22%, transparent 22.3%),
+      radial-gradient(circle at 18% 70%, oklch(0.36 0.07 205) 0 30%, transparent 30.3%),
+      radial-gradient(circle at 70% 88%, oklch(0.34 0.1 285) 0 18%, transparent 18.3%),
+      linear-gradient(160deg, oklch(0.2 0.03 250) 0%, oklch(0.16 0.04 265) 100%);
+    --wallpaper-android-worst: oklch(0.42 0.1 258);
+  }
+}
+:root[data-theme='dark'] [data-os='android'] {
+  color-scheme: dark;
+  --md-primary: oklch(0.82 0.09 258);
+  --md-on-primary: oklch(0.28 0.09 258);
+  --md-primary-container: oklch(0.38 0.11 258);
+  --md-on-primary-container: oklch(0.92 0.04 258);
+  --md-secondary-container: oklch(0.36 0.03 258);
+  --md-surface: oklch(0.17 0.01 258);
+  --md-surface-container-lowest: oklch(0.14 0.008 258);
+  --md-surface-container-low: oklch(0.2 0.012 258);
+  --md-surface-container: oklch(0.22 0.012 258);
+  --md-surface-container-high: oklch(0.26 0.014 258);
+  --md-surface-container-highest: oklch(0.3 0.014 258);
+  --md-on-surface: oklch(0.92 0.008 258);
+  --md-on-surface-variant: oklch(0.8 0.012 258);
+  --md-outline: oklch(0.64 0.014 258);
+  --md-outline-variant: oklch(0.4 0.014 258);
+  --text-tertiary: oklch(0.74 0.012 258);
+  --wallpaper-android:
+    radial-gradient(circle at 78% 22%, oklch(0.4 0.1 258) 0 22%, transparent 22.3%),
+    radial-gradient(circle at 18% 70%, oklch(0.36 0.07 205) 0 30%, transparent 30.3%),
+    radial-gradient(circle at 70% 88%, oklch(0.34 0.1 285) 0 18%, transparent 18.3%),
+    linear-gradient(160deg, oklch(0.2 0.03 250) 0%, oklch(0.16 0.04 265) 100%);
+  --wallpaper-android-worst: oklch(0.42 0.1 258);
+}

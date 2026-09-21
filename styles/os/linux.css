@@ -1,0 +1,89 @@
+/*
+ * Linux skin — values owned by plans/linux/01-identity.md. Monospace only, character cells, opaque surfaces, tiles
+ * with 1 px borders. Dark by default; light only when the visitor chooses it.
+ */
+
+[data-os='linux'] {
+  color-scheme: dark;
+  --term-bg: oklch(0.17 0.01 260);
+  --term-fg: oklch(0.9 0.01 260);
+  --term-dim: color-mix(in oklch, var(--term-fg) 60%, var(--term-bg));
+  --term-green: oklch(0.8 0.16 150);
+  --term-blue: oklch(0.75 0.12 250);
+  --term-cyan: oklch(0.8 0.1 200);
+  --term-yellow: oklch(0.85 0.13 95);
+  --term-red: oklch(0.7 0.18 25);
+  --term-magenta: oklch(0.75 0.14 330);
+  --term-selection: color-mix(in oklch, var(--term-fg) 25%, transparent);
+
+  --surface-base: var(--term-bg);
+  --surface-raised: oklch(0.2 0.01 260);
+  --surface-overlay: oklch(0.21 0.012 260);
+  --surface-chrome: oklch(0.14 0.01 260);
+  --text-primary: var(--term-fg);
+  --text-secondary: oklch(0.78 0.01 260);
+  --text-tertiary: oklch(0.7 0.01 260);
+  --text-on-accent: var(--term-bg);
+  --border-subtle: oklch(0.36 0.01 260);
+  --border-strong: oklch(0.5 0.01 260);
+  --accent: var(--term-green);
+  --focus-ring: var(--term-green);
+  --scrim-dark: oklch(0.1 0.01 260 / 0.7);
+  --scrim-light: oklch(0.98 0.003 90 / 0.8);
+  --radius-control: 3px;
+  --radius-card: 4px;
+  --radius-window: 6px;
+  --radius-icon: 0px;
+  --radius-sheet: 6px;
+  --target-min: 28px;
+  --font-ui: var(--font-mono-linux, ui-monospace), ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  --font-display: var(--font-ui);
+  --font-mono: var(--font-ui);
+  --font-size-caption: 12px;
+  --font-size-body: 14px;
+  --font-size-title: 14px;
+  --font-size-large: 14px;
+  --elevation-1: none;
+  --elevation-2: none;
+  --elevation-3: none;
+  --elevation-4: none;
+  --elevation-5: none;
+  --material-thin: var(--surface-chrome);
+  --material-regular: var(--surface-base);
+  --material-thick: var(--surface-overlay);
+  --material-chrome: var(--surface-chrome);
+  --material-blur: none;
+  --line-height: 1.35;
+}
+
+:root[data-theme='light'] [data-os='linux'] {
+  color-scheme: light;
+  --term-bg: oklch(0.985 0.003 90);
+  --term-fg: oklch(0.25 0.01 260);
+  --term-green: oklch(0.5 0.13 150);
+  --term-blue: oklch(0.48 0.14 255);
+  --term-cyan: oklch(0.5 0.1 210);
+  --term-yellow: oklch(0.55 0.12 80);
+  --term-red: oklch(0.5 0.19 27);
+  --term-magenta: oklch(0.5 0.15 330);
+  --term-selection: color-mix(in oklch, var(--term-fg) 18%, transparent);
+  --surface-raised: oklch(0.96 0.003 90);
+  --surface-overlay: oklch(0.95 0.004 90);
+  --surface-chrome: oklch(0.93 0.004 90);
+  --text-secondary: oklch(0.4 0.01 260);
+  --text-tertiary: oklch(0.47 0.01 260);
+  --border-subtle: oklch(0.82 0.005 260);
+  --border-strong: oklch(0.6 0.008 260);
+}
+
+@media (any-pointer: coarse) {
+  [data-os='linux'] {
+    --target-min: 44px;
+    --font-size-body: 16px;
+  }
+}
+@media (min-width: 1600px) {
+  [data-os='linux'] {
+    --font-size-body: 15px;
+  }
+}

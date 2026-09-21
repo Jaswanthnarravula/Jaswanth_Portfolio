@@ -1,0 +1,655 @@
+{
+  "v": 1,
+  "entries": {
+    "app.android.chrome": {
+      "kind": "app-icon",
+      "label": "Chrome",
+      "owner": "Google LLC",
+      "sourceUrl": "https://play.google.com/store/apps/details?id=com.android.chrome",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Google LLC; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.android.chrome.144.93c00b4ec4.webp",
+      "srcSet": "/assets/official/app.android.chrome.96.8a70a9ef0c.webp 96w, /assets/official/app.android.chrome.144.93c00b4ec4.webp 144w",
+      "width": 144,
+      "height": 144,
+      "bytes": [
+        1594,
+        2604
+      ]
+    },
+    "app.android.files": {
+      "kind": "app-icon",
+      "label": "Files",
+      "owner": "Google LLC",
+      "sourceUrl": "https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.files",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Google LLC; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.android.files.144.64a231c0a7.webp",
+      "srcSet": "/assets/official/app.android.files.96.6ad4356f45.webp 96w, /assets/official/app.android.files.144.64a231c0a7.webp 144w",
+      "width": 144,
+      "height": 144,
+      "bytes": [
+        896,
+        1222
+      ]
+    },
+    "app.android.github": {
+      "kind": "app-icon",
+      "label": "GitHub",
+      "owner": "GitHub, Inc.",
+      "sourceUrl": "https://play.google.com/store/apps/details?id=com.github.android",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of GitHub, Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.android.github.144.71b83f7650.webp",
+      "srcSet": "/assets/official/app.android.github.96.8f5a97a327.webp 96w, /assets/official/app.android.github.144.71b83f7650.webp 144w",
+      "width": 144,
+      "height": 144,
+      "bytes": [
+        1406,
+        1980
+      ]
+    },
+    "app.android.gmail": {
+      "kind": "app-icon",
+      "label": "Gmail",
+      "owner": "Google LLC",
+      "sourceUrl": "https://play.google.com/store/apps/details?id=com.google.android.gm",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Google LLC; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.android.gmail.144.bfbe2af0cd.webp",
+      "srcSet": "/assets/official/app.android.gmail.96.1e4160fb4c.webp 96w, /assets/official/app.android.gmail.144.bfbe2af0cd.webp 144w",
+      "width": 144,
+      "height": 144,
+      "bytes": [
+        1258,
+        1832
+      ]
+    },
+    "app.android.keep": {
+      "kind": "app-icon",
+      "label": "Keep Notes",
+      "owner": "Google LLC",
+      "sourceUrl": "https://play.google.com/store/apps/details?id=com.google.android.keep",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Google LLC; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.android.keep.144.85929818fd.webp",
+      "srcSet": "/assets/official/app.android.keep.96.6dfee48947.webp 96w, /assets/official/app.android.keep.144.85929818fd.webp 144w",
+      "width": 144,
+      "height": 144,
+      "bytes": [
+        2418,
+        3570
+      ]
+    },
+    "app.android.settings": {
+      "kind": "app-icon",
+      "label": "Settings",
+      "owner": "Google LLC",
+      "sourceUrl": "https://source.android.com/",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Google LLC; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.android.settings.144.d4fe8c0b26.webp",
+      "srcSet": "/assets/official/app.android.settings.96.b451543ac6.webp 96w, /assets/official/app.android.settings.144.d4fe8c0b26.webp 144w",
+      "width": 144,
+      "height": 144,
+      "bytes": [
+        3266,
+        5216
+      ]
+    },
+    "app.ios.files": {
+      "kind": "app-icon",
+      "label": "Files",
+      "owner": "Apple Inc.",
+      "sourceUrl": "https://apps.apple.com/app/id1232058109",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Apple Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.ios.files.180.3d98171920.webp",
+      "srcSet": "/assets/official/app.ios.files.120.d2348f6303.webp 120w, /assets/official/app.ios.files.180.3d98171920.webp 180w",
+      "width": 180,
+      "height": 180,
+      "bytes": [
+        1168,
+        1844
+      ]
+    },
+    "app.ios.github": {
+      "kind": "app-icon",
+      "label": "GitHub",
+      "owner": "GitHub, Inc.",
+      "sourceUrl": "https://apps.apple.com/app/id1477376905",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of GitHub, Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.ios.github.180.37507863b4.webp",
+      "srcSet": "/assets/official/app.ios.github.120.fb8250ef05.webp 120w, /assets/official/app.ios.github.180.37507863b4.webp 180w",
+      "width": 180,
+      "height": 180,
+      "bytes": [
+        1958,
+        3106
+      ]
+    },
+    "app.ios.mail": {
+      "kind": "app-icon",
+      "label": "Mail",
+      "owner": "Apple Inc.",
+      "sourceUrl": "https://apps.apple.com/app/id1108187098",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Apple Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.ios.mail.180.e5cd7960dd.webp",
+      "srcSet": "/assets/official/app.ios.mail.120.85a6d279ca.webp 120w, /assets/official/app.ios.mail.180.e5cd7960dd.webp 180w",
+      "width": 180,
+      "height": 180,
+      "bytes": [
+        1728,
+        2624
+      ]
+    },
+    "app.ios.messages": {
+      "kind": "app-icon",
+      "label": "Messages",
+      "owner": "Apple Inc.",
+      "sourceUrl": "https://apps.apple.com/app/id1146560473",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Apple Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.ios.messages.180.77d403671f.webp",
+      "srcSet": "/assets/official/app.ios.messages.120.24d56ce014.webp 120w, /assets/official/app.ios.messages.180.77d403671f.webp 180w",
+      "width": 180,
+      "height": 180,
+      "bytes": [
+        1836,
+        2726
+      ]
+    },
+    "app.ios.notes": {
+      "kind": "app-icon",
+      "label": "Notes",
+      "owner": "Apple Inc.",
+      "sourceUrl": "https://apps.apple.com/app/id1110145109",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Apple Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.ios.notes.180.85d5b387aa.webp",
+      "srcSet": "/assets/official/app.ios.notes.120.1265e201d4.webp 120w, /assets/official/app.ios.notes.180.85d5b387aa.webp 180w",
+      "width": 180,
+      "height": 180,
+      "bytes": [
+        944,
+        1446
+      ]
+    },
+    "app.ios.safari": {
+      "kind": "app-icon",
+      "label": "Safari",
+      "owner": "Apple Inc.",
+      "sourceUrl": "https://apps.apple.com/app/id1146562112",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Apple Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.ios.safari.180.a61c0cacf2.webp",
+      "srcSet": "/assets/official/app.ios.safari.120.1fc98cf104.webp 120w, /assets/official/app.ios.safari.180.a61c0cacf2.webp 180w",
+      "width": 180,
+      "height": 180,
+      "bytes": [
+        3424,
+        5624
+      ]
+    },
+    "app.ios.settings": {
+      "kind": "app-icon",
+      "label": "Settings",
+      "owner": "Apple Inc.",
+      "sourceUrl": "https://support.apple.com/guide/iphone/welcome/ios",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Apple Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.ios.settings.180.cc0c750220.webp",
+      "srcSet": "/assets/official/app.ios.settings.120.6701b5abc3.webp 120w, /assets/official/app.ios.settings.180.cc0c750220.webp 180w",
+      "width": 180,
+      "height": 180,
+      "bytes": [
+        5214,
+        8442
+      ]
+    },
+    "app.macos.finder": {
+      "kind": "app-icon",
+      "label": "Finder",
+      "owner": "Apple Inc.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Finder%20Icon%20macOS%20Big%20Sur.png",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Apple Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.macos.finder.128.ca8638acb0.webp",
+      "srcSet": "/assets/official/app.macos.finder.64.a11edae90c.webp 64w, /assets/official/app.macos.finder.128.ca8638acb0.webp 128w",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        1812,
+        3648
+      ]
+    },
+    "app.macos.github": {
+      "kind": "app-icon",
+      "label": "GitHub",
+      "owner": "GitHub, Inc.",
+      "sourceUrl": "https://apps.apple.com/app/id1477376905",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of GitHub, Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.macos.github.128.e29f12a4c0.webp",
+      "srcSet": "/assets/official/app.macos.github.64.378572ac23.webp 64w, /assets/official/app.macos.github.128.e29f12a4c0.webp 128w",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        1092,
+        2258
+      ]
+    },
+    "app.macos.mail": {
+      "kind": "app-icon",
+      "label": "Mail",
+      "owner": "Apple Inc.",
+      "sourceUrl": "https://apps.apple.com/app/id1108187098",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Apple Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.macos.mail.128.39d07ca69f.webp",
+      "srcSet": "/assets/official/app.macos.mail.64.f2674ad8ec.webp 64w, /assets/official/app.macos.mail.128.39d07ca69f.webp 128w",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        1156,
+        2286
+      ]
+    },
+    "app.macos.preview": {
+      "kind": "app-icon",
+      "label": "Preview",
+      "owner": "Apple Inc.",
+      "sourceUrl": "https://support.apple.com/guide/preview/welcome/mac",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Apple Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.macos.preview.128.f324df9727.webp",
+      "srcSet": "/assets/official/app.macos.preview.64.190afd81b0.webp 64w, /assets/official/app.macos.preview.128.f324df9727.webp 128w",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        1646,
+        4010
+      ]
+    },
+    "app.macos.safari": {
+      "kind": "app-icon",
+      "label": "Safari",
+      "owner": "Apple Inc.",
+      "sourceUrl": "https://apps.apple.com/app/id1146562112",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Apple Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.macos.safari.128.79dc96bdbf.webp",
+      "srcSet": "/assets/official/app.macos.safari.64.52759f5c68.webp 64w, /assets/official/app.macos.safari.128.79dc96bdbf.webp 128w",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        1516,
+        3520
+      ]
+    },
+    "app.macos.settings": {
+      "kind": "app-icon",
+      "label": "System Settings",
+      "owner": "Apple Inc.",
+      "sourceUrl": "https://support.apple.com/guide/mac-help/change-system-settings-mh15217/mac",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Apple Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.macos.settings.128.a93a33636e.webp",
+      "srcSet": "/assets/official/app.macos.settings.64.414de58b57.webp 64w, /assets/official/app.macos.settings.128.a93a33636e.webp 128w",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        2432,
+        5774
+      ]
+    },
+    "app.macos.terminal": {
+      "kind": "app-icon",
+      "label": "Terminal",
+      "owner": "Apple Inc.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Terminalicon2.png",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Apple Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.macos.terminal.128.88ebc21591.webp",
+      "srcSet": "/assets/official/app.macos.terminal.64.861553b436.webp 64w, /assets/official/app.macos.terminal.128.88ebc21591.webp 128w",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        922,
+        1834
+      ]
+    },
+    "app.macos.vscode": {
+      "kind": "app-icon",
+      "label": "Visual Studio Code",
+      "owner": "Microsoft Corporation",
+      "sourceUrl": "https://code.visualstudio.com/brand",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Microsoft Corporation; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.macos.vscode.128.7d85890fc8.webp",
+      "srcSet": "/assets/official/app.macos.vscode.64.e6ec20883b.webp 64w, /assets/official/app.macos.vscode.128.7d85890fc8.webp 128w",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        2014,
+        4174
+      ]
+    },
+    "app.windows.edge": {
+      "kind": "app-icon",
+      "label": "Microsoft Edge",
+      "owner": "Microsoft Corporation",
+      "sourceUrl": "https://www.microsoft.com/edge",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Microsoft Corporation; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.windows.edge.aaea822e48.svg",
+      "width": 256,
+      "height": 256,
+      "bytes": [
+        3813
+      ]
+    },
+    "app.windows.explorer": {
+      "kind": "app-icon",
+      "label": "File Explorer",
+      "owner": "Microsoft Corporation",
+      "sourceUrl": "https://learn.microsoft.com/windows/apps/design/style/iconography/app-icon-design",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Microsoft Corporation; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.windows.explorer.64.b632e27dfc.webp",
+      "srcSet": "/assets/official/app.windows.explorer.32.4c7b09a4d6.webp 32w, /assets/official/app.windows.explorer.64.b632e27dfc.webp 64w",
+      "width": 64,
+      "height": 64,
+      "bytes": [
+        524,
+        802
+      ]
+    },
+    "app.windows.github": {
+      "kind": "app-icon",
+      "label": "GitHub",
+      "owner": "GitHub, Inc.",
+      "sourceUrl": "https://github.com/primer/octicons",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of GitHub, Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": true,
+      "src": "/assets/official/app.windows.github.bce4941897.svg",
+      "width": 24,
+      "height": 24,
+      "bytes": [
+        873
+      ]
+    },
+    "app.windows.outlook": {
+      "kind": "app-icon",
+      "label": "Outlook",
+      "owner": "Microsoft Corporation",
+      "sourceUrl": "https://www.microsoft.com/microsoft-365/outlook",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Microsoft Corporation; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.windows.outlook.96.c365359d79.webp",
+      "srcSet": "/assets/official/app.windows.outlook.48.12bcf2b9fc.webp 48w, /assets/official/app.windows.outlook.96.c365359d79.webp 96w",
+      "width": 96,
+      "height": 96,
+      "bytes": [
+        1472,
+        2694
+      ]
+    },
+    "app.windows.settings": {
+      "kind": "app-icon",
+      "label": "Settings",
+      "owner": "Microsoft Corporation",
+      "sourceUrl": "https://support.microsoft.com/windows",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Microsoft Corporation; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.windows.settings.142d5eba89.svg",
+      "width": 579,
+      "height": 543,
+      "bytes": [
+        6498
+      ]
+    },
+    "app.windows.terminal": {
+      "kind": "app-icon",
+      "label": "Terminal",
+      "owner": "Microsoft Corporation",
+      "sourceUrl": "https://github.com/microsoft/terminal",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Microsoft Corporation; used referentially to identify the app. No affiliation. Source repository is MIT-licensed.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.windows.terminal.64.8ac0efb905.webp",
+      "srcSet": "/assets/official/app.windows.terminal.32.90d6aa78b1.webp 32w, /assets/official/app.windows.terminal.64.8ac0efb905.webp 64w",
+      "width": 64,
+      "height": 64,
+      "bytes": [
+        512,
+        688
+      ]
+    },
+    "app.windows.vscode": {
+      "kind": "app-icon",
+      "label": "Visual Studio Code",
+      "owner": "Microsoft Corporation",
+      "sourceUrl": "https://code.visualstudio.com/brand",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Microsoft Corporation; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/app.windows.vscode.64.e6ec20883b.webp",
+      "srcSet": "/assets/official/app.windows.vscode.32.d42fcbb906.webp 32w, /assets/official/app.windows.vscode.64.e6ec20883b.webp 64w",
+      "width": 64,
+      "height": 64,
+      "bytes": [
+        934,
+        2014
+      ]
+    },
+    "audio.intro": {
+      "kind": "audio",
+      "label": "Intro sound",
+      "owner": "Netflix, Inc.",
+      "sourceUrl": "https://github.com/Sandhit06/Netflix-Portfolio",
+      "retrieved": "2026-09-21",
+      "terms": "Artwork of Netflix, Inc.; used referentially for a profile picker. No affiliation; the Netflix name and logo never appear.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/audio.intro.6691b8ce9d.mp3",
+      "bytes": [
+        65965
+      ]
+    },
+    "avatar.adventurer": {
+      "kind": "avatar",
+      "label": "Yellow profile avatar",
+      "owner": "Netflix, Inc.",
+      "sourceUrl": "https://github.com/Sandhit06/Netflix-Portfolio",
+      "retrieved": "2026-09-21",
+      "terms": "Artwork of Netflix, Inc.; used referentially for a profile picker. No affiliation; the Netflix name and logo never appear.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/avatar.adventurer.200.d722d5fe5e.webp",
+      "srcSet": "/assets/official/avatar.adventurer.100.7d4185020c.webp 100w, /assets/official/avatar.adventurer.200.d722d5fe5e.webp 200w",
+      "width": 200,
+      "height": 200,
+      "bytes": [
+        3534,
+        7620
+      ]
+    },
+    "avatar.designer": {
+      "kind": "avatar",
+      "label": "Red profile avatar",
+      "owner": "Netflix, Inc.",
+      "sourceUrl": "https://github.com/Sandhit06/Netflix-Portfolio",
+      "retrieved": "2026-09-21",
+      "terms": "Artwork of Netflix, Inc.; used referentially for a profile picker. No affiliation; the Netflix name and logo never appear.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/avatar.designer.200.eb46f52f5d.webp",
+      "srcSet": "/assets/official/avatar.designer.100.05cdf64692.webp 100w, /assets/official/avatar.designer.200.eb46f52f5d.webp 200w",
+      "width": 200,
+      "height": 200,
+      "bytes": [
+        2224,
+        6034
+      ]
+    },
+    "avatar.developer": {
+      "kind": "avatar",
+      "label": "Grey profile avatar",
+      "owner": "Netflix, Inc.",
+      "sourceUrl": "https://github.com/Sandhit06/Netflix-Portfolio",
+      "retrieved": "2026-09-21",
+      "terms": "Artwork of Netflix, Inc.; used referentially for a profile picker. No affiliation; the Netflix name and logo never appear.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/avatar.developer.200.d66c8b2e12.webp",
+      "srcSet": "/assets/official/avatar.developer.100.586894d731.webp 100w, /assets/official/avatar.developer.200.d66c8b2e12.webp 200w",
+      "width": 200,
+      "height": 200,
+      "bytes": [
+        3578,
+        7844
+      ]
+    },
+    "avatar.guest": {
+      "kind": "avatar",
+      "label": "Green profile avatar",
+      "owner": "Netflix, Inc.",
+      "sourceUrl": "https://github.com/Sandhit06/Netflix-Portfolio",
+      "retrieved": "2026-09-21",
+      "terms": "Artwork of Netflix, Inc.; used referentially for a profile picker. No affiliation; the Netflix name and logo never appear.",
+      "derived": true,
+      "monochrome": false,
+      "src": "/assets/official/avatar.guest.200.a18d086578.webp",
+      "srcSet": "/assets/official/avatar.guest.100.fe40090005.webp 100w, /assets/official/avatar.guest.200.a18d086578.webp 200w",
+      "width": 200,
+      "height": 200,
+      "bytes": [
+        4046,
+        6830
+      ]
+    },
+    "avatar.recruiter": {
+      "kind": "avatar",
+      "label": "Blue profile avatar",
+      "owner": "Netflix, Inc.",
+      "sourceUrl": "https://github.com/Sandhit06/Netflix-Portfolio",
+      "retrieved": "2026-09-21",
+      "terms": "Artwork of Netflix, Inc.; used referentially for a profile picker. No affiliation; the Netflix name and logo never appear.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/avatar.recruiter.200.6f4a451340.webp",
+      "srcSet": "/assets/official/avatar.recruiter.100.d88b00d27a.webp 100w, /assets/official/avatar.recruiter.200.6f4a451340.webp 200w",
+      "width": 200,
+      "height": 200,
+      "bytes": [
+        4300,
+        7146
+      ]
+    },
+    "system.android-boot": {
+      "kind": "system-icon",
+      "label": "Android robot",
+      "owner": "Google LLC",
+      "sourceUrl": "https://developer.android.com/distribute/marketing-tools/brand-guidelines",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Google LLC; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/system.android-boot.0d3d8e90f4.svg",
+      "width": 919,
+      "height": 515,
+      "bytes": [
+        716
+      ]
+    },
+    "system.apple-logo": {
+      "kind": "system-icon",
+      "label": "Apple logo",
+      "owner": "Apple Inc.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Apple%20logo%20black.svg",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Apple Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": true,
+      "src": "/assets/official/system.apple-logo.fe0c33d5d9.svg",
+      "width": 814,
+      "height": 1000,
+      "bytes": [
+        656
+      ]
+    },
+    "system.windows-logo": {
+      "kind": "system-icon",
+      "label": "Windows logo",
+      "owner": "Microsoft Corporation",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Windows%2011%20logo.svg",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Microsoft Corporation; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/system.windows-logo.6698a8cbe3.svg",
+      "width": 512,
+      "height": 512,
+      "bytes": [
+        3049
+      ]
+    }
+  }
+}

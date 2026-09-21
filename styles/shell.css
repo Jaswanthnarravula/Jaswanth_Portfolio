@@ -1,0 +1,43 @@
+/* Shell layers — the OS layer sits above the semantic page and fades in without changing layout (shared/01). */
+@layer components {
+  html[data-shell='os'] {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  html[data-shell='os'] body {
+    overflow: hidden;
+  }
+  .os-root {
+    position: fixed;
+    inset: 0;
+    height: 100dvh;
+    z-index: var(--z-windows);
+    contain: strict;
+    background: var(--surface-base);
+    animation: os-layer-in var(--dur-base) var(--ease-out) both;
+  }
+  @keyframes os-layer-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .os-shell {
+    display: contents;
+  }
+  .os-failure {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-stage);
+    display: grid;
+    place-content: center;
+    gap: 12px;
+    padding: 24px;
+    background: var(--surface-base);
+    color: var(--text-primary);
+    text-align: center;
+    font-family: var(--font-sans);
+  }
+}

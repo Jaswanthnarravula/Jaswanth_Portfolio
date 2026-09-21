@@ -1,0 +1,143 @@
+/*
+ * Design tokens — shared/06-design-system.md.
+ * Layer 1 primitives live in `@theme` (app/globals.css). Layer 2 semantic tokens are defined here for the site's own
+ * brand (welcome, chooser, reader pages); each OS remaps every semantic token in styles/os/{os}.css (layer 3).
+ * Shared components read semantic tokens only.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --surface-base: oklch(0.15 0.02 268);
+  --surface-raised: oklch(0.2 0.024 268);
+  --surface-overlay: oklch(0.24 0.026 268 / 0.92);
+  --surface-chrome: oklch(0.18 0.022 268 / 0.86);
+
+  /* Text */
+  --text-primary: oklch(0.97 0.006 260);
+  --text-secondary: oklch(0.83 0.014 262);
+  --text-tertiary: oklch(0.7 0.018 262);
+  --text-on-accent: oklch(0.99 0 0);
+
+  /* Lines */
+  --border-subtle: oklch(1 0 0 / 0.1);
+  --border-strong: oklch(1 0 0 / 0.22);
+
+  /* Accent + focus */
+  --accent: oklch(0.7 0.16 258);
+  --accent-strong: oklch(0.54 0.19 262); /* white text ≥ 4.5:1 (5.1) */
+  --focus-ring: oklch(0.8 0.14 240);
+
+  /* Scrims guarantee text contrast over wallpaper/glass (DS-SCRIM-01) */
+  --scrim-dark: oklch(0.12 0.02 268 / 0.62);
+  --scrim-light: oklch(0.99 0 0 / 0.72);
+
+  /* Shape */
+  --radius-control: 999px;
+  --radius-card: 20px;
+  --radius-window: 24px;
+  --radius-icon: 22%;
+  --radius-sheet: 28px;
+
+  /* Hit area */
+  --target-min: 44px;
+
+  /* Type */
+  --font-ui: var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Menlo, Consolas, monospace;
+  --font-size-caption: 0.8125rem;
+  --font-size-body: 1rem;
+  --font-size-title: 1.5rem;
+  --font-size-large: clamp(2rem, 1.2rem + 3.2vw, 3.5rem);
+
+  /* Elevation */
+  --elevation-1: 0 1px 2px oklch(0 0 0 / 0.3);
+  --elevation-2: 0 4px 12px oklch(0 0 0 / 0.28);
+  --elevation-3: 0 10px 30px oklch(0 0 0 / 0.32);
+  --elevation-4: 0 20px 50px oklch(0 0 0 / 0.38);
+  --elevation-5: 0 32px 90px oklch(0 0 0 / 0.45);
+
+  /* Materials (glass), keyed to data-tier / data-glass below */
+  --material-thin: oklch(0.2 0.03 268 / 0.42);
+  --material-regular: oklch(0.2 0.03 268 / 0.56);
+  --material-thick: oklch(0.2 0.03 268 / 0.7);
+  --material-chrome: oklch(0.18 0.03 268 / 0.62);
+  --material-blur: blur(24px) saturate(160%);
+
+  /* Safe areas (RESP-VP-01): components read tokens only; tests override them */
+  --sa-t: env(safe-area-inset-top, 0px);
+  --sa-r: env(safe-area-inset-right, 0px);
+  --sa-b: env(safe-area-inset-bottom, 0px);
+  --sa-l: env(safe-area-inset-left, 0px);
+
+  /* Motion: every duration is multiplied by --motion-scale (0 under reduced motion) */
+  --motion-scale: 1;
+  --dur-press: calc(80ms * var(--motion-scale));
+  --dur-fast: calc(160ms * var(--motion-scale));
+  --dur-base: calc(240ms * var(--motion-scale));
+  --dur-slow: calc(420ms * var(--motion-scale));
+  --ease-out: cubic-bezier(0.2, 0.9, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Light brand variant (the brand is dark by default; light follows the visitor's choice) */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --surface-base: oklch(0.975 0.004 265);
+  --surface-raised: oklch(1 0 0);
+  --surface-overlay: oklch(1 0 0 / 0.9);
+  --surface-chrome: oklch(0.98 0.004 265 / 0.86);
+  --text-primary: oklch(0.2 0.02 265);
+  --text-secondary: oklch(0.38 0.02 265);
+  --text-tertiary: oklch(0.48 0.02 265);
+  --border-subtle: oklch(0.2 0.02 265 / 0.1);
+  --border-strong: oklch(0.2 0.02 265 / 0.22);
+  --accent: oklch(0.5 0.2 262);
+  --accent-strong: oklch(0.46 0.21 264);
+  --focus-ring: oklch(0.5 0.2 262);
+  --material-thin: oklch(1 0 0 / 0.5);
+  --material-regular: oklch(1 0 0 / 0.64);
+  --material-thick: oklch(1 0 0 / 0.78);
+  --material-chrome: oklch(1 0 0 / 0.7);
+}
+
+/* Reduced motion — one switch, applied in the primitives (MOTION-RM-01). Without JavaScript the system setting applies. */
+:root[data-motion='reduced'] {
+  --motion-scale: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion]) {
+    --motion-scale: 0;
+  }
+}
+
+/* Glass by tier (DS-GLASS-01): T0 / solid glass → opaque tinted surfaces, no backdrop-filter */
+:root[data-tier='0'],
+:root[data-glass='solid'] {
+  --material-thin: color-mix(in oklch, var(--surface-raised) 96%, transparent);
+  --material-regular: color-mix(in oklch, var(--surface-raised) 96%, transparent);
+  --material-thick: color-mix(in oklch, var(--surface-raised) 98%, transparent);
+  --material-chrome: color-mix(in oklch, var(--surface-chrome) 100%, var(--surface-base));
+  --material-blur: none;
+  --border-subtle: var(--border-strong);
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  :root:not([data-glass]) {
+    --material-blur: none;
+  }
+}
+
+/* High contrast / forced colours: materials collapse to solid system colours */
+@media (forced-colors: active) {
+  :root {
+    --material-thin: Canvas;
+    --material-regular: Canvas;
+    --material-thick: Canvas;
+    --material-chrome: Canvas;
+    --material-blur: none;
+    --focus-ring: Highlight;
+  }
+}

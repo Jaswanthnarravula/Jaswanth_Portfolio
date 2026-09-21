@@ -1,0 +1,163 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R /Lang (en-US) /ViewerPreferences << /DisplayDocTitle true >> >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [9 0 R 11 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Length 6646 >>
+stream
+BT 0.11 0.12 0.14 rg /F2 22 Tf 54.00 716.00 Td (Jaswanth Narravula) Tj ET
+BT 0.36 0.38 0.42 rg /F1 11 Tf 54.00 699.00 Td (Backend engineer \227 identity, distributed systems and data-intensive services) Tj ET
+BT 0.12 0.33 0.72 rg /F1 9.4 Tf 54.00 684.00 Td (jaswanthnarravula@gmail.com) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9.4 Tf 188.64 684.00 Td (\267) Tj ET
+BT 0.12 0.33 0.72 rg /F1 9.4 Tf 197.25 684.00 Td (linkedin.com/in/jaswanth-narravula) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9.4 Tf 347.43 684.00 Td (\267) Tj ET
+BT 0.12 0.33 0.72 rg /F1 9.4 Tf 356.04 684.00 Td (github.com/Jaswanthnarravula) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9.4 Tf 54.00 670.37 Td (Sugar Land, Texas) Tj ET
+0.2 0.22 0.26 RG 0.8 w 54 660.37 m 558 660.37 l S
+BT 0.12 0.33 0.72 rg /F2 8.6 Tf 54.00 641.37 Td (SUMMARY) Tj ET
+0.82 0.84 0.87 RG 0.5 w 54 636.37 m 558 636.37 l S
+BT 0.11 0.12 0.14 rg /F1 10 Tf 54.00 620.57 Td (I build the backend systems other applications depend on \227 identity providers, service boundaries, and the data) Tj ET
+BT 0.11 0.12 0.14 rg /F1 10 Tf 54.00 606.77 Td (layer underneath them.) Tj ET
+BT 0.11 0.12 0.14 rg /F1 10 Tf 54.00 588.97 Td (At Xclusive Trading Inc. I engineered a standards-based OAuth 2.1 / OpenID Connect provider in Go that is the) Tj ET
+BT 0.11 0.12 0.14 rg /F1 10 Tf 54.00 575.17 Td (central single sign-on for internal applications, decomposed a production platform into isolated microservices, and) Tj ET
+BT 0.11 0.12 0.14 rg /F1 10 Tf 54.00 561.37 Td (cut report generation time by roughly 60% through PostgreSQL tuning.) Tj ET
+BT 0.12 0.33 0.72 rg /F2 8.6 Tf 54.00 542.37 Td (EXPERIENCE) Tj ET
+0.82 0.84 0.87 RG 0.5 w 54 537.37 m 558 537.37 l S
+BT 0.11 0.12 0.14 rg /F2 10.5 Tf 54.00 520.15 Td (Software Engineer \227 Xclusive Trading Inc.) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9.5 Tf 525.26 520.15 Td (Present) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9.6 Tf 56.00 504.90 Td (\225) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 66.00 504.90 Td (Engineered a standards-based OAuth 2.1 / OpenID Connect provider in Go \227 authorization code flow with PKCE,) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 66.00 491.65 Td (refresh-token rotation, RS256-signed JWTs, automated JWKS key rotation, Argon2id credential hashing and RBAC) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 66.00 478.40 Td (\227 now the central SSO provider delivering single sign-on to 3,000+ users.) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9.6 Tf 56.00 465.15 Td (\225) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 66.00 465.15 Td (Decomposed a production platform into 6 microservices with isolated failure domains, and rebuilt its ETL workflows) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 66.00 451.91 Td (to be idempotent and replay-safe with exponential backoff.) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9.6 Tf 56.00 438.66 Td (\225) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 66.00 438.66 Td (Cut report-generation time by ~60% through PostgreSQL execution-plan analysis, targeted indexing, query) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 66.00 425.41 Td (optimization and denormalized reporting tables over 50M+ rows, supporting 8+ production services.) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9.6 Tf 56.00 412.16 Td (\225) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 66.00 412.16 Td (Built stateless REST APIs secured with Microsoft Entra ID SSO over OIDC, RS256 JWT validation and route-level) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 66.00 398.91 Td (RBAC, sustaining sub-200 ms p95 latency with per-IP rate limiting, CSRF protection, HSTS/CSP and audit logging.) Tj ET
+BT 0.36 0.38 0.42 rg /F1 8.8 Tf 54.00 386.77 Td (Stack: Go, Python, FastAPI, Flask, PostgreSQL, Redis, Elasticsearch, React, Docker, Nginx, Microsoft Entra ID) Tj ET
+BT 0.11 0.12 0.14 rg /F2 10.5 Tf 54.00 365.54 Td (IBM \(client: DBS Bank\)) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9.6 Tf 56.00 350.30 Td (\225) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 66.00 350.30 Td (Delivered 10+ production REST APIs automating loan intake, eligibility validation and multi-stage approvals.) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9.6 Tf 56.00 337.05 Td (\225) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 66.00 337.05 Td (Built the platform around a state-driven workflow engine with optimistic locking, so concurrent approvals could not) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 66.00 323.80 Td (land in invalid states.) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9.6 Tf 56.00 310.55 Td (\225) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 66.00 310.55 Td (Reduced API response times by 30%.) Tj ET
+BT 0.36 0.38 0.42 rg /F1 8.8 Tf 54.00 298.41 Td (Stack: Java 17, Spring Boot, JPA / Hibernate, MySQL, Redis, JUnit 5, Mockito) Tj ET
+BT 0.12 0.33 0.72 rg /F2 8.6 Tf 54.00 273.41 Td (SELECTED PROJECTS) Tj ET
+0.82 0.84 0.87 RG 0.5 w 54 268.41 m 558 268.41 l S
+BT 0.11 0.12 0.14 rg /F2 10 Tf 54.00 251.91 Td (Enterprise SSO Identity Provider \227 Xclusive Trading Inc.) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 54.00 238.66 Td (An OAuth 2.1 + OpenID Connect provider written from scratch in Go.) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 54.00 226.24 Td (Authorization code flow with PKCE and refresh-token rotation \267 RS256-signed JWTs with automatic JWKS key rotation \267) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 54.00 213.82 Td (Argon2id credential hashing and 4-tier RBAC \267 Admin session management and 15+ client integration examples) Tj ET
+BT 0.11 0.12 0.14 rg /F2 10 Tf 54.00 195.32 Td (Full-Stack Sales Platform \227 Xclusive Trading Inc.) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 54.00 182.07 Td (An internal sales platform in daily production use.) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 54.00 169.65 Td (6 microservices with isolated failure domains \267 JWT role propagation from the internal SSO provider \267 Idempotent, replay-safe) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 54.00 157.23 Td (ETL with exponential backoff) Tj ET
+BT 0.11 0.12 0.14 rg /F2 10 Tf 54.00 138.73 Td (Corporate Loan Processing Platform \227 IBM \267 DBS Bank) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 54.00 125.48 Td (Production REST APIs for corporate loan intake and approvals.) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 54.00 113.06 Td (10+ production REST APIs \267 State-driven workflow engine with optimistic locking \267 API response times reduced 30%) Tj ET
+BT 0.11 0.12 0.14 rg /F2 10 Tf 54.00 94.56 Td (Workforce Management Backend \227 Xclusive Trading Inc.) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 54.00 81.32 Td (An async-first FastAPI backend serving every internal management tier.) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 54.00 68.90 Td (Azure AD single sign-on over OIDC \267 WebSocket notifications with heartbeat and reconnection \267 4-tier route-level RBAC \267) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 54.00 56.48 Td (Calendar scheduling with recurrence rules) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Annot /Subtype /Link /Border [0 0 0] /Rect [54.00 681.65 182.64 692.46] /A << /S /URI /URI (mailto:jaswanthnarravula@gmail.com) >> >>
+endobj
+7 0 obj
+<< /Type /Annot /Subtype /Link /Border [0 0 0] /Rect [197.25 681.65 341.43 692.46] /A << /S /URI /URI (https://www.linkedin.com/in/jaswanth-narravula/) >> >>
+endobj
+8 0 obj
+<< /Type /Annot /Subtype /Link /Border [0 0 0] /Rect [356.04 681.65 483.52 692.46] /A << /S /URI /URI (https://github.com/Jaswanthnarravula) >> >>
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 5 0 R /Annots [6 0 R 7 0 R 8 0 R] >>
+endobj
+10 0 obj
+<< /Length 4295 >>
+stream
+BT 0.11 0.12 0.14 rg /F2 10 Tf 54.00 723.50 Td (Price Intelligence Platform \227 Xclusive Trading Inc.) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 54.00 710.25 Td (An asynchronous ingestion pipeline over unreliable external sources.) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 54.00 697.83 Td (Celery/Redis task orchestration with retries and failure handling \267 Elasticsearch fuzzy search and cross-retailer ranking \267) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 54.00 685.41 Td (Price-history analytics) Tj ET
+BT 0.11 0.12 0.14 rg /F2 10 Tf 54.00 666.91 Td (ASL Gesture Recognition \227 Graduate research \267 UAB) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 54.00 653.66 Td (A PyTorch pipeline for 24 static American Sign Language gestures.) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 54.00 641.24 Td (Test accuracy 13.21% -> 43.36% \267 Macro-F1 0.081 -> 0.351 \267 Transfer learning with ResNet-18) Tj ET
+BT 0.11 0.12 0.14 rg /F2 10 Tf 54.00 622.74 Td (Portfolio OS \227 Personal project) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 537.98 622.74 Td (2026) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.6 Tf 54.00 609.50 Td (This site: five miniature operating systems that hold one career.) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 54.00 597.08 Td (One pure-TypeScript kernel for windows, routing, history and persistence \267 A real shell engine over a virtual filesystem for the) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 54.00 584.66 Td (terminal \267 Static, accessible and fast: every URL works without JavaScript) Tj ET
+BT 0.12 0.33 0.72 rg /F2 8.6 Tf 54.00 561.66 Td (EDUCATION) Tj ET
+0.82 0.84 0.87 RG 0.5 w 54 556.66 m 558 556.66 l S
+BT 0.11 0.12 0.14 rg /F2 10 Tf 54.00 540.16 Td (M.S. Computer Science \227 University of Alabama at Birmingham) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 472.45 540.16 Td (Jan 2024 \226 Dec 2025) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 54.00 527.74 Td (Database Systems \267 Software Design & Integration \267 Machine Learning \267 Deep Learning \267 Computer Vision \267 Network,) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 54.00 515.32 Td (Computer & Cloud Security) Tj ET
+BT 0.11 0.12 0.14 rg /F2 10 Tf 54.00 497.82 Td (B.Tech Computer Science \227 Jawaharlal Nehru Technological University Hyderabad) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 507.96 497.82 Td (2019 \226 2023) Tj ET
+BT 0.36 0.38 0.42 rg /F1 9 Tf 54.00 485.40 Td (Data Structures & Algorithms \267 Operating Systems \267 Distributed Systems \267 Compiler Design \267 Cryptography & Network Security) Tj ET
+BT 0.11 0.12 0.14 rg /F2 9.4 Tf 54.00 465.42 Td (Credentials: ) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.4 Tf 110.94 465.42 Td (AWS Cloud Architecting \(Amazon Web Services\), AWS Machine Learning Foundations \(Amazon Web) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.4 Tf 54.00 452.45 Td (Services\)) Tj ET
+BT 0.12 0.33 0.72 rg /F2 8.6 Tf 54.00 433.45 Td (SKILLS) Tj ET
+0.82 0.84 0.87 RG 0.5 w 54 428.45 m 558 428.45 l S
+BT 0.11 0.12 0.14 rg /F2 9.4 Tf 54.00 413.48 Td (Languages: ) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.4 Tf 109.37 413.48 Td (Go, Java 17, Python, SQL, TypeScript, JavaScript, C, C++, Bash) Tj ET
+BT 0.11 0.12 0.14 rg /F2 9.4 Tf 54.00 399.01 Td (Backend & microservices: ) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.4 Tf 174.16 399.01 Td (Spring Boot, Spring Data JPA, Hibernate, FastAPI, Flask, Node.js, SQLAlchemy, REST) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.4 Tf 54.00 386.04 Td (APIs, OpenAPI / Swagger) Tj ET
+BT 0.11 0.12 0.14 rg /F2 9.4 Tf 54.00 371.56 Td (Identity & security: ) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.4 Tf 141.23 371.56 Td (OAuth 2.1, OpenID Connect, PKCE, JWT \(RS256 / JWKS\), Argon2id, RBAC, Microsoft Entra ID) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.4 Tf 54.00 358.59 Td (SSO, Rate limiting, CSRF, HSTS/CSP) Tj ET
+BT 0.11 0.12 0.14 rg /F2 9.4 Tf 54.00 344.12 Td (Data & storage: ) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.4 Tf 126.08 344.12 Td (PostgreSQL, MySQL, Redis, Elasticsearch, Celery, Query plans & indexing) Tj ET
+BT 0.11 0.12 0.14 rg /F2 9.4 Tf 54.00 329.65 Td (Frontend: ) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.4 Tf 100.47 329.65 Td (React, Redux, Vite, Tailwind CSS) Tj ET
+BT 0.11 0.12 0.14 rg /F2 9.4 Tf 54.00 315.18 Td (Cloud, tooling & CI/CD: ) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.4 Tf 160.53 315.18 Td (Docker, Nginx, Linux, GitHub Actions, AWS, Azure, Maven, JUnit 5, Mockito, Postman,) Tj ET
+BT 0.11 0.12 0.14 rg /F1 9.4 Tf 54.00 302.20 Td (Selenium) Tj ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Title <FEFF004A0061007300770061006E007400680020004E006100720072006100760075006C0061002020140020005200E900730075006D00E9> /Author <FEFF004A0061007300770061006E007400680020004E006100720072006100760075006C0061> /Subject <FEFF004200610063006B0065006E006400200065006E00670069006E006500650072002020140020006900640065006E0074006900740079002C002000640069007300740072006900620075007400650064002000730079007300740065006D007300200061006E006400200064006100740061002D0069006E00740065006E0073006900760065002000730065007200760069006300650073> /Creator <FEFF0050006F007200740066006F006C0069006F0020004F00530020007200E900730075006D00E90020006200750069006C006400650072> >>
+endobj
+xref
+0 13
+0000000000 65535 f 
+0000000015 00000 n 
+0000000125 00000 n 
+0000000189 00000 n 
+0000000286 00000 n 
+0000000388 00000 n 
+0000007086 00000 n 
+0000007245 00000 n 
+0000007418 00000 n 
+0000007580 00000 n 
+0000007744 00000 n 
+0000012092 00000 n 
+0000012230 00000 n 
+trailer
+<< /Size 13 /Root 1 0 R /Info 12 0 R >>
+startxref
+12905
+%%EOF

@@ -1,0 +1,37 @@
+{
+  "contributions": null,
+  "fetchedAt": "2026-09-21T07:37:16.851Z",
+  "pinned": [],
+  "repos": [
+    {
+      "archived": false,
+      "description": null,
+      "forks": 0,
+      "language": null,
+      "name": "Jaswanthnarravula",
+      "pushedAt": "2026-09-20T04:47:12Z",
+      "stars": 0,
+      "topics": [],
+      "url": "https://github.com/Jaswanthnarravula/Jaswanthnarravula"
+    },
+    {
+      "archived": false,
+      "description": null,
+      "forks": 0,
+      "language": "JavaScript",
+      "name": "Portfolio-Jaswanth",
+      "pushedAt": "2026-08-10T02:44:49Z",
+      "stars": 0,
+      "topics": [],
+      "url": "https://github.com/Jaswanthnarravula/Portfolio-Jaswanth"
+    }
+  ],
+  "user": {
+    "followers": 4,
+    "login": "Jaswanthnarravula",
+    "name": "Jaswanth Narravula",
+    "publicRepos": 2,
+    "url": "https://github.com/Jaswanthnarravula"
+  },
+  "v": 1
+}

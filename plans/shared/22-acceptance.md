@@ -1,0 +1,317 @@
+# shared/22 — Acceptance ledger (shared contracts)
+
+Every feature ID defined in `shared/01`–`21` appears **exactly once** here. The feature description and its named
+acceptance test live in the spec file; this ledger tracks delivery.
+
+Status: `planned` → `built` → `verified` (or `BLOCKED` + reason + owner sign-off). **Evidence** = the passing test
+name / CI run / capture. **Phase** = where the ID is first delivered and gated; later phases re-run the same tests.
+
+## Ledger
+
+### 01 Architecture
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `ARCH-TREE-01` | P0 | verified | `tooling/scaffold.test.ts` › folder-structure matches architecture manifest · vitest 587/587 (2026-09-21) |  |
+| `ARCH-SHELL-01` | P0 | verified | `e2e/history.spec.ts` › the shell instance survives app open, OS switch and Back/Forward · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+| `ARCH-STATIC-01` | P0 | verified | `unit/routing/codec.test.ts` › generateStaticParams equals the registry enumeration · vitest 587/587 (2026-09-21) |  |
+| `ARCH-HYDR-01` | P0 | verified | `e2e/foundation.spec.ts` › reload with populated storage logs zero hydration warnings · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+| `ARCH-SPLIT-01` | P2 | planned | | |
+| `ARCH-TYPES-01` | P0 | verified | `npm run check`: tsc strict + noUncheckedIndexedAccess clean; `@typescript-eslint/no-explicit-any: error` (eslint.config.mjs) · 2026-09-21 |  |
+| `ARCH-DEPS-01` | P0 | verified | `tooling/scaffold.test.ts` › dependencies are exactly pinned and match the approved set · vitest 587/587 (2026-09-21) | see log |
+| `ARCH-FIX-01` | P0 | verified | LHCI local, 3 runs/URL (2026-09-21): `meta-viewport` = 1 on all URLs · `e2e/foundation.spec.ts` › safe-area tokens are non-zero on a notched phone (pixel) + viewport meta test · scaffold test static half · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) | see log |
+| `ARCH-LINT-01` | P0 | verified | `tooling/boundaries.test.ts` › rejects forbidden import in … (7 fixtures) · vitest 587/587 (2026-09-21) |  |
+| `ARCH-REL-01` | P0 | verified | `unit/routing/codec.test.ts` › ARCH-REL-01 (static params + codec) · `unit/seo/seo.test.ts` › OG-MAP-01 (sitemap) · vitest 587/587 (2026-09-21); the P1 chooser reads the same `VISIBLE_OSES` |  |
+| `ARCH-NOJS-01` | P0 | verified | `e2e/no-js.spec.ts` › every /go section and one deep link per OS is complete without JavaScript · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+
+### 02 Portfolio data
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `DATA-SCHEMA-01` | P0 | verified | `unit/data/schema-types.test.ts` (`@ts-expect-error` cases; mutation-checked: a valid slug fails tsc TS2578) · vitest 587/587 (2026-09-21) | see log |
+| `DATA-SEL-01` | P0 | verified | `tooling/boundaries.test.ts` › rejects forbidden import in components/content/test.ts · vitest 587/587 (2026-09-21) |  |
+| `DATA-INDEX-01` | P0 | verified | `unit/data/data.test.ts` › DATA-INDEX-01 content index + contentRev · vitest 587/587 (2026-09-21) |  |
+| `DATA-INV-01` | P0 | verified | `unit/data/data.test.ts` › DATA-INV-01 data invariants · vitest 587/587 (2026-09-21) |  |
+| `DATA-GUARD-01` | P0 | verified | `unit/scripts/scripts.test.ts` › DATA-GUARD-01 placeholder guard blocks production · vitest 587/587 (2026-09-21) |  |
+| `DATA-EMPTY-01` | P0 | verified | `unit/content/views.test.ts` › DATA-EMPTY-01 · `unit/data/data.test.ts` › DATA-EMPTY-01 (selectors) · vitest 587/587 (2026-09-21) |  |
+| `DATA-RESUME-01` | P0 | verified | `e2e/foundation.spec.ts` › the résumé PDF is served with the right type · `unit/scripts/scripts.test.ts` › DATA-RESUME-01 (ingestion) the owner file wins + (freshness) build-resume --check · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) | see log |
+
+### 03 Content views
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `VIEW-CAT-01` | P0 | verified | `unit/content/views.test.ts` › VIEW-CAT-01 every catalogue view is hook-free and server-renderable · vitest 587/587 (2026-09-21) | see log |
+| `VIEW-TEXT-01` | P0 | verified | `unit/content/views.test.ts` › VIEW-TEXT-01 (snapshots at 80 and 40 columns) · vitest 587/587 (2026-09-21) |  |
+| `VIEW-SLOT-01` | P0 | verified | `component/kernel/focus.test.tsx` › VIEW-SLOT-01 link slot swaps between `<a>` and `KernelLink` · vitest 587/587 (2026-09-21) |  |
+| `VIEW-HEAD-01` | P2 | planned | | |
+| `VIEW-CONTACT-01` | P0 | verified | `unit/content/views.test.ts` › VIEW-CONTACT-01 (encoded mailto; copy fallback) · vitest 587/587 (2026-09-21) |  |
+| `VIEW-RESUME-01` | P0 | verified | `e2e/resume.spec.ts` › the résumé page shows the pages and a working download (iphone + all journey projects) · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) | see log |
+| `VIEW-MEDIA-01` | P0 | verified | LHCI local, 3 runs/URL (2026-09-21): CLS 0.000 (median) on /go/projects/enterprise-sso and every other URL; accessibility 1.00 |  |
+
+### 04 OS kernel
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `KRN-REG-01` | P0 | verified | `unit/kernel/platform.test.ts` › KRN-REG-01 registry + role bindings · vitest 587/587 (2026-09-21) |  |
+| `KRN-WIN-01` | P0 | verified | `unit/kernel/windows.test.ts` › KRN-WIN-01 idempotent open / focus · vitest 587/587 (2026-09-21) |  |
+| `KRN-WIN-02` | P0 | verified | `unit/kernel/windows.test.ts` › KRN-WIN-02 phase guard table · vitest 587/587 (2026-09-21) |  |
+| `KRN-WIN-03` | P0 | verified | `unit/kernel/windows.test.ts` › KRN-WIN-03 minimize / restore / maximize round-trips · vitest 587/587 (2026-09-21) |  |
+| `KRN-Z-01` | P0 | verified | `unit/kernel/windows.test.ts` › KRN-Z-01 z-order array semantics · vitest 587/587 (2026-09-21) |  |
+| `KRN-GEO-01` | P0 | verified | `unit/kernel/windows.test.ts` › KRN-GEO-01 px geometry, clamp (48 px title bar), buckets · vitest 587/587 (2026-09-21) |  |
+| `KRN-SES-01` | P0 | verified | `unit/kernel/sessions.test.ts` › KRN-SES-01 restore rules table · vitest 587/587 (2026-09-21) |  |
+| `KRN-SES-02` | P0 | verified | `unit/kernel/sessions.test.ts` › KRN-SES-02 staleness + contentRev revalidation · vitest 587/587 (2026-09-21) |  |
+| `KRN-SWITCH-01` | P0 | verified | `unit/kernel/sessions.test.ts` › KRN-SWITCH-01 epoch-tagged OS switch · vitest 587/587 (2026-09-21) |  |
+| `KRN-SWITCH-02` | P2 | planned | | |
+| `KRN-PERSIST-01` | P0 | verified | `unit/kernel/persistence.test.ts` › KRN-PERSIST-01 · `e2e/foundation.spec.ts` › corrupt storage never breaks boot · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) | see log |
+| `KRN-PERSIST-02` | P0 | verified | `unit/kernel/persistence.test.ts` › KRN-PERSIST-02 sessions discarded, prefs intact · vitest 587/587 (2026-09-21) |  |
+| `KRN-FOCUS-01` | P0 | verified | `component/kernel/focus.test.tsx` › KRN-FOCUS-01 · `component/kernel/focus-edges.test.tsx` · vitest 587/587 (2026-09-21) |  |
+| `KRN-SOUND-01` | P0 | verified | `unit/kernel/persistence.test.ts` › KRN-SOUND-01 only the intro sound is enabled by default · vitest 587/587 (2026-09-21) | see log |
+| `KRN-CAP-01` | P0 | verified | `unit/kernel/persistence.test.ts` › KRN-CAP-01 capability profile (shape + demotion persisted) · vitest 587/587 (2026-09-21) | see log |
+| `KRN-PERSONA-01` | P0 | verified | `unit/kernel/sessions.test.ts` › KRN-PERSONA-01 no reducer branches on persona · vitest 587/587 (2026-09-21) |  |
+| `KRN-EDGE-01` | P2 | planned | | |
+
+### 05 Routing and history
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `ROUTE-CODEC-01` | P0 | verified | `unit/routing/codec.test.ts` › ROUTE-CODEC-01 format∘parse identity · vitest 587/587 (2026-09-21) |  |
+| `ROUTE-CODEC-02` | P0 | verified | `unit/routing/codec.test.ts` › ROUTE-CODEC-02 · `e2e/history.spec.ts` › a bad URL repairs to the nearest valid route · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+| `ROUTE-GOFN-01` | P0 | verified | `unit/routing/history.test.ts` › ROUTE-GOFN-01 go() decision table · vitest 587/587 (2026-09-21) |  |
+| `ROUTE-EVENT-01` | P2 | planned | | |
+| `ROUTE-MOBILE-01` | P5 | planned | | |
+| `ROUTE-SER-01` | P0 | verified | `unit/routing/history.test.ts` › ROUTE-SER-01 · `e2e/history.spec.ts` › spamming Back/Forward mid-click never duplicates consecutive URLs · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+| `ROUTE-PORT-01` | P0 | verified | `e2e/history.spec.ts` › history contract … (native) and (next-router) · `component/kernel/route-sync.test.tsx` · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+| `ROUTE-CONTRACT-01` | P0 | verified | `e2e/history.spec.ts` › history contract: push → back → forward → refresh → back, no full reload (sentinel) · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+| `ROUTE-GO-01` | P0 | verified | `e2e/history.spec.ts` › /go resolves into an OS with replaceState; Back leaves the site · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+| `ROUTE-PLAIN-01` | P0 | verified | `e2e/no-js.spec.ts` › /plain holds every section and never redirects · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+| `ROUTE-DEEP-01` | P2 | planned | | |
+| `ROUTE-TERM-01` | P0 | verified | `unit/routing/history.test.ts` › ROUTE-TERM-01 push-rate degrade (>20/10 s → replace) · vitest 587/587 (2026-09-21) |  |
+| `ROUTE-TITLE-01` | P0 | verified | `unit/routing/codec.test.ts` › ROUTE-TITLE-01 · `e2e/history.spec.ts` › titles are unique per route · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+
+### 06 Design system
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `DS-TOKEN-01` | P0 | verified | `unit/design/tokens.test.ts` › DS-TOKEN-01 every semantic token in all five OS scopes · vitest 587/587 (2026-09-21) |  |
+| `DS-FONT-01` | P0 | verified | `e2e/performance.spec.ts` › only Inter is declared or fetched on … (7 routes, perf project) · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21); Roboto Flex / mono faces join with the Android (P6) and Linux (P7) chunks |  |
+| `DS-GLASS-01` | P1 | planned | | |
+| `DS-SCRIM-01` | P0 | verified | `unit/design/tokens.test.ts` › DS-SCRIM-01 (5 OS scrims over worst-case backdrops; brand text + accent fills + résumé paper in both themes) · vitest 587/587 (2026-09-21) |  |
+| `DS-THEME-01` | P8 | planned | | |
+| `DS-ICONBOX-01` | P0 | verified | `e2e/assets.spec.ts` › switching the asset mode never shifts layout (identical boxes) · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+| `DS-DISTINCT-01` | P0 | verified | `unit/design/tokens.test.ts` › DS-DISTINCT-01 no two OS scopes share a tuple · vitest 587/587 (2026-09-21) |  |
+
+### 07 Motion system
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `MOTION-SPRING-01` | P0 | verified | `unit/kernel/platform.test.ts` › MOTION-SPRING-01 retarget keeps velocity continuity · vitest 587/587 (2026-09-21) |  |
+| `MOTION-FLIGHT-01` | P5 | planned | | |
+| `MOTION-DRAG-01` | P2 | planned | | |
+| `MOTION-DIR-01` | P0 | verified | `unit/kernel/platform.test.ts` › MOTION-DIR-01 kill(epoch) stops older timelines only · vitest 587/587 (2026-09-21) |  |
+| `MOTION-RULE-01` | P2 | planned | | |
+| `MOTION-RULE-02` | P2 | planned | | |
+| `MOTION-RM-01` | P1 | planned | | |
+| `MOTION-LEAK-01` | P2 | planned | | |
+| `MOTION-SCROLL-01` | P3 | planned | | |
+
+### 08 Responsive
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `RESP-CLASS-01` | P0 | verified | `unit/kernel/platform.test.ts` › RESP-CLASS-01 size classes + posture · vitest 587/587 (2026-09-21) |  |
+| `RESP-DOM-01` | P2 | planned | | |
+| `RESP-VP-01` | P1 | planned | | |
+| `RESP-KB-01` | P7 | planned | | |
+| `RESP-TAP-01` | P2 | planned | | |
+| `RESP-ROT-01` | P2 | planned | | |
+| `RESP-GEST-01` | P3 | planned | | |
+| `RESP-ZOOM-01` | P3 | planned | | |
+
+### 09 Accessibility
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `A11Y-PRIM-01` | P0 | verified | `component/primitives/roving-group.test.tsx` › A11Y-PRIM-01 RovingGroup · vitest 587/587 (2026-09-21) |  |
+| `A11Y-PRIM-02` | P0 | verified | `component/primitives/menu.test.tsx` › A11Y-PRIM-02 Menubar + Menu · vitest 587/587 (2026-09-21) |  |
+| `A11Y-PRIM-03` | P0 | verified | `component/primitives/combobox.test.tsx` › A11Y-PRIM-03 Combobox / Listbox · vitest 587/587 (2026-09-21) |  |
+| `A11Y-PRIM-04` | P0 | verified | `component/primitives/focus-scope.test.tsx` › A11Y-PRIM-04 FocusScope / inert manager · vitest 587/587 (2026-09-21) |  |
+| `A11Y-PRIM-05` | P0 | verified | `component/primitives/press.test.tsx` › A11Y-PRIM-05 Press / LongPress · vitest 587/587 (2026-09-21) |  |
+| `A11Y-SEM-01` | P2 | planned | | |
+| `A11Y-FOCUS-01` | P2 | planned | | |
+| `A11Y-KEY-01` | P0 | verified | `unit/kernel/platform.test.ts` › A11Y-KEY-01 keymap has no reserved chord · vitest 587/587 (2026-09-21) |  |
+| `A11Y-SKIP-01` | P0 | verified | `e2e/foundation.spec.ts` › first Tab focuses "Skip the OS" on / · /plain · /go/projects · /macos · /linux/… (all non-WebKit-touch projects) · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) | see log |
+| `A11Y-PREF-01` | P3 | planned | | |
+| `A11Y-AXE-01` | P2 | planned | | |
+| `A11Y-LIVE-01` | P1 | planned | | |
+| `A11Y-LH-01` | P1 | planned | | |
+
+### 10 Performance
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `PERF-TIER-01` | P0 | verified | `unit/kernel/platform.test.ts` › PERF-TIER-01 · `e2e/foundation.spec.ts` › tier / motion / glass attributes are set before first paint · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+| `PERF-GOV-01` | P0 | verified | `unit/kernel/platform.test.ts` › PERF-GOV-01 demote-only governor · vitest 587/587 (2026-09-21) |  |
+| `PERF-BUDGET-01` | P1 | planned | | |
+| `PERF-LCP-01` | P1 | planned | | |
+| `PERF-INP-01` | P2 | planned | | |
+| `PERF-CLS-01` | P1 | planned | | |
+| `PERF-GL-01` | P1 | planned | | |
+| `PERF-GL-02` | P1 | planned | | |
+| `PERF-LAZY-01` | P1 | planned | | |
+| `PERF-3D-01` | P0 | verified | `unit/scripts/scripts.test.ts` › PERF-3D-01 no import of @react-three/* or useGLTF in v1 code · vitest 587/587 (2026-09-21) |  |
+| `PERF-LEAK-01` | P2 | planned | | |
+| `PERF-BLUR-01` | P2 | planned | | |
+
+### 11 Assets
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `ASSET-MAN-01` | P0 | verified | `unit/assets/assets.test.ts` › ASSET-MAN-01 typed manifest + resolver · vitest 587/587 (2026-09-21) |  |
+| `ASSET-MODE-01` | P0 | verified | the whole journey suite passes in `chromium-desktop` (official, :3000) and `asset-original` (:3001) · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+| `ASSET-MODE-02` | P0 | verified | `e2e/assets.spec.ts` › the stub OS journey works … (asset-original: zero /assets/official/ requests) · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+| `ASSET-BOX-01` | P0 | verified | `e2e/assets.spec.ts` › switching the asset mode never shifts layout · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+| `ASSET-ORIG-01` | P0 | verified | `unit/assets/assets.test.ts` › ASSET-ORIG-01 parametric original for every app · vitest 587/587 (2026-09-21) |  |
+| `ASSET-INBOX-01` | P0 | verified | `unit/assets/assets.test.ts` › ASSET-INBOX-01 assets-inbox ingestion · vitest 587/587 (2026-09-21) | see log |
+| `ASSET-AUDIO-01` | P1 | planned | | |
+| `ASSET-LEGAL-01` | P3 | planned | | |
+| `ASSET-MARK-01` | P0 | verified | `unit/assets/assets.test.ts` › ASSET-MARK-01 no third-party marks in site branding · vitest 587/587 (2026-09-21) |  |
+| `ASSET-BUDGET-01` | P0 | verified | `unit/assets/assets.test.ts` › ASSET-BUDGET-01 size budgets · vitest 587/587 (2026-09-21) |  |
+
+### 12 Testing
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `TEST-TOOL-01` | P0 | built | `.github/workflows/ci.yml` (check → unit → build → e2e ×4 → lhci → inp) + `nightly.yml`; every stage command run locally 2026-09-21. Verified on the first GitHub PR run (no remote yet) |  |
+| `TEST-UNIT-01` | P0 | verified | thresholds enforced in `vitest.config.ts` (lib/kernel + lib/terminal ≥ 90, global ≥ 80) by `npm run test:coverage`, the CI unit command: lib/kernel 94.7/91.5/94.8/96.3, global 90.7/84.5/88.5/92.7 · vitest 587/587 (2026-09-21) |  |
+| `TEST-E2E-01` | P8 | planned | | |
+| `TEST-MATRIX-01` | P0 | verified | `tooling/matrix.test.ts` › TEST-MATRIX-01 matrix config matches shared/12 · vitest 587/587 (2026-09-21) |  |
+| `TEST-PERF-01` | P1 | planned | | |
+| `TEST-DOUBLE-01` | P0 | verified | `unit/kernel/doubles.test.ts` › TEST-DOUBLE-01 kernel tests run without Next or DOM · vitest 587/587 (2026-09-21) |  |
+| `TEST-VIS-01` | P8 | planned | | |
+| `TEST-MANUAL-01` | P8 | planned | | |
+
+### 13 Deployment
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `DEPLOY-GIT-01` | P0 | verified | `tooling/scaffold.test.ts` › repository exists and generated or sensitive inputs are ignored · vitest 587/587 (2026-09-21) |  |
+| `DEPLOY-ENV-01` | P0 | verified | `tooling/environment.test.ts` › DEPLOY-ENV-01 · vitest 587/587 (2026-09-21) | see log |
+| `DEPLOY-HDR-01` | P1 | planned | | |
+| `DEPLOY-STATIC-01` | P0 | verified | post-build audit (`scripts/check-build.mjs`) after both builds: all routes static, 151 prerendered paths · `unit/scripts/scripts.test.ts` › DEPLOY-STATIC-01 · 2026-09-21 |  |
+| `DEPLOY-CRON-01` | P8 | planned | | |
+| `DEPLOY-SEO-01` | P0 | verified | `unit/seo/seo.test.ts` › OG-MAP-01 / DEPLOY-SEO-01 sitemap, robots, manifest · vitest 587/587 (2026-09-21) |  |
+| `DEPLOY-REL-01` | P8 | planned | | |
+| `DEPLOY-PREV-01` | P1 | planned | | |
+
+### 14 Résumé fast path
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `RES-REACH-01` | P7 | planned | | |
+| `RES-PRE-01` | P1 | planned | | |
+| `RES-IDIOM-01` | P7 | planned | | |
+| `RES-OPEN-01` | P2 | planned | | |
+| `RES-DL-01` | P2 | planned | | |
+| `RES-COMPACT-01` | P4 | planned | | |
+| `RES-NOJS-01` | P0 | verified | `e2e/no-js.spec.ts` › /go/resume offers the PDF (open + download) and the pages · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
+
+### 15 System search
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `SRCH-INDEX-01` | P0 | verified | `unit/data/data.test.ts` › SRCH-INDEX-01 (every ref + binding; ≤ 10 KB gz per OS) · vitest 587/587 (2026-09-21) |  |
+| `SRCH-MATCH-01` | P0 | verified | `unit/data/data.test.ts` › SRCH-MATCH-01 ranking fixtures (exact > prefix > typo) · vitest 587/587 (2026-09-21) |  |
+| `SRCH-ZERO-01` | P3 | planned | | |
+| `SRCH-ACT-01` | P3 | planned | | |
+| `SRCH-PARITY-01` | P7 | planned | | |
+| `SRCH-TERM-01` | P3 | planned | | |
+| `SRCH-A11Y-01` | P3 | planned | | |
+| `SRCH-LAZY-01` | P3 | planned | | |
+
+### 16 Cross-OS continuity
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `CONT-CAP-01` | P0 | verified | `unit/kernel/continuity-analytics.test.ts` › CONT-CAP-01 · vitest 587/587 (2026-09-21) |  |
+| `CONT-OFFER-01` | P0 | verified | `unit/kernel/continuity-analytics.test.ts` › CONT-OFFER-01 offer decision table · vitest 587/587 (2026-09-21) |  |
+| `CONT-ACCEPT-01` | P4 | planned | | |
+| `CONT-NEVER-01` | P4 | planned | | |
+| `CONT-IDIOM-01` | P7 | planned | | |
+| `CONT-A11Y-01` | P4 | planned | | |
+| `CONT-MEM-01` | P0 | verified | `unit/kernel/persistence.test.ts` › CONT-MEM-01 continuity absent from the persisted payload · vitest 587/587 (2026-09-21) |  |
+
+### 17 GitHub live data
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `GH-FETCH-01` | P0 | verified | `unit/scripts/scripts.test.ts` › GH-FETCH-01 · vitest 587/587 (2026-09-21) |  |
+| `GH-SAFE-01` | P0 | verified | `unit/scripts/scripts.test.ts` › GH-SAFE-01 failure keeps the snapshot and exits 0 · vitest 587/587 (2026-09-21) |  |
+| `GH-TOKEN-01` | P0 | verified | `unit/scripts/scripts.test.ts` › GH-TOKEN-01 (source) + GH-TOKEN-01 (bundle grep) · post-build audit: 17 client assets carry no token · vitest 587/587 (2026-09-21) |  |
+| `GH-MERGE-01` | P0 | verified | `unit/data/data.test.ts` › GH-MERGE-01 unmatched repos excluded · vitest 587/587 (2026-09-21) |  |
+| `GH-UI-01` | P3 | planned | | |
+| `GH-OFF-01` | P3 | planned | | |
+
+### 18 Analytics
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `ANL-PORT-01` | P0 | verified | `unit/kernel/continuity-analytics.test.ts` › ANL-PORT-01 · `component/kernel/focus-edges.test.tsx` › ANL-PORT-01 loader + Vercel adapter · vitest 587/587 (2026-09-21) |  |
+| `ANL-EVENT-01` | P0 | verified | `unit/kernel/continuity-analytics.test.ts` › ANL-EVENT-01 each kernel action emits once · vitest 587/587 (2026-09-21) |  |
+| `ANL-PV-01` | P0 | verified | `unit/kernel/continuity-analytics.test.ts` › ANL-PV-01 back-collapse echo does not double count · vitest 587/587 (2026-09-21) |  |
+| `ANL-LAZY-01` | P1 | planned | | |
+| `ANL-PRIV-01` | P1 | planned | | |
+| `ANL-LINT-01` | P0 | verified | `tooling/boundaries.test.ts` › rejects forbidden import in components/shell/test.ts (@vercel/analytics) · vitest 587/587 (2026-09-21) |  |
+| `ANL-CWV-01` | P1 | planned | | |
+| `ANL-NOTICE-01` | P3 | planned | | |
+
+### 19 Social cards and SEO
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `OG-GEN-01` | P0 | verified | `e2e/foundation.spec.ts` › every /go route in the sitemap points at its own Open Graph PNG · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) | see log |
+| `OG-REUSE-01` | P0 | verified | `unit/seo/seo.test.ts` › OG-REUSE-01 OS routes reuse the content card · vitest 587/587 (2026-09-21) |  |
+| `OG-MARK-01` | P0 | verified | `unit/seo/seo.test.ts` › OG-MARK-01 the OG template imports only original assets · vitest 587/587 (2026-09-21) |  |
+| `OG-META-01` | P0 | verified | `unit/seo/seo.test.ts` › OG-META-01 metadata per route type; titles unique · vitest 587/587 (2026-09-21) |  |
+| `OG-LD-01` | P0 | verified | `unit/seo/seo.test.ts` › OG-LD-01 JSON-LD Person + project schemas · vitest 587/587 (2026-09-21) |  |
+| `OG-MAP-01` | P0 | verified | `unit/seo/seo.test.ts` › OG-MAP-01 sitemap lists only /, /plain, /go/* · vitest 587/587 (2026-09-21) |  |
+| `OG-FIT-01` | P0 | verified | `unit/seo/seo.test.ts` › OG-FIT-01 long-title fixture stays within two lines · vitest 587/587 (2026-09-21) |  |
+
+### 20 Guided tour
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `TOUR-OFFER-01` | P3 | planned | | |
+| `TOUR-NEVER-01` | P3 | planned | | |
+| `TOUR-REAL-01` | P3 | planned | | |
+| `TOUR-CANCEL-01` | P3 | planned | | |
+| `TOUR-LNX-01` | P7 | planned | | |
+| `TOUR-A11Y-01` | P3 | planned | | |
+| `TOUR-LAZY-01` | P3 | planned | | |
+| `TOUR-RESTART-01` | P7 | planned | | |
+
+### 21 Easter eggs
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `EGG-SUDO-01` | P7 | planned | | |
+| `EGG-NEO-01` | P7 | planned | | |
+| `EGG-VIM-01` | P7 | planned | | |
+| `EGG-RMRF-01` | P7 | planned | | |
+| `EGG-COW-01` | P7 | planned | | |
+| `EGG-ABOUT-01` | P3 | planned | | |
+| `EGG-WINVER-01` | P4 | planned | | |
+| `EGG-KONAMI-01` | P3 | planned | | |
+| `EGG-SHAKE-01` | P5 | planned | | |
+| `EGG-MATRIX-01` | P7 | planned | | |
+| `EGG-LAZY-01` | P3 | planned | | |
+| `EGG-SAFE-01` | P7 | planned | | |
+| `EGG-COUNT-01` | P3 | planned | | |
+
+## Definition of done — shared contracts
+- [ ] Every ID above is `verified` with evidence, or `BLOCKED` with owner sign-off.
+- [ ] No OS file restates a rule owned here (spot-check motion numbers, breakpoints, ARIA policy).
+- [ ] Budgets in `10-performance.md` hold on the production build.
+- [ ] Both asset modes pass the full journey suite.
+- [ ] `check-plans` passes (unique IDs, one ledger each, one phase each, template sections present).
+
+## Deviations log
+| Date | ID | What changed vs the spec | Why | Owner sign-off |
+|---|---|---|---|---|
+| 2026-09-21 | ARCH-DEPS-01 | Add development-only `@vitest/coverage-v8`; runtime budget unchanged | Required by the planned Vitest coverage gate | Covered by owner's instruction to complete necessary implementation; architecture and budget updated |
+| 2026-09-21 | ARCH-DEPS-01 · ASSET-INBOX-01 | `scripts/ingest-assets.mjs` uses `sharp` (already installed by `next`, resolved with `createRequire`), not a declared dependency; build-time only | Resizing, squircle masking and WebP encoding need an image codec; adding a pinned package would duplicate the one Next ships | Owner authorization 2026-09-21 (plans/README); for review at the P0 gate |
+| 2026-09-21 | ARCH-TYPES-01 | `WindowId` is the template-literal union `` `${OsId}:${AppRole}` `` instead of a brand | It keys `Record`s and is exhaustively checked with no casts — stricter than a brand | Owner authorization 2026-09-21; for review at the P0 gate |
+| 2026-09-21 | DATA-SCHEMA-01 | Schema additions: nullable unpublished facts (`start`, `end`, `role`, `location`), `PartialDate` (`YYYY-MM` or `YYYY`), optional skill `level`, `credentials`, project `year` / `closedSource` / `context`, person `givenName`, `resume.{file, downloadName, updated}`, `provenance` | LinkedIn (primary source) was unreachable; facts published nowhere stay `null` + `placeholder: true` instead of being invented, and the production guard blocks deploy until they are supplied | Owner authorization 2026-09-21; for review at the P0 gate |
+| 2026-09-21 | DATA-RESUME-01 | Until `content/resume.pdf` exists, `build-resume` generates the PDF from the typed data (`lib/resume/pdf.ts`); the owner's file replaces it automatically when dropped | The Download must work from day one; the spec's ingestion path (copy the owner's PDF) is implemented and tested | Owner authorization 2026-09-21; for review at the P0 gate |
+| 2026-09-21 | VIEW-RESUME-01 | Where a PDF cannot render inline, the résumé pages are HTML (the same facts, from data) rather than page images | Selectable, accessible, zero extra assets, never stale | Owner authorization 2026-09-21; for review at the P0 gate |
+| 2026-09-21 | VIEW-CAT-01 | `headingLevel` also accepts `1` | `/go/*` pages render a single view whose title is the page's only `h1` | Owner authorization 2026-09-21; for review at the P0 gate |
+| 2026-09-21 | KRN-PERSIST-01 | `pf.prefs.v1` uses Zustand `persist` as specified; `pf.sessions.v1` is written by the kernel store through the same safe storage (debounce 250 ms, `pagehide` flush, validating parse, versioned migrate) | Sessions need per-OS TTLs and `contentRev` revalidation at boot, which a generic `merge` cannot express | Owner authorization 2026-09-21; for review at the P0 gate |
+| 2026-09-21 | KRN-SOUND-01 · KRN-CAP-01 | `prefs.sound` gains `ui: boolean` (default off); the capability profile gains `appleTouch` (a `CSS.supports` probe, never the user agent) | "All other UI sounds default off" needs its own switch; `/go` on a phone chooses iOS vs Android without user-agent sniffing | Owner authorization 2026-09-21; for review at the P0 gate |
+| 2026-09-21 | KRN-* | Model additions beyond the shared/04 catalogue: window `invoker` + `arrival`, session `learnedRects`, transition `reverse` + `attempts`, actions `APP_FORWARD`, `SET_SCROLL`, `SET_DRAFT`, `TERMINAL_SET_CWD` / `TERMINAL_RECORD` / `TERMINAL_CLEAR`, `CONTINUITY_CAPTURE` | Required by focus return, restore rules, return-to-origin reversal, failure retry, the Linux URL mapping and continuity | Owner authorization 2026-09-21; for review at the P0 gate |
+| 2026-09-21 | OG-GEN-01 | Cards are served by a force-static route handler `app/og/[...card]/route.tsx` (`next/og`) instead of `opengraph-image.tsx` files | Next does not allow `opengraph-image` under the optional catch-all segments this app uses; the output is identical static PNGs | Owner authorization 2026-09-21; for review at the P0 gate |
+| 2026-09-21 | DEPLOY-ENV-01 | New variables: `NEXT_PUBLIC_OS_PREVIEW` (unreleased OSes visible in test/preview builds; ignored in production), `NEXT_DIST_DIR` (second e2e build); a `pf.debug.history` session switch selects the history adapter for the contract suite | The P0 gate runs e2e on a stub OS before any OS is released, in both asset modes and on both adapters | Owner authorization 2026-09-21; for review at the P0 gate |
+| 2026-09-21 | ARCH-FIX-01 | "Safe-area tokens non-zero" runs on the Chromium phone project (`pixel`) with CDP `Emulation.setSafeAreaInsetsOverride` (47/34 px); the `iphone` project asserts the `env()` wiring | WebKit emulation always reports 0 px insets, so a non-zero check cannot run there | Owner authorization 2026-09-21; for review at the P0 gate |
+| 2026-09-21 | A11Y-SKIP-01 | "First Tab focuses the skip link" is skipped on the WebKit touch projects (`iphone`, `ipad-*`) | WebKit's Tab moves between form controls only unless Option is held — platform behaviour, not ours; verified on every other project | Owner authorization 2026-09-21; for review at the P0 gate |
+| 2026-09-21 | TEST-PERF-01 | Until P1, Lighthouse CI reports LCP, TBT and the per-route script budgets as warnings; accessibility, CLS and meta-viewport are errors now | Those three are owned by P1 IDs (`PERF-LCP-01`, `PERF-BUDGET-01`, `TEST-PERF-01`) and P1 rebuilds `/`; P0 baseline recorded in STATUS.md | Owner authorization 2026-09-21; for review at the P0 gate |
+| 2026-09-21 | DEPLOY-HDR-01 | CSP `script-src 'self' 'unsafe-inline'` instead of a hash for the tier script; every other directive is strict (`default-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`) | The App Router streams its RSC payload as per-page inline scripts that a static build can neither hash nor nonce, and a hash would disable `'unsafe-inline'` for them | Owner authorization 2026-09-21 (plans/README); for review at the P1 gate |
+| 2026-09-21 | TEST-UNIT-01 · PERF-GL-01 | `lib/webgl/glass-stage.ts` is excluded from unit coverage | It needs a real WebGL2 context; the forced-tier Playwright tests exercise it end to end | Owner authorization 2026-09-21; for review at the P1 gate |
+| 2026-09-21 | ARCH-DEPS-01 | `scripts/capture-snapshots.mjs` drives `playwright-core` (installed with `@playwright/test`) and `sharp`; `scripts/build-wordmark.mjs` uses `opentype.js` (already a listed build-script dependency) | Build-time scripts only; nothing ships | Owner authorization 2026-09-21; for review at the P1 gate |
+| 2026-09-21 | TEST-MATRIX-01 · TEST-TOOL-01 | A third e2e build (`.next-production`: no preview allow-list, analytics on) is served beside the two preview builds and checked by the `perf` project (`production.spec.ts`); local ports are configurable (`E2E_PORT`) | Production-only behaviour (Speed Insights, noindex off, unreleased OSes 404) cannot be observed on a preview build; configurable ports keep test servers off other processes on a shared machine | Owner authorization 2026-09-21; for review at the P1 gate |

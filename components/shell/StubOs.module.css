@@ -1,0 +1,138 @@
+/* Preview-only kernel scaffold (P0). Deliberately plain: it is replaced by each real OS in its phase. */
+.root {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: var(--surface-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: calc(var(--sa-t) + 10px) 16px 10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.badge {
+  margin: 0;
+  font-weight: 700;
+}
+.apps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.app {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 4px 12px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+.app {
+  gap: 8px;
+}
+.icon {
+  flex: none;
+}
+.app:hover,
+.app[aria-current='true'] {
+  background: oklch(1 0 0 / 0.08);
+  color: var(--text-primary);
+}
+.switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-inline-start: auto;
+}
+.switch {
+  min-height: 36px;
+  padding: 4px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.desk {
+  position: relative;
+  overflow: hidden;
+}
+.window {
+  position: absolute;
+  inset: 16px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--surface-raised);
+  box-shadow: var(--elevation-3);
+}
+.window:not([data-focused]) {
+  opacity: 0.6;
+}
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.controls {
+  display: flex;
+  gap: 4px;
+}
+.controls button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: oklch(1 0 0 / 0.06);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.controls button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.title {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+.body {
+  overflow: auto;
+  padding: 20px 24px 40px;
+}
+.empty {
+  color: var(--text-secondary);
+}
+
+/* Each OS skin paints the preview with its own wallpaper and chrome, so its chooser snapshot is recognisable until
+   the real home replaces this stub (plans/04 `CHOOSE-CARD-01`). */
+.bar {
+  background: var(--surface-chrome);
+}
+:global(.os-root[data-os='ios']) .desk {
+  background: var(--wallpaper-ios);
+}
+:global(.os-root[data-os='macos']) .desk {
+  background: var(--wallpaper-macos);
+}
+:global(.os-root[data-os='windows']) .desk {
+  background: var(--wallpaper-windows);
+}
+:global(.os-root[data-os='android']) .desk {
+  background: var(--wallpaper-android);
+}

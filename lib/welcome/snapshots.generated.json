@@ -1,0 +1,72 @@
+{
+  "ios": {
+    "landscape": {
+      "src": "/assets/snapshots/ios.landscape.9067998d37.avif",
+      "width": 1280,
+      "height": 800,
+      "bytes": 9871
+    },
+    "portrait": {
+      "src": "/assets/snapshots/ios.portrait.906c24ba37.avif",
+      "width": 600,
+      "height": 1298,
+      "bytes": 14522
+    }
+  },
+  "macos": {
+    "landscape": {
+      "src": "/assets/snapshots/macos.landscape.b21397bc63.avif",
+      "width": 1280,
+      "height": 800,
+      "bytes": 11359
+    },
+    "portrait": {
+      "src": "/assets/snapshots/macos.portrait.43bd1377a3.avif",
+      "width": 600,
+      "height": 1298,
+      "bytes": 16361
+    }
+  },
+  "windows": {
+    "landscape": {
+      "src": "/assets/snapshots/windows.landscape.3b57766e2c.avif",
+      "width": 1280,
+      "height": 800,
+      "bytes": 12440
+    },
+    "portrait": {
+      "src": "/assets/snapshots/windows.portrait.c399a1d75a.avif",
+      "width": 600,
+      "height": 1298,
+      "bytes": 17587
+    }
+  },
+  "android": {
+    "landscape": {
+      "src": "/assets/snapshots/android.landscape.1e007780e4.avif",
+      "width": 1280,
+      "height": 800,
+      "bytes": 9209
+    },
+    "portrait": {
+      "src": "/assets/snapshots/android.portrait.4c9c5e2619.avif",
+      "width": 600,
+      "height": 1298,
+      "bytes": 13947
+    }
+  },
+  "linux": {
+    "landscape": {
+      "src": "/assets/snapshots/linux.landscape.d71317d0a4.avif",
+      "width": 1280,
+      "height": 800,
+      "bytes": 7574
+    },
+    "portrait": {
+      "src": "/assets/snapshots/linux.portrait.1ee00c16dc.avif",
+      "width": 600,
+      "height": 1298,
+      "bytes": 12164
+    }
+  }
+}

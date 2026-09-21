@@ -1,0 +1,103 @@
+/* iOS skin — values owned by plans/ios/01-identity.md. Squircles, 17 pt SF, blur materials, 44 pt targets, hairlines. */
+
+[data-os='ios'] {
+  color-scheme: light;
+  --surface-base: oklch(0.962 0.003 286);
+  --surface-raised: oklch(1 0 0);
+  --surface-overlay: oklch(0.98 0.002 286 / 0.92);
+  --surface-chrome: oklch(0.975 0.002 286 / 0.8);
+  --text-primary: oklch(0.16 0 0);
+  --text-secondary: oklch(0.47 0.006 286);
+  --text-tertiary: oklch(0.53 0.006 286);
+  --text-on-accent: oklch(1 0 0);
+  --border-subtle: oklch(0.3 0.01 286 / 0.18);
+  --border-strong: oklch(0.3 0.01 286 / 0.3);
+  --accent: oklch(0.62 0.19 255);
+  --focus-ring: oklch(0.62 0.19 255);
+  --scrim-dark: oklch(0.12 0.01 280 / 0.64);
+  --scrim-light: oklch(0.99 0 0 / 0.72);
+  --radius-control: 12px;
+  --radius-card: 12px;
+  --radius-window: 0px;
+  --radius-icon: 22.37%;
+  --radius-sheet: 10px;
+  --radius-device: 38px;
+  --target-min: 44px;
+  --font-ui: -apple-system, 'SF Pro Text', 'SF Pro Display', var(--font-inter), sans-serif;
+  --font-display: -apple-system, 'SF Pro Display', var(--font-inter), sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-size-caption: 12px;
+  --font-size-body: 17px;
+  --font-size-title: 28px;
+  --font-size-large: 34px;
+  --elevation-1: 0 1px 3px oklch(0 0 0 / 0.08);
+  --elevation-2: 0 6px 18px oklch(0 0 0 / 0.12);
+  --elevation-3: 0 12px 34px oklch(0 0 0 / 0.16);
+  --elevation-4: 0 20px 60px oklch(0 0 0 / 0.2);
+  --elevation-5: 0 30px 90px oklch(0 0 0 / 0.26);
+  --material-thin: oklch(0.99 0 0 / 0.34);
+  --material-regular: oklch(0.98 0.002 286 / 0.72);
+  --material-thick: oklch(0.98 0.002 286 / 0.86);
+  --material-chrome: oklch(0.98 0.002 286 / 0.78);
+  --material-blur: blur(20px) saturate(180%);
+  --hairline: oklch(0.3 0.01 286 / 0.2);
+  --wallpaper-ios:
+    radial-gradient(90% 60% at 20% 18%, oklch(0.82 0.1 200) 0%, transparent 60%),
+    radial-gradient(80% 70% at 88% 40%, oklch(0.74 0.14 300) 0%, transparent 62%),
+    radial-gradient(100% 70% at 30% 92%, oklch(0.8 0.12 30) 0%, transparent 60%),
+    linear-gradient(180deg, oklch(0.72 0.1 250) 0%, oklch(0.66 0.13 290) 100%);
+  --wallpaper-ios-worst: oklch(0.86 0.08 200);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) [data-os='ios'] {
+    color-scheme: dark;
+    --surface-base: oklch(0 0 0);
+    --surface-raised: oklch(0.21 0.004 286);
+    --surface-overlay: oklch(0.2 0.004 286 / 0.92);
+    --surface-chrome: oklch(0.18 0.004 286 / 0.8);
+    --text-primary: oklch(1 0 0);
+    --text-secondary: oklch(0.8 0.006 286);
+    --text-tertiary: oklch(0.72 0.006 286);
+    --border-subtle: oklch(0.7 0.01 286 / 0.24);
+    --border-strong: oklch(0.7 0.01 286 / 0.36);
+    --accent: oklch(0.66 0.18 255);
+    --focus-ring: oklch(0.7 0.16 255);
+    --material-thin: oklch(0.2 0.004 286 / 0.34);
+    --material-regular: oklch(0.18 0.004 286 / 0.72);
+    --material-thick: oklch(0.2 0.004 286 / 0.86);
+    --material-chrome: oklch(0.16 0.004 286 / 0.78);
+    --hairline: oklch(0.7 0.01 286 / 0.26);
+    --wallpaper-ios:
+      radial-gradient(90% 60% at 20% 18%, oklch(0.36 0.1 220) 0%, transparent 60%),
+      radial-gradient(80% 70% at 88% 40%, oklch(0.34 0.14 300) 0%, transparent 62%),
+      radial-gradient(100% 70% at 30% 92%, oklch(0.32 0.12 20) 0%, transparent 60%),
+      linear-gradient(180deg, oklch(0.16 0.05 260) 0%, oklch(0.14 0.06 290) 100%);
+    --wallpaper-ios-worst: oklch(0.4 0.1 220);
+  }
+}
+:root[data-theme='dark'] [data-os='ios'] {
+  color-scheme: dark;
+  --surface-base: oklch(0 0 0);
+  --surface-raised: oklch(0.21 0.004 286);
+  --surface-overlay: oklch(0.2 0.004 286 / 0.92);
+  --surface-chrome: oklch(0.18 0.004 286 / 0.8);
+  --text-primary: oklch(1 0 0);
+  --text-secondary: oklch(0.8 0.006 286);
+  --text-tertiary: oklch(0.72 0.006 286);
+  --border-subtle: oklch(0.7 0.01 286 / 0.24);
+  --border-strong: oklch(0.7 0.01 286 / 0.36);
+  --accent: oklch(0.66 0.18 255);
+  --focus-ring: oklch(0.7 0.16 255);
+  --material-thin: oklch(0.2 0.004 286 / 0.34);
+  --material-regular: oklch(0.18 0.004 286 / 0.72);
+  --material-thick: oklch(0.2 0.004 286 / 0.86);
+  --material-chrome: oklch(0.16 0.004 286 / 0.78);
+  --hairline: oklch(0.7 0.01 286 / 0.26);
+  --wallpaper-ios:
+    radial-gradient(90% 60% at 20% 18%, oklch(0.36 0.1 220) 0%, transparent 60%),
+    radial-gradient(80% 70% at 88% 40%, oklch(0.34 0.14 300) 0%, transparent 62%),
+    radial-gradient(100% 70% at 30% 92%, oklch(0.32 0.12 20) 0%, transparent 60%),
+    linear-gradient(180deg, oklch(0.16 0.05 260) 0%, oklch(0.14 0.06 290) 100%);
+  --wallpaper-ios-worst: oklch(0.4 0.1 220);
+}

@@ -1,0 +1,142 @@
+# PR gate — plans/shared/12 "CI": check → unit → build → e2e (sharded ×4) → lhci → inp.
+# Every browser stage runs against the two production builds made once in `build` (official assets on :3000,
+# ASSET_MODE=original on :3001), never the dev server.
+name: Portfolio checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: portfolio-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # typecheck · lint (jsx-a11y strict, import boundaries, no-explicit-any) · prettier · check-plans · résumé fresh
+      - run: npm run check
+
+  unit:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Fails below kernel/terminal ≥ 90 %, global ≥ 80 % (vitest.config.ts thresholds).
+      - run: npm run test:coverage
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage
+
+  build:
+    needs: unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Both builds; each is followed by the post-build audit (all routes static, no token in client assets).
+      - run: npm run test:e2e:build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: builds
+          include-hidden-files: true
+          retention-days: 3
+          path: |
+            .next
+            .next-original
+            .next-production
+            !.next/cache
+            !.next-original/cache
+            !.next-production/cache
+
+  e2e:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: builds
+      - run: npx playwright install --with-deps chromium firefox webkit
+      # PR matrix (shared/12); the `perf` project's timing-sensitive tests run alone in `inp`.
+      - run: npx playwright test --shard=${{ matrix.shard }}/4 --grep-invert @perf
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-${{ matrix.shard }}
+          path: |
+            playwright-report
+            test-results
+
+  lhci:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: builds
+      # lighthouserc.cjs: next start, 3 runs, median, mobile preset; reports kept as artifacts only.
+      - run: npm run test:perf
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse
+          include-hidden-files: true
+          path: .lighthouseci
+
+  inp:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: builds
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --project=perf
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: inp
+          path: |
+            playwright-report
+            test-results

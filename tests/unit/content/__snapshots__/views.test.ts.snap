@@ -1,0 +1,273 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`VIEW-TEXT-01 renderText for every view > about at 40 columns 1`] = `
+[
+  "Ada Example",
+  "Engineer of examples",
+  "Engineer at Acme · Testville",
+  "",
+  "Builds fixtures.",
+  "",
+  "Second paragraph.",
+  "",
+  "Open to tests.",
+  "",
+  "SELECTED WORK",
+  "─────────────────",
+  "• Portfolio OS — Five operating systems.",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > about at 80 columns 1`] = `
+[
+  "Ada Example",
+  "Engineer of examples",
+  "Engineer at Acme · Testville",
+  "",
+  "Builds fixtures.",
+  "",
+  "Second paragraph.",
+  "",
+  "Open to tests.",
+  "",
+  "SELECTED WORK",
+  "─────────────────",
+  "• Portfolio OS — Five operating systems.",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > contact at 40 columns 1`] = `
+[
+  "Open to tests.",
+  "",
+  "Email ada@example.com",
+  "GitHub https://github.com/ada",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > contact at 80 columns 1`] = `
+[
+  "Open to tests.",
+  "",
+  "Email ada@example.com",
+  "GitHub https://github.com/ada",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > education-detail at 40 columns 1`] = `
+[
+  "B.S. Examples",
+  "State University",
+  "Sep 2016 – May 2020",
+  "",
+  "COURSEWORK",
+  "──────────────",
+  "• Algorithms",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > education-detail at 80 columns 1`] = `
+[
+  "B.S. Examples",
+  "State University",
+  "Sep 2016 – May 2020",
+  "",
+  "COURSEWORK",
+  "──────────────",
+  "• Algorithms",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > education-list at 40 columns 1`] = `
+[
+  "B.S. Examples",
+  "  State University",
+  "  Sep 2016 – May 2020",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > education-list at 80 columns 1`] = `
+[
+  "B.S. Examples",
+  "  State University",
+  "  Sep 2016 – May 2020",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > experience-detail at 40 columns 1`] = `
+[
+  "Engineer — Acme",
+  "Jan 2022 – Present · Remote",
+  "",
+  "Builds rockets.",
+  "",
+  "• Launched things",
+  "",
+  "Stack: Go",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > experience-detail at 80 columns 1`] = `
+[
+  "Engineer — Acme",
+  "Jan 2022 – Present · Remote",
+  "",
+  "Builds rockets.",
+  "",
+  "• Launched things",
+  "",
+  "Stack: Go",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > experience-list at 40 columns 1`] = `
+[
+  "Engineer — Acme",
+  "  Jan 2022 – Present",
+  "  Builds rockets.",
+  "",
+  "Intern — Globex",
+  "  Jun 2020 – Aug 2021",
+  "  Learned things.",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > experience-list at 80 columns 1`] = `
+[
+  "Engineer — Acme",
+  "  Jan 2022 – Present",
+  "  Builds rockets.",
+  "",
+  "Intern — Globex",
+  "  Jun 2020 – Aug 2021",
+  "  Learned things.",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > legal at 40 columns 1`] = `
+[
+  "A personal, non-commercial portfolio.",
+  "Not affiliated with, endorsed by or",
+  "sponsored by any operating-system maker.",
+  "",
+  "App icons and marks belong to their",
+  "owners and are used only to identify the",
+  "apps they represent.",
+  "",
+  "Original glyphs: Lucide (ISC).",
+  "",
+  "Rights requests: ada@example.com",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > legal at 80 columns 1`] = `
+[
+  "A personal, non-commercial portfolio. Not affiliated with, endorsed by or",
+  "sponsored by any operating-system maker.",
+  "",
+  "App icons and marks belong to their owners and are used only to identify the",
+  "apps they represent.",
+  "",
+  "Original glyphs: Lucide (ISC).",
+  "",
+  "Rights requests: ada@example.com",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > project-detail at 40 columns 1`] = `
+[
+  "Portfolio OS",
+  "Personal",
+  "",
+  "Five operating systems.",
+  "",
+  "A site.",
+  "",
+  "HIGHLIGHTS",
+  "──────────────",
+  "• Kernel",
+  "",
+  "STACK",
+  "─────────",
+  "TypeScript",
+  "",
+  "Source:",
+  "https://github.com/ada/portfolio-os",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > project-detail at 80 columns 1`] = `
+[
+  "Portfolio OS",
+  "Personal",
+  "",
+  "Five operating systems.",
+  "",
+  "A site.",
+  "",
+  "HIGHLIGHTS",
+  "──────────────",
+  "• Kernel",
+  "",
+  "STACK",
+  "─────────",
+  "TypeScript",
+  "",
+  "Source: https://github.com/ada/portfolio-os",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > project-list at 40 columns 1`] = `
+[
+  "Portfolio OS — Five operating systems.",
+  "  Personal · TypeScript",
+  "",
+  "Rocket — Goes up.",
+  "  Acme · Go",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > project-list at 80 columns 1`] = `
+[
+  "Portfolio OS — Five operating systems.",
+  "  Personal · TypeScript",
+  "",
+  "Rocket — Goes up.",
+  "  Acme · Go",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > resume at 40 columns 1`] = `
+[
+  "Ada Example — Résumé",
+  "Updated 2026-01-01 · PDF, 13 KB · 2",
+  "pages",
+  "",
+  "Open: /resume/ada.pdf",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > resume at 80 columns 1`] = `
+[
+  "Ada Example — Résumé",
+  "Updated 2026-01-01 · PDF, 13 KB · 2 pages",
+  "",
+  "Open: /resume/ada.pdf",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > skills at 40 columns 1`] = `
+[
+  "LANGUAGES",
+  "─────────────",
+  "Go, TypeScript",
+]
+`;
+
+exports[`VIEW-TEXT-01 renderText for every view > skills at 80 columns 1`] = `
+[
+  "LANGUAGES",
+  "─────────────",
+  "Go, TypeScript",
+]
+`;

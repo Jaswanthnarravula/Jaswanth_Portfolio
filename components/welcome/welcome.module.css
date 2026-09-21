@@ -1,0 +1,788 @@
+/*
+ * Welcome layer — the Hello stage in Jaswanth's own liquid-glass brand (plans/02), then the streaming-style intro and
+ * "Who's watching?" on a flat black stage (plans/03). Never an OS's chrome.
+ * Glass by tier (shared/06 `DS-GLASS-01`, shared/10): T1 blurs at most three surfaces (top bar, lens, pill);
+ * T0 or `data-glass=solid` → tinted solid; WebGL on (`data-webgl=on`, T2) → hairline + specular only.
+ * Only transform and opacity animate, plus the stroke draw of one SVG path (plans/02 "Motion").
+ */
+
+.root {
+  --w-stage: #eaf0ff;
+  --w-ink: #1b2347;
+  --w-ink-2: #3a4468;
+  --w-bar-ink: #2a3350;
+  --w-accent: #2447d6;
+  --w-line: rgb(255 255 255 / 0.75);
+  --w-fill: rgb(255 255 255 / 0.34);
+  --w-solid: rgb(246 248 255 / 0.94);
+  --w-blur: blur(14px) saturate(160%);
+  --w-flat: #141414;
+  --w-ease: cubic-bezier(0.2, 0.9, 0.3, 1);
+  --w-fade: 240ms;
+  --focus-ring: #2447d6;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100svh;
+  overflow-x: clip;
+  color: var(--w-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- Ambient light field (CSS; the WebGL stage replaces it on T2) ------------------------------------------------ */
+
+.field {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--w-stage);
+}
+.field::before,
+.field::after {
+  content: '';
+  position: absolute;
+  inset: -25%;
+  animation: drift 28s ease-in-out infinite alternate;
+}
+.field::before {
+  background:
+    radial-gradient(48% 56% at 30% 36%, #9db9ff, transparent 60%),
+    radial-gradient(44% 48% at 78% 38%, #ffc0de, transparent 60%);
+}
+.field::after {
+  background: radial-gradient(48% 56% at 58% 88%, #ffd9a0, transparent 60%);
+  animation-duration: 36s;
+  animation-direction: alternate-reverse;
+}
+@keyframes drift {
+  from {
+    transform: translate3d(-3%, -2%, 0) rotate(0deg) scale(1);
+  }
+  to {
+    transform: translate3d(3%, 2.5%, 0) rotate(8deg) scale(1.08);
+  }
+}
+/* Film grain, 3 %: one static layer, T1 only. */
+.root::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.root:not([data-screen='hello']) .field::before,
+.root:not([data-screen='hello']) .field::after {
+  animation-play-state: paused;
+}
+
+/* --- Glass ---------------------------------------------------------------------------------------------------------- */
+
+.glass {
+  position: relative;
+  background: var(--w-fill);
+  -webkit-backdrop-filter: var(--w-blur);
+  backdrop-filter: var(--w-blur);
+  border: 1px solid var(--w-line);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    0 32px 64px -32px rgb(40 60 140 / 0.5);
+}
+/* Specular sheen along the top-left edge. */
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(140deg, rgb(255 255 255 / 0.4), transparent 42%);
+}
+
+/* --- Top bar ---------------------------------------------------------------------------------------------------------- */
+
+.bar {
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: max(12px, calc(var(--sa-t) + 8px)) max(12px, calc(var(--sa-r) + 8px)) 0 max(12px, calc(var(--sa-l) + 8px));
+  padding: 4px;
+  border-radius: 999px;
+}
+.barEnd {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.barLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: var(--w-bar-ink);
+  font-size: 14px;
+  font-weight: 560;
+  text-decoration: none;
+  transition:
+    background-color 180ms var(--w-ease),
+    color 180ms var(--w-ease);
+}
+.barLink:hover {
+  color: var(--w-ink);
+  background: rgb(255 255 255 / 0.45);
+}
+.barLink:focus-visible,
+.sound:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.barIcon {
+  flex: none;
+}
+.sound {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--w-bar-ink);
+  cursor: pointer;
+  transition:
+    background-color 180ms var(--w-ease),
+    color 180ms var(--w-ease);
+}
+.sound:hover {
+  color: var(--w-ink);
+  background: rgb(255 255 255 / 0.45);
+}
+.sound > svg {
+  grid-area: 1 / 1;
+}
+.soundOff,
+.sound[aria-pressed='false'] .soundOn {
+  display: none;
+}
+.sound[aria-pressed='false'] .soundOff {
+  display: block;
+}
+/* Before hydration the button renders "on"; a muted visitor's pre-paint hint shows the real state. */
+:global(html[data-sound='off']) .sound[aria-pressed='true'] .soundOn {
+  display: none;
+}
+:global(html[data-sound='off']) .sound[aria-pressed='true'] .soundOff {
+  display: block;
+}
+@media (pointer: coarse) {
+  .barLink,
+  .sound {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+@media (max-width: 420px) {
+  .barText {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .barLink {
+    justify-content: center;
+    padding: 0 12px;
+  }
+}
+/* On the intro and profiles the bar keeps only the Sound toggle, flat (the streaming stage has no glass). */
+.root:not([data-screen='hello']) .bar,
+:global(html[data-welcome='profiles']) .root[data-screen='hello'] .bar {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  pointer-events: none;
+}
+.root:not([data-screen='hello']) .bar::before,
+:global(html[data-welcome='profiles']) .root[data-screen='hello'] .bar::before {
+  display: none;
+}
+.root:not([data-screen='hello']) .barLink,
+:global(html[data-welcome='profiles']) .root[data-screen='hello'] .barLink {
+  visibility: hidden;
+}
+.root:not([data-screen='hello']) .sound,
+:global(html[data-welcome='profiles']) .root[data-screen='hello'] .sound {
+  pointer-events: auto;
+  color: #d9d9d9;
+}
+
+/* --- Screens -------------------------------------------------------------------------------------------------------- */
+
+.screens {
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 4svh, 40px) max(16px, var(--sa-r)) max(24px, calc(var(--sa-b) + 16px)) max(16px, var(--sa-l));
+}
+.screen {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity var(--w-fade) var(--w-ease),
+    visibility 0s linear var(--w-fade);
+}
+.root[data-screen='hello'] .hello,
+.root[data-screen='intro'] .intro,
+.root[data-screen='profiles'] .profiles,
+.root[data-screen='leaving'] .profiles,
+:global(html[data-welcome='profiles']) .root[data-screen='hello'] .profiles {
+  visibility: visible;
+  opacity: 1;
+  transition:
+    opacity var(--w-fade) var(--w-ease),
+    visibility 0s;
+}
+:global(html[data-welcome='profiles']) .root[data-screen='hello'] .hello {
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* --- Hello ---------------------------------------------------------------------------------------------------------- */
+
+.hello {
+  display: grid;
+  place-items: center;
+  width: min(100%, 860px);
+  text-align: center;
+}
+/* One liquid-glass panel holds the glyph, the name and the pill (the storyboard's Hello). */
+.lens {
+  display: grid;
+  justify-items: center;
+  gap: clamp(14px, 2.6svh, 26px);
+  width: 100%;
+  padding: clamp(28px, 6svh, 64px) clamp(18px, 5vw, 72px) clamp(28px, 5.4svh, 56px);
+  border-radius: clamp(28px, 4vw, 44px);
+}
+.glyph {
+  display: block;
+  width: min(100%, 560px);
+  height: auto;
+  overflow: visible;
+}
+/* The storyboard's glass ink: gradient body + SVG light filter (GlassInk in Welcome.tsx). */
+.glyphPath,
+.glyphAlt {
+  fill: none;
+  stroke: url(#hello-ink);
+  stroke-width: 36;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: url(#hello-glass);
+}
+.glyphPath {
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1;
+  animation: draw 3200ms cubic-bezier(0.6, 0.12, 0.36, 0.96) 500ms both;
+}
+.glyphAlt {
+  opacity: 0;
+}
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.title {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  color: var(--w-ink);
+}
+.name {
+  font-size: clamp(28px, 3.8vw, 46px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.026em;
+}
+.headline {
+  max-width: 40ch;
+  margin-inline: auto;
+  color: var(--w-ink-2);
+  font-size: clamp(15px, 1.6vw, 18px);
+  font-weight: 500;
+  line-height: 1.45;
+  text-wrap: balance;
+}
+
+/* Tap to begin — a frosted pill with a rotating conic border beam (3.2 s linear, transform only). */
+.pill {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  margin-top: 4px;
+  padding: 0 26px 0 30px;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.9);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.55);
+  box-shadow: 0 10px 24px -14px rgb(40 60 140 / 0.55);
+  color: var(--w-ink);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 620;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 180ms var(--w-ease);
+}
+.pill::before {
+  content: '';
+  position: absolute;
+  z-index: -2;
+  left: 50%;
+  top: 50%;
+  width: 180%;
+  aspect-ratio: 1;
+  background: conic-gradient(from 0deg, transparent 0 78%, rgb(36 71 214 / 0.55) 96%, transparent);
+  opacity: 0.85;
+  transform: translate(-50%, -50%) rotate(0deg);
+  animation: beam 3.2s linear infinite;
+  transition: opacity 200ms var(--w-ease);
+}
+.pill::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 1.5px;
+  border-radius: inherit;
+  background: rgb(255 255 255 / 0.82);
+}
+@keyframes beam {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+.pill:hover::before,
+.pill:focus-visible::before {
+  opacity: 1;
+}
+.pill:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
+}
+.pill:active {
+  transform: scale(0.97);
+}
+.pillIcon {
+  transition: transform 220ms var(--w-ease);
+}
+.pill:hover .pillIcon {
+  transform: translateX(3px);
+}
+
+.noJs {
+  display: none;
+}
+@media (scripting: none) {
+  .noJs {
+    display: inline-flex;
+  }
+  .jsOnly {
+    display: none;
+  }
+}
+
+/* --- Intro ------------------------------------------------------------------------------------------------------------ */
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  background: var(--w-flat);
+}
+.wordmark {
+  width: min(74vw, 640px);
+  height: auto;
+  fill: #e50914;
+  opacity: 0;
+}
+.skip {
+  position: absolute;
+  right: max(20px, calc(var(--sa-r) + 16px));
+  bottom: max(20px, calc(var(--sa-b) + 16px));
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid oklch(1 0 0 / 0.32);
+  border-radius: 4px;
+  background: oklch(1 0 0 / 0.06);
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 560;
+  cursor: pointer;
+  transition: background-color 160ms var(--w-ease);
+}
+.skip:hover {
+  background: oklch(1 0 0 / 0.16);
+}
+
+/* --- Who's watching? --------------------------------------------------------------------------------------------- */
+
+.profiles {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  background: var(--w-flat);
+}
+.replay {
+  position: absolute;
+  top: max(12px, calc(var(--sa-t) + 8px));
+  left: max(14px, calc(var(--sa-l) + 10px));
+  z-index: 1;
+  width: 104px;
+  min-height: 44px;
+  padding: 8px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+}
+.replay > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  fill: #e50914;
+}
+.profilesMain {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: clamp(24px, 4.5svh, 48px);
+  padding: 72px 16px 16px;
+}
+.who {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(30px, 3.5vw, 56px);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+.who:focus {
+  outline: none;
+}
+.grid {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+.card {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 10px;
+  width: clamp(84px, 10vw, 200px);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #808080;
+  font: inherit;
+  font-size: clamp(14px, 1.3vw, 20px);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 320ms var(--w-ease),
+    color 200ms var(--w-ease);
+}
+.avatar {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  outline: 3px solid transparent;
+  outline-offset: -3px;
+  transition:
+    outline-color 200ms var(--w-ease),
+    box-shadow 260ms var(--w-ease);
+}
+.avatarArt {
+  display: block;
+}
+.profileName {
+  line-height: 1.2;
+}
+/* Shown only for the last profile; the pre-paint hint sets it before first paint, so it never shifts layout. */
+.last {
+  display: none;
+  margin-top: -4px;
+  color: #b3b3b3;
+  font-size: 12px;
+}
+:global(html[data-persona='recruiter']) .card[data-profile='recruiter'] .last,
+:global(html[data-persona='developer']) .card[data-profile='developer'] .last,
+:global(html[data-persona='adventurer']) .card[data-profile='adventurer'] .last,
+:global(html[data-persona='designer']) .card[data-profile='designer'] .last,
+:global(html[data-persona='guest']) .card[data-profile='guest'] .last {
+  display: block;
+}
+@media (hover: hover) {
+  .card:hover {
+    color: #fff;
+    transform: translateY(-6px) scale(1.02);
+  }
+  .card:hover .avatar {
+    outline-color: #fff;
+    box-shadow: 0 0 30px oklch(1 0 0 / 0.26);
+  }
+}
+.card:focus-visible {
+  outline: none;
+  color: #fff;
+  transform: translateY(-6px) scale(1.02);
+}
+.card:focus-visible .avatar {
+  outline-color: #fff;
+  box-shadow: 0 0 30px oklch(1 0 0 / 0.26);
+}
+.card:active {
+  transform: scale(0.98);
+}
+.footer {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  padding: 0 16px max(20px, calc(var(--sa-b) + 12px));
+}
+.footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #b3b3b3;
+  font-size: 15px;
+  text-decoration: none;
+}
+.footer a:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.stalled {
+  position: fixed;
+  left: 50%;
+  bottom: max(88px, calc(var(--sa-b) + 80px));
+  z-index: 30;
+  width: min(calc(100% - 32px), 440px);
+  margin: 0;
+  padding: 12px 16px;
+  border: 1px solid oklch(1 0 0 / 0.2);
+  border-radius: 10px;
+  background: oklch(0.2 0.02 266);
+  color: #fff;
+  font-size: 15px;
+  text-align: center;
+  transform: translateX(-50%);
+}
+.stalled a {
+  color: #fff;
+  text-underline-offset: 3px;
+}
+
+/* --- Without JavaScript: the pill jumps here --------------------------------------------------------------------------- */
+
+.fallback {
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: 48px 20px 64px;
+  color: var(--text-primary);
+}
+.fallback h2 {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+}
+.fallback ul {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+.fallback li a {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.fallback li a span {
+  color: var(--text-secondary);
+}
+
+/* --- Responsive ----------------------------------------------------------------------------------------------------- */
+
+@media (min-width: 600px) and (max-width: 1023px) {
+  .hello {
+    width: min(100%, 680px);
+  }
+}
+@media (max-width: 768px) {
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 100px);
+    gap: 30px 20px;
+  }
+  .card {
+    width: 100px;
+  }
+  .card:last-child {
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+}
+@media (max-width: 340px) {
+  .grid {
+    grid-template-columns: repeat(2, 84px);
+  }
+  .card {
+    width: 84px;
+  }
+}
+/* Phone landscape: inside the panel the glyph sits left, title and pill right; profiles in one row; nothing scrolls. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .hello {
+    width: min(100%, 860px);
+  }
+  .lens {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-template-areas:
+      'glyph title'
+      'glyph pill';
+    align-items: center;
+    column-gap: 28px;
+    row-gap: 12px;
+    justify-items: start;
+    padding: 18px 28px;
+    text-align: left;
+  }
+  .glyph {
+    grid-area: glyph;
+  }
+  .title {
+    grid-area: title;
+    align-self: end;
+    gap: 4px;
+  }
+  .name {
+    font-size: 28px;
+  }
+  .headline {
+    margin-inline: 0;
+    font-size: 14px;
+  }
+  .pill {
+    grid-area: pill;
+    align-self: start;
+    margin-top: 0;
+  }
+  .profilesMain {
+    gap: 18px;
+    padding-top: 56px;
+  }
+  .grid {
+    display: flex;
+    gap: 18px;
+  }
+  .card {
+    width: 84px;
+  }
+  .card:last-child {
+    grid-column: auto;
+  }
+}
+
+/* --- Tiers, glass preference, WebGL and reduced motion -------------------------------------------------------------- */
+
+:global(html[data-tier='0']) .glass,
+:global(html[data-glass='solid']) .glass,
+:global(html[data-tier='0']) .pill::after,
+:global(html[data-glass='solid']) .pill::after {
+  background: var(--w-solid);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+:global(html[data-tier='0']) .glyphPath,
+:global(html[data-tier='0']) .glyphAlt {
+  filter: none;
+}
+:global(html[data-tier='0']) .field::before,
+:global(html[data-tier='0']) .field::after {
+  animation: none;
+}
+:global(html[data-tier='0']) .root::after {
+  display: none;
+}
+:global(html[data-webgl='on']) .glass {
+  background: rgb(255 255 255 / 0.14);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+:global(html[data-webgl='on']) .field {
+  opacity: 0;
+}
+
+:global(html[data-motion='reduced']) .glyphPath {
+  animation: none;
+  stroke-dashoffset: 0;
+}
+:global(html[data-motion='reduced']) .field::before,
+:global(html[data-motion='reduced']) .field::after,
+:global(html[data-motion='reduced']) .pill::before {
+  animation: none;
+}
+:global(html[data-motion='reduced']) .root {
+  --w-fade: 150ms;
+}
+:global(html[data-motion='reduced']) .card,
+:global(html[data-motion='reduced']) .pill,
+:global(html[data-motion='reduced']) .pillIcon {
+  transition: none;
+}
+
+@media (forced-colors: active) {
+  .glass,
+  .pill,
+  .skip {
+    border: 1px solid CanvasText;
+  }
+  .avatar {
+    outline-color: Canvas;
+  }
+  .card:focus-visible .avatar,
+  .card:hover .avatar {
+    outline-color: Highlight;
+  }
+}
