@@ -5,6 +5,7 @@
  *   motion: no flight, same end state) · CHOOSE-A11Y-01 (names, status announcement, keyboard-only entry into each OS).
  */
 import { expect, test, type Page } from '@playwright/test';
+import { expectedBadges, skipIntro, waitForSettled } from './helpers';
 
 const OSES = [
   ['ios', 'iOS'],
@@ -17,14 +18,23 @@ const webkitTouch = (project: string) => ['iphone', 'ipad-portrait', 'ipad-lands
 const chooserHeading = (page: Page) => page.getByRole('heading', { name: 'Choose how you want to explore' });
 const card = (page: Page, os: string) => page.locator(`[data-chooser-card="${os}"]`);
 
-async function toChooser(page: Page) {
+/**
+ * Hello → profiles → Guest → the chooser. `withoutHover` parks the mouse in a corner and picks by keyboard, so no card
+ * ever sits under the pointer (a hovered card prefetches its OS chunk).
+ */
+async function toChooser(page: Page, { withoutHover = false } = {}) {
   await page.goto('/');
   await page.getByRole('button', { name: 'Tap to begin' }).click();
-  await page.getByRole('button', { name: 'Skip intro' }).click();
+  await skipIntro(page);
   await expect(page.getByRole('heading', { name: 'Who’s watching?' })).toBeFocused();
-  await page.getByRole('button', { name: /^Guest/ }).click();
+  const guest = page.getByRole('button', { name: /^Guest/ });
+  if (withoutHover) {
+    await page.mouse.move(1, 1);
+    await guest.focus();
+    await page.keyboard.press('Enter');
+  } else await guest.click();
   await expect(chooserHeading(page)).toBeFocused();
-  await page.waitForTimeout(700); // entrance settles
+  await waitForSettled(page, '[data-chooser-card]');
 }
 
 test('W1 the cards are real links with viewport-shaped snapshots and no device frame @smoke', async ({ page }) => {
@@ -35,23 +45,28 @@ test('W1 the cards are real links with viewport-shaped snapshots and no device f
     const link = card(page, os);
     await expect(link).toHaveAttribute('href', `/${os}`);
     await expect(link).toHaveAccessibleName(new RegExp(`^${name} — `));
-    const shot = await link.locator('[data-shot]').evaluate((el) => {
+    const shot = await link.locator('[data-shot]').evaluate(async (el) => {
       const img = el.querySelector('img')!;
+      await img.decode().catch(() => undefined);
       return {
         children: el.children.length,
         alt: img.getAttribute('alt'),
-        natural: img.naturalWidth / img.naturalHeight,
+        loaded: img.naturalWidth > 0,
+        fit: getComputedStyle(img).objectFit,
         box: el.getBoundingClientRect().width / el.getBoundingClientRect().height,
+        shape: img.naturalWidth >= img.naturalHeight ? 'landscape' : 'portrait',
       };
     });
     expect(shot.children, 'only the snapshot — no device outline').toBe(1);
     expect(shot.alt).toBe('');
-    // The snapshot file is the whole page in the visitor's viewport shape.
-    expect(shot.natural).toBeCloseTo(viewport.width / viewport.height, 1);
-    if (orientationAspect === 'landscape' && viewport.width >= 600)
-      expect(shot.box).toBeCloseTo(viewport.width / viewport.height, 1);
+    expect(shot.loaded, 'the snapshot decodes').toBe(true);
+    expect(shot.shape, 'the snapshot matches the viewport orientation').toBe(orientationAspect);
+    expect(shot.fit).toBe('cover');
+    // The card is the page in the visitor's viewport shape (phones crop to the card: plans/04 "Responsive").
+    if (viewport.width >= 600) expect(shot.box).toBeCloseTo(viewport.width / viewport.height, 1);
   }
-  await expect(page.getByText('Suits your device')).toHaveCount(1);
+  // Exactly one badge where the rule names a device; none on a tablet or a medium-width window.
+  await expect(page.getByText('Suits your device')).toHaveCount(await expectedBadges(page));
 });
 
 test('W1 a card flies into its OS; Back returns to the chooser with focus on that card', async ({ page }) => {
@@ -68,7 +83,12 @@ test('W1 a card flies into its OS; Back returns to the chooser with focus on tha
 });
 
 test('Esc mid-flight returns to the chooser with focus on the card', async ({ page }) => {
-  await toChooser(page);
+  await toChooser(page, { withoutHover: true }); // Linux is never badged or remembered: nothing prefetched it
+  // Hold new chunk responses so the transition is still in flight when Esc lands, even with a 150 ms reduced flight.
+  await page.route('**/_next/static/chunks/**', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await route.continue().catch(() => undefined);
+  });
   await card(page, 'linux').click();
   await page.keyboard.press('Escape');
   await expect(page).toHaveURL(/\/$/);
@@ -80,17 +100,19 @@ test('Esc mid-flight returns to the chooser with focus on the card', async ({ pa
 
 test('offline click shows Retry on the card; it recovers when back online', async ({ page, context }, info) => {
   test.skip(info.project.name === 'firefox-desktop', 'Firefox emulation does not fire the online event');
-  await toChooser(page);
+  // The chooser (and the kernel) are loaded; then the network drops before Linux's chunk was ever requested.
+  // (A chooser chunk that cannot load is covered by the ChooserSlot component test.)
+  await toChooser(page, { withoutHover: true }); // Linux is never badged or remembered: nothing prefetched it
   await context.setOffline(true);
-  await card(page, 'android').click();
-  const alert = page.getByRole('alert').filter({ hasText: 'Couldn’t load Android' });
+  await card(page, 'linux').click();
+  const alert = page.getByRole('alert').filter({ hasText: 'Couldn’t load Linux' });
   await expect(alert).toBeVisible({ timeout: 10_000 });
   await expect(alert.getByRole('button', { name: 'Retry' })).toBeVisible();
   await expect(alert.getByRole('link', { name: 'Plain portfolio' })).toHaveAttribute('href', '/plain');
   await expect(page.locator('.os-failure')).toHaveCount(0); // the chooser owns this failure, not the generic screen
   await context.setOffline(false);
-  await expect(page.locator('[data-os-shell="android"]')).toBeAttached({ timeout: 10_000 });
-  await expect(page).toHaveURL(/\/android$/);
+  await expect(page.locator('[data-os-shell="linux"]')).toBeAttached({ timeout: 10_000 });
+  await expect(page).toHaveURL(/\/linux$/);
 });
 
 test('R1 reduced motion: no flight, the same end state', async ({ page }, info) => {

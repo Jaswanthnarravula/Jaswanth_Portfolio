@@ -18,10 +18,50 @@ import { SITE_TITLE } from '@/lib/kernel/route/title';
 import { evaluateTier2, type Tier2Environment } from '@/lib/webgl/tier2';
 import { CHOOSER_HEADING, OS_CHARACTER, suitedOs } from '@/lib/welcome/chooser';
 import { PROFILES } from '@/lib/welcome/profiles';
+import snapshots from '@/lib/welcome/snapshots.generated.json';
 import wordmark from '@/lib/welcome/wordmark.generated.json';
+import { encodeWithinBudget, SNAPSHOT_BUDGET } from '../../../scripts/capture-snapshots.mjs';
+import { EM, MARK } from '../../../scripts/build-wordmark.mjs';
 import { attachKernel, resetKernelBridge, sendToKernel, whenKernel } from '@/stores/kernel-bridge';
 import { claimPhases, isClaimed, resetStageClaims } from '@/stores/transition-stage';
 import { booted, last, run } from '../../fixtures/portfolio';
+
+describe('CHOOSE-CARD-01 snapshot pipeline', () => {
+  const manifest = snapshots as Record<
+    string,
+    Record<string, { avif: string; webp: string; width: number; height: number }>
+  >;
+  it('every OS has a landscape and a portrait snapshot, each as AVIF and a WebP fallback within 25 KB', () => {
+    expect(Object.keys(manifest).sort()).toEqual(['android', 'ios', 'linux', 'macos', 'windows']);
+    for (const [os, shots] of Object.entries(manifest)) {
+      expect(Object.keys(shots).sort(), os).toEqual(['landscape', 'portrait']);
+      expect(shots.landscape!.width, os).toBeGreaterThan(shots.landscape!.height);
+      expect(shots.portrait!.height, os).toBeGreaterThan(shots.portrait!.width);
+      for (const shot of Object.values(shots))
+        for (const [format, src] of [
+          ['avif', shot.avif],
+          ['webp', shot.webp],
+        ] as const) {
+          const name = src.replace('/assets/snapshots/', '');
+          expect(name, os).toMatch(/^[a-z]+\.(landscape|portrait)\.[0-9a-f]{10}\.(avif|webp)$/);
+          expect(name.startsWith(`${os}.`) && name.endsWith(`.${format}`), src).toBe(true);
+          const bytes = statSync(join(process.cwd(), 'public', src)).size;
+          expect(bytes, src).toBeGreaterThan(0);
+          expect(bytes, src).toBeLessThanOrEqual(SNAPSHOT_BUDGET);
+        }
+    }
+  });
+  it('the encoder steps quality down until the budget fits, and refuses to go below q30', async () => {
+    const tried: number[] = [];
+    const fit = await encodeWithinBudget(async (q: number) => {
+      tried.push(q);
+      return new Uint8Array(q > 40 ? 30_000 : 20_000);
+    });
+    expect(fit.quality).toBe(38);
+    expect(tried).toEqual([62, 54, 46, 38]);
+    await expect(encodeWithinBudget(async () => new Uint8Array(30_000))).rejects.toThrow(/cannot fit/);
+  });
+});
 
 describe('NFLX-PROF-01 five profiles, data-driven', () => {
   it('has exactly the five PersonaIds, each with a name and its own avatar', () => {
@@ -36,24 +76,26 @@ describe('NFLX-PROF-01 five profiles, data-driven', () => {
 describe('CHOOSE-BADGE-01 device-suited badge from size + input only', () => {
   const all = ['ios', 'macos', 'windows', 'android', 'linux'] as const;
   it.each([
-    ['coarse', true, 0, 'ios'],
-    ['coarse', true, 1, 'android'],
-    ['coarse', true, 2, 'ios'],
-    ['fine', false, 0, 'macos'],
-    ['fine', false, 7, 'macos'],
-    ['coarse', false, 0, null], // a tablet: no badge
-    ['fine', true, 0, null], // a narrow desktop window: no badge
-    ['none', false, 0, null],
-  ] as const)('%s pointer, compact=%s, seed %i → %s', (pointer, compact, seed, expected) => {
-    expect(suitedOs({ pointer, compact, seed, visible: all })).toBe(expected);
+    ['coarse', 'compact', 0, 'ios'],
+    ['coarse', 'compact', 1, 'android'],
+    ['coarse', 'compact', 2, 'ios'],
+    ['fine', 'expanded', 0, 'macos'],
+    ['fine', 'large', 7, 'macos'],
+    ['coarse', 'medium', 0, null], // a tablet: no badge
+    ['coarse', 'expanded', 0, null], // a large tablet: no badge
+    ['fine', 'medium', 0, null], // a medium-width desktop window: nothing else
+    ['fine', 'compact', 0, null], // a narrow desktop window: no badge
+    ['none', 'expanded', 0, null],
+  ] as const)('%s pointer, %s, seed %i → %s', (pointer, sizeClass, seed, expected) => {
+    expect(suitedOs({ pointer, sizeClass, seed, visible: all })).toBe(expected);
   });
   it('only a visible (released) OS can carry it, and a phone falls back to the other phone OS', () => {
-    expect(suitedOs({ pointer: 'fine', compact: false, seed: 0, visible: ['linux'] })).toBeNull();
-    expect(suitedOs({ pointer: 'coarse', compact: true, seed: 0, visible: ['android'] })).toBe('android');
-    expect(suitedOs({ pointer: 'coarse', compact: true, seed: 0, visible: [] })).toBeNull();
+    expect(suitedOs({ pointer: 'fine', sizeClass: 'large', seed: 0, visible: ['linux'] })).toBeNull();
+    expect(suitedOs({ pointer: 'coarse', sizeClass: 'compact', seed: 0, visible: ['android'] })).toBe('android');
+    expect(suitedOs({ pointer: 'coarse', sizeClass: 'compact', seed: 0, visible: [] })).toBeNull();
   });
   it('is identical for all PersonaIds: the rule has no profile input at all', () => {
-    const input = { pointer: 'fine', compact: false, seed: 3, visible: all } as const;
+    const input = { pointer: 'fine', sizeClass: 'expanded', seed: 3, visible: all } as const;
     const results = PERSONA_IDS.map((persona) => suitedOs({ ...input, persona } as typeof input));
     expect(new Set(results)).toEqual(new Set(['macos']));
     expect(suitedOs.length).toBe(1);
@@ -75,6 +117,17 @@ describe('NFLX-MARK-01 the name wordmark; no "Netflix" in UI strings or metadata
   it('the wordmark is the visitor-facing name, generated as original artwork', () => {
     expect(wordmark.text).toBe('JASWANTH');
     expect(wordmark.source.licence).toBe('SIL OFL 1.1');
+  });
+  it('the wordmark is the storyboard frame’s `.mark` box: line-height .9 + .12 em padding, ellipse under the feet', () => {
+    const [x, y, width, height] = wordmark.viewBox;
+    expect([x, y]).toEqual([0, 0]);
+    expect(height).toBe((MARK.lineHeight + MARK.padBottom) * EM);
+    expect(wordmark.widthEm).toBeCloseTo(width! / EM, 3);
+    // The frame's ellipse: 6 % wider than the box each side, .62 em tall, its bottom .34 em below the box.
+    expect(wordmark.cut.rx).toBeCloseTo(width! * (0.5 + MARK.cut.overhang), 0);
+    expect(wordmark.cut.cy + wordmark.cut.ry).toBeCloseTo(height! + MARK.cut.bottom * EM, 0);
+    // Only the letters' feet are trimmed: the ellipse's top stays below the baseline's cap region.
+    expect(wordmark.cut.cy - wordmark.cut.ry).toBeGreaterThan(wordmark.baseline - 0.05 * EM);
   });
   it('no welcome, chooser, layout, SEO or data string says "Netflix"', () => {
     for (const dir of ['components/welcome', 'components/shell', 'app', 'lib/seo', 'lib/welcome', 'data'])
@@ -101,9 +154,8 @@ describe('HELLO-RETURN-01 / NFLX-RETURN-01 pre-paint welcome hint', () => {
   };
   const prefs = (state: object) => ({ 'pf.prefs.v1': JSON.stringify({ state, version: 1 }) });
 
-  it('a returning visitor lands on the profiles, with the last profile marked', () => {
+  it('keeps the root URL on Hello while preserving the last profile marker', () => {
     expect(execute(prefs({ ...DEFAULT_PREFS, introSeen: true, persona: 'designer' }))).toEqual({
-      welcome: 'profiles',
       persona: 'designer',
     });
   });
@@ -115,9 +167,7 @@ describe('HELLO-RETURN-01 / NFLX-RETURN-01 pre-paint welcome hint', () => {
     expect(execute({ 'pf.prefs.v1': '{nope' })).toEqual({});
   });
   it('never writes an unexpected persona value into the page', () => {
-    expect(execute(prefs({ introSeen: true, persona: '"><img src=x onerror=alert(1)>' }))).toEqual({
-      welcome: 'profiles',
-    });
+    expect(execute(prefs({ introSeen: true, persona: '"><img src=x onerror=alert(1)>' }))).toEqual({});
   });
 });
 

@@ -143,11 +143,12 @@ describe('OSHost + TransitionDriver', () => {
     });
     render(<TransitionDriver />);
     act(() => {
-      dispatch({ type: 'SWITCH_OS', to: 'windows', via: 'chooser' });
+      // An OS still on its preview stub (Windows has its real shell since P4).
+      dispatch({ type: 'SWITCH_OS', to: 'android', via: 'chooser' });
     });
     await waitFor(() => expect(getKernel().transition.phase).toBe('idle'), { timeout: 5000 });
-    expect(getKernel().activeOs).toBe('windows');
-    render(<OSHost os="windows" />);
-    expect(await screen.findByText('Windows 11 · preview')).toBeInTheDocument();
+    expect(getKernel().activeOs).toBe('android');
+    render(<OSHost os="android" heading={null} />);
+    expect(await screen.findByText('Android · preview')).toBeInTheDocument();
   });
 });

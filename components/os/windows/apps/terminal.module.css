@@ -1,0 +1,401 @@
+/*
+ * Windows Terminal — plans/windows/apps/windows-terminal.md. The tab strip lives in the (tall, Mica) title bar: the
+ * selected tab takes the terminal's own background so it runs into the body; "+" and ▾ follow the tabs. The body is
+ * Acrylic — one live `backdrop-filter` + tint — which the shell's blur budget can drop to the tint alone
+ * (`data-terminal-acrylic="tint"` on an ancestor), and which is solid on tier 0, solid glass and reduced transparency.
+ * Colours: Campbell (Windows PowerShell) and the classic console (Command Prompt), each ≥ 4.5:1 over the tint's worst
+ * case; Cascadia via --font-mono at 14 px, line height 1.3; a bar cursor, as Windows Terminal draws it.
+ * Motion: tab open fades/rises 167 ms (close is a 167 ms WAAPI fade in the component); hover fills fade an overlay's
+ * opacity (83 ms) — only transform and opacity ever animate.
+ */
+
+.strip,
+.body {
+  --wt-powershell: rgb(12 12 12 / 0.86);
+  --wt-cmd: rgb(0 0 0 / 0.88);
+}
+:global(:root[data-glass='solid']) .strip,
+:global(:root[data-glass='solid']) .body,
+:global(:root[data-tier='0']) .strip,
+:global(:root[data-tier='0']) .body {
+  --wt-powershell: #0c0c0c;
+  --wt-cmd: #000000;
+}
+@media (prefers-reduced-transparency: reduce) {
+  .strip,
+  .body {
+    --wt-powershell: #0c0c0c;
+    --wt-cmd: #000000;
+  }
+}
+
+/* --- Tab strip (in the title bar) ------------------------------------------------------------------------------ */
+.strip {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: flex-end;
+  align-self: stretch;
+  min-width: 0;
+  gap: 2px;
+  padding-left: 2px;
+}
+.tablist {
+  display: flex;
+  align-items: flex-end;
+  align-self: stretch;
+  min-width: 0;
+  gap: 2px;
+}
+.tab {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex: 0 1 220px;
+  align-items: center;
+  gap: 8px;
+  min-width: 72px;
+  height: 36px;
+  padding: 0 6px 0 10px;
+  border: 0;
+  border-radius: 8px 8px 0 0;
+  background: transparent;
+  color: var(--win-text);
+  font: inherit;
+  font-size: var(--win-fs-caption);
+  text-align: start;
+  cursor: default;
+}
+.tab::before,
+.stripButton::before,
+.button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--fill, var(--win-caption-hover));
+  opacity: 0;
+  transition: opacity var(--win-d83) linear;
+  pointer-events: none;
+}
+.tab:hover::before,
+.stripButton:hover:not(:disabled)::before,
+.button:hover::before {
+  opacity: 1;
+}
+.tab[aria-selected='true'] {
+  background: var(--wt-powershell);
+  color: #f2f2f2;
+}
+.tab[aria-selected='true'][data-profile='cmd'] {
+  background: var(--wt-cmd);
+}
+.tab[aria-selected='true']::before {
+  display: none;
+}
+:global([data-window]:not([data-focused])) .tab:not([aria-selected='true']) {
+  color: var(--win-text-dim);
+}
+.tab:focus-visible {
+  outline: 2px solid var(--win-accent);
+  outline-offset: -2px;
+}
+.tab[data-new] {
+  animation: wt-tab-in var(--win-d167) var(--win-ease-in) both;
+}
+.tabGlyph {
+  flex: none;
+}
+.tab[data-profile='powershell'] .tabGlyph,
+.powershellGlyph {
+  color: #3b78ff;
+}
+.tab[aria-selected='true'][data-profile='powershell'] .tabGlyph {
+  color: #6fa0ff;
+}
+.tabLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tabClose {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-control);
+}
+.tabClose::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: rgb(128 128 128 / 0.24);
+  opacity: 0;
+  transition: opacity var(--win-d83) linear;
+}
+.tabClose:hover::before {
+  opacity: 1;
+}
+
+.stripButton {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 32px;
+  margin-bottom: 2px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text);
+  cursor: default;
+}
+.profiles {
+  width: 32px;
+}
+.stripButton:disabled {
+  color: var(--win-text-disabled);
+}
+.stripButton:focus-visible {
+  outline: 2px solid var(--win-accent);
+  outline-offset: -2px;
+}
+
+/* --- Body: Acrylic (the one live blur of this window) ------------------------------------------------------------ */
+.body {
+  --wt-tint: var(--wt-powershell);
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--wt-tint);
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+}
+.body[data-profile='cmd'] {
+  --wt-tint: var(--wt-cmd);
+}
+/* The shell's blur budget (≤ 3 live surfaces) keeps the tint and drops the blur; solid everywhere glass is off. */
+:global([data-terminal-acrylic='tint']) .body,
+:global(:root[data-glass='solid']) .body,
+:global(:root[data-tier='0']) .body {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+@media (prefers-reduced-transparency: reduce) {
+  .body {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+.panel {
+  /* Campbell (Windows PowerShell) — the bright variants where the dark ones fall under 4.5:1 on the tint. */
+  --term-bg: #0c0c0c;
+  --term-fg: #cccccc;
+  --term-dim: #a0a0a0;
+  --term-dir: #6fa0ff;
+  --term-exe: #16c60c;
+  --term-pdf: #e07ae0;
+  --term-err: #ff7b7b;
+  --term-warn: #f9f1a5;
+  --term-ok: #16c60c;
+  --term-match: #ff7b7b;
+  --term-head: #f2f2f2;
+  --term-link: #61d6d6;
+  --term-caret: #cccccc;
+  --term-prompt: #cccccc;
+  --term-prompt-error: #cccccc;
+  --term-selection: rgb(242 242 242 / 0.3);
+  --term-font: var(--font-mono);
+  --term-size: calc(14px * var(--text-scale, 1));
+  --term-pad: 8px 10px;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+.panel[hidden] {
+  display: none;
+}
+/* Command Prompt: the classic console — one grey, no colourised listings. */
+.panel[data-profile='cmd'] {
+  --term-bg: #000000;
+  --term-fg: #c0c0c0;
+  --term-dim: #a8a8a8;
+  --term-dir: #c0c0c0;
+  --term-exe: #c0c0c0;
+  --term-pdf: #c0c0c0;
+  --term-err: #c0c0c0;
+  --term-warn: #c0c0c0;
+  --term-ok: #c0c0c0;
+  --term-match: #f2f2f2;
+  --term-head: #f2f2f2;
+  --term-link: #c0c0c0;
+  --term-caret: #c0c0c0;
+  --term-prompt: #c0c0c0;
+  --term-prompt-error: #c0c0c0;
+}
+/* The view is transparent over the Acrylic; its pager and chip keep the opaque --term-bg. */
+.panel .view {
+  flex: 1 1 auto;
+  background: transparent;
+  line-height: 1.3;
+}
+.panel .view [data-line] {
+  min-height: 1.3em;
+}
+/* Windows Terminal's default cursor is a bar, not a block. */
+.panel [data-caret] {
+  width: 2px;
+}
+
+/* --- "Switch to the Linux experience?" — a ContentDialog over the terminal (smoke: 30 % black) ------------------ */
+.smoke {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: var(--win-smoke);
+  animation: wt-fade var(--win-d167) linear both;
+}
+.smoke > [data-focus-scope] {
+  display: contents;
+}
+.dialog {
+  width: min(100%, 420px);
+  max-height: 100%;
+  overflow: auto;
+  border: 1px solid var(--win-flyout-stroke);
+  border-radius: 8px;
+  background: var(--win-content);
+  color: var(--win-text);
+  box-shadow: var(--win-flyout-shadow);
+  font-family: var(--font-ui);
+  font-size: var(--win-fs-body);
+  line-height: 20px;
+  animation: wt-dialog-in var(--win-d250) var(--win-ease-in) both;
+}
+.dialogContent {
+  padding: 24px;
+}
+.dialogTitle {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: var(--win-fs-subtitle);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.dialogBody {
+  margin: 0;
+}
+.dialogCommands {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 24px;
+  border-top: 1px solid var(--win-hairline);
+  background: var(--win-titlebar-inactive);
+}
+.button {
+  position: relative;
+  isolation: isolate;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--win-field-border);
+  border-radius: var(--radius-control);
+  background: var(--win-field);
+  color: var(--win-text);
+  font: inherit;
+  cursor: default;
+}
+.primary {
+  --fill: rgb(255 255 255 / 0.1);
+  border-color: transparent;
+  background: var(--win-accent);
+  color: var(--win-on-accent);
+}
+.button:focus-visible {
+  outline: 2px solid var(--win-text);
+  outline-offset: 1px;
+}
+
+/* --- Postures ----------------------------------------------------------------------------------------------------- */
+@media (any-pointer: coarse) {
+  .tab {
+    min-width: 56px;
+  }
+  .tabClose {
+    width: 32px;
+    height: 32px;
+  }
+  .stripButton {
+    width: 44px;
+    height: 40px;
+    margin-bottom: 0;
+  }
+  .profiles {
+    width: 40px;
+  }
+  .button {
+    min-height: 40px;
+  }
+}
+.body[data-compact] .panel {
+  --term-pad: 8px;
+}
+
+@keyframes wt-tab-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes wt-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes wt-dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .body {
+    background: Canvas;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .tab[aria-selected='true'] {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+  .dialog {
+    border: 2px solid CanvasText;
+  }
+}

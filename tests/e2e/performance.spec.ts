@@ -2,16 +2,21 @@
  * `perf` project (PR gate, shared/12). Lighthouse CI covers LCP/CLS/TBT/a11y/budgets; this file holds the
  * browser-side performance assertions Lighthouse cannot make.
  *   DS-FONT-01 — Inter is the only webfont on every route outside the Linux chunk (Roboto Flex and the mono face
- *   arrive with the Android and Linux chunks), and it never blocks text (`font-display: swap`).
+ *   arrive with the Android and Linux chunks), and it never blocks text (`font-display: swap`). The one addition is
+ *   `/`, whose welcome screens are the storyboard frames: it also declares and preloads the frame's IBM Plex Sans.
  *   P1: PERF-LAZY-01 · NFLX-AUDIO-02 · HELLO-LCP-01 · HELLO-GL-01 · PERF-GL-01 · PERF-GL-02 · CHOOSE-PREF-01 ·
  *   TEST-PERF-01 (INP + session CLS).
  */
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
+import { skipIntro } from './helpers';
 
 const ROUTES = ['/', '/plain', '/go/projects/enterprise-sso', '/macos', '/windows/edge/resume', '/ios', '/android'];
 
 for (const path of ROUTES) {
-  test(`only Inter is declared or fetched on ${path} @perf`, async ({ page }) => {
+  const welcome = path === '/';
+  test(`only Inter${welcome ? ' and the storyboard text face are' : ' is'} declared or fetched on ${path} @perf`, async ({
+    page,
+  }) => {
     const fetched: string[] = [];
     page.on('request', (request) => {
       if (request.resourceType() === 'font') fetched.push(new URL(request.url()).pathname);
@@ -31,11 +36,16 @@ for (const path of ROUTES) {
     );
     expect(faces.length).toBeGreaterThan(0);
     for (const face of faces) {
-      expect(face.family, JSON.stringify(face)).toMatch(/^inter( Fallback)?$/);
+      expect(face.family, JSON.stringify(face)).toMatch(
+        welcome ? /^(inter( Fallback)?|IBM Plex Sans)$/ : /^inter( Fallback)?$/,
+      );
       if (face.remote) expect(face.display, face.family).toBe('swap');
     }
-    expect(fetched.length).toBeLessThanOrEqual(1);
-    for (const url of fetched) expect(url).toMatch(/\/inter[^/]*\.woff2$/);
+    expect(fetched.length).toBeLessThanOrEqual(welcome ? 2 : 1);
+    for (const url of fetched)
+      expect(url).toMatch(
+        welcome ? /\/(inter[^/]*|ibm-plex-sans-latin-var\.[0-9a-f]{10})\.woff2$/ : /\/inter[^/]*\.woff2$/,
+      );
   });
 }
 
@@ -69,6 +79,41 @@ test('PERF-LAZY-01 three, gsap and audio are absent before the load event @perf'
   expect(early.filter((r) => /\.(mp3|ogg|wav)(\?|$)/.test(r.name))).toEqual([]);
   expect(await scriptsWith(request, early, SIGNATURES.gsap)).toEqual([]);
   expect(await scriptsWith(request, early, SIGNATURES.three)).toEqual([]);
+});
+
+/** shared/10 first load on `/`: the measured framework (Next 16.3 + React 19.2, ~131 KB gzip) + ≤ 20 KB welcome app JS. */
+const FIRST_LOAD_BUDGET = 151 * 1024;
+const LAZY_SIGNATURES = {
+  kernel: 'shellInstance',
+  chooser: 'Choose how you want to explore',
+  gsap: SIGNATURES.gsap,
+  three: SIGNATURES.three,
+} as const;
+
+test('PERF-LAZY-01 / PERF-BUDGET-01 before the first paint `/` fetches only its first load, within budget @perf', async ({
+  page,
+  request,
+}) => {
+  // A slow phone: at 4× CPU the load event can come before the first paint, which is when idle work used to leak in.
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+  await page.goto('/');
+  await page.waitForFunction(() => performance.getEntriesByName('first-contentful-paint').length > 0);
+  await page.waitForTimeout(1500); // let the idle loaders run, so "after" is observable too
+  const entries = await page.evaluate(() => {
+    const fcp = performance.getEntriesByName('first-contentful-paint')[0]!.startTime;
+    return performance.getEntriesByType('resource').map((e) => {
+      const r = e as PerformanceResourceTiming;
+      return { name: r.name, startTime: r.startTime, bytes: r.encodedBodySize, beforePaint: r.startTime < fcp };
+    });
+  });
+  const early = entries.filter((e) => e.beforePaint);
+  expect(early.filter((e) => /\.(mp3|ogg|wav)(\?|$)|\/avatar\./.test(e.name)).map((e) => e.name)).toEqual([]);
+  for (const [name, signature] of Object.entries(LAZY_SIGNATURES))
+    expect(await scriptsWith(request, early, signature), `${name} before the first paint`).toEqual([]);
+  const firstLoad = early.filter((e) => /\.js(\?|$)/.test(e.name)).reduce((sum, e) => sum + e.bytes, 0);
+  expect(firstLoad, `first-load JS ${(firstLoad / 1024).toFixed(1)} KB`).toBeLessThanOrEqual(FIRST_LOAD_BUDGET);
+  expect(await scriptsWith(request, entries, LAZY_SIGNATURES.kernel), 'the kernel still arrives').not.toEqual([]);
 });
 
 test('NFLX-AUDIO-02 the intro sound is fetched in idle time, never before first paint @perf', async ({ page }) => {
@@ -157,7 +202,7 @@ test('PERF-GL-02 a touch phone never requests WebGL @perf', async ({ browser, re
 test('CHOOSE-PREF-01 a card chunk is requested when the card gets focus, not before @perf', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Tap to begin' }).click();
-  await page.getByRole('button', { name: 'Skip intro' }).click();
+  await skipIntro(page);
   await page.getByRole('button', { name: /^Guest/ }).click();
   await expect(chooserHeading(page)).toBeFocused();
   await page.waitForTimeout(2500); // the idle prefetch of the badged OS (macOS on desktop) is over
@@ -187,7 +232,7 @@ test('TEST-PERF-01 INP ≤ 200 ms through the welcome at 4× CPU throttling; ses
   await page.goto('/');
   await page.waitForFunction(() => document.readyState === 'complete');
   await page.getByRole('button', { name: 'Tap to begin' }).click();
-  await page.getByRole('button', { name: 'Skip intro' }).click();
+  await skipIntro(page);
   await page.getByRole('button', { name: /^Recruiter/ }).click();
   await expect(chooserHeading(page)).toBeFocused({ timeout: 15_000 });
   await page.waitForTimeout(800);
@@ -200,4 +245,162 @@ test('TEST-PERF-01 INP ≤ 200 ms through the welcome at 4× CPU throttling; ses
   });
   expect(inp, 'INP (ms)').toBeLessThanOrEqual(200);
   expect(cls, 'session CLS').toBeLessThanOrEqual(0.1);
+});
+
+// --- P2 macOS vertical slice ---------------------------------------------------------------------------------------
+
+/** Each OS chunk entry carries a marker string (`pf-os-chunk:{os}`), so a fetched script can be attributed to its OS. */
+async function osChunksFetched(request: APIRequestContext, page: Page): Promise<string[]> {
+  const urls = await page.evaluate(() =>
+    performance
+      .getEntriesByType('resource')
+      .map((entry) => entry.name)
+      .filter((name) => /\.js(\?|$)/.test(name)),
+  );
+  const found = new Set<string>();
+  for (const url of urls) {
+    const text = await (await request.get(url)).text();
+    for (const match of text.matchAll(/pf-os-chunk:(ios|macos|windows|android|linux)/g)) found.add(match[1]!);
+  }
+  return [...found].sort();
+}
+
+test('ARCH-SPLIT-01 visiting /macos requests the macOS chunk and no other OS chunk @perf', async ({
+  page,
+  request,
+}) => {
+  await page.goto('/macos/finder/experience');
+  await expect(page.locator('[data-os-shell="macos"]')).toBeAttached({ timeout: 15_000 });
+  await page
+    .getByRole('navigation', { name: 'Dock' })
+    .getByRole('link', { name: /^GitHub/ })
+    .click();
+  await expect(page.locator('[data-window="macos:github"]')).toBeVisible();
+  expect(await osChunksFetched(request, page)).toEqual(['macos']);
+  // Nor the chooser: its idle warm-up belongs to `/` only.
+  await page.waitForTimeout(1500); // let the idle loaders run, so a stray warm-up would be observable
+  const { resources } = await timeline(page);
+  expect(await scriptsWith(request, resources, LAZY_SIGNATURES.chooser), 'the chooser chunk').toEqual([]);
+});
+
+test('PERF-INP-01 INP ≤ 200 ms on macOS at 4× CPU: open, select, drag, minimize, restore, zoom @perf', async ({
+  page,
+}) => {
+  // INP read straight from Event Timing: with fewer than 50 interactions it is the slowest one (web-vitals only
+  // reports INP on page hide, so its live value stays 0 here). Every interaction is kept with its target, so a
+  // failure names the slow press. CLS still comes from web-vitals.
+  await page.addInitScript({ path: 'node_modules/web-vitals/dist/web-vitals.iife.js' });
+  await page.addInitScript(() => {
+    type Metric = { value: number };
+    type Report = (callback: (metric: Metric) => void, options: { reportAllChanges: boolean }) => void;
+    const w = window as unknown as {
+      webVitals: { onCLS: Report };
+      __interactions: { name: string; target: string; duration: number }[];
+      __cls: number;
+    };
+    w.__interactions = [];
+    w.__cls = 0;
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries() as PerformanceEventTiming[]) {
+        if (!entry.interactionId) continue;
+        const target = entry.target as Element | null;
+        const label = target?.getAttribute('aria-label') ?? target?.getAttribute('data-window') ?? target?.tagName;
+        w.__interactions.push({ name: entry.name, target: label ?? '?', duration: entry.duration });
+      }
+    }).observe({ type: 'event', durationThreshold: 16, buffered: true } as PerformanceObserverInit);
+    w.webVitals.onCLS((m) => (w.__cls = m.value), { reportAllChanges: true });
+  });
+  await page.goto('/macos');
+  await expect(page.locator('[data-os-shell="macos"]')).toBeAttached({ timeout: 15_000 });
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+  const dock = page.getByRole('navigation', { name: 'Dock' });
+  await dock.getByRole('link', { name: /^Finder/ }).click();
+  const finder = page.locator('[data-window="macos:files"]');
+  await expect(finder).toHaveAttribute('data-phase', 'normal');
+  await finder.getByRole('navigation', { name: 'Favourites' }).getByRole('link', { name: 'Experience' }).click();
+  await finder.locator('[data-column="entries"] a').first().click();
+  await finder.locator('[data-column="entries"] a').nth(1).click();
+  const box = (await finder.boundingBox())!;
+  await page.mouse.move(box.x + 420, box.y + 26);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 520, box.y + 80, { steps: 10 });
+  await page.mouse.up();
+  await finder.getByRole('button', { name: 'Minimize Finder' }).click();
+  await dock.locator('[data-dock-tile="macos:files"]').click();
+  await expect(finder).toHaveAttribute('data-phase', 'normal');
+  await finder.getByRole('button', { name: 'Zoom Finder' }).click();
+  await dock.getByRole('link', { name: /^Safari/ }).click();
+  await expect(page.locator('[data-window="macos:browser"]')).toHaveAttribute('data-phase', 'normal');
+  const { interactions, cls } = await page.evaluate(() => {
+    const w = window as unknown as {
+      __interactions: { name: string; target: string; duration: number }[];
+      __cls: number;
+    };
+    return { interactions: w.__interactions, cls: w.__cls };
+  });
+  // The observer really saw the presses, so a vacuous 0 cannot pass. Nine clicks are made; entries under the
+  // 16 ms observer floor are not reported, so at least five must be.
+  expect(interactions.filter((entry) => entry.name === 'click').length, 'clicks observed').toBeGreaterThanOrEqual(5);
+  const worst = interactions.reduce((max, entry) => (entry.duration > max.duration ? entry : max), interactions[0]!);
+  expect(worst.duration, `INP (ms) — slowest: ${worst.name} on ${worst.target}`).toBeLessThanOrEqual(200);
+  expect(cls, 'session CLS').toBeLessThanOrEqual(0.1);
+});
+
+test('MOTION-RULE-02 no Layout > 1 ms inside a tagged macOS flight (open, minimize, restore, zoom, close) @perf', async ({
+  page,
+  browser,
+}) => {
+  await page.goto('/macos');
+  await expect(page.locator('[data-os-shell="macos"]')).toBeAttached({ timeout: 15_000 });
+  const dock = page.getByRole('navigation', { name: 'Dock' });
+  const finder = page.locator('[data-window="macos:files"]');
+  const idle = () =>
+    page.waitForFunction(() => {
+      const motion = (window as unknown as { __motion?: { debug(): { tweens: number } } }).__motion;
+      return (
+        !document.querySelector('[data-window][data-phase="opening"],[data-window][data-phase="closing"]') &&
+        (!motion || motion.debug().tweens === 0)
+      );
+    });
+  await browser.startTracing(page, { categories: ['devtools.timeline', 'blink.user_timing'] });
+  await dock.getByRole('link', { name: /^Finder/ }).click();
+  await expect(finder).toHaveAttribute('data-phase', 'normal');
+  await finder.getByRole('button', { name: 'Minimize Finder' }).click();
+  await expect(finder).toBeHidden();
+  await dock.locator('[data-dock-tile="macos:files"]').click();
+  await expect(finder).toBeVisible();
+  await idle();
+  await finder.getByRole('button', { name: 'Zoom Finder' }).click();
+  await idle();
+  await finder.getByRole('button', { name: 'Restore Finder' }).click();
+  await idle();
+  await finder.getByRole('button', { name: 'Close Finder' }).click();
+  await expect(finder).toHaveCount(0);
+  const trace = JSON.parse((await browser.stopTracing()).toString('utf8')) as {
+    traceEvents: { name: string; ph: string; ts: number; dur?: number; cat: string }[];
+  };
+  const events = trace.traceEvents;
+  const marks = events.filter((event) => /^pf-flight-(start|end):/.test(event.name)).sort((a, b) => a.ts - b.ts);
+  const flights: { kind: string; from: number; to: number }[] = [];
+  for (const mark of marks) {
+    const [, edge, kind] = mark.name.match(/^pf-flight-(start|end):(.+)$/)!;
+    if (edge === 'start') flights.push({ kind: kind!, from: mark.ts, to: Number.POSITIVE_INFINITY });
+    else {
+      const open = [...flights].reverse().find((f) => f.kind === kind && f.to === Number.POSITIVE_INFINITY);
+      if (open) open.to = mark.ts;
+    }
+  }
+  const kinds = new Set(flights.map((flight) => flight.kind));
+  for (const kind of ['open', 'minimize', 'restore', 'zoom', 'close']) expect(kinds.has(kind), kind).toBe(true);
+  const layouts = events.filter((event) => event.name === 'Layout' && event.ph === 'X' && event.dur !== undefined);
+  const slow = layouts.filter(
+    (layout) =>
+      layout.dur! > 1000 &&
+      flights.some((flight) => Number.isFinite(flight.to) && layout.ts > flight.from && layout.ts < flight.to),
+  );
+  expect(
+    slow.map((layout) => `${(layout.dur! / 1000).toFixed(2)} ms`),
+    'layouts > 1 ms during a flight',
+  ).toEqual([]);
 });

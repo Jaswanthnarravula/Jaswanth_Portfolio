@@ -7,8 +7,10 @@ import { describe, expect, it } from 'vitest';
 import {
   GREETINGS,
   CURSIVE_HELLO,
+  FRAME_VIEWBOX,
   MORPH_LIMITS,
   VIEW,
+  frameView,
   greetingFromPath,
   greetingFromRaster,
   pairModes,
@@ -73,6 +75,18 @@ describe('HELLO-PATHS-01 build-hello-paths output normalized + deterministic', (
     expect(within(onCurve, 0)).toBe(true);
     expect(within(control, VIEW.padY)).toBe(true);
     expect(generated.greetings[0]!.d).toBe(shape.d); // the committed opening greeting is this stroke
+  });
+  it('the committed frame view shows the stroke exactly where the storyboard frame draws it', () => {
+    const { placement } = greetingFromPath(CURSIVE_HELLO);
+    const view = frameView(placement);
+    expect(generated.frame).toEqual(view);
+    expect(view.box).toEqual(FRAME_VIEWBOX);
+    // Same aspect as the frame's `<svg class="hi">`, so a 17 em wide glyph box is the frame's box.
+    expect(view.viewBox[2]! / view.viewBox[3]!).toBeCloseTo(FRAME_VIEWBOX[2]! / FRAME_VIEWBOX[3]!, 3);
+    // The pen's first point (frame 242.5, 467.4) lands on the committed path's first point.
+    const [x, y] = numbers(generated.greetings[0]!.d);
+    expect(view.viewBox[0]! + (242.5 - FRAME_VIEWBOX[0]!) * view.unit).toBeCloseTo(x!, 0);
+    expect(view.viewBox[1]! + (467.4 - FRAME_VIEWBOX[1]!) * view.unit).toBeCloseTo(y!, 0);
   });
   it('simplification keeps the endpoints and drops collinear points', () => {
     expect(

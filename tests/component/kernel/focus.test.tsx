@@ -30,7 +30,7 @@ const notOnBody = () => expect(document.activeElement).not.toBe(document.body);
 describe('KRN-FOCUS-01 focus never on body', () => {
   it('open → window; minimize → Dock button; restore → window; close → invoker', async () => {
     const user = userEvent.setup();
-    render(<StubOs os="macos" />);
+    render(<StubOs os="macos" heading={null} />);
     expect(getKernel().activeOs).toBe('macos');
 
     await user.click(screen.getByRole('link', { name: 'Finder' }));
@@ -79,7 +79,7 @@ describe('VIEW-SLOT-01 link slot swaps between <a> and KernelLink', () => {
     expect(preventedByView).toBe(false);
   });
 
-  it('inside an OS: the same view navigates shallowly through the kernel', () => {
+  it('inside an OS: the same view navigates shallowly through the kernel', async () => {
     render(
       <ProjectList
         data={getProjects().slice(0, 2)}
@@ -96,11 +96,13 @@ describe('VIEW-SLOT-01 link slot swaps between <a> and KernelLink', () => {
     expect(link).toHaveAttribute('href', '/macos/github/sales-platform');
     const allowed = fireEvent.click(link);
     expect(allowed).toBe(false); // default prevented: no document navigation
-    const github = getKernel().sessions.macos.windows['macos:github'];
-    expect(github?.nav.entries.at(-1)).toEqual({
-      kind: 'content',
-      ref: { section: 'projects', slug: 'sales-platform' },
-    });
+    // The kernel commits right after the press paints (shared/10 INP), so the window appears a task later.
+    await waitFor(() =>
+      expect(getKernel().sessions.macos.windows['macos:github']?.nav.entries.at(-1)).toEqual({
+        kind: 'content',
+        ref: { section: 'projects', slug: 'sales-platform' },
+      }),
+    );
   });
 
   it('modified clicks keep native behaviour (new tab)', () => {

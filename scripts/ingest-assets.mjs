@@ -16,10 +16,34 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-export const BUDGETS = { 'app-icon': 12 * 1024, 'system-icon': 12 * 1024, avatar: 8 * 1024, audio: 80 * 1024 };
+export const BUDGETS = { 'app-icon': 12 * 1024, 'system-icon': 12 * 1024, avatar: 16 * 1024, audio: 80 * 1024 };
 const MAC_GRID = 0.805; // Big Sur icon body / canvas
 
 const hash = (buffer) => createHash('sha256').update(buffer).digest('hex').slice(0, 10);
+
+/**
+ * CSS `hue-rotate(deg) saturate(amount)` as one 3 × 3 matrix on sRGB values — the Filter Effects matrices, in the
+ * space browsers apply them in. The derived green profile avatar is the owner storyboard's
+ * `filter: hue-rotate(-62deg) saturate(1.15)` on the blue one (plans/03 "Visual target"), baked in.
+ */
+export function cssHueSaturate(deg, amount) {
+  const a = (deg * Math.PI) / 180;
+  const c = Math.cos(a);
+  const s = Math.sin(a);
+  const hue = [
+    [0.213 + c * 0.787 - s * 0.213, 0.715 - c * 0.715 - s * 0.715, 0.072 - c * 0.072 + s * 0.928],
+    [0.213 - c * 0.213 + s * 0.143, 0.715 + c * 0.285 + s * 0.14, 0.072 - c * 0.072 - s * 0.283],
+    [0.213 - c * 0.213 - s * 0.787, 0.715 - c * 0.715 + s * 0.715, 0.072 + c * 0.928 + s * 0.072],
+  ];
+  const k = amount;
+  const sat = [
+    [0.213 + 0.787 * k, 0.715 - 0.715 * k, 0.072 - 0.072 * k],
+    [0.213 - 0.213 * k, 0.715 + 0.285 * k, 0.072 - 0.072 * k],
+    [0.213 - 0.213 * k, 0.715 - 0.715 * k, 0.072 + 0.928 * k],
+  ];
+  return sat.map((row) => [0, 1, 2].map((j) => row.reduce((sum, v, i) => sum + v * hue[i][j], 0)));
+}
+export const GUEST_GREEN = cssHueSaturate(-62, 1.15);
 
 function minifySvg(text) {
   return text
@@ -71,7 +95,7 @@ async function render(sharp, input, size, transform) {
       .png()
       .toBuffer();
   }
-  const pipeline = transform === 'hue-green' ? base.modulate({ hue: -82, saturation: 1.35, brightness: 1.05 }) : base;
+  const pipeline = transform === 'hue-green' ? base.recomb(GUEST_GREEN) : base;
   return pipeline
     .resize(size, size, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .png()

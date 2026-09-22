@@ -63,6 +63,15 @@ export function moveFocusOutOf(
   if (active && active !== root.body && container.contains(active)) applyFocus(target, options);
 }
 
+/**
+ * Input always wins: true when focus has moved, since `origin` was active, onto another element that can keep it
+ * (connected, not inert/hidden). A focus request made before that move is stale and must not pull focus back.
+ */
+export function focusMovedSince(origin: Element | null, root: Document = document): boolean {
+  const active = root.activeElement;
+  return active !== null && active !== root.body && active !== origin && isUsable(active);
+}
+
 /** Development assertion used by e2e helpers and the shell: focus must never rest on `<body>` after an action. */
 export const focusIsOnBody = (root: Document = document): boolean =>
   root.activeElement === null || root.activeElement === root.body;

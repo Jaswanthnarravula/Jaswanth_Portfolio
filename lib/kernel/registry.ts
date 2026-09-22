@@ -9,7 +9,12 @@ import {
   type OsDefinition,
   type OsRegistry,
   type PxRect,
+  type RectFraction,
+  type Viewport,
   type WindowPolicy,
+  type WorkspaceInsets,
+  type UserPreferences,
+  type DockSize,
 } from './types';
 
 type Size = { readonly w: number; readonly h: number };
@@ -64,6 +69,60 @@ const SIZES = {
 
 const MIN = { w: 360, h: 240 } as const;
 
+/**
+ * macOS chrome metrics (plans/macos/01-identity, surfaces/menu-bar + dock, 04-responsive). One source: the kernel
+ * bounds the window workspace with them and the macOS shell writes the same numbers as CSS custom properties.
+ */
+export const MACOS_CHROME = {
+  /** Menu bar height: 24 px with a fine pointer, 28 px on the touch and compact postures. */
+  menuBar: { pointer: 24, touch: 28 },
+  /** Dock icon box: 48 px, 64 px on `large` (the Medium Dock size). */
+  dockIcon: { base: 48, large: 64 },
+  /** Settings → Desktop & Dock → Dock size (plans/macos/apps/system-settings.md): icon box per size, per size class. */
+  dockSizes: { small: { base: 40, large: 52 }, medium: { base: 48, large: 64 }, large: { base: 56, large: 76 } },
+  /** Dock plate padding and its gap above the bottom edge. */
+  dockPadding: 6,
+  dockMargin: 8,
+} as const;
+
+/** The Dock's icon box for a viewport and the visitor's Dock size. */
+export function macDockIcon(viewport: Pick<Viewport, 'sizeClass'>, size: DockSize = 'medium'): number {
+  const sizes = MACOS_CHROME.dockSizes[size];
+  return viewport.sizeClass === 'large' ? sizes.large : sizes.base;
+}
+
+export function macosInsets(viewport: Viewport, prefs?: Pick<UserPreferences, 'dock'>): WorkspaceInsets {
+  const icon = macDockIcon(viewport, prefs?.dock.size);
+  const dock = icon + MACOS_CHROME.dockPadding * 2 + MACOS_CHROME.dockMargin;
+  // Compact landscape: the Dock becomes a left rail; the menu bar stays on top (plans/macos/04 `MAC-RESP-04`).
+  const rail = viewport.posture === 'compact' && viewport.orientation === 'landscape';
+  return {
+    top: viewport.posture === 'pointer' ? MACOS_CHROME.menuBar.pointer : MACOS_CHROME.menuBar.touch,
+    right: 0,
+    bottom: rail ? 0 : dock,
+    left: rail ? dock : 0,
+  };
+}
+
+/**
+ * macOS windows are placed by fractions of the page: Finder and GitHub exactly where the owner's storyboard frame puts
+ * them (plans/macos/01-identity "Reference state"); Safari, Mail and VS Code share one document position, so the second
+ * of them opens cascaded 24 px from the first (`MAC-WM-01`).
+ */
+const MAC_PLACEMENT = {
+  finder: { x: 0.07, y: 0.24, w: 0.62, h: 0.54 },
+  github: { x: 0.3, y: 0.13, w: 0.5, h: 0.52 },
+  document: { x: 0.16, y: 0.1, w: 0.58, h: 0.66 },
+  preview: { x: 0.34, y: 0.08, w: 0.34, h: 0.78 },
+  terminal: { x: 0.26, y: 0.2, w: 0.42, h: 0.44 },
+  settings: { x: 0.3, y: 0.14, w: 0.4, h: 0.62 },
+} as const satisfies Record<string, RectFraction>;
+
+const macWindow = (fraction: RectFraction, min: Size = MIN): WindowPolicy => ({
+  ...floating(SIZES.document, 0, min),
+  defaultFraction: fraction,
+});
+
 function app(
   os: OsId,
   role: AppRole,
@@ -80,17 +139,22 @@ const macos: OsDefinition = {
   id: 'macos',
   name: 'macOS',
   chrome: 'desktop',
-  released: false,
+  // Released only when plans/macos/08-acceptance.md is 100 % verified (ARCH-REL-01); P2 ships it as a preview.
+  released: true,
   apps: [
-    app('macos', 'files', 'finder', 'Finder', floating(SIZES.document, 0, MIN), ['experience', 'education']),
-    app('macos', 'browser', 'safari', 'Safari', floating(SIZES.wide, 1, MIN), ['about']),
-    app('macos', 'github', 'github', 'GitHub', floating(SIZES.wide, 2, MIN), ['projects']),
-    app('macos', 'viewer', 'preview', 'Preview', floating(SIZES.document, 3, MIN), ['resume']),
-    app('macos', 'mail', 'mail', 'Mail', floating(SIZES.document, 4, MIN), ['contact']),
-    app('macos', 'editor', 'vscode', 'Visual Studio Code', floating(SIZES.wide, 5, MIN), ['skills']),
-    app('macos', 'terminal', 'terminal', 'Terminal', floating(SIZES.compactWindow, 6, MIN), []),
-    app('macos', 'settings', 'settings', 'System Settings', floating(SIZES.document, 7, MIN), []),
+    app('macos', 'files', 'finder', 'Finder', macWindow(MAC_PLACEMENT.finder, { w: 560, h: 360 }), [
+      'experience',
+      'education',
+    ]),
+    app('macos', 'browser', 'safari', 'Safari', macWindow(MAC_PLACEMENT.document), ['about']),
+    app('macos', 'github', 'github', 'GitHub', macWindow(MAC_PLACEMENT.github), ['projects']),
+    app('macos', 'viewer', 'preview', 'Preview', macWindow(MAC_PLACEMENT.preview), ['resume']),
+    app('macos', 'mail', 'mail', 'Mail', macWindow(MAC_PLACEMENT.document), ['contact']),
+    app('macos', 'editor', 'vscode', 'Visual Studio Code', macWindow(MAC_PLACEMENT.document), ['skills']),
+    app('macos', 'terminal', 'terminal', 'Terminal', macWindow(MAC_PLACEMENT.terminal), []),
+    app('macos', 'settings', 'settings', 'System Settings', macWindow(MAC_PLACEMENT.settings), []),
   ],
+  insets: macosInsets,
   sectionOwner: {
     about: 'browser',
     projects: 'github',
@@ -102,20 +166,77 @@ const macos: OsDefinition = {
   },
 };
 
+/**
+ * Windows 11 chrome metrics (plans/windows/01-identity, surfaces/taskbar, 04-responsive): one source for the kernel's
+ * workspace and the shell's CSS custom properties.
+ */
+export const WINDOWS_CHROME = {
+  /** Taskbar: 48 px, 40 px in compact landscape. */
+  taskbar: { base: 48, compactLandscape: 40 },
+  /** New windows that would open on top of another cascade by 32 px (plans/windows/02 "Open"). */
+  cascade: 32,
+} as const;
+
+export function windowsInsets(viewport: Viewport): WorkspaceInsets {
+  const compactLandscape = viewport.sizeClass === 'compact' && viewport.orientation === 'landscape';
+  return {
+    top: 0,
+    right: 0,
+    bottom: compactLandscape ? WINDOWS_CHROME.taskbar.compactLandscape : WINDOWS_CHROME.taskbar.base,
+    left: 0,
+  };
+}
+
+/**
+ * Windows windows open centred in the workspace at their app's size (plans/windows/apps/*), 12 % larger on `large`
+ * (plans/windows/04), clamped to the workspace. File Explorer opens exactly where the storyboard frame puts it
+ * (plans/windows/01-identity "Visual target": x 2 %, y 3 %, 48 % × 83 %).
+ */
+const winWindow = (size: Size, min: Size, fraction?: RectFraction): WindowPolicy => ({
+  ...floating(SIZES.document, 0, min),
+  centered: {
+    compact: size,
+    medium: size,
+    expanded: size,
+    large: { w: Math.round(size.w * 1.12), h: Math.round(size.h * 1.12) },
+  },
+  cascadePx: WINDOWS_CHROME.cascade,
+  ...(fraction ? { defaultFraction: fraction } : {}),
+});
+
+const WIN_EXPLORER_FRAME: RectFraction = { x: 0.02, y: 0.03, w: 0.48, h: 0.83 };
+
 const windows: OsDefinition = {
   id: 'windows',
   name: 'Windows 11',
   chrome: 'desktop',
-  released: false,
+  released: true,
   apps: [
-    app('windows', 'files', 'explorer', 'File Explorer', floating(SIZES.document, 0, MIN), ['experience', 'education']),
-    app('windows', 'browser', 'edge', 'Microsoft Edge', floating(SIZES.wide, 1, MIN), ['about', 'resume']),
-    app('windows', 'github', 'github', 'GitHub', floating(SIZES.wide, 2, MIN), ['projects']),
-    app('windows', 'mail', 'outlook', 'Outlook', floating(SIZES.document, 3, MIN), ['contact']),
-    app('windows', 'editor', 'vscode', 'Visual Studio Code', floating(SIZES.wide, 4, MIN), ['skills']),
-    app('windows', 'terminal', 'terminal', 'Terminal', floating(SIZES.compactWindow, 5, MIN), []),
-    app('windows', 'settings', 'settings', 'Settings', floating(SIZES.document, 6, MIN), [], false),
+    app(
+      'windows',
+      'files',
+      'explorer',
+      'File Explorer',
+      winWindow({ w: 960, h: 600 }, { w: 560, h: 360 }, WIN_EXPLORER_FRAME),
+      ['experience', 'education'],
+    ),
+    {
+      ...app('windows', 'browser', 'edge', 'Microsoft Edge', winWindow({ w: 1100, h: 700 }, { w: 640, h: 420 }), [
+        'about',
+        'resume',
+      ]),
+      home: 'about',
+    },
+    app('windows', 'github', 'github', 'GitHub', winWindow({ w: 1040, h: 680 }, { w: 600, h: 420 }), ['projects']),
+    app('windows', 'mail', 'outlook', 'Outlook', winWindow({ w: 1020, h: 640 }, { w: 600, h: 400 }), ['contact']),
+    app('windows', 'editor', 'vscode', 'Visual Studio Code', winWindow({ w: 1100, h: 700 }, { w: 640, h: 420 }), [
+      'skills',
+    ]),
+    app('windows', 'terminal', 'terminal', 'Terminal', winWindow({ w: 760, h: 480 }, { w: 420, h: 260 }), []),
+    // Pinned: the storyboard's taskbar shows Settings between Terminal and the Résumé (plans/windows/08 Deviations).
+    app('windows', 'settings', 'settings', 'Settings', winWindow({ w: 900, h: 640 }, { w: 560, h: 420 }), []),
   ],
+  insets: windowsInsets,
   sectionOwner: {
     about: 'browser',
     projects: 'github',
@@ -131,7 +252,7 @@ const ios: OsDefinition = {
   id: 'ios',
   name: 'iOS',
   chrome: 'mobile',
-  released: false,
+  released: true,
   apps: [
     app('ios', 'browser', 'safari', 'Safari', fullscreen, ['about']),
     app('ios', 'github', 'github', 'GitHub', fullscreen, ['projects']),
@@ -156,7 +277,7 @@ const android: OsDefinition = {
   id: 'android',
   name: 'Android',
   chrome: 'mobile',
-  released: false,
+  released: true,
   apps: [
     app('android', 'browser', 'chrome', 'Chrome', fullscreen, ['about']),
     app('android', 'github', 'github', 'GitHub', fullscreen, ['projects']),
@@ -180,7 +301,7 @@ const linux: OsDefinition = {
   id: 'linux',
   name: 'Linux',
   chrome: 'terminal',
-  released: false,
+  released: true,
   apps: [
     app('linux', 'terminal', 'terminal', 'Terminal', tiled, [
       'about',
@@ -207,6 +328,18 @@ export const OS_REGISTRY: OsRegistry = { ios, macos, windows, android, linux };
 
 export function getBinding(os: OsId, role: AppRole, registry: OsRegistry = OS_REGISTRY): OsAppBinding | undefined {
   return registry[os].apps.find((binding) => binding.role === role);
+}
+
+const NO_INSETS: WorkspaceInsets = { top: 0, right: 0, bottom: 0, left: 0 };
+
+/** The OS chrome's insets for a viewport (none for OSes without floating windows). */
+export function workspaceInsets(
+  os: OsId,
+  viewport: Viewport,
+  registry: OsRegistry = OS_REGISTRY,
+  prefs?: Pick<UserPreferences, 'dock'>,
+): WorkspaceInsets {
+  return registry[os].insets?.(viewport, prefs) ?? NO_INSETS;
 }
 
 export function getBindingBySlug(os: OsId, slug: string, registry: OsRegistry = OS_REGISTRY): OsAppBinding | undefined {
@@ -238,6 +371,8 @@ export function registryProblems(registry: OsRegistry = OS_REGISTRY): string[] {
       if (slugs.has(binding.slug)) problems.push(`${os}: duplicate slug ${binding.slug}`);
       if (roles.has(binding.role)) problems.push(`${os}: duplicate role ${binding.role}`);
       if (!/^[a-z][a-z0-9-]*$/.test(binding.slug)) problems.push(`${os}: slug ${binding.slug} not kebab-case`);
+      if (binding.home && (!binding.owns.includes(binding.home) || binding.owns.length < 2))
+        problems.push(`${os}: ${binding.slug} home ${binding.home} must be one of several owned sections`);
       slugs.add(binding.slug);
       roles.add(binding.role);
     }

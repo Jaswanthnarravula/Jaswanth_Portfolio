@@ -5,6 +5,8 @@
  * the next frame and shows the generic failure UI only when no stage owns the failure. Claims are made synchronously
  * right after the dispatch that bumps the epoch, so the driver never races them.
  */
+import type { OsId } from '@/lib/kernel/ids';
+
 export type StagedPhase = 'exiting' | 'entering' | 'failed';
 
 const claims = new Map<number, Set<StagedPhase>>();
@@ -23,7 +25,33 @@ export function claimPhases(epoch: number, phases: readonly StagedPhase[]): () =
 
 export const isClaimed = (epoch: number, phase: StagedPhase): boolean => claims.get(epoch)?.has(phase) ?? false;
 
+/**
+ * The exit hand-off (plans/04 "The exit transition", `CHOOSE-EXIT-01`): a leaving OS claims its `exiting` phase, plays
+ * its shutdown beat (≤ 300 ms, in its own idiom), then offers the rest of the phase to the return stage — the chooser's
+ * "snapshot shrinks back into its card" flight. The return stage takes over (and dispatches `PHASE_DONE` itself) or
+ * declines, in which case the OS completes the phase. One return stage at a time: the mounted chooser.
+ */
+export interface ExitHandOff {
+  readonly epoch: number;
+  readonly from: OsId;
+  readonly to: OsId | null;
+}
+export type ReturnStage = (handOff: ExitHandOff) => boolean;
+
+let returnStage: ReturnStage | null = null;
+
+export function registerReturnStage(stage: ReturnStage): () => void {
+  returnStage = stage;
+  return () => {
+    if (returnStage === stage) returnStage = null;
+  };
+}
+
+/** Returns true when a return stage took over the rest of the exit (it will complete the phase). */
+export const handOffExit = (handOff: ExitHandOff): boolean => returnStage?.(handOff) ?? false;
+
 /** Test seam. */
 export function resetStageClaims(): void {
   claims.clear();
+  returnStage = null;
 }

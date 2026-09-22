@@ -1,0 +1,140 @@
+/*
+ * The macOS menu skin (menu-bar menus and context menus — plans/macos/surfaces/context-menus.md "Anatomy"): thick
+ * material, radius 8 px, 5 px padding, 22 px rows (44 px on coarse pointers), 13 px text, accent fill on highlight,
+ * 1 px separators with 5 px vertical margin, a chevron for submenus, disabled rows at 35 % opacity. Opens instantly.
+ */
+.menu {
+  min-width: 220px;
+  max-width: 320px;
+  padding: 5px;
+  border-radius: var(--radius-menu);
+  background: var(--surface-overlay);
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+  box-shadow: var(--elevation-4);
+  color: var(--text-primary);
+  font-size: 13px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+:global([data-glass='solid']) .menu,
+:global([data-tier='0']) .menu {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: var(--surface-raised);
+}
+.menu [role='menuitem'],
+.menu [role='menuitemcheckbox'] {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 22px;
+  padding: 0 10px 0 22px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+}
+.menu [role='menuitem']:focus,
+.menu [role='menuitemcheckbox']:focus,
+.menu [data-open] {
+  outline: none;
+  background: var(--mac-selection);
+  color: #fff;
+}
+.menu [data-blink] {
+  background: var(--mac-selection);
+  color: #fff;
+}
+.menu [aria-disabled='true'] {
+  opacity: 0.35;
+}
+.menu [role='menuitemcheckbox'][aria-checked='true']::before {
+  content: '✓';
+  position: absolute;
+  left: 7px;
+  font-size: 12px;
+}
+.menu [data-menu-label] {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.menu [data-menu-shortcut] {
+  margin-left: 24px;
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+.menu [role='menuitem']:focus [data-menu-shortcut] {
+  color: inherit;
+}
+.menu [data-menu-chevron]::after {
+  content: '›';
+  font-size: 15px;
+  line-height: 1;
+}
+.menu [role='separator'] {
+  height: 1px;
+  margin: 5px 10px;
+  background: var(--border-subtle);
+}
+.menu [data-menu-heading] {
+  padding: 4px 10px 2px 22px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+.menu [role='menu'] {
+  /* A submenu opens beside its item. */
+  position: absolute;
+  top: -5px;
+  left: calc(100% - 4px);
+  z-index: 1;
+}
+.menu [data-menu-sub-slot] {
+  position: relative;
+}
+@media (any-pointer: coarse) {
+  .menu {
+    max-width: 280px;
+  }
+  .menu [role='menuitem'],
+  .menu [role='menuitemcheckbox'] {
+    min-height: 44px;
+    font-size: 15px;
+  }
+}
+
+/* Compact, when the menu would not fit: a bottom-anchored sheet with 44 px rows. */
+:global([data-menu-anchor][data-sheet]):has(> .menu) {
+  position: fixed !important;
+  top: auto !important;
+  right: 0;
+  bottom: 0;
+  left: 0 !important;
+}
+:global([data-menu-anchor][data-sheet]) .menu {
+  max-width: none;
+  max-height: 70dvh;
+  overflow-y: auto;
+  padding-bottom: calc(5px + var(--sa-b, 0px));
+  border-radius: 14px 14px 0 0;
+}
+
+@media (forced-colors: active) {
+  .menu {
+    border: 1px solid CanvasText;
+  }
+  .menu [role='menuitem']:focus,
+  .menu [role='menuitemcheckbox']:focus {
+    background: Highlight;
+    color: HighlightText;
+  }
+}

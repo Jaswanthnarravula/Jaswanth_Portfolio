@@ -27,6 +27,7 @@ not planned here, and nothing planned here is silently dropped.
 | `05-roadmap.md` | Phases as work orders (feature IDs + files to read) and their gates |
 | `06-onboarding-acceptance.md` | Ledger for the three pre-OS pages |
 | `STATUS.md` | Roll-up of every ledger per phase |
+| `visual-targets/` | The owner's approved storyboard frames (PNG) + their source CSS, and `frames/` (every frame full screen at 1440 × 900) — the required look of the welcome screens, the chooser and each OS |
 | `shared/` | Cross-cutting contracts `01`–`21` + `22-acceptance.md` (ledger) |
 | `macos/` `windows/` `ios/` `android/` `linux/` | One dedicated folder per OS: identity, lifecycle, `surfaces/`, `apps/`, motion, responsive, accessibility, edge cases, cross-OS features, acceptance ledger |
 
@@ -114,6 +115,8 @@ Definition-of-done audit checklist · Deviations log.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-21 | **Welcome screens = the storyboard frames.** Hello (top bar, field, face, name), the intro, "Who's watching?" and the chooser use the frame's own unit (1 em = 1.42 % of a 16:10 screen) and values, and land on its pixels at any 16:10 size; returning-visitor controls (replay, Sound on the profiles) appear only where the frame's first visit has none. | owner conversation ("exactly same as this html page"); `02`/`03`/`04` "Visual target", `06-onboarding-acceptance.md` Deviations log |
+| 2026-09-21 | **Owner visual targets.** The chooser and every OS must look exactly like the approved storyboard frames (`plans/visual-targets/`), and exactly like the real OS wherever a frame abbreviates it — not "close". Sample names in the frames are replaced by real data. | owner conversation; `00-north-star.md` smell test 8, `shared/06-design-system.md`, each `{os}/01-identity.md`, `04-os-chooser.md` |
 | 2026-09-21 | Owner authorized implementation to completion and reconstruction of any missing plans. Proceed through validated gates without repeat permission requests; do not waive tests or claim manual checks were performed. | owner conversation; `IMPLEMENTATION.md` |
 | 2026-09-21 | **No device frames.** iOS and Android fill the whole page at every size: phone layout on phones, full-page iPadOS / large-screen Android layout on tablets, laptops and desktops. Chooser cards are page-shaped snapshots, not device outlines. | owner conversation; `00-north-star.md` B17, `shared/08-responsive.md`, `ios/04`, `android/04`, `04-os-chooser.md` |
 | 2026-09-21 | LinkedIn is the primary career source; GitHub supports project details. Do not infer missing dates, proficiency ratings, or metrics. | owner conversation; `shared/02-portfolio-data.md` |

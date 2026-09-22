@@ -113,6 +113,9 @@ complete · placeholder guard passes with real résumé content.
 
 ## Standing rules
 - One OS at a time. No starting the next OS while the current one has unverified rows.
+- Every OS phase (P2–P7) opens by reconciling its surface and app files with the "Visual target" in its
+  `01-identity.md` (owner storyboard, `plans/visual-targets/`), logging each change in its Deviations log, and closes
+  with the Storyboard test in its definition-of-done audit.
 - The owner reviews at every gate. Deviations need the owner's sign-off in that folder's log.
 - New ideas mid-phase go to the **Backlog** below, not into the current work order.
 

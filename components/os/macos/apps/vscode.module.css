@@ -1,0 +1,157 @@
+/*
+ * VS Code's macOS chrome (plans/macos/apps/vscode.md): a 35 px unified title bar under the traffic lights with the
+ * command centre in the middle (Dark Modern by default, Light Modern with the light theme). The body is the shared
+ * EditorBody; the quick pick drops from under the title bar like VS Code's own.
+ */
+.vscode {
+  --code-title: #1f1f1f;
+  --code-title-ink: #cccccc;
+  --code-cc: #2a2a2a;
+  --code-cc-edge: #3c3c3c;
+  background: #1f1f1f;
+}
+:global(:root[data-theme='light']) .vscode {
+  --code-title: #f8f8f8;
+  --code-title-ink: #3b3b3b;
+  --code-cc: #ffffff;
+  --code-cc-edge: #cecece;
+  background: #ffffff;
+}
+@media (prefers-color-scheme: light) {
+  :global(:root:not([data-theme='dark'])) .vscode {
+    --code-title: #f8f8f8;
+    --code-title-ink: #3b3b3b;
+    --code-cc: #ffffff;
+    --code-cc-edge: #cecece;
+    background: #ffffff;
+  }
+}
+
+.titlebar {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 35px;
+  padding: 0 86px;
+  border-bottom: 1px solid var(--code-cc-edge);
+  background: var(--code-title);
+  color: var(--code-title-ink);
+  -webkit-user-select: none;
+  user-select: none;
+}
+:global([data-window]:not([data-focused])) .titlebar {
+  color: color-mix(in oklch, var(--code-title-ink) 70%, var(--code-title));
+}
+:global([data-mac-posture='compact']) .titlebar {
+  height: 44px;
+  padding: 0 56px;
+}
+.commandCenter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: min(420px, 100%);
+  height: 24px;
+  border: 1px solid var(--code-cc-edge);
+  border-radius: 6px;
+  background: var(--code-cc);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+}
+.commandCenter:hover {
+  border-color: color-mix(in oklch, var(--code-title-ink) 40%, var(--code-cc-edge));
+}
+.commandCenter:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+@media (any-pointer: coarse) {
+  .commandCenter {
+    height: 36px;
+  }
+}
+
+.quickOpen {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  z-index: 6;
+  width: min(560px, calc(100% - 32px));
+  transform: translateX(-50%);
+  border: 1px solid var(--code-cc-edge);
+  border-radius: 8px;
+  background: var(--code-cc);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.36);
+  color: var(--code-title-ink);
+}
+.combobox input {
+  width: 100%;
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-bottom: 1px solid var(--code-cc-edge);
+  border-radius: 8px 8px 0 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+}
+.combobox input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+.combobox [role='listbox'] {
+  max-height: 300px;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+}
+.combobox [role='option'] {
+  display: flex;
+  gap: 8px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+.combobox [role='option'][aria-selected='true'] {
+  background: #04395e;
+  color: #ffffff;
+}
+.combobox [data-combobox-group-label] {
+  padding: 4px 8px;
+  font-size: 11px;
+  opacity: 0.7;
+}
+.empty {
+  margin: 0;
+  padding: 10px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+/* The panel's Terminal: VS Code's integrated terminal colours on the shared view. */
+.terminal {
+  --term-bg: #181818;
+  --term-fg: #cccccc;
+  --term-prompt: #cccccc;
+  --term-dir: #3b8eea;
+  --term-exe: #23d18b;
+  --term-err: #f14c4c;
+  --term-dim: #9d9d9d;
+  --term-font: Menlo, Monaco, 'Courier New', monospace;
+  --term-size: 12px;
+}
+:global(:root[data-theme='light']) .terminal {
+  --term-bg: #ffffff;
+  --term-fg: #3b3b3b;
+  --term-prompt: #3b3b3b;
+  --term-dir: #0451a5;
+  --term-exe: #00813a;
+  --term-err: #cd3131;
+  --term-dim: #616161;
+}

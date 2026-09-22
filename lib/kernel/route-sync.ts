@@ -23,6 +23,18 @@ export interface RouteSyncOptions {
   readonly onRoute?: (route: RouteState) => void;
 }
 
+/** The live controller (one RouteSync per shell) — the transient-sheet entry point below reaches it. */
+let live: HistoryController | null = null;
+
+/**
+ * A transient sheet (compact Start / Search, plans/windows/04 `WIN-RESP-04`) asks for one Back entry: the browser or
+ * system Back then calls `onBack` instead of navigating. Returns `release` (call it when the sheet closes any other
+ * way, before any action that navigates). Without a running RouteSync there is no entry and `release` is a no-op.
+ */
+export function pushTransientHistory(onBack: () => void): () => void {
+  return live?.transient(onBack) ?? (() => undefined);
+}
+
 export function startRouteSync(options: RouteSyncOptions): () => void {
   const { port, getState, dispatch, subscribe, encode, title, onRoute } = options;
   const lifecycle = new AbortController();
@@ -32,6 +44,7 @@ export function startRouteSync(options: RouteSyncOptions): () => void {
     port,
     onPop: (url) => dispatch({ type: 'ROUTE_CHANGED', url }),
   });
+  live = controller;
   let started = false;
   let lastRoute: RouteState | null = null;
 
@@ -82,6 +95,7 @@ export function startRouteSync(options: RouteSyncOptions): () => void {
     );
 
   return () => {
+    if (live === controller) live = null;
     lifecycle.abort();
     titleGuard?.disconnect();
     cancelAnimationFrame(frame);

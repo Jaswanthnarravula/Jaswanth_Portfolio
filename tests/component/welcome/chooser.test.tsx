@@ -4,10 +4,10 @@
  * "{OS} — {character}", the badge part of the name; snapshots are decorative).
  */
 import { render, screen, within } from '@testing-library/react';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import Chooser from '@/components/welcome/Chooser';
 import { PERSONA_IDS } from '@/lib/kernel/ids';
-import { VISIBLE_OSES } from '@/lib/kernel/route';
+import { OS_IDS } from '@/lib/kernel/ids';
 import { DEFAULT_CAPABILITIES } from '@/lib/kernel/state';
 import { dispatch } from '@/stores/kernel-store';
 import { prefsStore } from '@/stores/prefs-store';
@@ -23,22 +23,31 @@ beforeAll(() => {
   });
 });
 
-const cards = () =>
-  screen.queryAllByRole('link').filter((link) => link.hasAttribute('data-chooser-card')) as HTMLAnchorElement[];
+const cards = () => [...document.querySelectorAll<HTMLElement>('[data-chooser-card]')];
 
 describe('CHOOSE-REL-01 only released OSes are shown', () => {
-  it('renders exactly the OSes it is given, in order, as links to /{os}', () => {
+  it('renders exactly the OS preview cards it is given, in order; visible OSes can be entered', () => {
     render(<Chooser oses={['macos', 'linux']} />);
-    expect(cards().map((card) => card.getAttribute('href'))).toEqual(['/macos', '/linux']);
+    expect(cards().map((card) => card.dataset.chooserCard)).toEqual(['macos', 'linux']);
+    // This environment previews every OS (NEXT_PUBLIC_OS_PREVIEW=all), so each card is a live link.
+    expect(cards().some((card) => card.getAttribute('aria-disabled') === 'true')).toBe(false);
+    expect(screen.queryByText('Coming soon')).toBeNull();
   });
-  it('defaults to the visible set, and says so plainly when nothing is released', () => {
+  it('by default shows the visible set (released + previewed): all five in a preview build', () => {
     const { unmount } = render(<Chooser />);
-    expect(cards().map((card) => card.dataset.chooserCard)).toEqual([...VISIBLE_OSES]);
+    expect(document.querySelectorAll('[data-chooser-card]')).toHaveLength(OS_IDS.length);
     unmount();
     render(<Chooser oses={[]} />);
-    expect(cards()).toEqual([]);
+    expect(document.querySelectorAll('[data-chooser-card]')).toHaveLength(0);
     expect(screen.getByText(/The operating systems open here as each one is finished/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Skip the OS' })).toHaveAttribute('href', '/plain');
+  });
+
+  it('does not ask GSAP to animate cards when no OS is released', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    render(<Chooser oses={[]} />);
+    expect(warning).not.toHaveBeenCalledWith(expect.stringContaining('GSAP target'));
+    warning.mockRestore();
   });
 });
 

@@ -10,7 +10,7 @@ import { OS_REGISTRY } from '@/lib/kernel/registry';
 import { routeCodec } from '@/lib/kernel/route';
 import { linuxLocationFor } from '@/lib/kernel/route/codec';
 import type { AppLocation, RouteState } from '@/lib/kernel/types';
-import { dispatch } from '@/stores/kernel-store';
+import { dispatchSoon } from '@/stores/kernel-store';
 
 export type KernelTarget =
   | { readonly os: OsId; readonly role: AppRole; readonly location?: AppLocation }
@@ -55,7 +55,15 @@ export function KernelLink({ to, children, originId, invoker, onActivate, ...res
         if (!isPlainClick(event)) return;
         event.preventDefault();
         const { role, location } = resolveTarget(to);
-        dispatch({ type: 'OPEN_APP', os: to.os, role, location, originId: originId ?? null, invoker: invoker ?? null });
+        // The press paints first; the kernel commits in the next task (shared/10 INP: handlers stay O(1)).
+        dispatchSoon({
+          type: 'OPEN_APP',
+          os: to.os,
+          role,
+          location,
+          originId: originId ?? null,
+          invoker: invoker ?? null,
+        });
         onActivate?.();
       }}
     >

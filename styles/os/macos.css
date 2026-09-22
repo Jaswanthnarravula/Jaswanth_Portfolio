@@ -44,12 +44,50 @@
   --light-close: #ff5f57;
   --light-minimize: #febc2e;
   --light-zoom: #28c840;
-  --wallpaper-macos:
-    radial-gradient(120% 90% at 18% 100%, oklch(0.86 0.09 55) 0%, transparent 55%),
-    radial-gradient(110% 80% at 85% 92%, oklch(0.8 0.1 20) 0%, transparent 60%),
-    radial-gradient(140% 90% at 50% 0%, oklch(0.83 0.08 240) 0%, transparent 65%),
-    linear-gradient(170deg, oklch(0.8 0.07 250) 0%, oklch(0.84 0.07 300) 48%, oklch(0.88 0.08 50) 100%);
-  --wallpaper-macos-worst: oklch(0.9 0.06 60);
+  /* The storyboard's wallpaper (plans/macos/01-identity "Visual target"): the soft dune gradient, exactly. */
+  --wallpaper-macos: linear-gradient(150deg, #1f4f7a 0%, #3f78a8 35%, #e3a873 78%, #f3d3a4 100%);
+  /* Settings → Appearance → Wallpaper: fixed variants (Automatic follows the theme through --wallpaper-macos). */
+  --wallpaper-macos-light: linear-gradient(150deg, #1f4f7a 0%, #3f78a8 35%, #e3a873 78%, #f3d3a4 100%);
+  --wallpaper-macos-dark: linear-gradient(
+    150deg,
+    oklch(0.229 0.089 248.7) 0%,
+    oklch(0.305 0.096 246.1) 35%,
+    oklch(0.426 0.098 62.5) 78%,
+    oklch(0.485 0.071 77.1) 100%
+  );
+  /* Lightest stop (#f3d3a4) — the worst case for white desktop labels (DS-SCRIM-01). */
+  --wallpaper-macos-worst: oklch(0.883 0.071 77.1);
+
+  /* Surfaces from the frame (plans/macos/01-identity): window body, unified toolbar + hairline, Finder sidebar, the
+     selection blue, tag outlines; the menu bar and Dock tints sit over the wallpaper with vibrancy (T1+). */
+  --mac-window: #f6f6f7;
+  --mac-content: #ffffff;
+  --mac-toolbar: #e9e9eb;
+  --mac-toolbar-inactive: #f1f1f2;
+  --mac-hairline: #d3d3d6;
+  --mac-column-rule: #dcdce0;
+  --mac-sidebar: rgb(225 229 236 / 0.9);
+  --mac-selection: #2f6fe4;
+  /* Link / accent *text* inside documents: the darker system link blue (5.4:1 on white; the fill accent is 3.7:1). */
+  --mac-link: #0066d6;
+  --mac-selection-inactive: #d7d7db;
+  --mac-selection-inactive-text: #222226;
+  --mac-row-text: #222222;
+  --mac-dim: #636368;
+  --mac-tag-border: #c9ccd3;
+  --mac-tag-text: #444444;
+  --mac-title: #333333;
+  --mac-title-inactive: #68686c;
+  --mac-light-off: #c9c9cc;
+  --mac-menubar: rgb(255 255 255 / 0.55);
+  --mac-menubar-text: #111111;
+  --mac-dock: rgb(255 255 255 / 0.38);
+  --mac-dock-rim: rgb(255 255 255 / 0.55);
+  --mac-dock-separator: rgb(0 0 0 / 0.25);
+  --mac-dock-dot: #222222;
+  --mac-window-shadow: 0 22px 70px 4px rgb(0 0 0 / 0.36), 0 0 0 0.5px rgb(0 0 0 / 0.3);
+  --mac-window-shadow-inactive: 0 12px 34px 2px rgb(0 0 0 / 0.16), 0 0 0 0.5px rgb(0 0 0 / 0.2);
+  --mac-label-shadow: 0 1px 3px rgb(0 0 0 / 0.6);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -72,12 +110,40 @@
     --material-thick: oklch(0.22 0.008 265 / 0.8);
     --material-chrome: oklch(0.18 0.008 265 / 0.55);
     --hairline: oklch(1 0 0 / 0.1);
-    --wallpaper-macos:
-      radial-gradient(120% 90% at 18% 100%, oklch(0.36 0.1 30) 0%, transparent 55%),
-      radial-gradient(110% 80% at 85% 92%, oklch(0.3 0.12 330) 0%, transparent 60%),
-      radial-gradient(140% 90% at 50% 0%, oklch(0.3 0.1 265) 0%, transparent 65%),
-      linear-gradient(170deg, oklch(0.2 0.06 265) 0%, oklch(0.24 0.08 300) 50%, oklch(0.3 0.09 20) 100%);
-    --wallpaper-macos-worst: oklch(0.38 0.1 30);
+    /* Dark variant: the same stops at 55 % of their lightness (plans/macos/01-identity). */
+    --wallpaper-macos: linear-gradient(
+      150deg,
+      oklch(0.229 0.089 248.7) 0%,
+      oklch(0.305 0.096 246.1) 35%,
+      oklch(0.426 0.098 62.5) 78%,
+      oklch(0.485 0.071 77.1) 100%
+    );
+    --wallpaper-macos-worst: oklch(0.485 0.071 77.1);
+    --mac-window: #2a2a2d;
+    --mac-content: #1e1e20;
+    --mac-toolbar: #38383b;
+    --mac-toolbar-inactive: #2e2e31;
+    --mac-hairline: #19191b;
+    --mac-column-rule: #3a3a3e;
+    --mac-sidebar: rgb(52 54 60 / 0.92);
+    --mac-selection-inactive: #4a4a4f;
+    --mac-link: #4aa0ff;
+    --mac-selection-inactive-text: #f2f2f5;
+    --mac-row-text: #ececef;
+    --mac-dim: #a1a1a8;
+    --mac-tag-border: #5a5c63;
+    --mac-tag-text: #d8d8dd;
+    --mac-title: #e6e6ea;
+    --mac-title-inactive: #a4a4aa;
+    --mac-light-off: #5b5b60;
+    --mac-menubar: rgb(28 28 32 / 0.5);
+    --mac-menubar-text: #f5f5f7;
+    --mac-dock: rgb(40 40 46 / 0.42);
+    --mac-dock-rim: rgb(255 255 255 / 0.18);
+    --mac-dock-separator: rgb(255 255 255 / 0.3);
+    --mac-dock-dot: #e8e8ea;
+    --mac-window-shadow: 0 22px 70px 4px rgb(0 0 0 / 0.56), 0 0 0 0.5px rgb(0 0 0 / 0.4);
+    --mac-window-shadow-inactive: 0 12px 34px 2px rgb(0 0 0 / 0.3), 0 0 0 0.5px rgb(0 0 0 / 0.36);
   }
 }
 :root[data-theme='dark'] [data-os='macos'] {
@@ -99,16 +165,112 @@
   --material-thick: oklch(0.22 0.008 265 / 0.8);
   --material-chrome: oklch(0.18 0.008 265 / 0.55);
   --hairline: oklch(1 0 0 / 0.1);
-  --wallpaper-macos:
-    radial-gradient(120% 90% at 18% 100%, oklch(0.36 0.1 30) 0%, transparent 55%),
-    radial-gradient(110% 80% at 85% 92%, oklch(0.3 0.12 330) 0%, transparent 60%),
-    radial-gradient(140% 90% at 50% 0%, oklch(0.3 0.1 265) 0%, transparent 65%),
-    linear-gradient(170deg, oklch(0.2 0.06 265) 0%, oklch(0.24 0.08 300) 50%, oklch(0.3 0.09 20) 100%);
-  --wallpaper-macos-worst: oklch(0.38 0.1 30);
+  /* Dark variant: the same stops at 55 % of their lightness (plans/macos/01-identity). */
+  --wallpaper-macos: linear-gradient(
+    150deg,
+    oklch(0.229 0.089 248.7) 0%,
+    oklch(0.305 0.096 246.1) 35%,
+    oklch(0.426 0.098 62.5) 78%,
+    oklch(0.485 0.071 77.1) 100%
+  );
+  --wallpaper-macos-worst: oklch(0.485 0.071 77.1);
+  --mac-window: #2a2a2d;
+  --mac-content: #1e1e20;
+  --mac-toolbar: #38383b;
+  --mac-toolbar-inactive: #2e2e31;
+  --mac-hairline: #19191b;
+  --mac-column-rule: #3a3a3e;
+  --mac-sidebar: rgb(52 54 60 / 0.92);
+  --mac-selection-inactive: #4a4a4f;
+  --mac-link: #4aa0ff;
+  --mac-selection-inactive-text: #f2f2f5;
+  --mac-row-text: #ececef;
+  --mac-dim: #a1a1a8;
+  --mac-tag-border: #5a5c63;
+  --mac-tag-text: #d8d8dd;
+  --mac-title: #e6e6ea;
+  --mac-title-inactive: #a4a4aa;
+  --mac-light-off: #5b5b60;
+  --mac-menubar: rgb(28 28 32 / 0.5);
+  --mac-menubar-text: #f5f5f7;
+  --mac-dock: rgb(40 40 46 / 0.42);
+  --mac-dock-rim: rgb(255 255 255 / 0.18);
+  --mac-dock-separator: rgb(255 255 255 / 0.3);
+  --mac-dock-dot: #e8e8ea;
+  --mac-window-shadow: 0 22px 70px 4px rgb(0 0 0 / 0.56), 0 0 0 0.5px rgb(0 0 0 / 0.4);
+  --mac-window-shadow-inactive: 0 12px 34px 2px rgb(0 0 0 / 0.3), 0 0 0 0.5px rgb(0 0 0 / 0.36);
 }
 
 @media (any-pointer: coarse) {
   [data-os='macos'] {
     --target-min: 44px;
   }
+}
+
+/* Settings → Appearance → Accent colour (plans/macos/apps/system-settings.md): fills and focus rings take the accent;
+   the selection fill keeps white text at ≥ 4.5 : 1, so it uses a deeper tone of the same hue. Blue is the default. */
+:root[data-accent='purple'] [data-os='macos'] {
+  --accent: #953d96;
+  --focus-ring: #953d96;
+  --mac-selection: #7f2f80;
+}
+:root[data-accent='plum'] [data-os='macos'] {
+  --accent: #e3407f;
+  --focus-ring: #e3407f;
+  --mac-selection: #b8285f;
+}
+:root[data-accent='red'] [data-os='macos'] {
+  --accent: #e0383e;
+  --focus-ring: #e0383e;
+  --mac-selection: #b8232a;
+}
+:root[data-accent='orange'] [data-os='macos'] {
+  --accent: #e8761c;
+  --focus-ring: #e8761c;
+  --mac-selection: #a8520b;
+}
+:root[data-accent='green'] [data-os='macos'] {
+  --accent: #62ba46;
+  --focus-ring: #4f9e36;
+  --mac-selection: #367a24;
+}
+:root[data-accent='navy'] [data-os='macos'],
+:root[data-accent='teal'] [data-os='macos'],
+:root[data-accent='graphite'] [data-os='macos'] {
+  --accent: #8c8c93;
+  --focus-ring: #6e6e75;
+  --mac-selection: #5e5e64;
+}
+
+/* Increase contrast (Settings → Accessibility; MAC-A11Y-05): solid surfaces (data-glass=solid comes with it), stronger
+   hairlines and dimmed text, borders around controls. */
+:root[data-contrast='more'] [data-os='macos'] {
+  --border-subtle: oklch(0 0 0 / 0.42);
+  --border-strong: oklch(0 0 0 / 0.7);
+  --hairline: oklch(0 0 0 / 0.42);
+  --mac-hairline: #6b6b70;
+  --mac-column-rule: #7a7a80;
+  --mac-dim: #45454a;
+  --mac-tag-border: #55555a;
+  --text-secondary: oklch(0.36 0 0);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-contrast='more']:not([data-theme='light']) [data-os='macos'] {
+    --border-subtle: oklch(1 0 0 / 0.45);
+    --border-strong: oklch(1 0 0 / 0.75);
+    --hairline: oklch(1 0 0 / 0.45);
+    --mac-hairline: #8e8e94;
+    --mac-column-rule: #8e8e94;
+    --mac-dim: #d0d0d6;
+    --text-secondary: oklch(0.86 0 0);
+  }
+}
+:root[data-contrast='more'][data-theme='dark'] [data-os='macos'] {
+  --border-subtle: oklch(1 0 0 / 0.45);
+  --border-strong: oklch(1 0 0 / 0.75);
+  --hairline: oklch(1 0 0 / 0.45);
+  --mac-hairline: #8e8e94;
+  --mac-column-rule: #8e8e94;
+  --mac-dim: #d0d0d6;
+  --text-secondary: oklch(0.86 0 0);
 }

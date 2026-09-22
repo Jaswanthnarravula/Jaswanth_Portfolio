@@ -1,0 +1,250 @@
+/*
+ * Spotlight (plans/macos/surfaces/spotlight.md): a 680 px (max 92 vw) bar at 22 % of the workspace, thick material,
+ * 14 px radius, a 24 px query field; results left (36 px rows, 20 px icons), preview right (hidden < 700 px).
+ * One of the ≤ 3 live backdrop-filter surfaces; solid under reduced transparency / tier 0.
+ */
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-overlays) + 20);
+}
+.scrim {
+  position: absolute;
+  inset: 0;
+}
+
+.panel {
+  position: absolute;
+  top: calc(var(--mb-h, 24px) + (100dvh - var(--mb-h, 24px) - var(--dock-reserve, 0px)) * 0.22);
+  left: 50%;
+  display: flex;
+  width: min(680px, 92vw);
+  max-height: min(560px, calc(100dvh - var(--mb-h, 24px) - 40px));
+  margin-left: calc(min(680px, 92vw) / -2);
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--material-thick);
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+  box-shadow: var(--elevation-5);
+  color: var(--text-primary);
+  transform-origin: 50% 0;
+}
+:global([data-glass='solid']) .panel,
+:global([data-tier='0']) .panel {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: var(--surface-raised);
+}
+
+.searchRow {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.magnifier {
+  position: absolute;
+  top: 15px;
+  left: 16px;
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+.combobox {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+.input {
+  flex: none;
+  width: 100%;
+  height: 52px;
+  padding: 0 16px 0 50px;
+  border: 0;
+  background: none;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 24px;
+  font-weight: 300;
+}
+.input:focus {
+  outline: none;
+}
+.input::placeholder {
+  color: var(--text-tertiary);
+}
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px 8px 8px;
+  border-top: 1px solid var(--hairline);
+  animation: reveal var(--mac-dur-spotlight-in, 120ms) var(--mac-ease-out, ease-out);
+}
+.list:empty {
+  display: none;
+}
+@keyframes reveal {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+:global([data-motion='reduced']) .list {
+  animation: none;
+}
+.list [data-combobox-group-label] {
+  padding: 8px 8px 2px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+.list [data-combobox-option] {
+  border-radius: 7px;
+  cursor: default;
+}
+.list [data-combobox-option][data-active] {
+  background: var(--mac-selection);
+  color: #fff;
+}
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 0 8px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.optionIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+}
+.optionTitle {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+}
+.optionSubtitle {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-overflow: ellipsis;
+}
+.option[data-active] .optionSubtitle {
+  color: rgb(255 255 255 / 0.85);
+}
+.empty {
+  margin: 0;
+  padding: 14px 18px;
+  border-top: 1px solid var(--hairline);
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.empty a {
+  color: var(--mac-link);
+}
+
+.preview {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 260px;
+  padding: 18px 16px;
+  overflow-y: auto;
+  border-left: 1px solid var(--hairline);
+  text-align: center;
+}
+.previewIcon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  color: var(--text-secondary);
+}
+.previewTitle {
+  margin: 4px 0 0;
+  font-size: 15px;
+}
+.previewKind {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.previewText {
+  width: 100%;
+  margin: 8px 0;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+}
+.previewAction {
+  margin-top: auto;
+  min-height: 28px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--mac-selection);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+}
+.previewAction:focus-visible {
+  outline: 3px solid color-mix(in oklch, var(--focus-ring) 55%, transparent);
+  outline-offset: 2px;
+}
+@media (max-width: 699px) {
+  .preview {
+    display: none;
+  }
+}
+
+@media (any-pointer: coarse) {
+  .option {
+    min-height: 44px;
+  }
+  .input {
+    font-size: 20px;
+  }
+  .previewAction {
+    min-height: 44px;
+  }
+}
+
+/* Compact: a full-width sheet pinned under the menu bar, results bounded by the visual viewport (keyboard-aware). */
+:global([data-mac-posture='compact']) .panel {
+  top: var(--mb-h, 24px);
+  left: 0;
+  width: 100%;
+  max-height: calc(var(--vvh, 100dvh) - var(--mb-h, 24px));
+  margin-left: 0;
+  border-radius: 0 0 14px 14px;
+}
+:global([data-mac-posture='compact']) .input {
+  height: 48px;
+  font-size: 18px;
+}
+
+@media (forced-colors: active) {
+  .panel {
+    border: 1px solid CanvasText;
+  }
+  .list [data-combobox-option][data-active] {
+    background: Highlight;
+    color: HighlightText;
+  }
+}

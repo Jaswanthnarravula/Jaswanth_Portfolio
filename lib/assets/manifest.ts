@@ -165,6 +165,23 @@ function buildManifest(): readonly AssetEntry[] {
       original: { mark: mark.mark },
       alt: '',
     });
+  // Windows shell artwork (desktop items, File Explorer): free-form like every Windows icon.
+  const winShell: { id: string; label: string; glyph: GlyphId; gradient: readonly [string, string] }[] = [
+    { id: 'system.windows-folder', label: 'Folder', glyph: 'folder', gradient: ['#ffd65c', '#e8a400'] },
+    { id: 'system.windows-this-pc', label: 'This PC', glyph: 'window', gradient: ['#6fc3ff', '#1a73e8'] },
+    { id: 'system.windows-recycle-bin', label: 'Recycle Bin', glyph: 'document', gradient: ['#e8eef7', '#9aa6b8'] },
+  ];
+  for (const item of winShell)
+    entries.push({
+      id: assetId(item.id),
+      kind: 'system-icon',
+      os: 'windows',
+      label: item.label,
+      box: { w: 96, h: 96 },
+      official: official(item.id),
+      original: { parametric: { glyph: item.glyph, gradient: item.gradient, shape: 'none' } },
+      alt: '',
+    });
   for (const persona of PERSONA_IDS)
     entries.push({
       id: assetId(`avatar.${persona}`),

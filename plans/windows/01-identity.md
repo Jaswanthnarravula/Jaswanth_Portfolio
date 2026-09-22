@@ -46,6 +46,18 @@ indicators (3 px left bar in lists/NavigationView) and toggles.
 ## Sound
 Off by default. If enabled: original soft "pop" for toasts, low "thud" for errors (synthesized).
 
+## Visual target (owner storyboard — `plans/visual-targets/windows-desktop.png`)
+Rules: `shared/06-design-system.md` → Owner visual targets. Positions are fractions of the page (W × H); sizes are
+the real Windows 11 metrics in this file and the surface/app files.
+
+| Element | Exactly as the frame |
+|---|---|
+| Wallpaper | `radial-gradient(70% 90% at 50% 110%, #7fc0ff 0, #2f6fe0 35%, #0b1f5c 75%)` (original bloom; Mica samples it) |
+| Reference state (chooser snapshot) | File Explorer at Experience, x 2 %, y 3 %, 48 % × 83 %, while a window is dragged to the right edge: the right-half **snap preview** (x 51 %, y 3 %, 47 % × 83 %). The frame's dashed box is a stand-in — build the real translucent, rounded, inset preview |
+| File Explorer | Tab strip `#e8eef7` with the tab "Experience ✕" in `#fafbfd` · caption buttons right (close turns `#c42b1c` on hover — the frame shows it hovered) · address row ← → ↑ + breadcrumb "Home › Experience" in a white field · command bar: Copy link · Share · Sort · View · Details (real Fluent glyphs beside each label) · nav pane Home · Experience · Education · Projects · Résumé, current row `#e5eefc` with a 3 px `#2f6fe0` left bar · Details view **Name · Role · Dates**, one `{Company}.docx` row per role, selected row `#dce8fb` |
+| Toast | Bottom-right above the taskbar, `rgb(244 247 252 / .92)`: **Continue from macOS** · "{item} — {app}" · [Open] (`#2f6fe0`) [Dismiss] — shown only when continuity has an item (`CONT-*`) |
+| Taskbar | Full width, `rgb(236 242 250 / .8)` + 1 px light top edge, centred: Start (Windows logo) · Search · Task View · File Explorer (active: lit button + 1.1 em `#2f6fe0` pill) · Edge (running: short grey pill) · GitHub · Outlook · VS Code · Terminal · Settings · Résumé PDF (Edge). Tray right: the real Quick Settings cluster (network, volume, battery) + clock `9:41 AM` over `9/21/2026`. The frame's `⌕` and `⧉` are stand-ins for the real Search and Task View glyphs |
+
 ## Feature IDs + acceptance tests
 | ID | Feature | Acceptance test | Phase |
 |---|---|---|---|

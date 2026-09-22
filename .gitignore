@@ -28,6 +28,7 @@ public/decoders/
 coverage/
 playwright-report/
 test-results/
+test-results-*/
 .lighthouseci/
 assets-inbox/*
 !assets-inbox/README.md
@@ -44,6 +45,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# second test build (asset-original project)
+# second test build (asset-original project), the production build, and local preview builds
 .next-original/
 .next-production/
+.next-*/

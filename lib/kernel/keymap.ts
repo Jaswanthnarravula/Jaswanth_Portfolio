@@ -15,6 +15,10 @@ export type ShortcutId =
   | 'focus-dock'
   | 'home'
   | 'switch-os'
+  | 'snap-left'
+  | 'snap-right'
+  | 'snap-up'
+  | 'snap-down'
   | 'dismiss';
 
 export interface Chord {
@@ -55,6 +59,11 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { id: 'focus-dock', chords: [accel('d')], label: 'Focus the Dock or taskbar', outsideTextFields: true },
   { id: 'home', chords: [accel('h')], label: 'Go to the Home Screen', outsideTextFields: true },
   { id: 'switch-os', chords: [accel('s')], label: 'Switch operating system', outsideTextFields: true },
+  // Windows Snap by keyboard (plans/windows/02 "Keyboard"): mirrors Win+Arrow without stealing the OS chord.
+  { id: 'snap-left', chords: [accel('ArrowLeft')], label: 'Snap window left', outsideTextFields: true },
+  { id: 'snap-right', chords: [accel('ArrowRight')], label: 'Snap window right', outsideTextFields: true },
+  { id: 'snap-up', chords: [accel('ArrowUp')], label: 'Maximize window', outsideTextFields: true },
+  { id: 'snap-down', chords: [accel('ArrowDown')], label: 'Restore, then minimize window', outsideTextFields: true },
   { id: 'dismiss', chords: [{ key: 'Escape' }], label: 'Dismiss or go back one level' },
 ];
 
@@ -118,6 +127,11 @@ export function formatChord(chord: Chord, apple: boolean): string {
   if (chord.ctrlOrMeta) parts.push(apple ? '⌘' : 'Ctrl');
   if (chord.alt) parts.push(apple ? '⌥' : 'Alt');
   if (chord.shift && chord.key !== '?') parts.push(apple ? '⇧' : 'Shift');
-  parts.push(chord.key === 'Escape' ? 'Esc' : chord.key.length === 1 ? chord.key.toUpperCase() : chord.key);
+  const arrows: Readonly<Record<string, string>> = { ArrowLeft: '←', ArrowRight: '→', ArrowUp: '↑', ArrowDown: '↓' };
+  parts.push(
+    chord.key === 'Escape'
+      ? 'Esc'
+      : (arrows[chord.key] ?? (chord.key.length === 1 ? chord.key.toUpperCase() : chord.key)),
+  );
   return parts.join(apple ? '' : '+');
 }

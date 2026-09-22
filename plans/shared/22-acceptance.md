@@ -15,7 +15,7 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `ARCH-SHELL-01` | P0 | verified | `e2e/history.spec.ts` › the shell instance survives app open, OS switch and Back/Forward · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
 | `ARCH-STATIC-01` | P0 | verified | `unit/routing/codec.test.ts` › generateStaticParams equals the registry enumeration · vitest 587/587 (2026-09-21) |  |
 | `ARCH-HYDR-01` | P0 | verified | `e2e/foundation.spec.ts` › reload with populated storage logs zero hydration warnings · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
-| `ARCH-SPLIT-01` | P2 | planned | | |
+| `ARCH-SPLIT-01` | P2 | verified | `e2e/performance.spec.ts` › ARCH-SPLIT-01 visiting /macos requests the macOS chunk and no other OS chunk · green locally 2026-09-22 (preview build) |  |
 | `ARCH-TYPES-01` | P0 | verified | `npm run check`: tsc strict + noUncheckedIndexedAccess clean; `@typescript-eslint/no-explicit-any: error` (eslint.config.mjs) · 2026-09-21 |  |
 | `ARCH-DEPS-01` | P0 | verified | `tooling/scaffold.test.ts` › dependencies are exactly pinned and match the approved set · vitest 587/587 (2026-09-21) | see log |
 | `ARCH-FIX-01` | P0 | verified | LHCI local, 3 runs/URL (2026-09-21): `meta-viewport` = 1 on all URLs · `e2e/foundation.spec.ts` › safe-area tokens are non-zero on a notched phone (pixel) + viewport meta test · scaffold test static half · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) | see log |
@@ -40,7 +40,7 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `VIEW-CAT-01` | P0 | verified | `unit/content/views.test.ts` › VIEW-CAT-01 every catalogue view is hook-free and server-renderable · vitest 587/587 (2026-09-21) | see log |
 | `VIEW-TEXT-01` | P0 | verified | `unit/content/views.test.ts` › VIEW-TEXT-01 (snapshots at 80 and 40 columns) · vitest 587/587 (2026-09-21) |  |
 | `VIEW-SLOT-01` | P0 | verified | `component/kernel/focus.test.tsx` › VIEW-SLOT-01 link slot swaps between `<a>` and `KernelLink` · vitest 587/587 (2026-09-21) |  |
-| `VIEW-HEAD-01` | P2 | planned | | |
+| `VIEW-HEAD-01` | P2 | verified | `component/macos/shell.test.tsx` › MAC-A11Y-01 · VIEW-HEAD-01 landmarks, regions and heading order · `e2e/macos.spec.ts` › A11Y-AXE-01 · VIEW-HEAD-01 X1 axe WCAG 2.2 AA: macOS home and Finder, no heading-order issue in a window · green locally 2026-09-22 (preview build) |  |
 | `VIEW-CONTACT-01` | P0 | verified | `unit/content/views.test.ts` › VIEW-CONTACT-01 (encoded mailto; copy fallback) · vitest 587/587 (2026-09-21) |  |
 | `VIEW-RESUME-01` | P0 | verified | `e2e/resume.spec.ts` › the résumé page shows the pages and a working download (iphone + all journey projects) · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) | see log |
 | `VIEW-MEDIA-01` | P0 | verified | LHCI local, 3 runs/URL (2026-09-21): CLS 0.000 (median) on /go/projects/enterprise-sso and every other URL; accessibility 1.00 |  |
@@ -57,14 +57,14 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `KRN-SES-01` | P0 | verified | `unit/kernel/sessions.test.ts` › KRN-SES-01 restore rules table · vitest 587/587 (2026-09-21) |  |
 | `KRN-SES-02` | P0 | verified | `unit/kernel/sessions.test.ts` › KRN-SES-02 staleness + contentRev revalidation · vitest 587/587 (2026-09-21) |  |
 | `KRN-SWITCH-01` | P0 | verified | `unit/kernel/sessions.test.ts` › KRN-SWITCH-01 epoch-tagged OS switch · vitest 587/587 (2026-09-21) |  |
-| `KRN-SWITCH-02` | P2 | planned | | |
+| `KRN-SWITCH-02` | P2 | verified | `e2e/macos-chooser.spec.ts` › KRN-SWITCH-02 an OS switch while offline shows Retry and the plain portfolio, and recovers online · green locally 2026-09-22 (preview build) |  |
 | `KRN-PERSIST-01` | P0 | verified | `unit/kernel/persistence.test.ts` › KRN-PERSIST-01 · `e2e/foundation.spec.ts` › corrupt storage never breaks boot · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) | see log |
 | `KRN-PERSIST-02` | P0 | verified | `unit/kernel/persistence.test.ts` › KRN-PERSIST-02 sessions discarded, prefs intact · vitest 587/587 (2026-09-21) |  |
 | `KRN-FOCUS-01` | P0 | verified | `component/kernel/focus.test.tsx` › KRN-FOCUS-01 · `component/kernel/focus-edges.test.tsx` · vitest 587/587 (2026-09-21) |  |
 | `KRN-SOUND-01` | P0 | verified | `unit/kernel/persistence.test.ts` › KRN-SOUND-01 only the intro sound is enabled by default · vitest 587/587 (2026-09-21) | see log |
 | `KRN-CAP-01` | P0 | verified | `unit/kernel/persistence.test.ts` › KRN-CAP-01 capability profile (shape + demotion persisted) · vitest 587/587 (2026-09-21) | see log |
 | `KRN-PERSONA-01` | P0 | verified | `unit/kernel/sessions.test.ts` › KRN-PERSONA-01 no reducer branches on persona · vitest 587/587 (2026-09-21) |  |
-| `KRN-EDGE-01` | P2 | planned | | |
+| `KRN-EDGE-01` | P2 | verified | `e2e/macos.spec.ts` › KRN-EDGE-01 · MAC-EDGE-01 impatience (E1–E7): spam, cancel, reverse, cycle, resize — state stays valid · green locally 2026-09-22 (preview build) |  |
 
 ### 05 Routing and history
 | ID | Phase | Status | Evidence | Deviation |
@@ -72,14 +72,14 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `ROUTE-CODEC-01` | P0 | verified | `unit/routing/codec.test.ts` › ROUTE-CODEC-01 format∘parse identity · vitest 587/587 (2026-09-21) |  |
 | `ROUTE-CODEC-02` | P0 | verified | `unit/routing/codec.test.ts` › ROUTE-CODEC-02 · `e2e/history.spec.ts` › a bad URL repairs to the nearest valid route · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
 | `ROUTE-GOFN-01` | P0 | verified | `unit/routing/history.test.ts` › ROUTE-GOFN-01 go() decision table · vitest 587/587 (2026-09-21) |  |
-| `ROUTE-EVENT-01` | P2 | planned | | |
+| `ROUTE-EVENT-01` | P2 | verified | `unit/kernel/macos-wm.test.ts` › MAC-WM-11 history rule per window event · `e2e/macos.spec.ts` › MAC-FIND-03 · ROUTE-EVENT-01 · MAC-WM-11 H1: in-app Back equals browser Back; window events follow the history table · green locally 2026-09-22 (preview build) |  |
 | `ROUTE-MOBILE-01` | P5 | planned | | |
 | `ROUTE-SER-01` | P0 | verified | `unit/routing/history.test.ts` › ROUTE-SER-01 · `e2e/history.spec.ts` › spamming Back/Forward mid-click never duplicates consecutive URLs · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
 | `ROUTE-PORT-01` | P0 | verified | `e2e/history.spec.ts` › history contract … (native) and (next-router) · `component/kernel/route-sync.test.tsx` · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
 | `ROUTE-CONTRACT-01` | P0 | verified | `e2e/history.spec.ts` › history contract: push → back → forward → refresh → back, no full reload (sentinel) · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
 | `ROUTE-GO-01` | P0 | verified | `e2e/history.spec.ts` › /go resolves into an OS with replaceState; Back leaves the site · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
 | `ROUTE-PLAIN-01` | P0 | verified | `e2e/no-js.spec.ts` › /plain holds every section and never redirects · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
-| `ROUTE-DEEP-01` | P2 | planned | | |
+| `ROUTE-DEEP-01` | P2 | verified | `e2e/macos.spec.ts` › ROUTE-DEEP-01 · MAC-FIND-02 D1 cold deep link: only Finder opens, the selection is restored, no boot screen · green locally 2026-09-22 (preview build) |  |
 | `ROUTE-TERM-01` | P0 | verified | `unit/routing/history.test.ts` › ROUTE-TERM-01 push-rate degrade (>20/10 s → replace) · vitest 587/587 (2026-09-21) |  |
 | `ROUTE-TITLE-01` | P0 | verified | `unit/routing/codec.test.ts` › ROUTE-TITLE-01 · `e2e/history.spec.ts` › titles are unique per route · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
 
@@ -99,23 +99,23 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 |---|---|---|---|---|
 | `MOTION-SPRING-01` | P0 | verified | `unit/kernel/platform.test.ts` › MOTION-SPRING-01 retarget keeps velocity continuity · vitest 587/587 (2026-09-21) |  |
 | `MOTION-FLIGHT-01` | P5 | planned | | |
-| `MOTION-DRAG-01` | P2 | planned | | |
+| `MOTION-DRAG-01` | P2 | verified | `component/motion/drag.test.tsx` › MOTION-DRAG-01 drag() · `e2e/macos.spec.ts` › MAC-WM-03 · MOTION-DRAG-01 drag: clamped under the menu bar, ≥ 48 px reachable, one commit, zero window renders · green locally 2026-09-22 (preview build) |  |
 | `MOTION-DIR-01` | P0 | verified | `unit/kernel/platform.test.ts` › MOTION-DIR-01 kill(epoch) stops older timelines only · vitest 587/587 (2026-09-21) |  |
-| `MOTION-RULE-01` | P2 | planned | | |
-| `MOTION-RULE-02` | P2 | planned | | |
+| `MOTION-RULE-01` | P2 | verified | `e2e/macos.spec.ts` › MOTION-RULE-01 input wins: a press during an open or close acts at once · green locally 2026-09-22 (preview build) |  |
+| `MOTION-RULE-02` | P2 | verified | `e2e/performance.spec.ts` › MOTION-RULE-02 no Layout > 1 ms inside a tagged macOS flight (open, minimize, restore, zoom, close) · green locally 2026-09-22 (preview build) |  |
 | `MOTION-RM-01` | P1 | planned | | |
-| `MOTION-LEAK-01` | P2 | planned | | |
+| `MOTION-LEAK-01` | P2 | verified | `e2e/macos.spec.ts` › MOTION-LEAK-01 leak loop: nothing ticking at idle, listener count stable · green locally 2026-09-22 (preview build) |  |
 | `MOTION-SCROLL-01` | P3 | planned | | |
 
 ### 08 Responsive
 | ID | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|
 | `RESP-CLASS-01` | P0 | verified | `unit/kernel/platform.test.ts` › RESP-CLASS-01 size classes + posture · vitest 587/587 (2026-09-21) |  |
-| `RESP-DOM-01` | P2 | planned | | |
+| `RESP-DOM-01` | P2 | verified | `e2e/macos.spec.ts` › RESP-DOM-01 the same DOM at 390 and 1440 px (CSS decides the posture) · green locally 2026-09-22 (preview build) |  |
 | `RESP-VP-01` | P1 | planned | | |
 | `RESP-KB-01` | P7 | planned | | |
-| `RESP-TAP-01` | P2 | planned | | |
-| `RESP-ROT-01` | P2 | planned | | |
+| `RESP-TAP-01` | P2 | verified | `e2e/macos.spec.ts` › RESP-TAP-01 X3 tap targets on the macOS home: 24 px (fine pointer), 44 px (coarse) · green locally 2026-09-22 (preview build) |  |
+| `RESP-ROT-01` | P2 | verified | `e2e/macos.spec.ts` › RESP-ROT-01 O1 a resize mid-drag commits the last valid rect and re-clamps · green locally 2026-09-22 (preview build) |  |
 | `RESP-GEST-01` | P3 | planned | | |
 | `RESP-ZOOM-01` | P3 | planned | | |
 
@@ -127,12 +127,12 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `A11Y-PRIM-03` | P0 | verified | `component/primitives/combobox.test.tsx` › A11Y-PRIM-03 Combobox / Listbox · vitest 587/587 (2026-09-21) |  |
 | `A11Y-PRIM-04` | P0 | verified | `component/primitives/focus-scope.test.tsx` › A11Y-PRIM-04 FocusScope / inert manager · vitest 587/587 (2026-09-21) |  |
 | `A11Y-PRIM-05` | P0 | verified | `component/primitives/press.test.tsx` › A11Y-PRIM-05 Press / LongPress · vitest 587/587 (2026-09-21) |  |
-| `A11Y-SEM-01` | P2 | planned | | |
-| `A11Y-FOCUS-01` | P2 | planned | | |
+| `A11Y-SEM-01` | P2 | verified | `e2e/macos.spec.ts` › MAC-A11Y-01 · A11Y-SEM-01 X2 landmarks in reading order, windows as labelled regions in open order · green locally 2026-09-22 (preview build) |  |
+| `A11Y-FOCUS-01` | P2 | verified | `e2e/macos.spec.ts` › A11Y-FOCUS-01 focus after every window action; never on <body> · `e2e/macos.spec.ts` › MAC-FIND-07 M3 compact Finder drill-down: favourites → folder → document, back chevron up each level · green locally 2026-09-22 (preview build) |  |
 | `A11Y-KEY-01` | P0 | verified | `unit/kernel/platform.test.ts` › A11Y-KEY-01 keymap has no reserved chord · vitest 587/587 (2026-09-21) |  |
 | `A11Y-SKIP-01` | P0 | verified | `e2e/foundation.spec.ts` › first Tab focuses "Skip the OS" on / · /plain · /go/projects · /macos · /linux/… (all non-WebKit-touch projects) · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) | see log |
 | `A11Y-PREF-01` | P3 | planned | | |
-| `A11Y-AXE-01` | P2 | planned | | |
+| `A11Y-AXE-01` | P2 | verified | `e2e/macos.spec.ts` › A11Y-AXE-01 · VIEW-HEAD-01 X1 axe WCAG 2.2 AA: macOS home and Finder, no heading-order issue in a window · `e2e/macos.spec.ts` › A11Y-AXE-01 X1 axe on the compact window switcher (an open overlay) · green locally 2026-09-22 (preview build) |  |
 | `A11Y-LIVE-01` | P1 | planned | | |
 | `A11Y-LH-01` | P1 | planned | | |
 
@@ -143,14 +143,14 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `PERF-GOV-01` | P0 | verified | `unit/kernel/platform.test.ts` › PERF-GOV-01 demote-only governor · vitest 587/587 (2026-09-21) |  |
 | `PERF-BUDGET-01` | P1 | planned | | |
 | `PERF-LCP-01` | P1 | planned | | |
-| `PERF-INP-01` | P2 | planned | | |
+| `PERF-INP-01` | P2 | verified | `e2e/performance.spec.ts` › PERF-INP-01 INP ≤ 200 ms on macOS at 4× CPU: open, select, drag, minimize, restore, zoom · `unit/kernel/dispatch-soon.test.ts` › dispatchSoon · green locally 2026-09-22 (preview build) | Deviations log 2026-09-22 |
 | `PERF-CLS-01` | P1 | planned | | |
 | `PERF-GL-01` | P1 | planned | | |
 | `PERF-GL-02` | P1 | planned | | |
 | `PERF-LAZY-01` | P1 | planned | | |
 | `PERF-3D-01` | P0 | verified | `unit/scripts/scripts.test.ts` › PERF-3D-01 no import of @react-three/* or useGLTF in v1 code · vitest 587/587 (2026-09-21) |  |
-| `PERF-LEAK-01` | P2 | planned | | |
-| `PERF-BLUR-01` | P2 | planned | | |
+| `PERF-LEAK-01` | P2 | verified | `e2e/leak.spec.ts` › PERF-LEAK-01 macOS leak loop: heap < 2 MB growth; DOM and listeners stable · green locally 2026-09-22 (preview build) |  |
+| `PERF-BLUR-01` | P2 | verified | `e2e/macos.spec.ts` › PERF-BLUR-01 · DS-GLASS-01 X5 at most 3 live backdrop-filter surfaces (menu bar + Dock) · green locally 2026-09-22 (preview build) |  |
 
 ### 11 Assets
 | ID | Phase | Status | Evidence | Deviation |
@@ -196,8 +196,8 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `RES-REACH-01` | P7 | planned | | |
 | `RES-PRE-01` | P1 | planned | | |
 | `RES-IDIOM-01` | P7 | planned | | |
-| `RES-OPEN-01` | P2 | planned | | |
-| `RES-DL-01` | P2 | planned | | |
+| `RES-OPEN-01` | P2 | verified | `e2e/macos.spec.ts` › RES-OPEN-01 the résumé opens in Preview through the kernel from the desktop, the menu bar and the Dock stack · green locally 2026-09-22 (preview build) |  |
+| `RES-DL-01` | P2 | verified | `e2e/macos.spec.ts` › RES-DL-01 Download saves Jaswanth-Resume.pdf and records resume_downloaded · green locally 2026-09-22 (preview build) |  |
 | `RES-COMPACT-01` | P4 | planned | | |
 | `RES-NOJS-01` | P0 | verified | `e2e/no-js.spec.ts` › /go/resume offers the PDF (open + download) and the pages · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
 
@@ -315,3 +315,8 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | 2026-09-21 | TEST-UNIT-01 · PERF-GL-01 | `lib/webgl/glass-stage.ts` is excluded from unit coverage | It needs a real WebGL2 context; the forced-tier Playwright tests exercise it end to end | Owner authorization 2026-09-21; for review at the P1 gate |
 | 2026-09-21 | ARCH-DEPS-01 | `scripts/capture-snapshots.mjs` drives `playwright-core` (installed with `@playwright/test`) and `sharp`; `scripts/build-wordmark.mjs` uses `opentype.js` (already a listed build-script dependency) | Build-time scripts only; nothing ships | Owner authorization 2026-09-21; for review at the P1 gate |
 | 2026-09-21 | TEST-MATRIX-01 · TEST-TOOL-01 | A third e2e build (`.next-production`: no preview allow-list, analytics on) is served beside the two preview builds and checked by the `perf` project (`production.spec.ts`); local ports are configurable (`E2E_PORT`) | Production-only behaviour (Speed Insights, noindex off, unreleased OSes 404) cannot be observed on a preview build; configurable ports keep test servers off other processes on a shared machine | Owner authorization 2026-09-21; for review at the P1 gate |
+| 2026-09-21 | KRN-FOCUS-01 | The FocusManager drops a queued `focusTarget` when the visitor pressed a key or pointer between the action and the frame it would apply on **and** focus moved to a usable element because of it; focus moved by code alone never cancels a request | "Input always wins": on a busy device a fast Tab / arrow landed in that frame and was pulled back (found by the P1 e2e matrix); tested in `tests/component/kernel/focus-manager.test.tsx` | Owner authorization 2026-09-21; for review at the P1 gate |
+| 2026-09-21 | PERF-BUDGET-01 | The shared/10 row "Framework ~105 KB (fixed)" is corrected to the measured size of the pinned framework on `/` — Next 16.3.5 + React 19.2.8 + Turbopack runtime = 130.8 KB gzip — so the welcome first load is ≤ 151 KB (framework + the unchanged ≤ 20 KB welcome app JS, measured 11.9 KB). First load is asserted as the scripts fetched before the first paint (`e2e/performance.spec.ts`), because Lighthouse's `resource-summary` on `/` also counts the kernel, chooser and motion chunks that load after the paint; LHCI keeps reporting those totals as warnings | The 105 KB figure was an estimate; the pinned framework cannot be trimmed without removing React from `/`, and the welcome's own JS is within its budget | Proposed 2026-09-21 — needs owner sign-off at the P1 gate |
+| 2026-09-21 | DS-FONT-01 | `/` also declares and preloads the storyboard's IBM Plex Sans (46 KB, OFL, self-hosted); every other route stays Inter-only; Bricolage Grotesque still loads only when the chooser mounts. `e2e/performance.spec.ts` asserts it | The welcome screens are the owner's storyboard frames, set in Plex; `swap` keeps the `<h1>` the LCP element (perf project green) and session CLS ≤ 0.1 | Owner, 2026-09-21 ("exactly same as this html page") |
+| 2026-09-21 | ASSET-BUDGET-01 · ASSET-INBOX-01 | Avatars ≤ 16 KB (was 8 KB), so each encodes at WebP q90; the derived green avatar is the storyboard's `hue-rotate(-62deg) saturate(1.15)` of the blue one as one sRGB matrix (`cssHueSaturate`, was `modulate(hue -82, sat 1.35)`) | At 8 KB the fur and eyes went soft against the frame; the old modulate gave a pale green where the frame's is vivid. The five avatars load during the intro, never before the first paint | Owner, 2026-09-21 ("exactly same as this html page") |
+| 2026-09-22 | PERF-INP-01 | On macOS, INP is read in Playwright straight from the Event Timing API (the slowest interaction ≥ 16 ms, reported with its target) instead of `web-vitals` `onINP`; `web-vitals` still reports CLS. The test also asserts that at least 5 of its 9 clicks were observed | `web-vitals` reports INP only when the page is hidden, so its live value stayed 0 and the check passed without measuring anything; Event Timing is the data `web-vitals` itself reads (with < 50 interactions, INP is the slowest one) | Owner authorization 2026-09-21 (plans/README); for review at the P2 gate |

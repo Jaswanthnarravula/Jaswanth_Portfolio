@@ -97,11 +97,12 @@ function StubWindow({ os, id, zIndex, focused }: { os: OsId; id: WindowId; zInde
   );
 }
 
-export default function StubOs({ os }: OsShellProps) {
+export default function StubOs({ os, heading, chunk }: OsShellProps & { readonly chunk?: string }) {
   const zOrder = useKernel((state) => state.sessions[os].zOrder);
   const focused = useKernel((state) => state.sessions[os].focused);
   return (
-    <div className={styles.root} data-stub-os={os}>
+    <div className={styles.root} data-stub-os={os} data-os-chunk={chunk}>
+      {heading}
       <header className={styles.bar}>
         <p className={styles.badge}>{OS_NAMES[os]} · preview</p>
         <nav aria-label="Apps">

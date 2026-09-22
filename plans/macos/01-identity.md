@@ -47,6 +47,20 @@ T0 / `data-glass=solid`: opaque `--surface-chrome` for menu bar, Dock, sidebars.
 bar + Dock + one transient** (menu / Spotlight / Notification Center) — the ≤ 3 cap. T2: adds sidebar vibrancy of
 the focused window only and two-layer shadows.
 
+## Visual target (owner storyboard — `plans/visual-targets/macos-desktop.png`)
+Rules: `shared/06-design-system.md` → Owner visual targets. Positions are fractions of the page (W × H); sizes are
+the real macOS metrics in this file and the surface/app files.
+
+| Element | Exactly as the frame |
+|---|---|
+| Wallpaper (light) | `linear-gradient(150deg, #1f4f7a 0%, #3f78a8 35%, #e3a873 78%, #f3d3a4 100%)` — this *is* the "soft abstract gradient"; dark variant = same stops at 55 % lightness |
+| Menu bar | Full width, white tint `rgb(255 255 255 / .55)` + vibrancy · Apple logo · **bold app name** · File · Edit · View · Go · Window · Help · right: Résumé · Spotlight glyph (frame's "Search") · clock `Tue 9:41 AM` |
+| Desktop items | Top-right column under the menu bar, in this order: `Résumé.pdf` (document), `Projects` (folder), `Experience` (folder); white labels with text shadow |
+| Reference state (chooser snapshot) | `/macos/finder/experience` after opening GitHub: GitHub window **behind and inactive** at x 30 %, y 13 %, 50 % × 52 % (grey lights); Finder **front and active** at x 7 %, y 24 %, 62 % × 54 % |
+| Finder window | Surface `#f6f6f7`; four columns 1 : 1.1 : 1.3 : 1.6 — sidebar (`rgb(225 229 236 / .9)`, "Favourites": Jaswanth · Experience · Education · Projects · Résumé) · sections (Experience · Education · Projects) · entries ("{Company} — {Role}") · preview (role bold, "{Company} · {dates}" dim, one-line summary, skill tags with 1 px `#c9ccd3` border). Selection `#2f6fe4` with white text in every column |
+| Title bars | The frame's plain title strip abbreviates the real unified toolbar: build the real one (`apps/finder.md`, 52 px, traffic lights over the sidebar), keeping the frame's title text and greys (`#e9e9eb`, hairline `#d3d3d6`) |
+| Dock | Centred floating shelf, tint `rgb(255 255 255 / .38)` + 1 px `rgb(255 255 255 / .55)` rim · Finder · Safari · GitHub · Mail · Preview · VS Code · Terminal · System Settings · separator · Résumé stack · running dots `#222` under Finder and GitHub. The frame's GitHub at 1.45× with 1.2× neighbours is the **hover** state (magnification), not rest |
+
 ## Feature IDs + acceptance tests
 | ID | Feature | Acceptance test | Phase |
 |---|---|---|---|

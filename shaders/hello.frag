@@ -1,14 +1,18 @@
-// Hello GlassStage — plans/02-hello-page.md "Shader spec". Tier 2 only.
-// field(uv): 3 drifting Gaussian lights in the storyboard's light palette (blue, pink, peach over #eaf0ff) + one pointer-following light (analytic, no fbm loops).
-// Lenses: SDF rounded rectangles (uPanels, updated from a ResizeObserver, never per frame). Inside a lens the field is
-// sampled through a refraction offset along the SDF gradient, three times for R/G/B dispersion, with a fresnel rim.
-// Film grain; uIntensity fades the stage in over 600 ms; uDim hands over to the intro's #141414.
+// Hello GlassStage — plans/02-hello-page.md "Shader spec" + "Visual target". Tier 2 only.
+// field(uv): the storyboard frame's light field, computed exactly as its CSS draws it — three elliptical radial
+// gradients (blue, pink, peach; each its colour at the centre, transparent at 60 % of its radii) over #eaf0ff — so the
+// step to Tier 2 changes nothing but the glass.
+// Lenses: SDF rounded rectangles (uPanels, updated from a ResizeObserver, never per frame). The glass is the DOM's
+// refracting lens (the owner's liquid-glass decision of 2026-09-21, plans/06 Deviations log;
+// components/welcome/refraction.ts): inside, the field frosted as the lens CSS does it (saturate(160%)
+// brightness(1.04), then its ~12 % white tint); within BAND of the rim every sample moves outward along the edge normal
+// by up to BEND, strongest at the rim — `field(uv + n·k)`, three times for R/G/B dispersion — so the field around the
+// glass bends into it, plus a fresnel rim. Normals come from a rounder rectangle so corners bend without a mitre.
+// uIntensity fades the refraction in over 600 ms; uDim hands over to the intro's #141414.
 precision highp float;
 
 uniform vec2 uResolution; // device px
-uniform float uTime; // s
-uniform vec2 uPointer; // 0..1, y up, smoothed
-uniform vec3 uAccent;
+uniform float uPx; // device px per CSS px
 uniform float uIntensity;
 uniform float uDim;
 uniform vec4 uPanels[4]; // x, y (bottom-left, device px), w, h
@@ -18,26 +22,38 @@ uniform int uPanelCount;
 in vec2 vUv;
 out vec4 fragColor;
 
-const vec3 STAGE = vec3(0.918, 0.941, 1.0); // #eaf0ff
+const vec3 STAGE = vec3(0.917647, 0.941176, 1.0); // #eaf0ff
 const vec3 NETFLIX_BLACK = vec3(0.0784);
+// refraction.ts LENS_REFRACTION, in CSS px: band, scale / 2, power.
+const float BAND = 120.0;
+const float BEND = 130.0;
+const float POWER = 2.0;
 
-// On a light stage lights tint rather than add: mix toward the light's colour by its Gaussian weight.
-vec3 tint(vec3 base, vec2 p, vec2 c, float r, vec3 col, float strength) {
-  vec2 d = p - c;
-  return mix(base, col, strength * exp(-dot(d, d) / (r * r)));
+// `radial-gradient(rx ry at cx cy, col 0, transparent 60%)` composited over `base` (CSS y runs down, uv.y runs up).
+vec3 layer(vec3 base, vec2 uv, vec2 at, vec2 radii, vec3 col) {
+  vec2 d = (vec2(uv.x, 1.0 - uv.y) - at) / radii;
+  float alpha = clamp(1.0 - length(d) / 0.6, 0.0, 1.0);
+  return mix(base, col, alpha);
 }
 
 vec3 field(vec2 uv) {
-  float aspect = uResolution.x / uResolution.y;
-  vec2 p = vec2(uv.x * aspect, uv.y);
-  float t = uTime * 0.07;
   vec3 col = STAGE;
-  // Same positions and colours as the T1 CSS field, so the step to Tier 2 adds life, not a new look.
-  col = tint(col, p, vec2((0.30 + 0.05 * sin(t * 1.3)) * aspect, 0.64 + 0.06 * cos(t)), 0.46, vec3(0.616, 0.725, 1.0), 0.95);
-  col = tint(col, p, vec2((0.78 + 0.05 * cos(t * 0.9)) * aspect, 0.62 + 0.05 * sin(t * 1.7)), 0.42, vec3(1.0, 0.753, 0.871), 0.9);
-  col = tint(col, p, vec2((0.58 + 0.06 * sin(t * 0.7)) * aspect, 0.12 + 0.06 * cos(t * 1.1)), 0.46, vec3(1.0, 0.851, 0.627), 0.9);
-  col = tint(col, p, vec2(uPointer.x * aspect, uPointer.y), 0.30, mix(STAGE, uAccent, 0.45), 0.35);
+  // CSS paints the last-listed gradient first.
+  col = layer(col, uv, vec2(0.60, 0.95), vec2(0.60, 0.70), vec3(1.0, 0.850980, 0.627451)); // #ffd9a0
+  col = layer(col, uv, vec2(0.85, 0.25), vec2(0.55, 0.60), vec3(1.0, 0.752941, 0.870588)); // #ffc0de
+  col = layer(col, uv, vec2(0.18, 0.20), vec2(0.60, 0.70), vec3(0.615686, 0.725490, 1.0)); // #9db9ff
   return col;
+}
+
+// CSS `saturate(160%) brightness(1.04)` (Filter Effects matrices, on sRGB values), then the lens tint (white, ~12 %).
+vec3 frost(vec3 c) {
+  const float s = 1.6;
+  mat3 m = mat3(
+    0.213 + 0.787 * s, 0.213 - 0.213 * s, 0.213 - 0.213 * s,
+    0.715 - 0.715 * s, 0.715 + 0.285 * s, 0.715 - 0.715 * s,
+    0.072 - 0.072 * s, 0.072 - 0.072 * s, 0.072 + 0.928 * s
+  );
+  return mix(clamp(clamp(m * c, 0.0, 1.0) * 1.04, 0.0, 1.0), vec3(1.0), 0.12);
 }
 
 float roundBox(vec2 p, vec4 box, float r) {
@@ -46,11 +62,13 @@ float roundBox(vec2 p, vec4 box, float r) {
   return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
 }
 
-float lenses(vec2 px) {
+// `minRadius` > 0 rounds every corner at least that much (for normals only).
+float lenses(vec2 px, float minRadius) {
   float d = 1e5;
   for (int i = 0; i < 4; i++) {
     if (i >= uPanelCount) break;
-    d = min(d, roundBox(px, uPanels[i], uRadii[i]));
+    float r = min(max(uRadii[i], minRadius), 0.5 * min(uPanels[i].z, uPanels[i].w));
+    d = min(d, roundBox(px, uPanels[i], r));
   }
   return d;
 }
@@ -60,24 +78,26 @@ void main() {
   vec3 col = field(vUv);
 
   if (uPanelCount > 0) {
-    float d = lenses(px);
+    float d = lenses(px, 0.0);
     if (d < 1.5) {
+      float band = BAND * uPx;
+      float normalRadius = band * 1.15;
       vec2 e = vec2(1.0, 0.0);
-      vec2 grad = vec2(lenses(px + e.xy) - lenses(px - e.xy), lenses(px + e.yx) - lenses(px - e.yx));
+      vec2 grad = vec2(
+        lenses(px + e.xy, normalRadius) - lenses(px - e.xy, normalRadius),
+        lenses(px + e.yx, normalRadius) - lenses(px - e.yx, normalRadius)
+      );
       vec2 n = normalize(grad + 1e-5);
-      float depth = clamp(-d / (28.0 * uResolution.y / 900.0), 0.0, 1.0); // 0 at the rim → 1 inside
-      vec2 bend = n * (1.0 - depth) * 0.045;
-      vec3 refracted = vec3(field(vUv - bend).r, field(vUv - bend * 1.4).g, field(vUv - bend * 1.8).b);
-      refracted = mix(refracted, vec3(1.0), 0.34); // frosted white, as the CSS glass (rgb(255 255 255 / .34))
-      float rim = pow(1.0 - depth, 5.0) * 0.5;
+      float t = clamp(1.0 + d / band, 0.0, 1.0); // 0 at the band's inner edge → 1 at the rim
+      vec2 bend = n * pow(t, POWER) * BEND * uPx / uResolution * uIntensity;
+      vec3 refracted = vec3(field(vUv + bend).r, field(vUv + bend * 1.04).g, field(vUv + bend * 1.08).b);
+      float depth = clamp(-d / (28.0 * uPx), 0.0, 1.0);
+      float rim = pow(1.0 - depth, 5.0) * 0.5 * uIntensity;
       float inside = 1.0 - smoothstep(-1.0, 1.0, d);
-      col = mix(col, refracted + rim, inside);
+      col = mix(col, frost(refracted) + rim, inside);
     }
   }
 
-  float grain = fract(sin(dot(px + fract(uTime) * 91.7, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
-  col += grain * 0.022;
-  col = mix(STAGE, col, uIntensity);
   col = mix(col, NETFLIX_BLACK, uDim);
   fragColor = vec4(col, 1.0);
 }

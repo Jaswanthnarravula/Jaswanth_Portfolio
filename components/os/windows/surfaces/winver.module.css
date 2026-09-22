@@ -1,0 +1,178 @@
+/*
+ * `winver` — the "About Windows" dialog (plans/windows/apps/settings.md "winver"). A small fixed window-style dialog:
+ * a Mica-like title strip with a caption ✕ (red on hover), a solid body, a footer with OK; 8 px radius, 1 px stroke,
+ * the window shadow. Opens like a Windows window (250 ms scale 0.9 → 1 + fade, entrance curve); nothing else moves.
+ */
+
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--win-z-dialog, 1000);
+  display: grid;
+  place-items: center;
+  padding: 16px 16px calc(16px + var(--tb-h, 48px) + var(--sa-b, 0px));
+  font-family: var(--font-ui);
+  font-size: var(--win-fs-body);
+  line-height: 1.43;
+}
+/* Presses outside the dialog land here and dismiss it; nothing behind is dimmed (Windows dialogs don't dim). */
+.backdrop {
+  position: absolute;
+  inset: 0;
+}
+.scope {
+  position: relative;
+  width: min(440px, 100%);
+}
+
+.dialog {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: var(--win-stroke-w) solid var(--win-border);
+  border-radius: var(--radius-window);
+  background: var(--win-content);
+  color: var(--win-text);
+  box-shadow: var(--win-window-shadow);
+  animation: winver-in var(--win-d250) var(--win-ease-in) both;
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding-left: 12px;
+  background: var(--win-titlebar);
+}
+.title {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: var(--win-fs-caption);
+  font-weight: 400;
+}
+.close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 46px;
+  height: 32px;
+  border: 0;
+  border-top-right-radius: calc(var(--radius-window) - 1px);
+  background: transparent;
+  color: var(--win-text);
+}
+.close:hover,
+.close:focus-visible {
+  background: var(--caption-close);
+  color: #ffffff;
+  outline: none;
+}
+
+.body {
+  display: grid;
+  gap: 4px;
+  padding: 20px 24px 20px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 0 16px;
+}
+.mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  color: var(--win-accent);
+}
+.product {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--win-fs-title);
+  font-weight: 600;
+  line-height: 1.2;
+}
+.rule {
+  width: 100%;
+  height: 0;
+  margin: 0 0 12px;
+  border: 0;
+  border-top: var(--win-stroke-w) solid var(--win-hairline);
+}
+.line,
+.fine,
+.licence {
+  margin: 0;
+}
+.fine {
+  margin-top: 12px;
+  color: var(--win-text-2);
+}
+.licence {
+  margin-top: 16px;
+}
+.licensee {
+  display: block;
+  padding-left: 16px;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px 24px;
+  border-top: var(--win-stroke-w) solid var(--win-hairline);
+  background: var(--win-titlebar-inactive);
+}
+.ok {
+  min-width: 120px;
+  min-height: 32px;
+  padding: 4px 16px;
+  border: var(--win-stroke-w) solid transparent;
+  border-radius: var(--radius-control);
+  background: var(--win-accent);
+  color: var(--win-on-accent);
+  font: inherit;
+}
+.ok:hover {
+  background: color-mix(in srgb, var(--win-accent) 90%, var(--win-on-accent));
+}
+.ok:focus-visible {
+  outline: 2px solid var(--win-text);
+  outline-offset: 2px;
+}
+
+@media (any-pointer: coarse) {
+  .close {
+    width: 48px;
+    height: 44px;
+  }
+  .titlebar {
+    height: 44px;
+  }
+  .ok {
+    min-height: 44px;
+  }
+}
+
+@keyframes winver-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@media (forced-colors: active) {
+  .dialog {
+    border: 2px solid CanvasText;
+  }
+  .close:hover,
+  .close:focus-visible {
+    background: Highlight;
+    color: HighlightText;
+  }
+  .ok {
+    border-color: ButtonText;
+  }
+}

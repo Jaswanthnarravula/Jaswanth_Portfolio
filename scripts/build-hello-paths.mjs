@@ -5,6 +5,8 @@
  * stroke (`CURSIVE_HELLO`); the other four are generated from open-licensed handwriting fonts: the shaped text is rasterized (Pango/HarfBuzz via sharp, so Devanagari conjuncts are correct),
  * thinned to its centreline, traced into pen strokes, put in writing order, smoothed into cubic Béziers and
  * normalized into one shared 1000 × 320 box so any two greetings can morph. Deterministic: same fonts → same bytes.
+ * `frame` records the storyboard frame's view of the opening stroke in the box's units (plans/02 "Visual target"), so
+ * the Hello draws it at exactly the frame's size and position while every greeting keeps the shared box.
  * No single-line font covers Devanagari and Japanese, hence centrelines (see the deviations log).
  *
  *   node scripts/build-hello-paths.mjs            → writes lib/welcome/hello-paths.generated.json
@@ -25,6 +27,9 @@ export const MORPH_LIMITS = { strokeRatio: 2.5, segmentRatio: 2 };
  * (assets-inbox/preview/storyboard.html). It is resampled and normalized like the font greetings, so it morphs with
  * them (see the deviations log in plans/06-onboarding-acceptance.md).
  */
+/** The storyboard's `<svg class="hi" viewBox="216 205 844 307">` around `CURSIVE_HELLO` (plans/visual-targets). */
+export const FRAME_VIEWBOX = [216, 205, 844, 307];
+
 export const CURSIVE_HELLO =
   'M 242.5 467.4 C 351 372 304.8 427.6 351 372 C 386.5 329.2 405.1 271.6 390.9 246.8 C 338.9 156.6 308 485.3 315.5 485.4 C 323.1 485.4 322.6 389.7 360.9 368 C 399.1 346.3 412.5 375.2 414.3 388.7 C 417.1 410.5 405.6 445 407.5 457.6 C 415.7 510.1 547.7 458.5 558.1 398.9 C 569.2 334.7 471.4 337.8 490.8 440.3 C 497.9 477.9 542 487.6 565.5 482 C 650.4 461.6 708.6 357.6 706.6 277.7 C 703.8 174.3 612.6 278.8 634.5 438.2 C 643 499.6 714.8 479.7 736 463.3 C 775.2 433.1 844.4 346 831.7 261.5 C 818.5 173.2 719.1 318.6 764.7 450.8 C 780 494.9 825.6 480 838.1 473.2 C 867.9 457.1 877.4 398.6 902.1 373.1 C 933.2 340.8 982.2 364.9 984.3 403.3 C 988.7 487.7 923.6 487.8 899.4 468.8 C 878.4 452.3 873.5 403.4 901.7 373.1 C 921 352.4 951.8 351.9 992.4 375.1 C 1009 384.6 1023.2 382.9 1034.3 367.7';
 
@@ -381,7 +386,21 @@ export function normalize(strokes) {
   const oy = (VIEW.height - (y1 - y0) * scale) / 2;
   return {
     scale,
+    placement: { scale, x0, y0, ox, oy },
     strokes: strokes.map((stroke) => stroke.map(([x, y]) => [(x - x0) * scale + ox, (y - y0) * scale + oy])),
+  };
+}
+
+/**
+ * Where a source-space box lands in the shared box, given a greeting's placement: the storyboard frame's view box
+ * around the authored "hello", in box units, and how many box units one frame unit is (`unit`).
+ */
+export function frameView({ scale, x0, y0, ox, oy }, box = FRAME_VIEWBOX) {
+  const r2 = (n) => Math.round(n * 100) / 100;
+  return {
+    box: [...box],
+    viewBox: [r2((box[0] - x0) * scale + ox), r2((box[1] - y0) * scale + oy), r2(box[2] * scale), r2(box[3] * scale)],
+    unit: Math.round(scale * 1e4) / 1e4,
   };
 }
 
@@ -438,10 +457,10 @@ export function greetingFromPath(source, { steps = 24, epsilon = 1.5, strokeWidt
       }
     }
   }
-  const { strokes, scale } = normalize(raw.map((stroke) => simplify(stroke, epsilon)));
+  const { strokes, scale, placement } = normalize(raw.map((stroke) => simplify(stroke, epsilon)));
   const d = strokes.map(strokeToPath).join('');
   const segments = (d.match(/[CL]/g) ?? []).length;
-  return { d, strokes: strokes.length, segments, strokeWidth: round(strokeWidth * scale) };
+  return { d, strokes: strokes.length, segments, strokeWidth: round(strokeWidth * scale), placement };
 }
 
 /**
@@ -480,15 +499,18 @@ async function main() {
   const sharp = createRequire(join(root, 'package.json'))('sharp');
   const fontDir = join(root, 'assets-inbox/fonts');
   const greetings = [];
+  let frame = null;
   for (const source of GREETINGS) {
-    const shape = source.path
+    const { placement, ...shape } = source.path
       ? greetingFromPath(source.path)
       : greetingFromRaster(await rasterize(sharp, fontDir, source));
+    if (source.path === CURSIVE_HELLO) frame = frameView(placement);
     greetings.push({ id: source.id, text: source.text, lang: source.lang, ...shape });
     console.log(`[hello] ${source.id}: ${shape.strokes} strokes, ${shape.segments} segments`);
   }
   const output = {
     viewBox: [0, 0, VIEW.width, VIEW.height],
+    frame,
     sources: [
       { font: 'Kalam', licence: 'SIL OFL 1.1', copyright: 'Indian Type Foundry' },
       { font: 'Klee One', licence: 'SIL OFL 1.1', copyright: 'Fontworks Inc.' },

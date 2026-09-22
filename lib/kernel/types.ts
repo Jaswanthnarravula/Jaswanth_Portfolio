@@ -38,11 +38,67 @@ export interface PxRect {
   readonly h: number;
 }
 
+/** A rect as fractions of the page (0..1 of the viewport's width and height). */
+export interface RectFraction {
+  readonly x: number;
+  readonly y: number;
+  readonly w: number;
+  readonly h: number;
+}
+
 export interface WindowPolicy {
   readonly mode: 'floating' | 'fullscreen' | 'tiled';
   readonly defaultRect: Readonly<Record<SizeClass, PxRect>>;
+  /**
+   * addition: default placement as fractions of the page (an OS's visual target places windows by fraction). Wins
+   * over `defaultRect` when present; a stored bucket or a learned rect still wins over both.
+   */
+  readonly defaultFraction?: RectFraction;
+  /**
+   * addition (plans/windows/02 "Open"): a preferred px size per size class, placed centred in the workspace (the page
+   * minus the OS chrome). Wins over `defaultRect`; `defaultFraction` still wins over it.
+   */
+  readonly centered?: Readonly<Record<SizeClass, { readonly w: number; readonly h: number }>>;
+  /** addition: the cascade step for windows that would open on top of another (default 24 px; Windows 32 px). */
+  readonly cascadePx?: number;
   readonly minPx: { readonly w: number; readonly h: number };
   readonly resizable: boolean;
+}
+
+/**
+ * addition (plans/windows/02 "Snapped state"): Windows Snap zones — halves, quarters, and the thirds of the
+ * snap-layouts flyout (⅔ + ⅓, ⅓ + ⅓ + ⅓). The top edge maximizes instead (a phase, not a zone).
+ */
+export const SNAP_ZONES = [
+  'left',
+  'right',
+  'tl',
+  'tr',
+  'bl',
+  'br',
+  'left-two-thirds',
+  'third-l',
+  'third-c',
+  'third-r',
+] as const;
+export type SnapZone = (typeof SNAP_ZONES)[number];
+
+/**
+ * addition: a snapped window keeps `phase: normal` and its pre-snap rect in its bucket; the rect on screen is derived
+ * from the zone and the workspace, so a viewport change re-derives it. `split` is the shared edge of a ½ + ½ pair as a
+ * fraction of the workspace width (paired resize moves it for both windows).
+ */
+export interface SnapState {
+  readonly zone: SnapZone;
+  readonly split?: number;
+}
+
+/** Space the OS chrome takes from the page edges (menu bar, Dock, taskbar); windows live in what remains. */
+export interface WorkspaceInsets {
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+  readonly left: number;
 }
 
 export interface OsAppBinding {
@@ -53,6 +109,11 @@ export interface OsAppBinding {
   readonly window: WindowPolicy;
   readonly pinned: boolean;
   readonly owns: readonly SectionId[];
+  /**
+   * addition: the section an app that owns several shows at its root (Windows Edge: `/windows/edge` *is* the About
+   * tab, `/windows/edge/resume` the PDF tab). The long form `/{os}/{app}/{home}` canonicalizes to the root.
+   */
+  readonly home?: SectionId;
 }
 
 export interface OsDefinition {
@@ -62,6 +123,8 @@ export interface OsDefinition {
   readonly released: boolean;
   readonly apps: readonly OsAppBinding[];
   readonly sectionOwner: Readonly<Record<SectionId, AppRole>>;
+  /** addition: chrome insets that bound the window workspace (clamping, zoom, cascade); none = the whole page. */
+  readonly insets?: (viewport: Viewport, prefs?: Pick<UserPreferences, 'dock'>) => WorkspaceInsets;
 }
 
 export type OsRegistry = Readonly<Record<OsId, OsDefinition>>;
@@ -89,6 +152,8 @@ export interface WindowInstance {
   readonly draft?: string;
   /** addition: focus key of the element that opened the window (focus returns to it on close). */
   readonly invoker?: string | null;
+  /** addition: Windows Snap (see `SnapState`); absent = floating. */
+  readonly snap?: SnapState;
 }
 
 export interface TerminalSession {
@@ -111,6 +176,11 @@ export interface OsSession {
   readonly contentRev: string;
   readonly bootSeen: boolean;
   readonly lockSeen: boolean;
+  /**
+   * addition (plans/macos/02 `MAC-WM-07`): apps that are running on a desktop OS. Opening an app starts it; closing its
+   * window keeps it running (the Dock dot stays); only Quit stops it.
+   */
+  readonly running: readonly AppRole[];
 }
 
 export type TransitionFailure = 'chunk' | 'offline' | 'timeout';
@@ -226,7 +296,27 @@ export interface UserPreferences {
   readonly eggsFound: readonly string[];
   /** addition: governor demotion cap `{tier, exp}` read by the pre-paint tier script (14-day TTL). */
   readonly demotion: { readonly tier: Tier; readonly exp: number } | null;
+  /** addition (plans/windows/apps/settings "Personalization"): Windows-only taskbar alignment. */
+  readonly taskbarAlign: 'center' | 'left';
+  /** addition: the accent colour chosen in an OS's Personalization settings; `null` = that OS's own default. */
+  readonly accent: AccentId | null;
+  /** addition (shared/09 "larger text"): text size multiplier, 1 – 1.3 in steps of 0.05. */
+  readonly textScale: number;
+  /** addition (Windows "Contrast themes" = increase contrast): `more` forces solid surfaces and 2 px borders. */
+  readonly contrast: 'system' | 'more';
+  /** addition: OS notifications (toasts / banners) on or off; the notification centre keeps them either way. */
+  readonly notifications: boolean;
+  /** addition (plans/macos/apps/system-settings "Appearance"): wallpaper variant — follow the theme, or fixed. */
+  readonly wallpaper: 'auto' | 'light' | 'dark';
+  /** addition (plans/macos/apps/system-settings "Desktop & Dock"): Dock magnification and size. */
+  readonly dock: { readonly magnification: boolean; readonly size: DockSize };
 }
+
+export type DockSize = 'small' | 'medium' | 'large';
+
+/** addition: the accent palette offered by Personalization settings (plans/windows/apps/settings). */
+export const ACCENT_IDS = ['blue', 'navy', 'teal', 'green', 'purple', 'plum', 'red', 'orange', 'graphite'] as const;
+export type AccentId = (typeof ACCENT_IDS)[number];
 
 export interface PersistedSessionsV1 {
   readonly v: 1;
@@ -250,6 +340,8 @@ export type RouteIntent = 'go' | 'canonicalize' | null;
 export const focusKeys = {
   window: (id: WindowId) => `window:${id}`,
   launcher: (os: OsId, role: AppRole) => `launcher:${os}:${role}`,
+  /** A minimized window's own Dock tile (macOS): the minimize focus target, ahead of the app's launcher. */
+  dockTile: (id: WindowId) => `dock-tile:${id}`,
   osHeading: 'os-heading',
   home: (os: OsId) => `home:${os}`,
   chooserHeading: 'chooser-heading',

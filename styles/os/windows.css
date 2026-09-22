@@ -41,12 +41,86 @@
   --material-blur: blur(30px) saturate(125%);
   --card-stroke: oklch(0 0 0 / 0.06);
   --caption-close: #c42b1c;
-  --wallpaper-windows:
-    radial-gradient(60% 70% at 62% 58%, oklch(0.62 0.2 262 / 0.95) 0%, transparent 70%),
-    radial-gradient(45% 55% at 42% 44%, oklch(0.78 0.12 238 / 0.9) 0%, transparent 70%),
-    radial-gradient(80% 90% at 70% 70%, oklch(0.7 0.16 280 / 0.55) 0%, transparent 75%),
-    linear-gradient(135deg, oklch(0.93 0.03 240) 0%, oklch(0.86 0.06 250) 100%);
-  --wallpaper-windows-worst: oklch(0.93 0.03 240);
+  /* The storyboard's wallpaper (plans/windows/01-identity "Visual target"): the blue bloom rising from the bottom edge. */
+  --wallpaper-windows: radial-gradient(70% 90% at 50% 110%, #7fc0ff 0, #2f6fe0 35%, #0b1f5c 75%);
+  /* Lightest stop (#7fc0ff) — the worst case for white desktop labels (DS-SCRIM-01). */
+  --wallpaper-windows-worst: #7fc0ff;
+
+  /* Text ramp (Caption 12 · Body 14 · Body Strong 14/600 · Subtitle 20/600 · Title 28/600), scaled by the Text size
+     setting (Settings → Accessibility; `--text-scale` on <html>). */
+  --win-fs-caption: calc(12px * var(--text-scale, 1));
+  --win-fs-body: calc(14px * var(--text-scale, 1));
+  --win-fs-subtitle: calc(20px * var(--text-scale, 1));
+  --win-fs-title: calc(28px * var(--text-scale, 1));
+  --win-fs-display: calc(40px * var(--text-scale, 1));
+
+  /* Surfaces from the storyboard frame (plans/windows/01-identity "Visual target"), real Windows 11 elsewhere. */
+  --win-window: #fafbfd;
+  --win-content: #ffffff;
+  --win-titlebar: #e8eef7;
+  --win-titlebar-inactive: #f3f3f3;
+  --win-mica-tint: rgb(232 238 247 / 0.84);
+  --win-mica-tint-inactive: #f3f3f3;
+  --win-border: rgb(0 0 0 / 0.18);
+  --win-border-inactive: rgb(0 0 0 / 0.12);
+  --win-stroke-w: 1px;
+  --win-hairline: #e4e7ec;
+  --win-field: #ffffff;
+  --win-field-border: #d5dae2;
+  --win-field-underline: #868a91;
+  --win-nav-current: #e5eefc;
+  --win-row-selected: #dce8fb;
+  --win-row-hover: rgb(0 0 0 / 0.04);
+  --win-subtle-fill: rgb(0 0 0 / 0.037);
+  --win-subtle-press: rgb(0 0 0 / 0.024);
+  --win-card: rgb(255 255 255 / 0.7);
+  --win-card-stroke: rgb(0 0 0 / 0.06);
+  --win-accent: #2f6fe0;
+  --win-accent-text: #1a5bc9;
+  --win-on-accent: #ffffff;
+  --win-accent-hover: #2a63c9;
+  --win-text: #1b1b1b;
+  --win-text-2: #444444;
+  --win-text-dim: #5f636a;
+  --win-text-disabled: rgb(0 0 0 / 0.36);
+  --win-caption-hover: rgb(0 0 0 / 0.06);
+  --win-caption-press: rgb(0 0 0 / 0.04);
+  --win-caption-glyph-inactive: rgb(0 0 0 / 0.5);
+  --win-taskbar: rgb(236 242 250 / 0.8);
+  --win-taskbar-edge: rgb(255 255 255 / 0.6);
+  --win-taskbar-button-on: rgb(255 255 255 / 0.7);
+  --win-taskbar-hover: rgb(255 255 255 / 0.5);
+  --win-pill-idle: #7d8795;
+  --win-flyout: rgb(243 246 251 / 0.86);
+  --win-flyout-solid: #f3f6fb;
+  --win-flyout-footer: rgb(231 236 244 / 0.9);
+  --win-flyout-stroke: rgb(0 0 0 / 0.1);
+  --win-toast: rgb(244 247 252 / 0.92);
+  --win-menu: rgb(249 250 252 / 0.9);
+  --win-menu-solid: #f9fafc;
+  --win-snap-preview: rgb(255 255 255 / 0.32);
+  --win-snap-preview-stroke: rgb(255 255 255 / 0.7);
+  --win-desk-selection: color-mix(in srgb, var(--win-accent) 18%, transparent);
+  --win-desk-selection-stroke: color-mix(in srgb, var(--win-accent) 35%, transparent);
+  --win-desk-hover: rgb(255 255 255 / 0.14);
+  --win-label-shadow: 0 1px 2px rgb(0 0 0 / 0.75), 0 0 8px rgb(0 0 0 / 0.45);
+  --win-window-shadow: 0 8px 32px rgb(0 0 0 / 0.28);
+  --win-window-shadow-inactive: 0 4px 16px rgb(0 0 0 / 0.16);
+  --win-flyout-shadow: 0 8px 16px rgb(0 0 0 / 0.26);
+  --win-smoke: rgb(0 0 0 / 0.3);
+  --win-night-light: rgb(255 150 60 / 0.16);
+  --win-lock-text: #ffffff;
+
+  /* Motion (plans/windows/03): the WinUI duration ladder and its three curves, scaled to 0 under reduced motion. */
+  --win-d83: calc(83ms * var(--motion-scale));
+  --win-d167: calc(167ms * var(--motion-scale));
+  --win-d250: calc(250ms * var(--motion-scale));
+  --win-d333: calc(333ms * var(--motion-scale));
+  --win-d500: calc(500ms * var(--motion-scale));
+  --win-ease-in: cubic-bezier(0, 0, 0, 1);
+  --win-ease-out: cubic-bezier(1, 0, 1, 1);
+  --win-ease-p2p: cubic-bezier(0.55, 0.55, 0, 1);
+  --win-ease-wm: cubic-bezier(0.1, 0.9, 0.2, 1);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -69,12 +143,55 @@
     --material-thick: oklch(0.24 0.006 250 / 0.9);
     --material-chrome: oklch(0.2 0.008 250 / 0.78);
     --card-stroke: oklch(1 0 0 / 0.08);
-    --wallpaper-windows:
-      radial-gradient(60% 70% at 62% 58%, oklch(0.5 0.2 262 / 0.95) 0%, transparent 70%),
-      radial-gradient(45% 55% at 42% 44%, oklch(0.62 0.16 238 / 0.85) 0%, transparent 70%),
-      radial-gradient(80% 90% at 70% 70%, oklch(0.42 0.18 285 / 0.6) 0%, transparent 75%),
-      linear-gradient(135deg, oklch(0.16 0.04 255) 0%, oklch(0.2 0.06 265) 100%);
-    --wallpaper-windows-worst: oklch(0.66 0.14 238);
+    --wallpaper-windows: radial-gradient(70% 90% at 50% 110%, #3f7fd0 0, #173f9c 35%, #050f33 75%);
+    --wallpaper-windows-worst: #7fc0ff;
+    --win-window: #1f1f1f;
+    --win-content: #1b1b1b;
+    --win-titlebar: #202020;
+    --win-titlebar-inactive: #202020;
+    --win-mica-tint: rgb(28 30 36 / 0.86);
+    --win-mica-tint-inactive: #202020;
+    --win-border: rgb(255 255 255 / 0.1);
+    --win-border-inactive: rgb(255 255 255 / 0.07);
+    --win-hairline: #2e2e2e;
+    --win-field: #2b2b2b;
+    --win-field-border: #3a3a3a;
+    --win-field-underline: #9a9a9a;
+    --win-nav-current: rgb(255 255 255 / 0.06);
+    --win-row-selected: rgb(96 160 255 / 0.2);
+    --win-row-hover: rgb(255 255 255 / 0.05);
+    --win-subtle-fill: rgb(255 255 255 / 0.06);
+    --win-subtle-press: rgb(255 255 255 / 0.04);
+    --win-card: rgb(255 255 255 / 0.05);
+    --win-card-stroke: rgb(0 0 0 / 0.2);
+    --win-accent: #60cdff;
+    --win-accent-text: #60cdff;
+    --win-on-accent: #000000;
+    --win-accent-hover: #5ab8e6;
+    --win-text: #ffffff;
+    --win-text-2: #dcdcdc;
+    --win-text-dim: #c5c5c5;
+    --win-text-disabled: rgb(255 255 255 / 0.36);
+    --win-caption-hover: rgb(255 255 255 / 0.06);
+    --win-caption-press: rgb(255 255 255 / 0.04);
+    --win-caption-glyph-inactive: rgb(255 255 255 / 0.5);
+    --win-taskbar: rgb(28 30 36 / 0.82);
+    --win-taskbar-edge: rgb(255 255 255 / 0.08);
+    --win-taskbar-button-on: rgb(255 255 255 / 0.1);
+    --win-taskbar-hover: rgb(255 255 255 / 0.06);
+    --win-pill-idle: #9aa3ad;
+    --win-flyout: rgb(36 38 44 / 0.86);
+    --win-flyout-solid: #24262c;
+    --win-flyout-footer: rgb(28 30 34 / 0.9);
+    --win-flyout-stroke: rgb(255 255 255 / 0.08);
+    --win-toast: rgb(40 42 48 / 0.94);
+    --win-menu: rgb(44 44 48 / 0.92);
+    --win-menu-solid: #2c2c30;
+    --win-snap-preview: rgb(255 255 255 / 0.14);
+    --win-snap-preview-stroke: rgb(255 255 255 / 0.4);
+    --win-window-shadow: 0 8px 32px rgb(0 0 0 / 0.56);
+    --win-window-shadow-inactive: 0 4px 16px rgb(0 0 0 / 0.36);
+    --win-flyout-shadow: 0 8px 16px rgb(0 0 0 / 0.44);
   }
 }
 :root[data-theme='dark'] [data-os='windows'] {
@@ -96,12 +213,191 @@
   --material-thick: oklch(0.24 0.006 250 / 0.9);
   --material-chrome: oklch(0.2 0.008 250 / 0.78);
   --card-stroke: oklch(1 0 0 / 0.08);
-  --wallpaper-windows:
-    radial-gradient(60% 70% at 62% 58%, oklch(0.5 0.2 262 / 0.95) 0%, transparent 70%),
-    radial-gradient(45% 55% at 42% 44%, oklch(0.62 0.16 238 / 0.85) 0%, transparent 70%),
-    radial-gradient(80% 90% at 70% 70%, oklch(0.42 0.18 285 / 0.6) 0%, transparent 75%),
-    linear-gradient(135deg, oklch(0.16 0.04 255) 0%, oklch(0.2 0.06 265) 100%);
-  --wallpaper-windows-worst: oklch(0.66 0.14 238);
+  --wallpaper-windows: radial-gradient(70% 90% at 50% 110%, #3f7fd0 0, #173f9c 35%, #050f33 75%);
+  --wallpaper-windows-worst: #7fc0ff;
+  --win-window: #1f1f1f;
+  --win-content: #1b1b1b;
+  --win-titlebar: #202020;
+  --win-titlebar-inactive: #202020;
+  --win-mica-tint: rgb(28 30 36 / 0.86);
+  --win-mica-tint-inactive: #202020;
+  --win-border: rgb(255 255 255 / 0.1);
+  --win-border-inactive: rgb(255 255 255 / 0.07);
+  --win-hairline: #2e2e2e;
+  --win-field: #2b2b2b;
+  --win-field-border: #3a3a3a;
+  --win-field-underline: #9a9a9a;
+  --win-nav-current: rgb(255 255 255 / 0.06);
+  --win-row-selected: rgb(96 160 255 / 0.2);
+  --win-row-hover: rgb(255 255 255 / 0.05);
+  --win-subtle-fill: rgb(255 255 255 / 0.06);
+  --win-subtle-press: rgb(255 255 255 / 0.04);
+  --win-card: rgb(255 255 255 / 0.05);
+  --win-card-stroke: rgb(0 0 0 / 0.2);
+  --win-accent: #60cdff;
+  --win-accent-text: #60cdff;
+  --win-on-accent: #000000;
+  --win-accent-hover: #5ab8e6;
+  --win-text: #ffffff;
+  --win-text-2: #dcdcdc;
+  --win-text-dim: #c5c5c5;
+  --win-text-disabled: rgb(255 255 255 / 0.36);
+  --win-caption-hover: rgb(255 255 255 / 0.06);
+  --win-caption-press: rgb(255 255 255 / 0.04);
+  --win-caption-glyph-inactive: rgb(255 255 255 / 0.5);
+  --win-taskbar: rgb(28 30 36 / 0.82);
+  --win-taskbar-edge: rgb(255 255 255 / 0.08);
+  --win-taskbar-button-on: rgb(255 255 255 / 0.1);
+  --win-taskbar-hover: rgb(255 255 255 / 0.06);
+  --win-pill-idle: #9aa3ad;
+  --win-flyout: rgb(36 38 44 / 0.86);
+  --win-flyout-solid: #24262c;
+  --win-flyout-footer: rgb(28 30 34 / 0.9);
+  --win-flyout-stroke: rgb(255 255 255 / 0.08);
+  --win-toast: rgb(40 42 48 / 0.94);
+  --win-menu: rgb(44 44 48 / 0.92);
+  --win-menu-solid: #2c2c30;
+  --win-snap-preview: rgb(255 255 255 / 0.14);
+  --win-snap-preview-stroke: rgb(255 255 255 / 0.4);
+  --win-window-shadow: 0 8px 32px rgb(0 0 0 / 0.56);
+  --win-window-shadow-inactive: 0 4px 16px rgb(0 0 0 / 0.36);
+  --win-flyout-shadow: 0 8px 16px rgb(0 0 0 / 0.44);
+}
+
+/* Accent colour (Settings → Personalization → Accent colour): light-theme value, then the dark-theme tone. */
+:root[data-accent='navy'] [data-os='windows'] {
+  --win-accent: #0f4a9e;
+  --win-accent-text: #0f4a9e;
+}
+:root[data-accent='teal'] [data-os='windows'] {
+  --win-accent: #00736e;
+  --win-accent-text: #00736e;
+}
+:root[data-accent='green'] [data-os='windows'] {
+  --win-accent: #107c10;
+  --win-accent-text: #107c10;
+}
+:root[data-accent='purple'] [data-os='windows'] {
+  --win-accent: #744da9;
+  --win-accent-text: #744da9;
+}
+:root[data-accent='plum'] [data-os='windows'] {
+  --win-accent: #9a0089;
+  --win-accent-text: #9a0089;
+}
+:root[data-accent='red'] [data-os='windows'] {
+  --win-accent: #c42b1c;
+  --win-accent-text: #c42b1c;
+}
+:root[data-accent='orange'] [data-os='windows'] {
+  --win-accent: #b3440c;
+  --win-accent-text: #b3440c;
+}
+:root[data-accent='graphite'] [data-os='windows'] {
+  --win-accent: #4c5b6a;
+  --win-accent-text: #4c5b6a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light'])[data-accent='navy'] [data-os='windows'] {
+    --win-accent: #76a8f0;
+    --win-accent-text: #76a8f0;
+  }
+  :root:not([data-theme='light'])[data-accent='teal'] [data-os='windows'] {
+    --win-accent: #4fd1c5;
+    --win-accent-text: #4fd1c5;
+  }
+  :root:not([data-theme='light'])[data-accent='green'] [data-os='windows'] {
+    --win-accent: #6ccb5f;
+    --win-accent-text: #6ccb5f;
+  }
+  :root:not([data-theme='light'])[data-accent='purple'] [data-os='windows'] {
+    --win-accent: #b4a0ff;
+    --win-accent-text: #b4a0ff;
+  }
+  :root:not([data-theme='light'])[data-accent='plum'] [data-os='windows'] {
+    --win-accent: #e39be0;
+    --win-accent-text: #e39be0;
+  }
+  :root:not([data-theme='light'])[data-accent='red'] [data-os='windows'] {
+    --win-accent: #ff99a4;
+    --win-accent-text: #ff99a4;
+  }
+  :root:not([data-theme='light'])[data-accent='orange'] [data-os='windows'] {
+    --win-accent: #f7a26b;
+    --win-accent-text: #f7a26b;
+  }
+  :root:not([data-theme='light'])[data-accent='graphite'] [data-os='windows'] {
+    --win-accent: #a8b5c2;
+    --win-accent-text: #a8b5c2;
+  }
+}
+:root[data-theme='dark'][data-accent='navy'] [data-os='windows'] {
+  --win-accent: #76a8f0;
+  --win-accent-text: #76a8f0;
+}
+:root[data-theme='dark'][data-accent='teal'] [data-os='windows'] {
+  --win-accent: #4fd1c5;
+  --win-accent-text: #4fd1c5;
+}
+:root[data-theme='dark'][data-accent='green'] [data-os='windows'] {
+  --win-accent: #6ccb5f;
+  --win-accent-text: #6ccb5f;
+}
+:root[data-theme='dark'][data-accent='purple'] [data-os='windows'] {
+  --win-accent: #b4a0ff;
+  --win-accent-text: #b4a0ff;
+}
+:root[data-theme='dark'][data-accent='plum'] [data-os='windows'] {
+  --win-accent: #e39be0;
+  --win-accent-text: #e39be0;
+}
+:root[data-theme='dark'][data-accent='red'] [data-os='windows'] {
+  --win-accent: #ff99a4;
+  --win-accent-text: #ff99a4;
+}
+:root[data-theme='dark'][data-accent='orange'] [data-os='windows'] {
+  --win-accent: #f7a26b;
+  --win-accent-text: #f7a26b;
+}
+:root[data-theme='dark'][data-accent='graphite'] [data-os='windows'] {
+  --win-accent: #a8b5c2;
+  --win-accent-text: #a8b5c2;
+}
+
+/* Contrast themes (Settings → Accessibility, plans/windows/05 "Contrast and preferences"): solid surfaces (the glass
+   is already solid via data-glass), 2 px borders, stronger secondary text. */
+:root[data-contrast='more'] [data-os='windows'] {
+  --win-stroke-w: 2px;
+  --win-border: currentColor;
+  --win-border-inactive: currentColor;
+  --win-hairline: currentColor;
+  --win-field-border: currentColor;
+  --win-card-stroke: currentColor;
+  --win-flyout-stroke: currentColor;
+  --win-text-dim: var(--win-text);
+  --win-text-2: var(--win-text);
+  --win-caption-glyph-inactive: var(--win-text);
+}
+
+/* Solid glass (tier 0, Reduce transparency, contrast): Acrylic tints become opaque (DS-GLASS-01). */
+:root[data-tier='0'] [data-os='windows'],
+:root[data-glass='solid'] [data-os='windows'] {
+  --win-taskbar: var(--win-flyout-solid);
+  --win-flyout: var(--win-flyout-solid);
+  --win-menu: var(--win-menu-solid);
+  --win-toast: var(--win-flyout-solid);
+  --win-flyout-footer: var(--win-titlebar-inactive);
+}
+
+@media (forced-colors: active) {
+  [data-os='windows'] {
+    --win-accent: Highlight;
+    --win-accent-text: LinkText;
+    --win-on-accent: HighlightText;
+    --win-border: CanvasText;
+    --win-hairline: CanvasText;
+    --win-stroke-w: 2px;
+  }
 }
 
 @media (any-pointer: coarse) {

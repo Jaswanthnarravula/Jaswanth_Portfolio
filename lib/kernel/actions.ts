@@ -12,6 +12,7 @@ import type {
   Onboarding,
   PersistedSessionsV1,
   PxRect,
+  SnapZone,
   TransitionFailure,
   UserPreferences,
   WindowId,
@@ -42,11 +43,26 @@ export type KernelAction =
       readonly invoker?: string | null;
     }
   | { readonly type: 'CLOSE_WINDOW'; readonly id: WindowId }
-  | { readonly type: 'FOCUS_WINDOW'; readonly id: WindowId }
+  /** addition (plans/macos/02 `MAC-WM-07`): Quit closes the app's window (if any) and stops the app — its Dock dot goes. */
+  | { readonly type: 'QUIT_APP'; readonly role: AppRole; readonly os?: OsId }
+  /** addition (`MAC-WM-12`): Hide Others — every other window goes to the Dock at once. */
+  | { readonly type: 'HIDE_OTHERS'; readonly id: WindowId }
+  /** addition (`MAC-WM-12`): Show All — every minimized window comes back; focus stays where it is. */
+  | { readonly type: 'SHOW_ALL'; readonly os?: OsId }
+  | {
+      readonly type: 'FOCUS_WINDOW';
+      readonly id: WindowId;
+      /** addition: a press inside the window focused it; the browser already put focus where the press landed. */
+      readonly via?: 'pointer';
+    }
   | { readonly type: 'MINIMIZE'; readonly id: WindowId }
   | { readonly type: 'RESTORE'; readonly id: WindowId }
   | { readonly type: 'TOGGLE_MAXIMIZE'; readonly id: WindowId }
   | { readonly type: 'COMMIT_RECT'; readonly id: WindowId; readonly rect: PxRect }
+  /** addition (plans/windows/02 Snap): snap a window into a zone, or `null` to leave it floating where it shows. */
+  | { readonly type: 'SNAP_WINDOW'; readonly id: WindowId; readonly zone: SnapZone | null }
+  /** addition: move the shared edge of ½ + ½ snapped windows (paired resize), as a fraction of the workspace. */
+  | { readonly type: 'SET_SNAP_SPLIT'; readonly os: OsId; readonly split: number }
   | { readonly type: 'NAVIGATE_IN_APP'; readonly id: WindowId; readonly location: AppLocation }
   | { readonly type: 'APP_BACK'; readonly id: WindowId }
   | { readonly type: 'APP_FORWARD'; readonly id: WindowId }
@@ -71,7 +87,8 @@ export type KernelAction =
       readonly command: string;
       readonly output: readonly string[];
     }
-  | { readonly type: 'TERMINAL_CLEAR'; readonly os: OsId }
+  /** `history` is an addition: `history -c` drops the persisted history (the scrollback stays). */
+  | { readonly type: 'TERMINAL_CLEAR'; readonly os: OsId; readonly history?: true }
   | { readonly type: 'CONTINUITY_CAPTURE'; readonly ref: ContentRef; readonly os: OsId }
   | { readonly type: 'CONTINUITY_DISMISS' }
   | { readonly type: 'MARK_BOOT_SEEN'; readonly os: OsId }

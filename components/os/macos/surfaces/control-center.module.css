@@ -1,0 +1,159 @@
+/*
+ * Control Center (plans/macos/surfaces/menu-bar.md): a 300 px panel under the menu bar's right end, thick material,
+ * modules as rounded tiles — toggles with an accent glyph circle when on, an Appearance segment, Switch OS.
+ */
+.panel {
+  position: fixed;
+  top: calc(var(--mb-h, 24px) + 6px);
+  right: 8px;
+  z-index: calc(var(--z-overlays) + 6);
+  display: grid;
+  gap: 10px;
+  width: 300px;
+  max-width: calc(100vw - 16px);
+  padding: 10px;
+  border-radius: 16px;
+  background: var(--material-thick);
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+  box-shadow: var(--elevation-5);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+:global([data-glass='solid']) .panel,
+:global([data-tier='0']) .panel {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: var(--surface-raised);
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tile,
+.wide {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.5);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.wide {
+  justify-content: center;
+  min-height: 36px;
+  font-weight: 500;
+}
+.icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.1);
+}
+.tile[aria-pressed='true'] .icon {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+.tileText {
+  display: grid;
+}
+.tileLabel {
+  font-weight: 600;
+}
+.tileState {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+.tile:focus-visible,
+.wide:focus-visible,
+.choice:has(input:focus-visible) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+.module {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.5);
+}
+.moduleTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-weight: 600;
+}
+.segmented {
+  display: flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: rgb(0 0 0 / 0.06);
+}
+.choice {
+  position: relative;
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 26px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.choice input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+}
+.choice:has(input:checked) {
+  background: var(--surface-raised);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+}
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme='light'])) .tile,
+  :global(:root:not([data-theme='light'])) .wide,
+  :global(:root:not([data-theme='light'])) .module {
+    background: rgb(255 255 255 / 0.08);
+  }
+}
+:global(:root[data-theme='dark']) .tile,
+:global(:root[data-theme='dark']) .wide,
+:global(:root[data-theme='dark']) .module {
+  background: rgb(255 255 255 / 0.08);
+}
+@media (any-pointer: coarse) {
+  .choice,
+  .wide {
+    min-height: 44px;
+  }
+}
+:global([data-mac-posture='compact']) .panel {
+  right: 0;
+  left: 0;
+  width: auto;
+  max-width: none;
+  border-radius: 0 0 16px 16px;
+  top: var(--mb-h, 24px);
+}
+@media (forced-colors: active) {
+  .panel {
+    border: 1px solid CanvasText;
+  }
+  .tile[aria-pressed='true'] .icon {
+    background: Highlight;
+    color: HighlightText;
+  }
+}

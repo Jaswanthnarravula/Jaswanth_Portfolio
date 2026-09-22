@@ -96,6 +96,8 @@ export const SPRINGS = {
   press: { response: 0.18, damping: 1 },
   card: { response: 0.3, damping: 1 },
   chooserFlight: { response: 0.55, damping: 0.9 },
+  /** plans/04 exit: the snapshot shrinks back into its card (settles in ~420 ms, no overshoot). */
+  chooserReturn: { response: 0.42, damping: 1 },
   iosOpen: { response: 0.42, damping: 0.86 },
   iosClose: { response: 0.5, damping: 0.8 },
   dockMagnify: { response: 0.18, damping: 1 },

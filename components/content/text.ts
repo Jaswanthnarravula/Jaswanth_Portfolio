@@ -9,8 +9,7 @@ import type { EducationData } from './experience';
 import type { LegalData } from './legal';
 import type { ProjectDetailData } from './projects';
 import type { ResumeData } from './resume';
-import { resumeFileLabel } from './resume';
-import { bullet, formatPeriod, rule, wrap } from './format';
+import { bullet, formatPeriod, resumeFileLabel, rule, wrap } from './format';
 
 export type ViewId =
   | 'about'

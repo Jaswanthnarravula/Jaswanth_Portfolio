@@ -1,0 +1,1159 @@
+/*
+ * File Explorer — plans/windows/apps/file-explorer.md on the storyboard frame (plans/windows/01-identity "Visual target"):
+ * the Mica tab strip with the active tab in the window colour, the address row (← → ↑ + a white breadcrumb field with a
+ * 1 px stroke), the command bar, the navigation pane (current row #e5eefc + a 3 px accent pill), the Details list with
+ * the selected row #dce8fb. Real Windows 11 metrics: 4 px grid, 32 px controls, 36 px rows (40 px touch), 48 px command
+ * bar, 4 px control radii, 1 px strokes, Segoe UI Variable 14 / 12. Every colour is a `--win-*` token (light + dark).
+ * Only transform / opacity / clip-path animate; hover fills are instant.
+ */
+
+/* --- Title bar: one tab --------------------------------------------------------------------------------------------- */
+.tabs {
+  display: flex;
+  flex: 0 1 auto;
+  align-self: flex-end;
+  align-items: flex-end;
+  min-width: 0;
+  height: 40px;
+  padding-left: 4px;
+}
+.tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+  max-width: 240px;
+  height: 40px;
+  padding: 0 6px 0 12px;
+  border-radius: 8px 8px 0 0;
+  background: var(--win-window);
+  color: var(--win-text);
+  font-size: var(--win-fs-caption);
+}
+/* The concave "feet" that join the tab to the toolbar below (Windows 11 tabs). */
+.tab::before,
+.tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 8px;
+  height: 8px;
+  pointer-events: none;
+}
+.tab::before {
+  left: -8px;
+  background: radial-gradient(circle at 0 0, transparent 7.5px, var(--win-window) 8px);
+}
+.tab::after {
+  right: -8px;
+  background: radial-gradient(circle at 100% 0, transparent 7.5px, var(--win-window) 8px);
+}
+.tabIcon {
+  display: inline-flex;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  color: var(--win-accent);
+}
+.tabLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+:global([data-window]:not([data-focused])) .tabLabel {
+  color: var(--win-text-dim);
+}
+.tabClose,
+.newTab,
+.titleBack {
+  display: grid;
+  flex: none;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text);
+}
+.tabClose {
+  width: 24px;
+  height: 24px;
+}
+.newTab {
+  width: 32px;
+  height: 32px;
+  margin: 0 0 4px 12px;
+  color: var(--win-text-disabled);
+  cursor: default;
+}
+.titleBack {
+  width: 40px;
+  height: 36px;
+  margin: 0 4px 2px 0;
+}
+.tabClose:hover,
+.titleBack:hover {
+  background: var(--win-caption-hover);
+}
+.tabClose:active,
+.titleBack:active {
+  background: var(--win-caption-press);
+}
+.tabs[data-compact] .tab {
+  min-width: 0;
+  height: 36px;
+}
+
+/* --- The body ------------------------------------------------------------------------------------------------------ */
+.explorer {
+  container: explorer / inline-size;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--win-window);
+  color: var(--win-text);
+  font-size: var(--win-fs-body);
+}
+
+/* Focus: Windows' 2 px focus rectangle, inside the control. */
+.iconButton:focus-visible,
+.tabClose:focus-visible,
+.titleBack:focus-visible,
+.crumb:focus-visible,
+.crumbChevron:focus-visible,
+.editArea:focus-visible,
+.command:focus-visible,
+.navItem:focus-visible,
+.headerButton:focus-visible,
+.gridItem:focus-visible,
+.quickItem:focus-visible,
+.expander:focus-visible,
+.infoClose:focus-visible,
+.backToFolder:focus-visible,
+.statusButton:focus-visible,
+.pane:focus-visible,
+.document:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
+/* --- Address row: ← → ↑ · breadcrumb field · search ----------------------------------------------------------------- */
+.addressRow {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 12px 0 8px;
+  border-bottom: 1px solid var(--win-hairline);
+}
+.navButtons {
+  display: flex;
+  flex: none;
+  gap: 4px;
+}
+.iconButton,
+.infoClose {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text);
+}
+.iconButton:hover:not(:disabled),
+.infoClose:hover {
+  background: var(--win-subtle-fill);
+}
+.iconButton:active:not(:disabled),
+.infoClose:active {
+  background: var(--win-subtle-press);
+}
+.iconButton:disabled {
+  color: var(--win-text-disabled);
+}
+
+.address {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  min-width: 0;
+  height: 32px;
+  padding: 0 4px 0 8px;
+  border: 1px solid var(--win-field-border);
+  border-radius: var(--radius-control);
+  background: var(--win-field);
+}
+.address[data-editing] {
+  box-shadow: inset 0 -2px 0 var(--win-accent);
+}
+.crumbs {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+.crumbList {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  white-space: nowrap;
+}
+.crumbItem {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.crumb {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 2px;
+  border-radius: var(--radius-control);
+  color: var(--win-text);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* The chevron glyph is 10 px, its hit area 24 × 24 (WCAG 2.2 target size, axe `target-size`). */
+.crumbChevron {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text-dim);
+}
+.crumb:hover,
+.crumbChevron:hover {
+  background: var(--win-subtle-fill);
+}
+.editArea {
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-width: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: text;
+}
+.addressInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0 4px 0 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--win-text);
+  font: inherit;
+  font-size: var(--win-fs-body);
+}
+.addressError {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: min(440px, 100cqi);
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--win-flyout-stroke);
+  border-radius: 8px;
+  background: var(--win-flyout-solid);
+  box-shadow: var(--win-flyout-shadow);
+  color: var(--win-text);
+  font-size: var(--win-fs-body);
+  line-height: 1.43;
+  animation: exp-flyout-in var(--win-d167) var(--win-ease-in) both;
+}
+.errorGlyph {
+  flex: none;
+  margin-top: 2px;
+  color: var(--caption-close);
+}
+
+.search {
+  position: relative;
+  flex: 0 1 clamp(160px, 30%, 280px);
+  min-width: 120px;
+}
+.searchInput {
+  width: 100%;
+  height: 32px;
+  padding: 0 32px 0 12px;
+  border: 1px solid var(--win-field-border);
+  border-radius: var(--radius-control);
+  background: var(--win-field);
+  color: var(--win-text);
+  font: inherit;
+  font-size: var(--win-fs-body);
+  appearance: none;
+}
+.searchInput::placeholder {
+  color: var(--win-text-dim);
+}
+.searchInput::-webkit-search-cancel-button,
+.searchInput::-webkit-search-decoration {
+  appearance: none;
+}
+.searchInput:focus {
+  outline: none;
+  border-bottom-color: var(--win-accent);
+  box-shadow: inset 0 -1px 0 var(--win-accent);
+}
+.searchGlyph {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  color: var(--win-text-dim);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+/* --- Command bar ----------------------------------------------------------------------------------------------------- */
+.commandBar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  height: 48px;
+  padding: 0 12px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--win-hairline);
+}
+.command {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text);
+  font: inherit;
+  font-size: var(--win-fs-body);
+  white-space: nowrap;
+}
+.command[data-icon-only] {
+  justify-content: center;
+  width: 32px;
+  padding: 0;
+}
+.command:hover:not([aria-disabled='true']) {
+  background: var(--win-subtle-fill);
+}
+.command:active:not([aria-disabled='true']) {
+  background: var(--win-subtle-press);
+}
+.command[aria-pressed='true'] {
+  background: var(--win-subtle-fill);
+}
+.command[aria-disabled='true'] {
+  color: var(--win-text-disabled);
+  cursor: default;
+}
+.commandGlyph {
+  flex: none;
+}
+.commandChevron {
+  flex: none;
+  margin-left: -4px;
+  color: var(--win-text-dim);
+}
+.command[aria-disabled='true'] .commandChevron {
+  color: inherit;
+}
+.commandSep {
+  flex: none;
+  width: 1px;
+  height: 24px;
+  margin: 0 6px;
+  background: var(--win-hairline);
+}
+.commandSpacer {
+  flex: 1 1 auto;
+}
+
+/* --- Panes ------------------------------------------------------------------------------------------------------------ */
+.main {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.nav {
+  flex: none;
+  width: clamp(160px, 25%, 240px);
+  overflow: auto;
+  padding: 8px;
+  border-right: 1px solid var(--win-hairline);
+}
+.navList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.navItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 32px;
+  padding: 0 8px 0 12px;
+  border-radius: var(--radius-control);
+  color: var(--win-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.navItem:hover {
+  background: var(--win-subtle-fill);
+}
+.navItem[aria-current='page'] {
+  background: var(--win-nav-current);
+}
+/* The NavigationView selection indicator: a 3 × 16 px accent pill on the left. */
+.navItem[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 3px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--win-accent);
+  transform: translateY(-50%);
+}
+.navIcon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--win-accent);
+}
+.navLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.navSep {
+  height: 1px;
+  margin: 4px 8px;
+  background: var(--win-hairline);
+}
+
+.content {
+  container: list / inline-size;
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 4px 8px;
+}
+
+.infoBar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  margin: 8px 8px 4px;
+  padding: 0 8px 0 16px;
+  border: 1px solid var(--win-card-stroke);
+  border-radius: var(--radius-control);
+  background: color-mix(in srgb, var(--win-accent) 8%, var(--win-content));
+  animation: exp-reveal var(--win-d167) var(--win-ease-in) both;
+}
+.infoGlyph {
+  flex: none;
+  color: var(--win-accent);
+}
+.infoText {
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+/* --- Details list (a real table) ------------------------------------------------------------------------------------- */
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  font-size: var(--win-fs-body);
+}
+.th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 36px;
+  padding: 0;
+  background: var(--win-window);
+  font-weight: 400;
+  text-align: left;
+}
+.headerButton,
+.headerLabel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 36px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text-dim);
+  font: inherit;
+  font-size: var(--win-fs-caption);
+  text-align: left;
+}
+.headerButton:hover {
+  background: var(--win-subtle-fill);
+}
+/* Windows shows the sort direction as a small chevron centred above the header text. */
+.sortGlyph {
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  color: var(--win-text-dim);
+  transform: translateX(-50%);
+}
+.col-name {
+  width: 30%;
+}
+.col-title {
+  width: 34%;
+}
+.col-dates {
+  width: 26%;
+}
+.col-where {
+  width: 20%;
+}
+.td {
+  height: 36px;
+  padding: 0 8px;
+  overflow: hidden;
+  color: var(--win-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.row > .td:first-child {
+  border-radius: 4px 0 0 4px;
+}
+.row > .td:last-child {
+  border-radius: 0 4px 4px 0;
+}
+.row:hover > .td {
+  background: var(--win-row-hover);
+}
+.row[data-selected] > .td {
+  background: var(--win-row-selected);
+}
+.row:has(.name:focus-visible) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+.name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 100%;
+  margin: 0 -8px;
+  padding: 0 8px;
+  color: inherit;
+  text-decoration: none;
+  outline: none;
+}
+.fileIcon {
+  display: inline-flex;
+  flex: none;
+}
+.nameText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.nameLine,
+.subLine {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.subLine {
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+.empty {
+  height: 64px;
+  padding: 16px 8px;
+  color: var(--win-text-dim);
+  text-align: center;
+  white-space: normal;
+}
+.emptyNote {
+  margin: 24px;
+  color: var(--win-text-dim);
+  text-align: center;
+}
+
+/* Narrow windows hide columns in priority order: Location, Dates, Role (plans/windows/apps/file-explorer). */
+@container list (max-width: 640px) {
+  .col-where {
+    display: none;
+  }
+}
+@container list (max-width: 420px) {
+  .col-dates {
+    display: none;
+  }
+}
+@container list (max-width: 300px) {
+  .col-title {
+    display: none;
+  }
+}
+
+/* --- Tiles / Large icons ---------------------------------------------------------------------------------------------- */
+.tiles,
+.icons {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 8px 4px;
+  list-style: none;
+}
+.tiles {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+.icons {
+  grid-template-columns: repeat(auto-fill, 120px);
+}
+.gridCell {
+  min-width: 0;
+}
+.gridItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 72px;
+  padding: 8px 12px;
+  border-radius: var(--radius-control);
+  color: var(--win-text);
+  text-decoration: none;
+}
+.icons .gridItem {
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 4px;
+  height: auto;
+  min-height: 124px;
+  padding: 8px 4px;
+  text-align: center;
+}
+.gridItem:hover {
+  background: var(--win-row-hover);
+}
+.gridItem[aria-current='true'] {
+  background: var(--win-row-selected);
+}
+.gridIcon {
+  display: inline-flex;
+  flex: none;
+}
+.gridText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.gridName,
+.gridMeta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.icons .gridName {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.gridMeta {
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+
+/* --- Home: Quick access + Recent ------------------------------------------------------------------------------------ */
+.home {
+  padding: 8px 4px 16px;
+}
+.homeSection + .homeSection {
+  margin-top: 12px;
+}
+.expanderHeading {
+  margin: 0;
+  font-size: var(--win-fs-body);
+  font-weight: 600;
+}
+.expander {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text);
+  font: inherit;
+  font-weight: 600;
+}
+.expander:hover {
+  background: var(--win-subtle-fill);
+}
+.expanderGlyph {
+  color: var(--win-text-dim);
+}
+.quick {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 4px 0 8px;
+  list-style: none;
+  animation: exp-reveal var(--win-d167) var(--win-ease-in) both;
+}
+.quickItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 72px;
+  padding: 8px 12px;
+  border-radius: var(--radius-control);
+  color: var(--win-text);
+  text-decoration: none;
+}
+.quickItem:hover {
+  background: var(--win-row-hover);
+}
+.quickIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+}
+.quickText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.quickName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.quickDetail {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+  white-space: nowrap;
+}
+.pinGlyph {
+  flex: none;
+}
+.shortcutIcon {
+  position: relative;
+  display: inline-flex;
+}
+.shortcutArrow {
+  position: absolute;
+  bottom: -2px;
+  left: -2px;
+  display: inline-flex;
+}
+.recentTable {
+  margin-top: 4px;
+  animation: exp-reveal var(--win-d167) var(--win-ease-in) both;
+}
+
+/* --- Details pane --------------------------------------------------------------------------------------------------- */
+.pane {
+  flex: none;
+  width: clamp(240px, 30%, 340px);
+  overflow: auto;
+  padding: 16px;
+  border-left: 1px solid var(--win-hairline);
+  background: var(--win-window);
+  animation: exp-pane-in var(--win-d250) var(--win-ease-in) both;
+}
+.paneHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0 16px;
+  border-bottom: 1px solid var(--win-hairline);
+  text-align: center;
+}
+.paneName {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.paneType {
+  margin: 0;
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+.paneBody {
+  padding-top: 12px;
+}
+.paneHint {
+  margin: 24px 8px;
+  color: var(--win-text-dim);
+  text-align: center;
+}
+.paneBody :global(.cv-eyebrow) {
+  color: var(--win-accent-text);
+  font-size: var(--win-fs-caption);
+}
+.paneBody :global(.cv-title) {
+  font-family: var(--font-display);
+  font-size: var(--win-fs-subtitle);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.paneBody :global(.cv-lede),
+.paneBody :global(.cv-meta) {
+  color: var(--win-text-2);
+  font-size: var(--win-fs-body);
+}
+/* Medium windows: the details pane overlays the list instead of squeezing it (plans/windows/apps "Responsive"). */
+@container explorer (max-width: 860px) {
+  .pane {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    box-shadow: var(--win-flyout-shadow);
+  }
+}
+
+/* --- Document view (the file opened in this tab) ------------------------------------------------------------------- */
+.document {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  background: color-mix(in srgb, var(--win-text) 4%, var(--win-window));
+}
+.docBar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--win-hairline);
+  background: var(--win-window);
+}
+.backToFolder {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px 0 8px;
+  border: 1px solid var(--win-field-border);
+  border-radius: var(--radius-control);
+  background: var(--win-field);
+  color: var(--win-text);
+  font: inherit;
+  font-size: var(--win-fs-body);
+}
+.backToFolder:hover {
+  background: color-mix(in srgb, var(--win-text) 4%, var(--win-field));
+}
+.docName {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--win-text-dim);
+  white-space: nowrap;
+}
+.sheet {
+  max-width: 760px;
+  margin: 24px auto 40px;
+  padding: 48px 56px;
+  border: 1px solid var(--win-card-stroke);
+  border-radius: 2px;
+  background: var(--win-content);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.08);
+  line-height: 1.5;
+}
+.sheet :global(.cv-eyebrow) {
+  color: var(--win-accent-text);
+  font-size: var(--win-fs-body);
+  font-weight: 600;
+}
+.sheet :global(.cv-title) {
+  font-family: var(--font-display);
+  font-size: var(--win-fs-title);
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+.sheet :global(.cv-meta) {
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-body);
+}
+.sheet :global(.cv-lede) {
+  color: var(--win-text-2);
+  font-size: var(--win-fs-body);
+  line-height: 1.6;
+}
+.sheet :global(.cv-bullets li::marker) {
+  color: var(--win-accent);
+}
+.sheet :global(.cv-tag) {
+  border-color: var(--win-field-border);
+  border-radius: var(--radius-control);
+  color: var(--win-text-2);
+  font-size: var(--win-fs-caption);
+}
+.sheet :global(.cv-subtitle) {
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+  letter-spacing: 0.02em;
+}
+@container explorer (max-width: 640px) {
+  .sheet {
+    margin: 12px;
+    padding: 24px 20px;
+  }
+}
+
+/* --- Status bar ------------------------------------------------------------------------------------------------------ */
+.status {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  padding: 0 12px;
+  color: var(--win-text);
+  font-size: var(--win-fs-caption);
+}
+.statusSep {
+  width: 1px;
+  height: 12px;
+  background: var(--win-hairline);
+}
+.statusSpacer {
+  flex: 1 1 auto;
+}
+.statusViews {
+  display: flex;
+  gap: 2px;
+}
+.statusButton {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text);
+}
+.statusButton:hover,
+.statusButton[aria-pressed='true'] {
+  background: var(--win-subtle-fill);
+}
+
+/* --- Medium: the navigation pane collapses to icons ------------------------------------------------------------------ */
+@container explorer (max-width: 600px) {
+  .explorer:not([data-compact]) .nav {
+    width: 56px;
+    padding: 8px 4px;
+  }
+  .explorer:not([data-compact]) .navItem {
+    justify-content: center;
+    padding: 0;
+  }
+  .explorer:not([data-compact]) .navLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* --- Touch posture: 40 px targets (plans/windows/04 tablet posture) --------------------------------------------------- */
+.explorer[data-coarse] .td,
+.explorer[data-coarse] .headerButton,
+.explorer[data-coarse] .headerLabel {
+  height: 40px;
+}
+.explorer[data-coarse] .navItem {
+  min-height: 40px;
+}
+.explorer[data-coarse] .iconButton,
+.explorer[data-coarse] .command[data-icon-only] {
+  width: 40px;
+  height: 40px;
+}
+.explorer[data-coarse] .command {
+  height: 40px;
+}
+
+/* --- Compact: a drill-down (plans/windows/apps/file-explorer "Responsive") ------------------------------------------- */
+.explorer[data-compact] .addressRow {
+  gap: 4px;
+  height: 56px;
+  padding: 0 4px 0 8px;
+}
+.explorer[data-compact] .address,
+.explorer[data-compact] .searchInput {
+  height: 40px;
+}
+.explorer[data-compact] .search {
+  flex: 0 1 40%;
+  min-width: 0;
+}
+.explorer[data-compact] .iconButton {
+  width: 44px;
+  height: 44px;
+}
+.explorer[data-compact] .nav {
+  width: 100%;
+  padding: 8px;
+  border-right: 0;
+}
+.explorer[data-compact] .navItem {
+  gap: 16px;
+  min-height: 48px;
+  padding: 0 12px 0 16px;
+}
+.explorer[data-compact] .navIcon {
+  width: 24px;
+  height: 24px;
+}
+.explorer[data-compact] .td {
+  height: 56px;
+}
+.explorer[data-compact] .name {
+  gap: 12px;
+}
+.explorer[data-compact] :is(.col-title, .col-dates, .col-where) {
+  display: none;
+}
+.explorer[data-compact] .sheet {
+  max-width: none;
+  margin: 0;
+  padding: 20px 16px 32px;
+  border: 0;
+  box-shadow: none;
+}
+
+@keyframes exp-reveal {
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0);
+  }
+}
+@keyframes exp-pane-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes exp-flyout-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --- Contrast themes -------------------------------------------------------------------------------------------------- */
+@media (forced-colors: active) {
+  .address,
+  .searchInput,
+  .backToFolder {
+    border: 2px solid ButtonText;
+  }
+  .navItem[aria-current='page'],
+  .row[data-selected] > .td,
+  .gridItem[aria-current='true'] {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+  .navItem[aria-current='page']::before {
+    background: HighlightText;
+  }
+  .command[aria-disabled='true'],
+  .newTab,
+  .iconButton:disabled {
+    color: GrayText;
+  }
+}

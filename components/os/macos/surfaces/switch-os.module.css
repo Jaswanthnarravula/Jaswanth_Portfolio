@@ -1,0 +1,57 @@
+/* The OS list (Switch OS sheet, Settings → General): an inset-grouped list, one row per OS. */
+.list {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--mac-content);
+  box-shadow: 0 0 0 0.5px var(--border-subtle);
+  list-style: none;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 40px;
+  padding: 6px 12px;
+  font-size: var(--font-size-body);
+}
+.row + .row {
+  border-top: 1px solid var(--border-subtle);
+}
+.name {
+  color: var(--mac-row-text);
+}
+.current {
+  color: var(--mac-dim);
+}
+.button {
+  flex: none;
+  min-height: 22px;
+  padding: 2px 12px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--mac-window);
+  box-shadow:
+    0 0 0 0.5px var(--mac-tag-border),
+    0 1px 1px rgb(0 0 0 / 0.06);
+  color: var(--mac-row-text);
+  font: inherit;
+  font-size: 13px;
+}
+.button:focus-visible {
+  outline: 3px solid color-mix(in oklch, var(--focus-ring) 60%, transparent);
+  outline-offset: 1px;
+}
+@media (any-pointer: coarse) {
+  .row,
+  .button {
+    min-height: 44px;
+  }
+}
+@media (forced-colors: active) {
+  .button {
+    border: 1px solid ButtonText;
+  }
+}

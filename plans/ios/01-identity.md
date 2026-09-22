@@ -42,6 +42,21 @@ UI sounds off by default. "Haptics" are expressed visually only (the scale-dip o
 T0 / `data-glass=solid`: Dock plate, bars and banners become solid tints. T1: blur on **Dock + one bar + one
 transient** (banner / Control Center / Spotlight). T2 adds nothing (no WebGL in any OS).
 
+## Visual target (owner storyboard — `plans/visual-targets/ios-home.png`, `ios-github.png`)
+Rules: `shared/06-design-system.md` → Owner visual targets. These are the **full-page (iPadOS) layouts** used on
+tablets, laptops and desktops; phones keep the iPhone layout (`04-responsive.md`). Positions are fractions of the
+page (W × H); sizes are the real iPadOS metrics.
+
+| Element | Exactly as the frame |
+|---|---|
+| Wallpaper | `radial-gradient(60% 90% at 12% 8%, #8e6bd8 0, transparent 60%), radial-gradient(55% 80% at 92% 18%, #ff9f7a 0, transparent 55%), linear-gradient(160deg, #2a1d63 0, #6c3aa3 45%, #e27a86 85%, #ffb07a 100%)` |
+| Status bar | Left `9:41  Mon 21 Sep`; right Wi-Fi glyph, `80%`, battery glyph (the frame's "Wi-Fi" and `▮` are stand-ins for the real glyphs) |
+| Widgets | Left column from x 5.7 %, y 7.7 %, width 25.6 %: **Résumé** large widget (caps label, name, "{role} · {company}", "Updated {month year}", [Open] filled `#16183a` + [Download] outlined), then two square widgets side by side — **Open to work** ("{headline}") and **Projects** ("{featured repo}", "{language} · ★ {stars}"). White-to-lavender fill `rgb(255 255 255 / .92) → rgb(235 240 255 / .85)`, ink `#16183a` |
+| App grid | From x 37 % to 3 em from the right, 5 columns: Safari · GitHub · Notes · Messages · Settings · **Career** folder (Files, Notes, Mail) |
+| Search pill | Centred above the Dock: "Search" on `rgb(255 255 255 / .25)` |
+| Dock | Floating, centred, `rgb(255 255 255 / .28)` + 1 px `rgb(255 255 255 / .35)` rim: Files · Safari · GitHub · Mail (badge 1) · divider · Notes · Messages (recents). Home indicator: white bar, bottom centre |
+| GitHub app | Split view. Sidebar 31 % W on `#f2f2f7`: large title "GitHub", search field `#e3e3e8`, inset group Home · **Projects** (blue `#0a7aff` text) · Profile, caption "REPOSITORIES", inset group of repos ("{name}" + "{language} · ★ {stars}"), selected row filled `#0a7aff` with white text. Detail on white: "‹ Repositories" and "Share" in `#0a7aff`, large title repo name, "{description} · {year}" in `#6d6d72`, segmented control README · Stack · About, body text `#1c1c1e`, topic chips `#eef3ff` / `#0a4fd6`, [Repository ↗] filled `#0a7aff` + [Live site ↗] tinted. Dark home indicator |
+
 ## Feature IDs + acceptance tests
 | ID | Feature | Acceptance test | Phase |
 |---|---|---|---|

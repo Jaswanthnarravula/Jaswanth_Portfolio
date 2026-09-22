@@ -13,6 +13,8 @@ import { reduce, type KernelDeps, type KernelResult } from '@/lib/kernel/reducer
 import { OS_REGISTRY } from '@/lib/kernel/registry';
 import { routeCodec, VISIBLE_OSES } from '@/lib/kernel/route';
 import { initialKernelState } from '@/lib/kernel/state';
+import { probe } from '@/lib/motion/debug';
+import { afterNextPaint } from '@/lib/motion/yield';
 import type { KernelState } from '@/lib/kernel/types';
 import { getPrefs, prefsStore } from './prefs-store';
 
@@ -48,6 +50,7 @@ let persistScheduled = false;
 export function dispatch(action: KernelAction): KernelResult {
   const previous = kernelStore.getState().kernel;
   const result = reduce(previous, action, deps());
+  probe(`action:${action.type}`); // acceptance probes only (e.g. "a drag commits once"); no-op otherwise
   if (result.state !== previous) {
     kernelStore.setState({ kernel: result.state });
     // Sessions persist through the debounced safe storage (250 ms); geometry only ever arrives committed.
@@ -68,3 +71,34 @@ export function dispatch(action: KernelAction): KernelResult {
 }
 
 export const getKernel = (): KernelState => kernelStore.getState().kernel;
+
+const queued: KernelAction[] = [];
+let flushScheduled = false;
+
+/**
+ * Dispatch from an input handler (shared/10 INP): the press paints its own feedback first, then the kernel commits and
+ * React renders in the task after that frame — the handler itself stays O(1). Queued actions commit in order.
+ */
+export function dispatchSoon(action: KernelAction): void {
+  queued.push(action);
+  if (flushScheduled) return;
+  flushScheduled = true;
+  afterNextPaint(flushQueued);
+}
+
+/**
+ * Commit presses still waiting for paint, now. An input handler that reads the kernel calls this first, so a second
+ * press within the same frame acts on the first one's result (two quick ⌘W close two windows, not one twice).
+ */
+export function flushQueued(): void {
+  flushScheduled = false;
+  for (const action of queued.splice(0)) dispatch(action);
+}
+
+/**
+ * Run `run` once every press queued so far has committed and React has rendered it — for moving focus into DOM that
+ * a queued press creates or removes. Frame callbacks and tasks run in order, so this lands after the queue's flush.
+ */
+export function afterQueued(run: () => void): void {
+  afterNextPaint(run);
+}

@@ -68,21 +68,20 @@ describe('Hello → intro → profiles', () => {
   });
 
   it('replay runs the intro again from the profiles', () => {
-    document.documentElement.dataset.welcome = 'profiles';
     render(<Welcome />);
+    fireEvent.click(screen.getByRole('button', { name: /Tap to begin/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Skip intro', hidden: true }));
     fireEvent.click(screen.getByRole('button', { name: 'Replay intro', hidden: true }));
     expect(root().dataset.screen).toBe('intro');
   });
 });
 
 describe('returning visitors, sound and keyboard', () => {
-  it('a returning visitor starts on the profiles with the last profile pressed', () => {
+  it('the root URL always starts on Hello, even with a saved profile', () => {
     document.documentElement.dataset.welcome = 'profiles';
     document.documentElement.dataset.persona = 'adventurer';
     render(<Welcome />);
-    expect(root().dataset.screen).toBe('profiles');
-    expect(screen.getByRole('button', { name: /^Adventurer/, hidden: true })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: /^Recruiter/, hidden: true })).toHaveAttribute('aria-pressed', 'false');
+    expect(root().dataset.screen).toBe('hello');
   });
 
   it('Sound toggles, marks the page and sends a prefs patch that keeps the volume', () => {
@@ -97,8 +96,9 @@ describe('returning visitors, sound and keyboard', () => {
   });
 
   it('arrow keys move between the five profiles and wrap', () => {
-    document.documentElement.dataset.welcome = 'profiles';
     render(<Welcome />);
+    fireEvent.click(screen.getByRole('button', { name: /Tap to begin/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Skip intro', hidden: true }));
     const recruiter = screen.getByRole('button', { name: /^Recruiter/, hidden: true });
     recruiter.focus();
     fireEvent.keyDown(recruiter, { key: 'ArrowLeft' });
@@ -111,8 +111,9 @@ describe('returning visitors, sound and keyboard', () => {
 
   it('if the kernel never arrives after a pick, the way out is offered', async () => {
     vi.useFakeTimers();
-    document.documentElement.dataset.welcome = 'profiles';
     render(<Welcome />);
+    fireEvent.click(screen.getByRole('button', { name: /Tap to begin/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Skip intro', hidden: true }));
     fireEvent.click(screen.getByRole('button', { name: /^Guest/, hidden: true }));
     await act(async () => {
       await vi.advanceTimersByTimeAsync(6500);

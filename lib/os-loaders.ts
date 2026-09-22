@@ -2,11 +2,16 @@
  * One lazy chunk per OS (shared/01 `ARCH-SPLIT-01`): visiting macOS never downloads Android. Each loader resolves an
  * `OsModule`. Until an OS's own shell is built in its phase, it resolves the preview stub (never released).
  */
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { OsId } from '@/lib/kernel/ids';
 
 export interface OsShellProps {
   readonly os: OsId;
+  /**
+   * The shell's visually hidden `h1` (focus target on OS switch, shared/09). The shell renders it where its landmark
+   * structure puts it (macOS: first inside `<main>`, plans/macos/05); the host renders it until the chunk mounts.
+   */
+  readonly heading: ReactNode;
 }
 
 export interface OsModule {

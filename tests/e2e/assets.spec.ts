@@ -6,8 +6,9 @@
 import { expect, test, type Page } from '@playwright/test';
 import { isOriginalMode, waitForOs } from './helpers';
 
-const ORIGINAL = process.env.TEST_BASE_URL_ORIGINAL ?? 'http://localhost:3001';
-const OFFICIAL = process.env.TEST_BASE_URL ?? 'http://localhost:3000';
+const PORT = Number(process.env.E2E_PORT ?? 3000);
+const ORIGINAL = process.env.TEST_BASE_URL_ORIGINAL ?? `http://localhost:${PORT + 1}`;
+const OFFICIAL = process.env.TEST_BASE_URL ?? `http://localhost:${PORT}`;
 
 async function iconBoxes(page: Page) {
   return page.locator('[data-asset]').evaluateAll((nodes) =>
@@ -24,7 +25,7 @@ async function iconBoxes(page: Page) {
   );
 }
 
-test('the stub OS journey works and icons render in this build’s asset mode', async ({ page }, info) => {
+test('the macOS journey works and icons render in this build’s asset mode', async ({ page }, info) => {
   const requests: string[] = [];
   page.on('request', (request) => requests.push(new URL(request.url()).pathname));
   await page.goto('/macos');
@@ -34,7 +35,10 @@ test('the stub OS journey works and icons render in this build’s asset mode', 
     .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-asset-mode')));
   expect(modes.length).toBeGreaterThan(0);
   expect(new Set(modes)).toEqual(new Set([isOriginalMode(info) ? 'original' : 'official']));
-  await page.getByRole('link', { name: 'Finder' }).click();
+  await page
+    .getByRole('navigation', { name: 'Dock' })
+    .getByRole('link', { name: /^Finder/ })
+    .click();
   await expect(page.getByRole('region', { name: 'Finder' })).toBeFocused();
   const official = requests.filter((path) => path.startsWith('/assets/official/'));
   if (isOriginalMode(info)) expect(official).toEqual([]);

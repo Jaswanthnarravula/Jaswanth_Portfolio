@@ -174,8 +174,15 @@ describe('DS-SCRIM-01 guaranteed contrast over wallpaper', () => {
   const WHITE = parseColor('#ffffff');
   const BLACK = parseColor('#000000');
   const worst: Record<string, string[]> = {
-    macos: ['oklch(0.9 0.06 60)', 'oklch(0.83 0.08 240)', 'oklch(0.88 0.08 50)'],
-    windows: ['oklch(0.93 0.03 240)', 'oklch(0.78 0.12 238)', 'oklch(0.66 0.14 238)'],
+    // The storyboard gradient's stops (plans/macos/01-identity): #f3d3a4 · #e3a873 · #3f78a8 · #1f4f7a.
+    macos: [
+      'oklch(0.883 0.071 77.1)',
+      'oklch(0.775 0.098 62.5)',
+      'oklch(0.555 0.096 246.1)',
+      'oklch(0.417 0.089 248.7)',
+    ],
+    // The storyboard gradient's stops (plans/windows/01-identity): #7fc0ff · #2f6fe0 · #0b1f5c.
+    windows: ['#7fc0ff', '#2f6fe0', '#0b1f5c'],
     ios: ['oklch(0.86 0.08 200)', 'oklch(0.82 0.1 200)', 'oklch(0.8 0.12 30)'],
     android: ['oklch(0.9 0.04 245)', 'oklch(0.84 0.07 200)', 'oklch(0.42 0.1 258)'],
     linux: ['oklch(0.17 0.01 260)', 'oklch(0.985 0.003 90)'],
@@ -230,5 +237,71 @@ describe('DS-SCRIM-01 (brand) reader text and accent fills ≥ 4.5:1 in both the
     const sheet = parseColor(paper.get('background')!);
     for (const token of ['--text-primary', '--text-secondary', '--text-tertiary', '--accent'])
       expect(contrast(color(paper, token), sheet), token).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe('MAC-ID-01 the macOS token scope carries plans/macos/01-identity', () => {
+  const scope = () => baseScope('macos');
+  it('type, radii, targets, accent, traffic lights (identity table)', () => {
+    const s = scope();
+    expect(s.get('--font-ui')).toMatch(/^-apple-system, BlinkMacSystemFont, 'SF Pro Text'/);
+    expect([s.get('--font-size-body'), s.get('--font-size-caption'), s.get('--font-size-title')]).toEqual([
+      '13px',
+      '11px',
+      '15px',
+    ]);
+    expect(s.get('--font-size-large')).toBe('26px');
+    expect([
+      s.get('--radius-window'),
+      s.get('--radius-sheet'),
+      s.get('--radius-control'),
+      s.get('--radius-menu'),
+    ]).toEqual(['12px', '10px', '6px', '8px']);
+    expect(s.get('--radius-icon')).toBe('22.37%');
+    expect(s.get('--target-min')).toBe('24px');
+    expect(s.get('--accent')).toBe('oklch(0.62 0.19 255)');
+    expect([s.get('--light-close'), s.get('--light-minimize'), s.get('--light-zoom')]).toEqual([
+      '#ff5f57',
+      '#febc2e',
+      '#28c840',
+    ]);
+    expect(css('macos')).toMatch(/@media \(any-pointer: coarse\)\s*{\s*\[data-os='macos'\]\s*{\s*--target-min: 44px;/);
+  });
+  it('the storyboard frame values: wallpaper, window, toolbar, sidebar, selection, tags, menu bar, Dock', () => {
+    const s = scope();
+    expect(s.get('--wallpaper-macos')).toBe(
+      'linear-gradient(150deg, #1f4f7a 0%, #3f78a8 35%, #e3a873 78%, #f3d3a4 100%)',
+    );
+    expect([s.get('--mac-window'), s.get('--mac-toolbar'), s.get('--mac-hairline')]).toEqual([
+      '#f6f6f7',
+      '#e9e9eb',
+      '#d3d3d6',
+    ]);
+    expect(s.get('--mac-sidebar')).toBe('rgb(225 229 236 / 0.9)');
+    expect(s.get('--mac-selection')).toBe('#2f6fe4');
+    expect(s.get('--mac-tag-border')).toBe('#c9ccd3');
+    expect(s.get('--mac-light-off')).toBe('#c9c9cc');
+    expect([s.get('--mac-menubar'), s.get('--mac-dock'), s.get('--mac-dock-rim')]).toEqual([
+      'rgb(255 255 255 / 0.55)',
+      'rgb(255 255 255 / 0.38)',
+      'rgb(255 255 255 / 0.55)',
+    ]);
+  });
+  it('macOS text colours stay ≥ 4.5:1 where they sit (inactive titles and secondary text included)', () => {
+    const s = scope();
+    const c = (token: string) => parseColor(s.get(token)!);
+    const sidebar = over({ ...parseColor('#e1e5ec'), a: 0.9 }, parseColor('#f6f6f7'));
+    const pairs: [string, ReturnType<typeof parseColor>][] = [
+      ['--mac-dim', c('--mac-window')],
+      ['--mac-dim', c('--mac-toolbar')],
+      ['--mac-dim', sidebar],
+      ['--mac-title-inactive', c('--mac-toolbar')],
+      ['--mac-title', c('--mac-toolbar')],
+      ['--mac-row-text', c('--mac-window')],
+      ['--mac-tag-text', c('--mac-window')],
+      ['--mac-link', c('--mac-content')],
+    ];
+    for (const [token, surface] of pairs) expect(contrast(c(token), surface), token).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(parseColor('#ffffff'), c('--mac-selection')), 'white on the selection').toBeGreaterThanOrEqual(4.5);
   });
 });

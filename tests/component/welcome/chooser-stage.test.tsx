@@ -23,7 +23,7 @@ interface FakeFlight {
   retargets: number;
 }
 
-function harness() {
+function harness(extra: Partial<Parameters<typeof createChooserStage>[0]> = {}) {
   const deps = makeDeps();
   let state: KernelState = booted('/macos');
   const listeners = new Set<(effect: KernelEffect) => void>();
@@ -86,6 +86,8 @@ function harness() {
     onView: (view) => views.push(view),
     announce: (message) => announced.push(message),
     fly,
+    getState: () => state,
+    ...extra,
   });
   const overlays = () => document.querySelectorAll('body > .stage');
   const shot = (os: OsId) => root.querySelector<HTMLElement>(`[data-chooser-card="${os}"] [data-shot]`)!;
@@ -208,5 +210,167 @@ describe('CHOOSE-FAIL-01 a failed chunk', () => {
     h.dispatch({ type: 'PHASE_DONE', target: { kind: 'os', epoch: h.state.epoch } });
     await waitFor(() => expect(h.state.transition.phase).toBe('idle'));
     expect(h.state.activeOs).toBe('linux');
+  });
+
+  it('the kernel’s own retry (the online event) flies the failed card again, like Retry', async () => {
+    const h = harness();
+    h.stage.enter('linux', 'Linux');
+    h.flights[0]!.land();
+    await tick();
+    h.dispatch({ type: 'TRANSITION_FAILED', epoch: h.state.epoch, reason: 'offline' });
+    h.flights[1]!.land();
+    await waitFor(() => expect(h.overlays()).toHaveLength(0));
+
+    h.dispatch({ type: 'RETRY_TRANSITION' }); // what TransitionDriver dispatches on `online`
+    const epoch = h.state.epoch;
+    expect(h.state.transition).toMatchObject({ phase: 'loading', to: 'linux' });
+    expect(h.views.at(-1)).toEqual({ covered: false, failed: null });
+    expect(h.announced.filter((message) => message === 'Entering Linux')).toHaveLength(2);
+    expect(h.overlays()).toHaveLength(1);
+    expect(isClaimed(epoch, 'entering') && isClaimed(epoch, 'failed')).toBe(true);
+    h.flights[2]!.land();
+    await tick();
+    h.dispatch({ type: 'PHASE_DONE', target: { kind: 'os', epoch } });
+    await waitFor(() => expect(h.state.transition.phase).toBe('idle'));
+    expect(h.state.activeOs).toBe('linux');
+  });
+
+  it('a plain switch after a failure is not mistaken for a retry', async () => {
+    const h = harness();
+    h.stage.enter('linux', 'Linux');
+    h.flights[0]!.land();
+    await tick();
+    h.dispatch({ type: 'TRANSITION_FAILED', epoch: h.state.epoch, reason: 'chunk' });
+    h.flights[1]!.land();
+    await waitFor(() => expect(h.overlays()).toHaveLength(0));
+    h.stage.enter('windows', 'Windows 11'); // the visitor chooses another card instead
+    const epoch = h.state.epoch;
+    expect(h.state.transition).toMatchObject({ phase: 'loading', to: 'windows' }); // nothing left to exit
+    expect(h.views.at(-1)).toEqual({ covered: false, failed: null });
+    expect(h.overlays()).toHaveLength(1);
+    expect(h.flights.at(-1)!.el).toBe(h.overlays()[0]);
+    expect(isClaimed(epoch, 'entering') && isClaimed(epoch, 'failed')).toBe(true);
+    h.flights.at(-1)!.land();
+    await tick();
+    expect(h.state.transition.phase).toBe('loading'); // the driver, not the stage, completes loading
+    h.dispatch({ type: 'PHASE_DONE', target: { kind: 'os', epoch } });
+    expect(h.state.transition).toMatchObject({ phase: 'entering', to: 'windows' });
+  });
+});
+
+/** Enter macOS through the stage and settle it idle on macOS (the chunk "loads" when the test says so). */
+async function enterMacos(h: ReturnType<typeof harness>) {
+  h.stage.enter('macos', 'macOS');
+  h.flights.at(-1)!.land();
+  await tick();
+  return h.state.epoch;
+}
+
+describe('CHOOSE-EXIT-01 the return flight after a leaving OS’s exit beat', () => {
+  it('reduced motion: the foyer uncovers and the kernel settles on the chooser, focus on the card', async () => {
+    const h = harness({ returning: true });
+    const epoch = await enterMacos(h);
+    h.dispatch({ type: 'PHASE_DONE', target: { kind: 'os', epoch } }); // loading → entering
+    await waitFor(() => expect(h.state.transition.phase).toBe('idle'));
+    expect(h.state.activeOs).toBe('macos');
+    h.dispatch({ type: 'ROUTE_CHANGED', url: '/' }); // Back: macOS exits (its beat owns the phase)
+    expect(h.state.transition).toMatchObject({ phase: 'exiting', from: 'macos', to: null });
+    expect(h.stage.returnFrom('macos', h.state.epoch, 'macOS')).toBe(true);
+    expect(h.views.at(-1)).toEqual({ covered: false, failed: null });
+    expect(h.state.transition.phase).toBe('idle');
+    expect(h.state.activeOs).toBeNull();
+    expect(h.results.at(-1)!.focusTarget?.candidates[0]).toBe('chooser-card:macos');
+    expect(h.overlays()).toHaveLength(0); // no flight under reduced motion
+  });
+
+  it('full motion: the snapshot appears over the leaving OS, then flies back into its re-measured card', async () => {
+    const h = harness();
+    const epoch = await enterMacos(h);
+    h.dispatch({ type: 'PHASE_DONE', target: { kind: 'os', epoch } });
+    await waitFor(() => expect(h.state.transition.phase).toBe('idle'));
+    delete document.documentElement.dataset.motion;
+    h.dispatch({ type: 'ROUTE_CHANGED', url: '/' });
+    const flightsBefore = h.flights.length;
+    expect(h.stage.returnFrom('macos', h.state.epoch, 'macOS')).toBe(true);
+    expect(h.overlays()).toHaveLength(1);
+    expect(h.shot('macos').style.visibility).toBe('hidden');
+    // After the overlay's 90 ms fade-in the kernel settles and the flight into the card starts.
+    await waitFor(() => expect(h.flights.length).toBe(flightsBefore + 1));
+    expect(h.state.transition.phase).toBe('idle');
+    expect(h.views.at(-1)).toEqual({ covered: false, failed: null });
+    h.flights.at(-1)!.land();
+    await waitFor(() => expect(h.overlays()).toHaveLength(0));
+    expect(h.shot('macos').style.visibility).toBe('');
+  });
+
+  it('declines (the OS completes its own exit) when there is no card for that OS', async () => {
+    const h = harness();
+    expect(h.stage.returnFrom('ios', h.state.epoch, 'iOS')).toBe(false);
+  });
+
+  it('a chooser mounted under a leaving OS uncovers itself if the OS finished without a return flight', async () => {
+    const h = harness({ returning: true });
+    // macOS reached without this stage (e.g. a deep link), idle and live:
+    h.dispatch({ type: 'SWITCH_OS', to: 'macos', via: 'switch' });
+    for (let step = 0; step < 3; step++)
+      h.dispatch({ type: 'PHASE_DONE', target: { kind: 'os', epoch: h.state.epoch } });
+    expect(h.state).toMatchObject({ activeOs: 'macos', transition: { phase: 'idle' } });
+    h.dispatch({ type: 'ROUTE_CHANGED', url: '/' });
+    const views = h.views.length;
+    h.dispatch({ type: 'PHASE_DONE', target: { kind: 'os', epoch: h.state.epoch } }); // the OS completed it itself
+    expect(h.views.slice(views)).toContainEqual({ covered: false, failed: null });
+  });
+});
+
+describe('CHOOSE-ENTER-02 the boot frame', () => {
+  const shell = () => {
+    const el = document.createElement('div');
+    el.dataset.osShell = 'macos';
+    return el;
+  };
+
+  it('a chunk still loading after the delay shows that OS’s boot frame once; it ends in a crossfade', async () => {
+    delete document.documentElement.dataset.motion;
+    const boots: (string | null)[] = [];
+    const h = harness({ onBoot: (os) => boots.push(os), bootable: ['macos'], bootDelayMs: 5 });
+    const epoch = await enterMacos(h);
+    expect(h.state.transition.phase).toBe('loading');
+    await waitFor(() => expect(boots).toEqual(['macos']));
+    expect(h.state.sessions.macos.bootSeen).toBe(true);
+    expect(h.announced).toContain('Starting macOS');
+    document.body.append(shell()); // the shell mounted
+    h.dispatch({ type: 'PHASE_DONE', target: { kind: 'os', epoch } }); // the chunk resolved
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift' })); // any input drops the hold
+    await waitFor(() => expect(h.state.transition.phase).toBe('idle'), { timeout: 3000 });
+    expect(boots).toEqual(['macos', null]);
+    expect(h.announced).toContain('macOS ready');
+    expect(h.overlays()).toHaveLength(0);
+  });
+
+  it('a cached chunk (loaded before the delay) never shows it; reduced motion never shows it', async () => {
+    delete document.documentElement.dataset.motion;
+    const boots: (string | null)[] = [];
+    const h = harness({ onBoot: (os) => boots.push(os), bootable: ['macos'], bootDelayMs: 40 });
+    const epoch = await enterMacos(h);
+    h.dispatch({ type: 'PHASE_DONE', target: { kind: 'os', epoch } }); // resolved at once
+    await waitFor(() => expect(h.state.transition.phase).toBe('idle'));
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    expect(boots).toEqual([]);
+
+    document.documentElement.dataset.motion = 'reduced';
+    const r = harness({ onBoot: (os) => boots.push(os), bootable: ['macos'], bootDelayMs: 5 });
+    await enterMacos(r);
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    expect(boots).toEqual([]);
+  });
+
+  it('only OSes with a boot surface get one', async () => {
+    delete document.documentElement.dataset.motion;
+    const boots: (string | null)[] = [];
+    const h = harness({ onBoot: (os) => boots.push(os), bootable: ['macos'], bootDelayMs: 5 });
+    h.stage.enter('linux', 'Linux');
+    h.flights.at(-1)!.land();
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    expect(boots).toEqual([]);
   });
 });

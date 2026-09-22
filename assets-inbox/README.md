@@ -56,7 +56,8 @@ Source: `og:image` of `https://play.google.com/store/apps/details?id=<package>` 
 | `settings.svg` (vector, the real blue gear) | Microsoft | Commons `Windows Settings icon.svg` |
 | `edge.svg` (vector, free-form) | Microsoft | Commons `Microsoft Edge logo (2019).svg` |
 | `outlook.svg` (vector, current 2025 logo) | Microsoft | Commons `Microsoft Outlook Icon (2025–present).svg` (URL-encode the en-dash) |
-| `this-pc.png` · `folder.png` (144 px) | Microsoft | `github.com/DustinBrett/daedalOS` → `public/System/Icons/144x144/` |
+| `this-pc.png` · `folder.png` (144 px, Windows 10-era art — superseded) | Microsoft | `github.com/DustinBrett/daedalOS` → `public/System/Icons/144x144/` |
+| `folder-11.png` · `this-pc-11.png` · `recycle-bin.png` (256 px, Windows 11 shell art; used by the desktop and File Explorer, P4) | Microsoft | `github.com/blueedgetechno/win11React` → `public/img/icon/win/folder.png` · `thispc.png` · `bin-em.png` (retrieved 2026-09-21) |
 
 ## `icons/ios/` and `icons/android/`
 | File | Owner | Source |

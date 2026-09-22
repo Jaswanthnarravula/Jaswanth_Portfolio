@@ -116,7 +116,8 @@ describe('KRN-WIN-03 minimize / restore / maximize round-trips', () => {
       restore: rect,
       wasMaximized: false,
     });
-    expect(minimized.focusTarget?.candidates[0]).toBe('launcher:macos:files');
+    // macos/05: minimize → focus the window's Dock tile, then the app's launcher.
+    expect(minimized.focusTarget?.candidates.slice(0, 2)).toEqual(['dock-tile:macos:files', 'launcher:macos:files']);
     const restored = reduce(minimized.state, { type: 'RESTORE', id: finder }, deps);
     expect(restored.state.sessions.macos.windows[finder]!.phase).toEqual({ s: 'normal' });
     expect(restored.state.sessions.macos.windows[finder]!.rect.expanded).toEqual(rect);

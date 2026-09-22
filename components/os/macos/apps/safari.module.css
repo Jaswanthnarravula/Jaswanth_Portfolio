@@ -1,0 +1,331 @@
+/*
+ * Safari (plans/macos/apps/safari.md): unified toolbar with a centred address pill, a tab bar under it, a favourites
+ * bar, and a long-form page typeset for reading (a nested scroller — the only place smooth scrolling runs).
+ */
+.safari {
+  --page-bg: #ffffff;
+  --page-ink: #1d1d1f;
+  --page-dim: #515154;
+}
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme='light'])) .safari {
+    --page-bg: #1e1e20;
+    --page-ink: #f2f2f5;
+    --page-dim: #b6b6bc;
+  }
+}
+:global(:root[data-theme='dark']) .safari {
+  --page-bg: #1e1e20;
+  --page-ink: #f2f2f5;
+  --page-dim: #b6b6bc;
+}
+
+.toolbar {
+  position: relative;
+  gap: 2px;
+}
+.address {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 120px;
+  margin: 0 8px;
+}
+.address input {
+  width: min(100%, 480px);
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: rgb(0 0 0 / 0.06);
+  color: var(--mac-title);
+  font: inherit;
+  font-size: 13px;
+  text-align: center;
+}
+.address input:focus-visible {
+  outline: 3px solid color-mix(in oklch, var(--focus-ring) 55%, transparent);
+  text-align: left;
+}
+@media (any-pointer: coarse) {
+  .address input {
+    height: 44px;
+    font-size: 16px;
+  }
+}
+.shareWrap {
+  position: relative;
+}
+.shareMenu {
+  position: absolute;
+  top: 34px;
+  right: 0;
+  z-index: 5;
+  display: grid;
+  min-width: 190px;
+  padding: 5px;
+  border-radius: var(--radius-menu);
+  background: var(--surface-overlay);
+  box-shadow: var(--elevation-4);
+}
+.shareMenu > * {
+  display: block;
+  min-height: 24px;
+  padding: 3px 10px;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+}
+.shareMenu > *:hover,
+.shareMenu > *:focus-visible {
+  outline: none;
+  background: var(--mac-selection);
+  color: #fff;
+}
+.progress {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.progress > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition:
+    transform 220ms ease-out,
+    opacity 160ms linear;
+}
+
+.tabs {
+  display: flex;
+  flex: none;
+  gap: 1px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--mac-hairline);
+  background: var(--mac-toolbar);
+}
+.tabs > button {
+  flex: 1;
+  max-width: 260px;
+  height: 26px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--mac-dim);
+  font: inherit;
+  font-size: 12px;
+}
+.tabs > button[aria-selected='true'] {
+  background: var(--mac-content);
+  color: var(--mac-row-text);
+  box-shadow: 0 0 0 0.5px var(--mac-hairline);
+}
+.tabs > button:focus-visible,
+.segmented > button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+}
+
+.favourites {
+  display: flex;
+  flex: none;
+  gap: 14px;
+  padding: 4px 14px;
+  border-bottom: 1px solid var(--mac-hairline);
+  background: var(--mac-toolbar);
+  font-size: 12px;
+}
+.favourites a {
+  color: var(--mac-title);
+  text-decoration: none;
+}
+.favourites a:hover {
+  text-decoration: underline;
+}
+.favourites a:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  border-radius: 3px;
+}
+:global([data-mac-size='medium']) .favourites {
+  display: none;
+}
+
+.sidebar {
+  width: 190px;
+}
+.page {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--page-bg);
+  color: var(--page-ink);
+  outline: none;
+}
+.page:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--focus-ring);
+}
+.content {
+  min-height: 100%;
+}
+.article {
+  max-width: 68ch;
+  margin: 0 auto;
+  padding: 40px 32px 64px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.article :global(.cv-title) {
+  font-size: 32px;
+  line-height: 1.15;
+}
+.article a {
+  color: var(--accent);
+}
+.hero {
+  margin: 0 0 20px;
+  color: var(--page-dim);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.section {
+  margin-top: 40px;
+}
+.section h3 {
+  margin: 0 0 12px;
+  font-size: 22px;
+}
+.strip {
+  overflow: hidden;
+  margin: 0 -32px;
+  padding: 4px 32px 12px;
+}
+.track {
+  display: flex;
+  gap: 14px;
+  width: max-content;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.card {
+  display: grid;
+  gap: 4px;
+  width: 240px;
+  min-height: 132px;
+  padding: 16px;
+  border-radius: 12px;
+  background: color-mix(in oklch, var(--page-ink) 5%, var(--page-bg));
+  color: var(--page-ink) !important;
+  text-decoration: none;
+}
+.card:hover {
+  background: color-mix(in oklch, var(--page-ink) 9%, var(--page-bg));
+}
+.card:focus-visible {
+  outline: 2px solid var(--focus-ring);
+}
+.cardContext {
+  color: var(--page-dim);
+  font-size: 12px;
+}
+.cardName {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.cardBody {
+  color: var(--page-dim);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  margin: 16px 0;
+  color: var(--page-dim);
+}
+.statValue {
+  display: inline-block;
+  min-width: 2ch;
+  margin-right: 6px;
+  color: var(--page-ink);
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.cta {
+  padding: 24px;
+  border-radius: 14px;
+  background: color-mix(in oklch, var(--accent) 10%, var(--page-bg));
+}
+.ctaActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ctaPrimary,
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.ctaPrimary {
+  background: var(--accent);
+  color: #fff !important;
+}
+.ctaSecondary {
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.plain .section {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--mac-hairline);
+}
+
+.segmented {
+  display: flex;
+  flex: none;
+  gap: 2px;
+  margin: 6px 10px calc(6px + var(--sa-b));
+  padding: 2px;
+  border-radius: 9px;
+  background: rgb(0 0 0 / 0.06);
+}
+.segmented > button {
+  flex: 1;
+  min-height: 44px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--mac-dim);
+  font: inherit;
+}
+.segmented > button[aria-selected='true'] {
+  background: var(--mac-content);
+  color: var(--mac-row-text);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+}
+
+:global([data-mac-posture='compact']) .wide {
+  display: none;
+}
+:global([data-mac-posture='compact']) .article {
+  padding: 24px 18px 40px;
+}

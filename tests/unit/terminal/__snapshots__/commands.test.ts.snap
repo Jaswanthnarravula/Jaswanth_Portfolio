@@ -1,0 +1,485 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-cat — incl. the binary notice and cat dir → Is a directory 1`] = `
+{
+  "input": "cat skills.txt",
+  "narrow": [
+    "LANGUAGES",
+    "─────────────",
+    "Go, TypeScript",
+  ],
+  "wide": [
+    "LANGUAGES",
+    "─────────────",
+    "Go, TypeScript",
+  ],
+}
+`;
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-contact — real links 1`] = `
+{
+  "input": "contact",
+  "narrow": [
+    "Open to tests.",
+    "",
+    "Email   ada@example.com",
+    "GitHub  github.com/ada",
+    "",
+    "mail  writes to me in your own mail app",
+  ],
+  "wide": [
+    "Open to tests.",
+    "",
+    "Email   ada@example.com",
+    "GitHub  github.com/ada",
+    "",
+    "mail  writes to me in your own mail app",
+  ],
+}
+`;
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-experience / LNX-CMD-education 1`] = `
+{
+  "input": "experience",
+  "narrow": [
+    "Jan 2022 – Present",
+    "Engineer @ Acme",
+    "Builds rockets.",
+    "",
+    "Jun 2020 – Aug 2021",
+    "Intern @ Globex",
+    "Learned things.",
+    "",
+    "try  cd experience && ls",
+    "     open experience/<slug>",
+  ],
+  "wide": [
+    "Jan 2022 – Present   Engineer @ Acme",
+    "                     Builds rockets.",
+    "Jun 2020 – Aug 2021  Intern @ Globex",
+    "                     Learned things.",
+    "",
+    "try  cd experience && ls  ·  open experience/<slug>",
+  ],
+}
+`;
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-experience / LNX-CMD-education 2`] = `
+{
+  "input": "education",
+  "narrow": [
+    "State University · B.S. Examples · Sep",
+    "2016 – May 2020",
+  ],
+  "wide": [
+    "State University · B.S. Examples · Sep 2016 – May 2020",
+  ],
+}
+`;
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-find — -name / -type 1`] = `
+{
+  "input": "find projects",
+  "narrow": [
+    "projects",
+    "projects/README.md",
+    "projects/portfolio-os.md",
+    "projects/rocket.md",
+  ],
+  "wide": [
+    "projects",
+    "projects/README.md",
+    "projects/portfolio-os.md",
+    "projects/rocket.md",
+  ],
+}
+`;
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-help — generated from the registry: every visible command exactly once 1`] = `
+{
+  "input": "help",
+  "narrow": [
+    "Explore",
+    "  ls          list a directory",
+    "  cd          change directory",
+    "  pwd         print the current",
+    "              directory",
+    "  tree        show a directory as a tree",
+    "  find        find files by name or type",
+    "  grep        search text in files",
+    "  open        open the résumé, a",
+    "              project, a role or a",
+    "              folder",
+    "  less        page through a file",
+    "",
+    "About me",
+    "  whoami      who this is",
+    "  about       the overview (= cat",
+    "              ~/about.txt)",
+    "  projects    the projects, featured",
+    "              first",
+    "  experience  roles, newest first",
+    "  education   schools and degrees",
+    "  skills      skills by group",
+    "  contact     how to reach me",
+    "  resume      open (or download) the",
+    "              résumé",
+    "  mail        write to me in your own",
+    "              mail app",
+    "",
+    "Files",
+    "  cat         print files",
+    "  head        first lines of a file or",
+    "              input",
+    "  tail        last lines of a file or",
+    "              input",
+    "  wc          count lines, words and",
+    "              bytes",
+    "  sort        sort lines",
+    "  uniq        collapse repeated lines",
+    "  echo        print arguments",
+    "",
+    "System",
+    "  help        this list",
+    "  man         the manual for a command",
+    "  history     commands you ran",
+    "  clear       clear the screen (Ctrl+L)",
+    "  which       where a command lives",
+    "  type        what kind of command it is",
+    "  alias       the aliases in ~/.bashrc",
+    "  exit        close this terminal",
+    "",
+    "Tab completes · ↑ recalls · Esc then Tab",
+    "leaves the terminal.",
+    "Some commands aren't listed.",
+  ],
+  "wide": [
+    "Explore",
+    "  ls          list a directory",
+    "  cd          change directory",
+    "  pwd         print the current directory",
+    "  tree        show a directory as a tree",
+    "  find        find files by name or type",
+    "  grep        search text in files",
+    "  open        open the résumé, a project, a role or a folder",
+    "  less        page through a file",
+    "",
+    "About me",
+    "  whoami      who this is",
+    "  about       the overview (= cat ~/about.txt)",
+    "  projects    the projects, featured first",
+    "  experience  roles, newest first",
+    "  education   schools and degrees",
+    "  skills      skills by group",
+    "  contact     how to reach me",
+    "  resume      open (or download) the résumé",
+    "  mail        write to me in your own mail app",
+    "",
+    "Files",
+    "  cat         print files",
+    "  head        first lines of a file or input",
+    "  tail        last lines of a file or input",
+    "  wc          count lines, words and bytes",
+    "  sort        sort lines",
+    "  uniq        collapse repeated lines",
+    "  echo        print arguments",
+    "",
+    "System",
+    "  help        this list",
+    "  man         the manual for a command",
+    "  history     commands you ran",
+    "  clear       clear the screen (Ctrl+L)",
+    "  which       where a command lives",
+    "  type        what kind of command it is",
+    "  alias       the aliases in ~/.bashrc",
+    "  exit        close this terminal",
+    "",
+    "Tab completes · ↑ recalls · Esc then Tab leaves the terminal.",
+    "Some commands aren't listed.",
+  ],
+}
+`;
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-ls — column fitting at 80/40; -la fields; entries insertable 1`] = `
+{
+  "input": "ls",
+  "narrow": [
+    "README.md    education   resume.pdf",
+    "about.txt    experience  skills.txt",
+    "contact.txt  projects",
+  ],
+  "wide": [
+    "README.md  contact.txt  experience  resume.pdf",
+    "about.txt  education    projects    skills.txt",
+  ],
+}
+`;
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-ls — column fitting at 80/40; -la fields; entries insertable 2`] = `
+{
+  "input": "ls -la",
+  "narrow": [
+    "total 64",
+    ".",
+    "  dr-xr-xr-x · 4096 · Jan  1  2026",
+    "",
+    "..",
+    "  dr-xr-xr-x · 4096 · Jan  1  2026",
+    "",
+    ".bashrc",
+    "  -r--r--r-- · 375 · Jan  1  2026",
+    "",
+    ".plan",
+    "  -r--r--r-- · 15 · Jan  1  2026",
+    "",
+    ".ssh",
+    "  drwx------ · 4096 · Jan  1  2026",
+    "",
+    "README.md",
+    "  -r--r--r-- · 290 · Jan  1  2026",
+    "",
+    "about.txt",
+    "  -r--r--r-- · 228 · Jan  1  2026",
+    "",
+    "contact.txt",
+    "  -r--r--r-- · 68 · Jan  1  2026",
+    "",
+    "education",
+    "  dr-xr-xr-x · 4096 · Jan  1  2026",
+    "",
+    "experience",
+    "  dr-xr-xr-x · 4096 · Jan  1  2026",
+    "",
+    "projects",
+    "  dr-xr-xr-x · 4096 · Jan  1  2026",
+    "",
+    "resume.pdf",
+    "  -r--r--r-- · 12845 · Jan  1  2026",
+    "",
+    "skills.txt",
+    "  -r--r--r-- · 65 · Jan  1  2026",
+  ],
+  "wide": [
+    "total 64",
+    "dr-xr-xr-x 6 jaswanth jaswanth  4096 Jan  1  2026 .",
+    "dr-xr-xr-x 3 jaswanth jaswanth  4096 Jan  1  2026 ..",
+    "-r--r--r-- 1 jaswanth jaswanth   375 Jan  1  2026 .bashrc",
+    "-r--r--r-- 1 jaswanth jaswanth    15 Jan  1  2026 .plan",
+    "drwx------ 2 jaswanth jaswanth  4096 Jan  1  2026 .ssh",
+    "-r--r--r-- 1 jaswanth jaswanth   290 Jan  1  2026 README.md",
+    "-r--r--r-- 1 jaswanth jaswanth   228 Jan  1  2026 about.txt",
+    "-r--r--r-- 1 jaswanth jaswanth    68 Jan  1  2026 contact.txt",
+    "dr-xr-xr-x 2 jaswanth jaswanth  4096 Jan  1  2026 education",
+    "dr-xr-xr-x 2 jaswanth jaswanth  4096 Jan  1  2026 experience",
+    "dr-xr-xr-x 2 jaswanth jaswanth  4096 Jan  1  2026 projects",
+    "-r--r--r-- 1 jaswanth jaswanth 12845 Jan  1  2026 resume.pdf",
+    "-r--r--r-- 1 jaswanth jaswanth    65 Jan  1  2026 skills.txt",
+  ],
+}
+`;
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-ls — column fitting at 80/40; -la fields; entries insertable 3`] = `
+{
+  "input": "ls -F projects /usr/bin/ls",
+  "narrow": [
+    "/usr/bin/ls*",
+    "",
+    "projects:",
+    "README.md  portfolio-os.md  rocket.md",
+  ],
+  "wide": [
+    "/usr/bin/ls*",
+    "",
+    "projects:",
+    "README.md  portfolio-os.md  rocket.md",
+  ],
+}
+`;
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-projects — table from data, featured first, footer insertables 1`] = `
+{
+  "input": "projects",
+  "narrow": [
+    "slug    portfolio-os",
+    "name    Portfolio OS",
+    "stack   TypeScript",
+    "year    2026",
+    "",
+    "slug    rocket",
+    "name    Rocket",
+    "stack   Go",
+    "year    2023",
+    "",
+    "try  cd projects && ls",
+    "     open projects/<slug>",
+  ],
+  "wide": [
+    "SLUG          NAME          STACK       YEAR",
+    "portfolio-os  Portfolio OS  TypeScript  2026",
+    "rocket        Rocket        Go          2023",
+    "",
+    "try  cd projects && ls  ·  open projects/<slug>",
+  ],
+}
+`;
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-pwd 1`] = `
+{
+  "input": "pwd",
+  "narrow": [
+    "/home/jaswanth/projects",
+  ],
+  "wide": [
+    "/home/jaswanth/projects",
+  ],
+}
+`;
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-skills — groups (bars only for published levels) + filter 1`] = `
+{
+  "input": "skills",
+  "narrow": [
+    "Languages  (skills langs)",
+    "  Go, TypeScript",
+  ],
+  "wide": [
+    "Languages  (skills langs)",
+    "  Go, TypeScript",
+  ],
+}
+`;
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-tree 1`] = `
+{
+  "input": "tree",
+  "narrow": [
+    ".",
+    "├── README.md",
+    "├── about.txt",
+    "├── contact.txt",
+    "├── education",
+    "│   └── state-u.md",
+    "├── experience",
+    "│   ├── acme.md",
+    "│   └── globex.md",
+    "├── projects",
+    "│   ├── README.md",
+    "│   ├── portfolio-os.md",
+    "│   └── rocket.md",
+    "├── resume.pdf",
+    "└── skills.txt",
+    "",
+    "3 directories, 11 files",
+  ],
+  "wide": [
+    ".",
+    "├── README.md",
+    "├── about.txt",
+    "├── contact.txt",
+    "├── education",
+    "│   └── state-u.md",
+    "├── experience",
+    "│   ├── acme.md",
+    "│   └── globex.md",
+    "├── projects",
+    "│   ├── README.md",
+    "│   ├── portfolio-os.md",
+    "│   └── rocket.md",
+    "├── resume.pdf",
+    "└── skills.txt",
+    "",
+    "3 directories, 11 files",
+  ],
+}
+`;
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-tree 2`] = `
+{
+  "input": "tree -L 1 ~",
+  "narrow": [
+    "/home/jaswanth",
+    "├── README.md",
+    "├── about.txt",
+    "├── contact.txt",
+    "├── education",
+    "├── experience",
+    "├── projects",
+    "├── resume.pdf",
+    "└── skills.txt",
+    "",
+    "3 directories, 5 files",
+  ],
+  "wide": [
+    "/home/jaswanth",
+    "├── README.md",
+    "├── about.txt",
+    "├── contact.txt",
+    "├── education",
+    "├── experience",
+    "├── projects",
+    "├── resume.pdf",
+    "└── skills.txt",
+    "",
+    "3 directories, 5 files",
+  ],
+}
+`;
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-which / LNX-CMD-type — path, alias, builtin 1`] = `
+{
+  "input": "type ls ll cd",
+  "narrow": [
+    "ls is /usr/bin/ls",
+    "ll is aliased to 'ls -l'",
+    "cd is a shell builtin",
+  ],
+  "wide": [
+    "ls is /usr/bin/ls",
+    "ll is aliased to 'ls -l'",
+    "cd is a shell builtin",
+  ],
+}
+`;
+
+exports[`LNX-CMD-* golden output (80 / 40 columns) > LNX-CMD-whoami / LNX-CMD-about 1`] = `
+{
+  "input": "whoami",
+  "narrow": [
+    "jaswanth",
+    "Ada Example — Engineer of examples ·",
+    "Testville",
+  ],
+  "wide": [
+    "jaswanth",
+    "Ada Example — Engineer of examples · Testville",
+  ],
+}
+`;
+
+exports[`shared/21 easter-egg commands (engine level; counted by the host through \`egg\` effects) > EGG-COW-01 cowsay / fortune 1`] = `
+[
+  " _______",
+  "< hello >",
+  " -------",
+  "        \\   ^__^",
+  "         \\  (oo)\\_______",
+  "            (__)\\       )\\/\\",
+  "                ||----w |",
+  "                ||     ||",
+]
+`;
+
+exports[`shared/21 easter-egg commands (engine level; counted by the host through \`egg\` effects) > EGG-COW-01 cowsay / fortune 2`] = `
+[
+  " __________________________________",
+  "/ a long message that must wrap    \\",
+  "| across more than one line of the |",
+  "\\ bubble                           /",
+  " ----------------------------------",
+  "        \\   ^__^",
+  "         \\  (oo)\\_______",
+  "            (__)\\       )\\/\\",
+  "                ||----w |",
+  "                ||     ||",
+]
+`;

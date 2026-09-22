@@ -204,9 +204,12 @@ describe('KRN-SWITCH-01 epoch-tagged OS switch', () => {
     state = reduce(state, { type: 'PHASE_DONE', target: { kind: 'os', epoch } }, deps).state;
     expect(state.transition.phase).toBe('loading');
     expect(state.activeOs).toBeNull();
-    state = reduce(state, { type: 'PHASE_DONE', target: { kind: 'os', epoch } }, deps).state;
+    const entering = reduce(state, { type: 'PHASE_DONE', target: { kind: 'os', epoch } }, deps);
+    state = entering.state;
     expect(state.transition.phase).toBe('entering');
     expect(state.activeOs).toBe('windows');
+    // shared/09: focus moves when the enter animation starts, not when it ends.
+    expect(entering.focusTarget?.candidates[0]).toBe('os-heading');
     const done = reduce(state, { type: 'PHASE_DONE', target: { kind: 'os', epoch } }, deps);
     expect(done.state.transition.phase).toBe('idle');
     expect(done.focusTarget?.candidates[0]).toBe('os-heading');
@@ -306,11 +309,11 @@ describe('KRN-PERSONA-01 no reducer branches on persona', () => {
 });
 
 describe('onboarding boot state', () => {
-  it('first visit starts at Hello; returning visitors land on profiles; Back returns to the chooser', () => {
+  it('the root URL always starts at Hello', () => {
     expect(booted('/').onboarding).toBe('hello');
     const returning = { ...DEFAULT_PREFS, introSeen: true };
-    expect(booted('/', { prefs: returning }).onboarding).toBe('profiles');
-    expect(booted('/', { prefs: returning, navType: 'back_forward' }).onboarding).toBe('chooser');
+    expect(booted('/', { prefs: returning }).onboarding).toBe('hello');
+    expect(booted('/', { prefs: returning, navType: 'back_forward' }).onboarding).toBe('hello');
   });
   it('a double tap on Hello is ignored (already in the intro)', () => {
     const intro = reduce(booted('/'), { type: 'ONBOARDING_ADVANCE', to: 'intro' }, deps).state;

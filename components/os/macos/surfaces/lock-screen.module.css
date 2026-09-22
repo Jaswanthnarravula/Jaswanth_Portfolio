@@ -1,0 +1,170 @@
+/*
+ * The lock screen (plans/macos/surfaces/lock-screen.md): the wallpaper's softened variant (a pre-softened gradient —
+ * no live filter), a large clock and date at the top centre, the avatar + name + headline in the middle, the
+ * notification stack bottom-right (max 3). White text on the dark scrim meets 4.5 : 1 at every wallpaper stop.
+ */
+.lock {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-system) + 50);
+  display: flex;
+  overflow: hidden;
+  background:
+    linear-gradient(rgb(10 18 30 / 0.34), rgb(10 18 30 / 0.46)),
+    radial-gradient(120% 90% at 30% 20%, #3c6d99 0%, transparent 60%),
+    radial-gradient(90% 80% at 80% 90%, #d49a6a 0%, transparent 65%),
+    linear-gradient(150deg, #24507a 0%, #4a7ca6 40%, #c9976c 80%, #e2c197 100%);
+  color: #fff;
+}
+.content {
+  position: relative;
+  flex: 1;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  padding: calc(48px + var(--sa-t, 0px)) 24px calc(24px + var(--sa-b, 0px));
+}
+.clock {
+  margin: 0;
+  text-align: center;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 0.25);
+}
+.clock time {
+  display: grid;
+}
+.date {
+  font-size: 20px;
+  font-weight: 500;
+}
+.time {
+  font-size: 88px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.user {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 6px;
+}
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.22);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.35),
+    0 8px 24px rgb(0 0 0 / 0.25);
+  font-size: 36px;
+  font-weight: 600;
+}
+.name {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+.headline {
+  max-width: 44ch;
+  margin: 0;
+  color: rgb(255 255 255 / 0.92);
+  font-size: 14px;
+  text-align: center;
+}
+.enter {
+  margin-top: 14px;
+  min-height: 32px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.24);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+.enter:hover {
+  background: rgb(255 255 255 / 0.32);
+}
+.enter:focus-visible,
+.card:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+.hint {
+  margin: 4px 0 0;
+  color: rgb(255 255 255 / 0.85);
+  font-size: 12px;
+}
+.cards {
+  display: grid;
+  gap: 8px;
+  justify-self: end;
+  width: min(344px, 100%);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.78);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.18);
+  color: #1d1d1f;
+  text-decoration: none;
+}
+.card:hover {
+  background: rgb(255 255 255 / 0.9);
+}
+.cardIcon {
+  flex: none;
+}
+.cardText {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.cardApp {
+  color: #515154;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.cardTitle {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+}
+.cardBody {
+  font-size: 13px;
+}
+@media (any-pointer: coarse) {
+  .enter {
+    min-height: 44px;
+  }
+}
+
+/* Compact: a smaller clock, the notifications as a full-width stack above the safe area. */
+:global([data-mac-posture='compact']) .time {
+  font-size: 64px;
+}
+:global([data-mac-posture='compact']) .cards {
+  justify-self: stretch;
+  width: 100%;
+}
+
+@media (forced-colors: active) {
+  .card,
+  .enter {
+    border: 1px solid CanvasText;
+  }
+}

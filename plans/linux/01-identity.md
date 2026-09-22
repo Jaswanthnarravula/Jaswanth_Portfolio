@@ -55,6 +55,20 @@ title-bar buttons. A slim title strip per tile: `jaswanth@portfolio: ~/projects`
 Off by default; if enabled: a single soft bell for `\a`/Tab-with-no-completions (the visual bell — a 80 ms border flash
 — is the default and is disabled under reduced motion).
 
+## Visual target (owner storyboard — `plans/visual-targets/linux-terminal.png`)
+Rules: `shared/06-design-system.md` → Owner visual targets. Where this table and the colour/metric tables above
+disagree on a colour, this table wins; metrics stay as above (character cells).
+
+| Element | Exactly as the frame |
+|---|---|
+| Ground | `#0c1016`, text `#d9dee8`, mono only; no icons at all |
+| Status bar | Workspaces `1:term` (active: `#0c1016` on `#7ee6a5`) · `2:view`; right: `résumé` link `#6fb6ff` · `?` · clock `09:41` · `exit`; text `#9aa6b8`, bottom rule `#2a3240` |
+| Tiles | Terminal 1.25 fr + viewer 1 fr with equal gutters; 1 px `#2a3240` borders, focused tile `#7ee6a5`; title rows `#8693a6` — `jaswanth@portfolio: {cwd}` and `viewer — {path}   [q] close   [l] copy link` |
+| Reference state (chooser snapshot) | MOTD → `cd projects && ls` → `open {featured project}`, viewer showing it, caret at a fresh prompt, hint chip visible |
+| Terminal text | MOTD and notices dim `#77849a` ("Welcome. This is Jaswanth's portfolio — as a shell." · "* résumé ready → open resume" · "* {n} projects → cd projects && ls"); prompt user `#7ee6a5`, path `#6fb6ff`; directories/README `#7fdcdc`; block caret blinking 1.06 s |
+| Hint chip | Bottom of the terminal tile, 1 px `#2a3240` box: "Lost already? Linux welcomes you." · command chip (`#1a212c`) · underlined "Paste into Terminal" |
+| Viewer | `# {name}` bold `#f0d37a` · "{description} · {year}" dim · dashed rules `#2a3240` · summary · `stack` `#f0d37a` + `[tags]` `#e59be0` · `repo ↗` `live ↗` `#7fdcdc` · "n next · p previous" dim |
+
 ## Feature IDs + acceptance tests
 | ID | Feature | Acceptance test | Phase |
 |---|---|---|---|

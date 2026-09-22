@@ -1,9 +1,12 @@
 /**
  * The welcome layer on `/` — plans/02-hello-page.md (Hello) and plans/03-netflix-page.md (intro + "Who's watching?").
+ * Each screen is the owner's storyboard frame (plans/visual-targets/{hello,intro,profiles}.png; each plan's "Visual
+ * target"): the frame's markup, units and colours, with real data in its slots.
  * Server-rendered and complete without JavaScript: the `<h1>` is the LCP element and never starts hidden, the Hello
  * draws itself in CSS from first paint, the pill jumps to real links. `WelcomeRoot` (client) only switches screens.
  * Personal copy comes from the data layer; nothing here is typed career content.
  */
+import { preload } from 'react-dom';
 import { AssetIcon } from '@/components/ui/AssetIcon';
 import { getPerson } from '@/data/selectors';
 import { resolveAsset } from '@/lib/assets/manifest';
@@ -15,188 +18,226 @@ import { CHOOSER_HEADING, OS_CHARACTER } from '@/lib/welcome/chooser';
 import helloPaths from '@/lib/welcome/hello-paths.generated.json';
 import { PROFILES } from '@/lib/welcome/profiles';
 import wordmark from '@/lib/welcome/wordmark.generated.json';
-import { ProfileButton, ReplayIntro, SkipIntro, SoundToggle, TapToBegin, WelcomeRoot } from './WelcomeRoot';
+import { TEXT_FACE } from './chooser-fonts';
+import { LENS_REFRACTION } from './refraction';
+import {
+  ProfileButton,
+  ReplayIntro,
+  RestartWelcome,
+  SkipIntro,
+  SoundToggle,
+  TapToBegin,
+  WelcomeRoot,
+} from './WelcomeRoot';
 import styles from './welcome.module.css';
 
 const RESUME_PAGE = '/go/resume';
 const PLAIN = '/plain';
 
-function Wordmark({ className }: { className?: string }) {
+/** The storyboard's text face (DS-FONT-01), declared and preloaded on `/` so the first paint already sets it. */
+const FACE_CSS = `@font-face{font-family:'${TEXT_FACE.family}';src:url(${TEXT_FACE.src}) format('woff2');font-weight:${TEXT_FACE.weight};font-style:normal;font-display:swap}`;
+
+/**
+ * The name, set exactly as the frame's `.mark` box (scripts/build-wordmark.mjs): glyphs on the box's baseline and the
+ * frame's ellipse trimming their feet. `cutId` keeps the mask id unique per instance.
+ */
+function Wordmark({ className, cutId }: { className?: string; cutId: string }) {
+  const [, , width, height] = wordmark.viewBox;
+  const { cx, cy, rx, ry } = wordmark.cut;
   return (
-    <svg className={className} viewBox={wordmark.viewBox.join(' ')} aria-hidden="true" focusable="false" data-wordmark>
-      <path d={wordmark.d} />
+    <svg
+      className={className}
+      viewBox={wordmark.viewBox.join(' ')}
+      aria-hidden="true"
+      focusable="false"
+      data-wordmark
+      style={{ ['--mark-em' as string]: wordmark.widthEm }}
+    >
+      <mask id={cutId} maskUnits="userSpaceOnUse" x="0" y="0" width={width} height={height}>
+        <rect width={width} height={height} fill="#fff" />
+        <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="#000" />
+      </mask>
+      <path d={wordmark.d} mask={`url(#${cutId})`} />
     </svg>
   );
 }
 
+// The greeting box shows exactly the frame's view of the opening "hello" (hello-paths `frame`); the frame's ink is
+// authored in its own units, so every length below is converted with `unit`.
+const { box: FRAME_BOX, viewBox: FRAME_VIEW, unit: FRAME_UNIT } = helloPaths.frame;
+const r2 = (n: number) => Math.round(n * 100) / 100;
+const fx = (x: number) => r2(FRAME_VIEW[0]! + (x - FRAME_BOX[0]!) * FRAME_UNIT);
+const fy = (y: number) => r2(FRAME_VIEW[1]! + (y - FRAME_BOX[1]!) * FRAME_UNIT);
+const fl = (length: number) => r2(length * FRAME_UNIT);
+/** The band the greetings sit in (frame units): the rod's light runs from its top to its bottom. */
+const LIGHT = { x1: 0, y1: fy(235), x2: 0, y2: fy(495) } as const;
+const ACROSS = { x1: fx(240), y1: 0, x2: fx(1040), y2: 0 } as const;
+
 /**
- * The storyboard's glass ink for the greeting stroke (view box 0 0 1000 320): a blue → lilac → pink body, a soft drop
- * shadow, a navy hairline, depth on the lower edge, a specular highlight and a white rim with chromatic fringes.
+ * Liquid-glass ink (owner decision 2026-09-21, plans/06 Deviations log): each greeting is a clear glass rod, drawn as
+ * layered strokes of one path, bottom to top — a contact shadow, a hairline, the refracting edge in the field's colours,
+ * a rim light, a clear body with the field seen flipped through it, light pooling on the lower inner edge, and a
+ * specular line on the upper left that is hot on the tops of the loops and fades down the strokes. The highlight copies
+ * are the path moved by less than half the rod's width minus their own, so they always stay inside the rod.
+ * Entries: stroke, opacity, width, dx, dy (frame units).
  */
-function GlassInk() {
+const ROD = [
+  ['#2a3a8f', 0.16, 32, 0, 16],
+  ['#1b2347', 0.2, 38, 0, 0],
+  ['url(#hello-edge)', 0.66, 36, 0, 0],
+  ['#fff', 0.62, 31, 0, 0],
+  ['url(#hello-body)', 0.62, 27, 0, 0],
+  ['url(#hello-flip)', 0.5, 27, 0, 0],
+  ['url(#hello-caustic)', 1, 7, 3, 9],
+  ['url(#hello-spec)', 1, 5, -4, -9],
+  ['url(#hello-spec)', 1, 1.8, -5, -11],
+] as const;
+
+function GlassDefs() {
   return (
     <defs>
-      <linearGradient id="hello-ink" gradientUnits="userSpaceOnUse" x1="80" y1="0" x2="920" y2="0">
-        <stop offset="0" stopColor="#8fb0ff" stopOpacity=".62" />
-        <stop offset=".5" stopColor="#d9d2ff" stopOpacity=".5" />
-        <stop offset="1" stopColor="#ffb3d9" stopOpacity=".62" />
+      <linearGradient id="hello-edge" gradientUnits="userSpaceOnUse" {...ACROSS}>
+        <stop offset="0" stopColor="#5f7fff" />
+        <stop offset=".5" stopColor="#9a86ff" />
+        <stop offset="1" stopColor="#ff7fbf" />
       </linearGradient>
-      <filter
-        id="hello-glass"
-        filterUnits="userSpaceOnUse"
-        x="-40"
-        y="-40"
-        width="1080"
-        height="400"
-        colorInterpolationFilters="sRGB"
-      >
-        <feGaussianBlur in="SourceAlpha" stdDeviation="10" result="sb" />
-        <feOffset in="sb" dy="12" result="so" />
-        <feFlood floodColor="#23306e" floodOpacity=".3" />
-        <feComposite in2="so" operator="in" result="shadow" />
-        <feMorphology in="SourceAlpha" operator="dilate" radius="1.4" result="dl" />
-        <feComposite in="dl" in2="SourceAlpha" operator="out" result="ol" />
-        <feFlood floodColor="#1b2347" floodOpacity=".3" />
-        <feComposite in2="ol" operator="in" result="hair" />
-        <feOffset in="SourceAlpha" dy="-9" result="up" />
-        <feComposite in="SourceAlpha" in2="up" operator="out" result="low" />
-        <feGaussianBlur in="low" stdDeviation="4" result="lowb" />
-        <feFlood floodColor="#3f4fc4" floodOpacity=".6" />
-        <feComposite in2="lowb" operator="in" />
-        <feComposite in2="SourceAlpha" operator="in" result="depth" />
-        <feGaussianBlur in="SourceAlpha" stdDeviation="7" result="bump" />
-        <feSpecularLighting
-          in="bump"
-          surfaceScale="8"
-          specularConstant="1.15"
-          specularExponent="30"
-          lightingColor="#fff"
-          result="sp"
-        >
-          <feDistantLight azimuth="235" elevation="55" />
-        </feSpecularLighting>
-        <feComposite in="sp" in2="SourceAlpha" operator="in" result="spec" />
-        <feMorphology in="SourceAlpha" operator="erode" radius="3" result="er" />
-        <feComposite in="SourceAlpha" in2="er" operator="out" result="ring" />
-        <feGaussianBlur in="ring" stdDeviation=".9" result="ringb" />
-        <feFlood floodColor="#fff" floodOpacity=".95" />
-        <feComposite in2="ringb" operator="in" result="rim" />
-        <feOffset in="ringb" dx="2" dy="1" result="rr" />
-        <feFlood floodColor="#ff8fcf" floodOpacity=".45" />
-        <feComposite in2="rr" operator="in" />
-        <feComposite in2="SourceAlpha" operator="in" result="fr" />
-        <feOffset in="ringb" dx="-2" dy="-1" result="rb" />
-        <feFlood floodColor="#7fa8ff" floodOpacity=".5" />
-        <feComposite in2="rb" operator="in" />
-        <feComposite in2="SourceAlpha" operator="in" result="fb" />
-        <feMerge>
-          <feMergeNode in="shadow" />
-          <feMergeNode in="hair" />
-          <feMergeNode in="SourceGraphic" />
-          <feMergeNode in="depth" />
-          <feMergeNode in="fr" />
-          <feMergeNode in="fb" />
-          <feMergeNode in="spec" />
-          <feMergeNode in="rim" />
-        </feMerge>
+      <linearGradient id="hello-body" gradientUnits="userSpaceOnUse" {...ACROSS}>
+        <stop offset="0" stopColor="#fdf3fb" />
+        <stop offset=".5" stopColor="#f4f3ff" />
+        <stop offset="1" stopColor="#eef4ff" />
+      </linearGradient>
+      {/* A cylinder flips what is behind it: the warm field below shows at the top, the blue above at the bottom. */}
+      <linearGradient id="hello-flip" gradientUnits="userSpaceOnUse" {...LIGHT}>
+        <stop offset="0" stopColor="#ffd6b8" />
+        <stop offset=".55" stopColor="#f1e8ff" stopOpacity="0" />
+        <stop offset="1" stopColor="#b9ccff" />
+      </linearGradient>
+      <linearGradient id="hello-caustic" gradientUnits="userSpaceOnUse" {...LIGHT}>
+        <stop offset="0" stopColor="#fff" stopOpacity="0" />
+        <stop offset=".5" stopColor="#fff" stopOpacity=".2" />
+        <stop offset="1" stopColor="#fff" stopOpacity=".95" />
+      </linearGradient>
+      <linearGradient id="hello-spec" gradientUnits="userSpaceOnUse" {...LIGHT}>
+        <stop offset="0" stopColor="#fff" />
+        <stop offset=".4" stopColor="#fff" stopOpacity=".9" />
+        <stop offset="1" stopColor="#fff" stopOpacity=".12" />
+      </linearGradient>
+      {/* The only filter: the shadow's blur, over the whole greeting box so no greeting is ever clipped. */}
+      <filter id="hello-soft" filterUnits="userSpaceOnUse" x="-100" y="-100" width="1200" height="520">
+        <feGaussianBlur stdDeviation={fl(8)} />
+      </filter>
+      {/* The lens's edge refraction (Chromium only, used from CSS `backdrop-filter`). refraction.ts inserts the map's
+          <feImage> once it is painted: an feImage without an href would be fetched as an empty URL. */}
+      <filter id="hello-refract" x="0" y="0" width="1" height="1" colorInterpolationFilters="sRGB" data-refract-filter>
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="map"
+          scale={LENS_REFRACTION.scale}
+          xChannelSelector="R"
+          yChannelSelector="G"
+        />
       </filter>
     </defs>
   );
 }
 
-function Icon({ d, className }: { d: string; className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      width="18"
-      height="18"
-      aria-hidden="true"
-      focusable="false"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d={d} />
-    </svg>
-  );
+function Rod({ href }: { href: string }) {
+  return ROD.map(([stroke, opacity, width, dx, dy], i) => (
+    <use
+      key={i}
+      href={href}
+      className={i === 0 ? styles.inkShadow : undefined}
+      stroke={stroke}
+      strokeOpacity={opacity}
+      strokeWidth={fl(width)}
+      transform={dx || dy ? `translate(${fl(dx)} ${fl(dy)})` : undefined}
+    />
+  ));
 }
-
-const ICONS = {
-  reader: 'M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5v13c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5z M12 6v13.5',
-  resume: 'M7 3h7l4 4v14H7z M14 3v4h4 M10 12h5 M10 16h5',
-  soundOn: 'M4 9.5h3.5L12 5.5v13l-4.5-4H4z M15.5 9a4.2 4.2 0 0 1 0 6 M18 6.5a7.8 7.8 0 0 1 0 11',
-  soundOff: 'M4 9.5h3.5L12 5.5v13l-4.5-4H4z M16 9.5l5 5 M21 9.5l-5 5',
-  arrow: 'M5 12h13 M13 7l5 5-5 5',
-} as const;
 
 export function Welcome() {
   const person = getPerson();
   const hello = helloPaths.greetings[0]!;
   const audio = resolveAsset('audio.intro');
+  preload(TEXT_FACE.src, { as: 'font', type: 'font/woff2', crossOrigin: '' });
   return (
     <>
       <script dangerouslySetInnerHTML={{ __html: WELCOME_SCRIPT }} />
+      <style href="welcome-face" precedence="default">
+        {FACE_CSS}
+      </style>
       <WelcomeRoot
         className={styles.root}
         stalledClassName={styles.stalled}
         audioSrc={audio.render === 'audio' ? audio.src : null}
       >
         <div className={styles.field} aria-hidden="true" />
+        {/* The frame's `.top`: "Skip the OS" left; "Résumé  ·  Sound on" right. */}
         <header className={styles.bar} data-welcome-bar>
           <a className={styles.barLink} href={PLAIN}>
-            <Icon d={ICONS.reader} className={styles.barIcon} />
-            <span className={styles.barText}>Skip the OS</span>
+            Skip the OS
           </a>
           <nav className={styles.barEnd} aria-label="Welcome">
             <a className={styles.barLink} href={RESUME_PAGE}>
-              <Icon d={ICONS.resume} className={styles.barIcon} />
-              <span className={styles.barText}>Résumé</span>
+              Résumé
             </a>
-            <SoundToggle className={`${styles.sound} ${styles.jsOnly}`}>
-              <Icon d={ICONS.soundOn} className={styles.soundOn} />
-              <Icon d={ICONS.soundOff} className={styles.soundOff} />
-              <span className="sr-only">Sound</span>
-            </SoundToggle>
+            <span className={styles.jsOnly}>
+              <span className={styles.barDot} aria-hidden="true">
+                {' \u00a0·\u00a0 '}
+              </span>
+              <SoundToggle className={`${styles.barLink} ${styles.sound}`}>
+                Sound
+                <span aria-hidden="true">
+                  {'\u00a0'}
+                  <span className={styles.soundOn}>on</span>
+                  <span className={styles.soundOff}>off</span>
+                </span>
+              </SoundToggle>
+            </span>
           </nav>
         </header>
 
         <main id="main" className={styles.screens}>
           <section className={`${styles.screen} ${styles.hello}`} aria-labelledby="hello-title">
-            <div className={`${styles.lens} ${styles.glass}`} data-lens>
-              <svg className={styles.glyph} viewBox={helloPaths.viewBox.join(' ')} aria-hidden="true" focusable="false">
-                <GlassInk />
-                <path className={styles.glyphPath} d={hello.d} pathLength={1} data-glyph />
-                <path className={styles.glyphAlt} data-glyph-alt />
+            <div className={styles.lens} data-lens>
+              {/* The glass's backdrop: blur everywhere; edge refraction where refraction.ts turns it on. */}
+              <span className={styles.lensBackdrop} aria-hidden="true" />
+              <svg className={styles.glyph} viewBox={FRAME_VIEW.join(' ')} aria-hidden="true" focusable="false">
+                <GlassDefs />
+                {/* Geometry only: the greeting loop morphs these; the rods below draw them. */}
+                <defs>
+                  <path id="hello-glyph" d={hello.d} pathLength={1} data-glyph />
+                  <path id="hello-glyph-alt" pathLength={1} data-glyph-alt />
+                </defs>
+                <g className={styles.ink} data-ink>
+                  <Rod href="#hello-glyph" />
+                </g>
+                <g className={styles.inkAlt} data-ink-alt>
+                  <Rod href="#hello-glyph-alt" />
+                </g>
               </svg>
               <p className="sr-only">Hello</p>
               <h1 id="hello-title" className={styles.title}>
-                <span className={styles.name}>{person.givenName}</span>
-                <span className="sr-only"> — </span>
-                <span className={styles.headline}>{person.headline}</span>
+                {person.givenName} — {person.role}
               </h1>
               <TapToBegin className={`${styles.pill} ${styles.jsOnly}`}>
-                <span className={styles.pillLabel}>Tap to begin</span>
-                <Icon d={ICONS.arrow} className={styles.pillIcon} />
+                <span>Tap to begin</span>
               </TapToBegin>
               <a className={`${styles.pill} ${styles.noJs}`} href="#begin">
-                <span className={styles.pillLabel}>Tap to begin</span>
-                <Icon d={ICONS.arrow} className={styles.pillIcon} />
+                <span>Tap to begin</span>
               </a>
             </div>
           </section>
 
           <section className={`${styles.screen} ${styles.intro}`} aria-label="Intro" data-intro>
             <p className="sr-only">{person.givenName}</p>
-            <Wordmark className={styles.wordmark} />
+            <Wordmark className={styles.wordmark} cutId="wordmark-cut-intro" />
             <SkipIntro className={styles.skip} />
           </section>
 
           <section className={`${styles.screen} ${styles.profiles}`} aria-labelledby="profiles-heading">
             <ReplayIntro className={styles.replay}>
-              <Wordmark />
+              <Wordmark cutId="wordmark-cut-replay" />
             </ReplayIntro>
             <div className={styles.profilesMain}>
               <h1
@@ -226,6 +267,7 @@ export function Welcome() {
               </div>
             </div>
             <footer className={styles.footer} data-profiles-fade>
+              <RestartWelcome className={styles.restart}>Start at Hello</RestartWelcome>
               <a href={RESUME_PAGE}>Résumé</a>
               <a href={PLAIN}>Skip the OS</a>
             </footer>

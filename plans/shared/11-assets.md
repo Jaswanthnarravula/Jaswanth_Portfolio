@@ -59,7 +59,7 @@ sound-alike). Other UI sounds (off by default) are original synthesized ticks. O
 ### Formats and budgets
 Icons: SVG where available, else PNG/AVIF at 1×/2×/3×, ≤ 12 KB each. Wallpapers: CSS gradient first; AVIF
 ≤ 60 KB, `fetchpriority="low"`. OS chooser snapshots: AVIF ≤ 25 KB each, one landscape and one portrait per OS; the chooser picks the one closest to
-the visitor's viewport aspect. Avatars ≤ 8 KB each. Everything has
+the visitor's viewport aspect. Avatars ≤ 16 KB each (WebP q90 at 200 px). Everything has
 explicit dimensions.
 
 ### Legal surface and runbook

@@ -1,0 +1,418 @@
+/*
+ * macOS window frame — plans/macos/01-identity (tokens, traffic lights, shadows) + 02-window-manager (anatomy).
+ * Colours are the storyboard frame's (`.win`, `.tb`, `.tl`); sizes are real macOS metrics (52 px unified toolbar,
+ * 12 px dots on a 20 px pitch with 24 px hit areas, 12 px corner radius, 13 px type).
+ * Geometry: committed kernel rects arrive as --x/--y/--w/--h; compact mode ignores them (one maximized window).
+ */
+
+.window {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--w);
+  height: var(--h);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-window);
+  background: var(--mac-window);
+  color: var(--mac-row-text);
+  box-shadow: var(--mac-window-shadow-inactive);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  line-height: 1.35;
+  contain: layout paint style;
+  outline: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.window[data-focused] {
+  box-shadow: var(--mac-window-shadow);
+}
+.window:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.window[hidden] {
+  display: none;
+}
+/* Title-bar drag regions take touch drags themselves (shared/08: `none` only on active drag handles). */
+.window [data-drag-region] {
+  touch-action: none;
+}
+:global([data-mac-posture='compact']) .window [data-drag-region] {
+  touch-action: manipulation;
+}
+/* While dragging, content never reacts to the pointer (shared/07 drag()). */
+.window[data-dragging] [data-body] {
+  pointer-events: none;
+}
+
+/* Compact (plans/macos/04): one maximized window between the menu bar and the Dock; geometry vars are ignored. */
+:global([data-mac-posture='compact']) .window {
+  left: 0;
+  top: var(--mb-h);
+  width: 100%;
+  height: calc(100% - var(--mb-h) - var(--dock-reserve));
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* --- Traffic lights: left, 8 px in; 12 px dots on a 20 px pitch, each inside a 24 × 24 hit area ------------------ */
+.lights {
+  position: absolute;
+  top: 14px;
+  left: 10px;
+  z-index: 3;
+  display: flex;
+}
+.light {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: default;
+}
+/* Dot centres at 16, 36 and 56 px: a 20 px visual pitch over 24 px targets. */
+.light:nth-child(1) .dot {
+  transform: translateX(4px);
+}
+.light:nth-child(3) .dot {
+  transform: translateX(-4px);
+}
+.dot {
+  display: grid;
+  place-items: center;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--mac-light-off);
+  box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.12);
+  color: transparent;
+}
+.window[data-focused] [data-light='close'] .dot,
+.lights:hover [data-light='close'] .dot {
+  background: var(--light-close);
+}
+.window[data-focused] [data-light='minimize'] .dot,
+.lights:hover [data-light='minimize'] .dot {
+  background: var(--light-minimize);
+}
+.window[data-focused] [data-light='zoom'] .dot,
+.lights:hover [data-light='zoom'] .dot {
+  background: var(--light-zoom);
+}
+/* Glyphs: on group hover, on keyboard focus, and always under increased contrast / forced colours. */
+.lights:hover [data-light='close'] .dot,
+.light[data-light='close']:focus-visible .dot {
+  color: #4c0002;
+}
+.lights:hover [data-light='minimize'] .dot,
+.light[data-light='minimize']:focus-visible .dot {
+  color: #985600;
+}
+.lights:hover [data-light='zoom'] .dot,
+.light[data-light='zoom']:focus-visible .dot {
+  color: #006400;
+}
+.light:focus-visible {
+  outline: none;
+}
+.light:focus-visible .dot {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+@media (prefers-contrast: more) {
+  .dot {
+    color: rgb(0 0 0 / 0.75);
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.6);
+  }
+}
+@media (forced-colors: active) {
+  .dot {
+    forced-color-adjust: none;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: inset 0 0 0 1px ButtonText;
+  }
+}
+
+/* --- Compact: one 44 px "Window controls" menu ------------------------------------------------------------------ */
+.compactControls {
+  display: none;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 3;
+}
+:global([data-mac-posture='compact']) .lights {
+  display: none;
+}
+:global([data-mac-posture='compact']) .compactControls {
+  display: block;
+}
+.controlsButton {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+}
+.controlsButton:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+.compactControls [data-menu-anchor] {
+  position: absolute;
+  top: 46px;
+  left: 0;
+}
+
+/* Menus (the compact controls menu here; the menu bar's own menus arrive in P3): instant, thick material, 8 px. */
+.menu {
+  min-width: 200px;
+  padding: 5px;
+  border-radius: var(--radius-menu);
+  background: var(--surface-overlay);
+  box-shadow: var(--elevation-4);
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+.menu [role='menuitem'] {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.menu [role='menuitem']:focus {
+  outline: none;
+  background: var(--mac-selection);
+  color: #fff;
+}
+.menu [role='separator'] {
+  height: 1px;
+  margin: 5px 10px;
+  background: var(--border-subtle);
+}
+
+/* --- The standard unified title bar (apps without a sidebar) -------------------------------------------------- */
+.titlebar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 16px 0 86px;
+  background: var(--mac-toolbar);
+  border-bottom: 1px solid var(--mac-hairline);
+}
+:global([data-mac-posture='compact']) .titlebar {
+  padding-left: 56px;
+}
+.title {
+  overflow: hidden;
+  margin: 0;
+  color: var(--mac-title);
+  font-size: var(--font-size-title);
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.window:not([data-focused]) .title {
+  color: var(--mac-title-inactive);
+}
+
+/* A plain document body: the shared content views in the macOS type scale. */
+.body {
+  /* The shared content views colour text with --accent: inside a document it is the text-safe link blue. */
+  --accent: var(--mac-link);
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--mac-content);
+  -webkit-user-select: text;
+  user-select: text;
+}
+.document {
+  max-width: 72ch;
+  margin: 0 auto;
+  padding: 20px 28px 36px;
+}
+.note {
+  max-width: 44ch;
+  margin: 48px auto;
+  padding: 0 24px;
+  color: var(--mac-dim);
+  text-align: center;
+}
+
+/* --- Resize (MAC-WM-04): 4 edges 6 px + 4 corners 12 px; touch gets one 44 px corner instead ------------------- */
+.resizers {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+.resizer {
+  position: absolute;
+  pointer-events: auto;
+  touch-action: none;
+}
+.resizer[data-resize='n'] {
+  top: 0;
+  right: 12px;
+  left: 12px;
+  height: 6px;
+  cursor: ns-resize;
+}
+.resizer[data-resize='s'] {
+  right: 12px;
+  bottom: 0;
+  left: 12px;
+  height: 6px;
+  cursor: ns-resize;
+}
+.resizer[data-resize='e'] {
+  top: 12px;
+  right: 0;
+  bottom: 12px;
+  width: 6px;
+  cursor: ew-resize;
+}
+.resizer[data-resize='w'] {
+  top: 12px;
+  bottom: 12px;
+  left: 0;
+  width: 6px;
+  cursor: ew-resize;
+}
+.resizer[data-resize='ne'],
+.resizer[data-resize='nw'],
+.resizer[data-resize='se'],
+.resizer[data-resize='sw'] {
+  width: 12px;
+  height: 12px;
+}
+.resizer[data-resize='ne'] {
+  top: 0;
+  right: 0;
+  cursor: nesw-resize;
+}
+.resizer[data-resize='nw'] {
+  top: 0;
+  left: 0;
+  cursor: nwse-resize;
+}
+.resizer[data-resize='se'] {
+  right: 0;
+  bottom: 0;
+  cursor: nwse-resize;
+}
+.resizer[data-resize='sw'] {
+  bottom: 0;
+  left: 0;
+  cursor: nesw-resize;
+}
+/* The traffic lights and title-bar controls sit above the top edge zone. */
+.lights,
+.windowMenu {
+  z-index: 5;
+}
+@media (any-pointer: coarse) {
+  .resizer {
+    display: none;
+  }
+  .resizer[data-resize='se'] {
+    display: block;
+    width: 44px;
+    height: 44px;
+    border-bottom-right-radius: var(--radius-window);
+    background: linear-gradient(
+      135deg,
+      transparent 60%,
+      rgb(0 0 0 / 0.18) 60% 64%,
+      transparent 64% 72%,
+      rgb(0 0 0 / 0.18) 72% 76%,
+      transparent 76%
+    );
+  }
+}
+.window[data-resizing] [data-body] {
+  pointer-events: none;
+}
+/* Tier 0 resizes this outline, then commits once on release. */
+.ghost {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: calc(var(--z-windows) + 500);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-window);
+  background: color-mix(in oklch, var(--accent) 8%, transparent);
+  pointer-events: none;
+}
+
+/* The ⋯ window menu (plans/macos/02 "Anatomy"): right after the lights — shown while it has keyboard focus, and
+   always on touch, where the title bar makes room for it. */
+.windowMenu {
+  position: absolute;
+  top: 14px;
+  left: 82px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.08);
+  color: var(--mac-title);
+  opacity: 0;
+  pointer-events: none;
+}
+.windowMenu:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (any-pointer: coarse) {
+  .windowMenu {
+    top: 4px;
+    width: 44px;
+    height: 44px;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .window > [data-body] > [data-drag-region]:first-child {
+    padding-left: 132px;
+  }
+}
+
+/* Keyboard Move / Size mode (MAC-WM-09): a visible frame while the arrows act on the window. */
+.window[data-mode] {
+  outline: 3px dashed var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/* Compact: one maximized window — no resize zones, no ⋯ (the controls menu has the window's actions). The DOM is the
+   same in every posture (RESP-DOM-01); CSS decides. */
+:global([data-mac-posture='compact']) .resizers,
+:global([data-mac-posture='compact']) .windowMenu {
+  display: none;
+}

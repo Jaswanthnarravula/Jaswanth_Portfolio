@@ -7,6 +7,7 @@
  *   ARCH-REL-01 only released OSes exist: none yet, so every OS URL is a 404 and the chooser says so
  */
 import { expect, test, type Page } from '@playwright/test';
+import { skipIntro } from './helpers';
 import { PRODUCTION } from '../../playwright.config';
 
 const ANALYTICS = /\/_vercel\/(insights|speed-insights)\//;
@@ -63,7 +64,7 @@ test.describe('production build', () => {
     expect(sitemap).not.toMatch(/\/(ios|macos|windows|android|linux)(\/|<)/);
     await page.goto('/');
     await page.getByRole('button', { name: 'Tap to begin' }).click();
-    await page.getByRole('button', { name: 'Skip intro' }).click();
+    await skipIntro(page);
     await page.getByRole('button', { name: /^Guest/ }).click();
     await expect(page.getByRole('heading', { name: 'Choose how you want to explore' })).toBeVisible();
     await expect(page.locator('[data-chooser-card]')).toHaveCount(0);

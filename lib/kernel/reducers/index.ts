@@ -7,7 +7,7 @@ import type { ContentCatalog } from '@/data/content-index';
 import { refSlug, type ContentRef } from '@/data/schema';
 import type { AnalyticsEvent } from '@/lib/analytics/events';
 import type { KernelAction, NavigationType, SwitchVia } from '../actions';
-import { clampGeometry, viewportFor } from '../geometry';
+import { clampGeometry, clampSplit, sameRect, viewportFor } from '../geometry';
 import type { AppRole, OsId } from '../ids';
 import {
   SESSION_TTL_COLD,
@@ -16,7 +16,7 @@ import {
   sanitizeSession,
   type LocationRepair,
 } from '../persist/sessions';
-import { getBinding } from '../registry';
+import { getBinding, workspaceInsets } from '../registry';
 import { linuxLocationFor, refForLocation, routeOf, type RouteCodec } from '../route/codec';
 import {
   currentLocation,
@@ -56,6 +56,7 @@ import {
   pushLocation,
   removeWindow,
   seekLocation,
+  unsnap,
   withWindow,
   workspaceOf,
 } from './windows';
@@ -162,7 +163,8 @@ function captureContinuity(
   location: AppLocation,
   deps: KernelDeps,
 ): KernelState {
-  if (location.kind === 'root') return state;
+  // App roots don't count — except an app whose root *is* a section (Windows Edge's About tab).
+  if (location.kind === 'root' && !getBinding(os, role, deps.registry)?.home) return state;
   const ref = refForLocation(os, role, location, deps.registry);
   if (!ref || !deps.catalog.has(ref)) return state;
   // Linux cwd at `~` maps to no content.
@@ -195,6 +197,7 @@ function openApp(
       invoker: options.invoker ?? null,
       sizeClass: state.viewport.sizeClass,
       viewport: state.viewport,
+      insets: workspaceInsets(os, state.viewport, deps.registry, deps.prefs),
       learned: state.learnedRects[id],
       animate: options.animate ?? true,
     });
@@ -210,8 +213,13 @@ function openApp(
     window = phase === existing.phase && rect === existing.rect ? moved : { ...moved, phase, rect };
   }
 
-  const nextSession = focusWindow(withWindow(session, window), id);
-  if (nextSession === session && window === existing) return;
+  const nextSession = startApp(focusWindow(withWindow(session, window), id), binding.role);
+  if (nextSession === session && window === existing) {
+    // Already in front at that place: nothing changes, but focus returns to the window (a search result or a link
+    // chosen from a closing panel must not leave focus behind), and the request is still published to the app.
+    draft.focusTarget = focus(focusKeys.window(id));
+    return;
+  }
   draft.state = captureContinuity(setSession(state, nextSession), os, binding.role, currentLocation(window), deps);
   draft.focusTarget = focus(focusKeys.window(id));
   draft.routeIntent = 'go';
@@ -220,6 +228,10 @@ function openApp(
     draft.events.push({ name: 'app_opened', os, role: binding.role, ...(ref ? { section: ref.section } : {}) });
   }
 }
+
+/** Opening an app starts it (desktop OSes keep it running after its window closes, until Quit — `MAC-WM-07`). */
+const startApp = (session: OsSession, role: AppRole): OsSession =>
+  session.running.includes(role) ? session : { ...session, running: [...session.running, role] };
 
 /** A requested location is pushed; re-opening without one keeps where the app was. */
 const seekOrPush = (window: WindowInstance, location: AppLocation, explicit: boolean): WindowInstance =>
@@ -369,6 +381,9 @@ function phaseDoneOs(draft: Draft, epoch: number, deps: KernelDeps): void {
         },
         transition.to,
       );
+      // shared/09: focus moves at animation start — the OS heading exists from `loading` on, so the reveal (however
+      // long on a slow device) never leaves focus on the chooser card it is covering.
+      draft.focusTarget = focus(focusKeys.osHeading);
       return;
     case 'entering': {
       draft.state = { ...state, activeOs: transition.to, transition: { phase: 'idle' } };
@@ -440,12 +455,7 @@ function boot(draft: Draft, action: Extract<KernelAction, { type: 'BOOT' }>, dep
 
   switch (route.kind) {
     case 'welcome': {
-      const onboarding: Onboarding =
-        deps.prefs.introSeen && action.navType === 'back_forward'
-          ? 'chooser'
-          : deps.prefs.introSeen
-            ? 'profiles'
-            : 'hello';
+      const onboarding: Onboarding = 'hello';
       draft.state = { ...draft.state, route, onboarding, activeOs: null };
       return;
     }
@@ -591,7 +601,11 @@ function step(draft: Draft, action: KernelAction, deps: KernelDeps): void {
           const binding = getBinding(os, window.role, deps.registry);
           const rect = window.rect[viewport.sizeClass];
           if (binding?.window.mode === 'floating' && rect) {
-            const clamped = clampGeometry(rect, workspaceOf(viewport), binding.window.minPx);
+            const clamped = clampGeometry(
+              rect,
+              workspaceOf(viewport, workspaceInsets(os, viewport, deps.registry, deps.prefs)),
+              binding.window.minPx,
+            );
             if (clamped.x !== rect.x || clamped.y !== rect.y || clamped.w !== rect.w || clamped.h !== rect.h) {
               windows[window.id] = { ...window, rect: { ...window.rect, [viewport.sizeClass]: clamped } };
               changed = true;
@@ -630,6 +644,88 @@ function step(draft: Draft, action: KernelAction, deps: KernelDeps): void {
       });
       return;
 
+    case 'QUIT_APP': {
+      const os = action.os ?? state.activeOs;
+      if (!os) return;
+      const session = state.sessions[os];
+      const id = `${os}:${action.role}` as WindowId;
+      const window = session.windows[id];
+      const stopped: OsSession = session.running.includes(action.role)
+        ? { ...session, running: session.running.filter((role) => role !== action.role) }
+        : session;
+      if (window && window.phase.s !== 'closing') {
+        // Quit = close the window (same focus and history rules as the red button) + stop the app.
+        draft.state = setSession(state, stopped);
+        step(draft, { type: 'CLOSE_WINDOW', id }, deps);
+        return;
+      }
+      if (stopped !== session) draft.state = setSession(state, stopped);
+      return;
+    }
+
+    case 'HIDE_OTHERS':
+      windowAction(draft, action.id, (window, session) => {
+        if (!isFocusable(window)) return;
+        let next = session;
+        for (const other of Object.values(session.windows)) {
+          if (!other || other.id === window.id || !isFocusable(other)) continue;
+          const binding = getBinding(other.os, other.role, deps.registry);
+          if (!binding || binding.window.mode !== 'floating') continue;
+          const phase =
+            other.phase.s === 'maximized'
+              ? ({ s: 'minimized', restore: other.phase.restore, wasMaximized: true } as const)
+              : ({
+                  s: 'minimized',
+                  restore: currentRect(
+                    other,
+                    binding,
+                    state.viewport.sizeClass,
+                    state.viewport,
+                    state.learnedRects[other.id],
+                    workspaceInsets(other.os, state.viewport, deps.registry, deps.prefs),
+                  ),
+                  wasMaximized: false,
+                } as const);
+          next = withWindow(next, { ...other, phase });
+        }
+        const focused = focusWindow(next, window.id);
+        if (focused === session) return;
+        draft.state = setSession(state, focused);
+        if (session.focused !== window.id) {
+          draft.focusTarget = focus(focusKeys.window(window.id));
+          draft.routeIntent = 'go';
+        }
+      });
+      return;
+
+    case 'SHOW_ALL': {
+      const os = action.os ?? state.activeOs;
+      if (!os) return;
+      const session = state.sessions[os];
+      let next = session;
+      for (const window of Object.values(session.windows)) {
+        if (!window || window.phase.s !== 'minimized') continue;
+        const { restore, wasMaximized } = window.phase;
+        next = withWindow(next, {
+          ...window,
+          rect: { ...window.rect, [state.viewport.sizeClass]: restore },
+          phase: wasMaximized ? { s: 'maximized', restore } : { s: 'normal' },
+        });
+      }
+      if (next === session) return;
+      // Nothing was focused (every window was in the Dock): the frontmost restored window takes focus.
+      if (session.focused === null) {
+        const top = topmostFocusable(next);
+        if (top) {
+          next = focusWindow(next, top);
+          draft.focusTarget = focus(focusKeys.window(top));
+          draft.routeIntent = 'go';
+        }
+      }
+      draft.state = setSession(state, next);
+      return;
+    }
+
     case 'FOCUS_WINDOW':
       windowAction(draft, action.id, (window, session) => {
         if (window.phase.s === 'closing') return;
@@ -640,7 +736,8 @@ function step(draft: Draft, action: KernelAction, deps: KernelDeps): void {
         const next = focusWindow(session, window.id);
         if (next === session) return;
         draft.state = captureContinuity(setSession(state, next), window.os, window.role, currentLocation(window), deps);
-        draft.focusTarget = focus(focusKeys.window(window.id));
+        // A pointer press already moved focus to what it hit (or to the window section itself): never pull it away.
+        draft.focusTarget = action.via === 'pointer' ? null : focus(focusKeys.window(window.id));
         draft.routeIntent = 'go';
       });
       return;
@@ -658,6 +755,7 @@ function step(draft: Draft, action: KernelAction, deps: KernelDeps): void {
             state.viewport.sizeClass,
             state.viewport,
             state.learnedRects[window.id],
+            workspaceInsets(window.os, state.viewport, deps.registry, deps.prefs),
           );
         else if (window.phase.s === 'maximized') {
           restore = window.phase.restore;
@@ -667,7 +765,9 @@ function step(draft: Draft, action: KernelAction, deps: KernelDeps): void {
         const next =
           session.focused === window.id ? { ...minimized, focused: nextFocus(minimized, window.id) } : minimized;
         draft.state = setSession(state, next);
+        // Minimize: focus → the window's own Dock tile, else the app's launcher (shared/09, macos/05).
         draft.focusTarget = focus(
+          focusKeys.dockTile(window.id),
           focusKeys.launcher(window.os, window.role),
           next.focused && focusKeys.window(next.focused),
           focusKeys.osHeading,
@@ -709,6 +809,7 @@ function step(draft: Draft, action: KernelAction, deps: KernelDeps): void {
             state.viewport.sizeClass,
             state.viewport,
             state.learnedRects[window.id],
+            workspaceInsets(window.os, state.viewport, deps.registry, deps.prefs),
           );
           next = { ...window, phase: { s: 'maximized', restore } };
         } else if (window.phase.s === 'maximized') {
@@ -729,7 +830,11 @@ function step(draft: Draft, action: KernelAction, deps: KernelDeps): void {
         if (!binding || binding.window.mode !== 'floating') return;
         if (window.phase.s === 'minimized' || window.phase.s === 'closing') return;
         const sizeClass = state.viewport.sizeClass;
-        const rect = clampGeometry(action.rect, workspaceOf(state.viewport), binding.window.minPx);
+        const rect = clampGeometry(
+          action.rect,
+          workspaceOf(state.viewport, workspaceInsets(window.os, state.viewport, deps.registry, deps.prefs)),
+          binding.window.minPx,
+        );
         const next = commitRect(window, sizeClass, rect);
         if (next === window) return;
         draft.state = {
@@ -738,6 +843,68 @@ function step(draft: Draft, action: KernelAction, deps: KernelDeps): void {
         };
       });
       return;
+
+    case 'SNAP_WINDOW':
+      windowAction(draft, action.id, (window, session) => {
+        const binding = getBinding(window.os, window.role, deps.registry);
+        if (!binding || binding.window.mode !== 'floating' || !binding.window.resizable) return;
+        if (window.phase.s === 'minimized' || window.phase.s === 'closing') return;
+        if (action.zone === null) {
+          const next = unsnap(window);
+          if (next !== window) draft.state = setSession(state, withWindow(session, next));
+          return;
+        }
+        const zone = action.zone;
+        const sizeClass = state.viewport.sizeClass;
+        // The pre-snap rect stays in the bucket (dragging away restores it): a maximized window's restore rect, else
+        // the rect it shows now, materialized so it never drifts with the defaults.
+        const restore =
+          window.phase.s === 'maximized'
+            ? window.phase.restore
+            : currentRect(
+                window,
+                binding,
+                sizeClass,
+                state.viewport,
+                state.learnedRects[window.id],
+                workspaceInsets(window.os, state.viewport, deps.registry, deps.prefs),
+              );
+        const halves = zone === 'left' || zone === 'right';
+        // A new half lines up with its partner's shared edge (½ + ½ pair), else starts at the middle.
+        const partner = Object.values(session.windows).find(
+          (other) => other && other.id !== window.id && (other.snap?.zone === 'left' || other.snap?.zone === 'right'),
+        );
+        const split = halves ? (partner?.snap?.split ?? 0.5) : undefined;
+        const next: WindowInstance = {
+          ...window,
+          phase: window.phase.s === 'maximized' ? { s: 'normal' } : window.phase,
+          rect: { ...window.rect, [sizeClass]: restore },
+          snap: split === undefined ? { zone } : { zone, split },
+        };
+        if (
+          window.snap?.zone === zone &&
+          window.snap.split === next.snap?.split &&
+          window.phase.s !== 'maximized' &&
+          sameRect(window.rect[sizeClass], restore)
+        )
+          return;
+        draft.state = setSession(state, withWindow(session, next));
+      });
+      return;
+
+    case 'SET_SNAP_SPLIT': {
+      const session = state.sessions[action.os];
+      const split = clampSplit(action.split);
+      let windows = session.windows;
+      for (const window of Object.values(session.windows)) {
+        if (!window?.snap || (window.snap.zone !== 'left' && window.snap.zone !== 'right')) continue;
+        if (window.snap.split === split) continue;
+        windows = { ...windows, [window.id]: { ...window, snap: { ...window.snap, split } } };
+      }
+      if (windows === session.windows) return;
+      draft.state = setSession(state, { ...session, windows });
+      return;
+    }
 
     case 'NAVIGATE_IN_APP':
       windowAction(draft, action.id, (window, session) => {
@@ -907,6 +1074,11 @@ function step(draft: Draft, action: KernelAction, deps: KernelDeps): void {
 
     case 'TERMINAL_CLEAR': {
       const session = state.sessions[action.os];
+      if (action.history) {
+        if (!session.terminal || session.terminal.history.length === 0) return;
+        draft.state = setSession(state, { ...session, terminal: { ...session.terminal, history: [] } });
+        return;
+      }
       if (!session.terminal || session.terminal.scrollback.length === 0) return;
       draft.state = setSession(state, { ...session, terminal: { ...session.terminal, scrollback: [] } });
       return;

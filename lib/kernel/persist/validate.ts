@@ -1,9 +1,13 @@
 /** Structural validators for persisted payloads. Anything invalid is dropped, never thrown (`KRN-PERSIST-01`). */
 import { isSectionId } from '@/data/schema';
+import { clampSplit } from '../geometry';
 import { isAppRole, isOsId, isSizeClass, SIZE_CLASSES, type SizeClass } from '../ids';
 import {
+  SNAP_ZONES,
   windowId,
   type AppLocation,
+  type SnapState,
+  type SnapZone,
   type NavStack,
   type PxRect,
   type TerminalSession,
@@ -101,7 +105,16 @@ export function parseWindow(value: Json): WindowInstance | null {
     scrollTop: isFiniteNumber(value.scrollTop) ? Math.max(0, value.scrollTop) : 0,
     ...(typeof value.draft === 'string' ? { draft: value.draft.slice(0, 10_000) } : {}),
     invoker: typeof value.invoker === 'string' ? value.invoker : null,
+    ...parseSnap(value.snap),
   };
+}
+
+/** A persisted Snap tag (Windows): a known zone, and a finite split for ½ + ½ pairs. Anything else floats. */
+function parseSnap(value: Json): { snap?: SnapState } {
+  if (!isRecord(value) || typeof value.zone !== 'string' || !(SNAP_ZONES as readonly string[]).includes(value.zone))
+    return {};
+  const zone = value.zone as SnapZone;
+  return isFiniteNumber(value.split) ? { snap: { zone, split: clampSplit(value.split) } } : { snap: { zone } };
 }
 
 export function parseTerminal(value: Json): TerminalSession | null {

@@ -6,16 +6,17 @@ portfolio hero. It ends with **Tap to begin**, the gesture that unlocks audio fo
 (`03-netflix-page.md`). Requirements: R10, R40, R41, T. Kernel onboarding state: `hello`.
 
 ## Portfolio mapping
-Only `person.name` and `person.headline` (server-rendered `<h1>` + subtitle). No other content — this page sets
-tone, it does not list anything. A discreet "Résumé" link (`RES-PRE-01`) and "Skip the OS" link are present.
+Only `person.givenName` and `person.role` (the server-rendered `<h1>` "Jaswanth — Software Engineer", exactly as the
+storyboard frame sets it). No other content — this page sets tone, it does not list anything. A discreet "Résumé"
+link (`RES-PRE-01`) and "Skip the OS" link are present.
 
 ## Anatomy
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│ [Skip the OS]                                   Résumé · 🔊 │  top bar (text links + mute toggle)
+│ Skip the OS                              Résumé · Sound on  │  top bar (plain text links + Sound toggle)
 │                                                              │
 │                     ✍  Hello  (SVG morph)                    │  aria-hidden; static text alternative
-│              Jaswanth — <headline>        ← <h1> LCP element │
+│              Jaswanth — <role>            ← <h1> LCP element │
 │                                                              │
 │                  ( Tap to begin  ◌ beam )                    │  glass pill button
 │                                                              │
@@ -28,6 +29,20 @@ tone, it does not list anything. A discreet "Résumé" link (`RES-PRE-01`) and "
 - **Glass surfaces (≤ 3):** the Tap-to-begin pill, the top bar, and one large lens panel behind the glyph.
 - **Tap to begin pill:** glass pill with a rotating conic border-beam (3 s linear, `transform`-only), as in the
   reference.
+
+## Visual target (owner storyboard — `plans/visual-targets/frames/hello.png`)
+Rules: `shared/06-design-system.md` → Owner visual targets. The frame is drawn at **1 em = 1.42 % of a 16:10 screen**;
+the page uses the same unit (`--u = max(12px, min(1.42vw, 2.272vh))`), so at any 16:10 size it lands on the frame's
+pixels (checked at 1280 × 800, 1440 × 900, 1680 × 1050 and 1920 × 1200). Values are the frame's (`.hello`, `.top`,
+`.who`); smaller and portrait screens keep the composition in a centred column (Responsive below).
+
+| Element | Exactly as the frame |
+|---|---|
+| Light field | Static `radial-gradient(60% 70% at 18% 20%, #9db9ff 0, transparent 60%), radial-gradient(55% 60% at 85% 25%, #ffc0de 0, transparent 60%), radial-gradient(60% 70% at 60% 95%, #ffd9a0 0, transparent 60%), #eaf0ff`; no drift, no grain. T2's shader computes this same field (see the shader spec) |
+| Text face | IBM Plex Sans (OFL, self-hosted, preloaded on `/` — `DS-FONT-01`), line-height 1.3, base colour `#111` |
+| Top bar | `inset: 2.2em 2.6em auto` at `.95em`, colour `#2a3350`: "Skip the OS" left; "Résumé · Sound on" right (space + nbsp either side of the dot). Plain text — no icons, no glass. The hit areas are padded without moving the text |
+| Name (`<h1>`) | "{givenName} — {role}", `1.5em`, weight 600, `#1b2347`, centred in the lens, `1.1em` below the glyph |
+| Lens, glyph, pill | **Not the frame: the owner's liquid-glass decision** (2026-09-21, Deviations log of `06-onboarding-acceptance.md`; Apple Liquid Glass is the bar). **Lens:** the frame's box (`inset: 16% 22% 14%`, radius `2.4em`) as clear glass — `linear-gradient(160deg, white .30 → .12 at 55 % → .22)` under `blur(6px) saturate(185%) brightness(1.04)`; rim = inset catch-lights top (.95) and bottom (.45), a .28 hairline, light entering the top edge and focused at the bottom, blue / pink bent into the left / right edges; a 1.5 px conic specular rim bright on the top-left and bottom-right corners; drop shadow `0 40px 80px -40px rgb(30 45 120 / .38)`. Three layers under the content: backdrop (blur or refraction) < surface (tint, rim light, shadow) < corner speculars, so a refraction bends only the page, never the glass's own tint. **Refracting (Chromium, see Liquid glass by tier):** the backdrop layer is 135 px larger than the lens and clipped back to it; `url(#hello-refract) blur(1.5px) saturate(160%) brightness(1.04)`; the field's colours around the glass bend into a 120 px band at the rim (up to 130 px, strongest at the edge); the tint clears to `white .20 → .05 → .14` and the rim gains a fresnel glow (`inset 0 0 6px 1px white .7`, `inset 0 0 22px 2px white .35`). **Glyph:** 25 em wide (frame 17 em); each greeting is a clear glass rod of 9 layered strokes of one path (`ROD` in `Welcome.tsx`, frame units: blurred shadow 32 ↓16, hairline 38, edge 36 in `#5f7fff → #9a86ff → #ff7fbf` at .66, rim light 31, clear body 27 + the field seen flipped through it, caustic 7 at (3, 9), specular 5 at (−4, −9) + glint 1.8, the lights fading top → bottom); no lighting filter — the shadow's blur is the only one and T0 drops it. **Pill:** the frame's size and 3.2 s conic beam (blue → pink); glass body `white .62 → .34`, top catch-light, focused light at the bottom, soft drop shadow, label weight 500. T2's shader frosts the lens to the same values. The frame's own values, for reference: lens `rgb(255 255 255 / .34)` + `blur(14px) saturate(160%)`, 1 px `rgb(255 255 255 / .75)` rim; glyph 17 em in `#hiGlass`; pill white .82 |
 
 ## Behaviour & states
 | State | Behaviour |
@@ -44,18 +59,24 @@ The Hello sequence **gates nothing**: the pill is interactive from first paint; 
 
 ## Liquid glass by tier (`shared/06-design-system.md`, `shared/10-performance.md`)
 - **T0:** tint over a pre-blurred static gradient; no `backdrop-filter`.
-- **T1 (default):** `blur(24px) saturate(160%)`, specular edge pseudo-elements, 3 % noise; ±6 px pointer parallax
-  on the background only. Optional Chromium-only SVG `feDisplacementMap` refraction on the pill (≤ 320 × 96) —
-  cut if it costs frames.
+- **T1 (default):** live `backdrop-filter` on the lens only (values: Visual target); the field stays static, with no
+  noise or parallax, as in the frame. **Edge refraction (Chromium, desktop, full glass):** the lens's backdrop layer
+  bends the page through an SVG `feDisplacementMap` inside `backdrop-filter` (technique after GlassiFy, MIT; map our
+  own — `components/welcome/refraction.ts`), still the one backdrop surface; if the first 1.5 s flight fails the frame
+  budget (`flightFailed`, shared/10) it drops to the blur for the page (`data-refract="slow"`). None on the pill.
 - **T2:** `GlassStage` (imperative three.js, `lib/webgl`) — one fullscreen triangle, one fragment shader, zero
   render targets. DOM panels drop `backdrop-filter` and keep hairline + specular.
 
 ### Shader spec (`shaders/hello.frag`)
-`field(uv)` = 4–5 drifting Gaussian lights in the brand palette (analytic, no fbm loops). Lens = SDF rounded
-rectangles passed as `uniform vec4 uPanels[4]` (updated from a `ResizeObserver`, never per frame). Refraction:
-`field(uv + n·k)` with `n` from the SDF gradient; dispersion = three evaluations (R/G/B offsets); fresnel edge
-highlight; subtle film grain. Uniforms: `uTime`, `uPointer` (smoothed), `uAccent`, `uIntensity` (fades in 600 ms),
-`uDim` (→ 1 when the Netflix layer takes over). DPR ≤ 1.5; 30 fps idle, full rate on input; paused when hidden.
+`field(uv)` = the Visual target's light field, computed exactly as CSS draws it (three elliptical radial gradients,
+each its colour at the centre and transparent at 60 % of its radii, over `#eaf0ff`) — so Tier 2 changes the glass, not
+the page. Lens = SDF rounded rectangles passed as `uniform vec4 uPanels[4]` (updated from a `ResizeObserver`, never per
+frame). Inside a lens: the field frosted exactly as the lens's CSS glass (values: Visual target). Along the rim:
+refraction `field(uv + n·k)` with `n` from the SDF gradient (of a rounder rectangle, so corners never mitre) and `k`
+the DOM refraction's profile (`refraction.ts`: 120 px band, up to 130 px outward, power 2; a unit test keeps the two
+in step); dispersion = three evaluations (R/G/B offsets); fresnel edge highlight. Uniforms: `uIntensity` (fades the refraction in over 600 ms), `uDim` (→ 1 when the Netflix layer takes
+over). DPR ≤ 1.5. The picture is static, so a frame is drawn only when something changed (fade-in, dim, resize, lens
+move); nothing while hidden.
 
 ## Navigation & routes
 Route `/`, onboarding state `hello`. **No history writes** — all of `/` is one entry. Tap → `intro`.
@@ -67,14 +88,15 @@ loaded) · pill press spring · exit: glyph and panels fade 240 ms while the sta
 to the Netflix intro without a cut.
 
 ## Responsive
-Phone portrait: single column, glyph sized in `svh`, pill ≥ 56 px tall, top bar collapses to icons with labels for
-AT. Phone landscape: glyph left, pill right, no scroll. Tablet: centred 640 px column. Laptop/desktop: capped width;
-T2 eligible. Safe-area tokens pad the top bar and pill.
+Laptop/desktop (landscape, ≥ 1024 px): the Visual target, scaled by `--u`; T2 eligible. Tablet, portrait screens and
+narrow windows: the same composition in a centred column ≤ 660 px, `--u` 13–18 px, top bar text 15 px. Phone
+landscape: glyph left, name and pill right, no scroll. Safe-area tokens pad the top bar and pill.
 
 ## Accessibility
-`<main>` with one `<h1>` ("Jaswanth — {headline}"). The morphing glyph is `aria-hidden`; a visually hidden
+`<main>` with one `<h1>` ("Jaswanth — {role}"). The morphing glyph is `aria-hidden`; a visually hidden
 "Hello" precedes the `<h1>`. The pill is a real `<button>` named "Tap to begin". Mute toggle is a `<button
-aria-pressed>` named "Sound". No autofocus (would scroll/zoom on mobile). First Tab → "Skip the OS".
+aria-pressed>` named "Sound" (its visible "on" / "off" is `aria-hidden`; `aria-pressed` carries the state). No
+autofocus (would scroll/zoom on mobile). First Tab → "Skip the OS".
 
 ## Edge cases
 JS disabled → static page with links to `/plain`, `/go/resume` and each released OS. WebGL context lost → drop to T1

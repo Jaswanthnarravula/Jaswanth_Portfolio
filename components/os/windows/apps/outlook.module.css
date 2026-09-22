@@ -1,0 +1,1182 @@
+/*
+ * Outlook — plans/windows/apps/outlook.md, on plans/windows/01-identity metrics. The new Outlook for Windows: Mica shows
+ * behind the app rail, the ribbon card and the folder pane; the message list and the reading pane are solid 8 px cards.
+ * 48 px title bar with a 32 px search box · 48 px app rail of 40 px items · a 40 px ribbon of 32 px commands · 32 px
+ * folder rows · three-line message rows · 32 px controls with 4 px corners (40 px on coarse pointers).
+ * Tokens only (`--win-*`, light/dark aware). Motion on the WinUI ladder (`--win-d*`, 0 under reduced motion); only
+ * transform, opacity and clip-path animate — a hover fill is the opacity of a ::before layer (83 ms).
+ */
+
+.app {
+  container: outlook / inline-size;
+  position: relative;
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: 48px minmax(0, 1fr);
+  min-height: 0;
+  color: var(--win-text);
+  font-size: var(--win-fs-body);
+  line-height: 1.43;
+}
+.app [hidden] {
+  display: none !important;
+}
+
+/* --- Hover fills: an opacity fade of a tinted layer under the content (never a background transition) ----------- */
+.railItem,
+.command,
+.newMail,
+.hamburger,
+.folder,
+.tab,
+.row,
+.button,
+.send,
+.dialogPrimary,
+.back,
+.attachmentOpen,
+.attachmentMore,
+.infoClose {
+  position: relative;
+  isolation: isolate;
+  cursor: default;
+}
+.railItem::before,
+.command::before,
+.newMail::before,
+.hamburger::before,
+.folder::before,
+.row::before,
+.button::before,
+.send::before,
+.dialogPrimary::before,
+.back::before,
+.attachmentOpen::before,
+.attachmentMore::before,
+.infoClose::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--fill, var(--win-subtle-fill));
+  opacity: 0;
+  transition: opacity var(--win-d83) linear;
+  pointer-events: none;
+}
+.railItem:hover:not(:disabled)::before,
+.command:hover:not(:disabled)::before,
+.newMail:hover::before,
+.hamburger:hover::before,
+.folder:hover::before,
+.row:hover::before,
+.button:hover::before,
+.send:hover::before,
+.dialogPrimary:hover::before,
+.back:hover::before,
+.attachmentOpen:hover::before,
+.attachmentMore:hover::before,
+.infoClose:hover::before {
+  opacity: 1;
+}
+.railItem:active:not(:disabled)::before,
+.command:active:not(:disabled)::before,
+.hamburger:active::before,
+.folder:active::before,
+.row:active::before,
+.button:active::before,
+.back:active::before,
+.attachmentOpen:active::before,
+.attachmentMore:active::before,
+.infoClose:active::before {
+  background: var(--win-subtle-press);
+}
+
+/* Focus: the frame's accent ring, inset so scrolling panes never clip it; on accent fills it takes the text colour. */
+.app :is(button, a, input, textarea, [tabindex='-1']):focus-visible {
+  outline: 2px solid var(--win-accent);
+  outline-offset: -2px;
+}
+.app :is(.newMail, .send, .dialogPrimary):focus-visible {
+  outline-color: var(--win-text);
+  outline-offset: 1px;
+}
+.app [tabindex='-1']:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* --- Title bar: app name + the search box (inputs never start a drag) ------------------------------------------- */
+.appName {
+  flex: none;
+  align-self: center;
+  margin: 0 16px 0 2px;
+  font-size: var(--win-fs-caption);
+  white-space: nowrap;
+}
+.appName[data-compact] {
+  display: none;
+}
+.searchSlot {
+  display: flex;
+  flex: 1 1 auto;
+  align-self: center;
+  justify-content: center;
+  min-width: 0;
+}
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: min(100%, 468px);
+  height: 32px;
+}
+.searchIcon {
+  position: absolute;
+  left: 10px;
+  color: var(--win-text-dim);
+  pointer-events: none;
+}
+.searchInput {
+  width: 100%;
+  height: 100%;
+  padding: 0 10px 0 34px;
+  border: 1px solid var(--win-field-border);
+  border-bottom-color: var(--win-field-underline);
+  border-radius: var(--radius-control);
+  background: var(--win-field);
+  color: var(--win-text);
+  font: inherit;
+  font-size: var(--win-fs-body);
+  outline: none;
+  appearance: none;
+}
+.searchInput::placeholder {
+  color: var(--win-text-dim);
+}
+.searchInput:focus {
+  border-bottom-color: var(--win-accent);
+  box-shadow: inset 0 -1px 0 var(--win-accent);
+}
+.searchSlot[data-compact] .searchInput {
+  font-size: max(16px, var(--win-fs-body));
+}
+
+/* --- App rail (Mail · Calendar · People) ------------------------------------------------------------------------- */
+.rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 0 8px;
+}
+.railList {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.railItem {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text-2);
+}
+.railItem[aria-current='page'] {
+  background: var(--win-subtle-fill);
+  color: var(--win-accent-text);
+}
+.railItem[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 0;
+  width: 3px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--win-accent);
+}
+.railItem:disabled {
+  color: var(--win-text-disabled);
+}
+
+/* --- Main column: ribbon, (the manual-copy bar), panes ------------------------------------------------------------ */
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0 8px 8px 0;
+}
+
+/* The simplified ribbon: one row of commands on a card. */
+.ribbon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  height: 40px;
+  padding: 0 4px;
+  overflow: hidden;
+  border: 1px solid var(--win-card-stroke);
+  border-radius: 8px;
+  background: var(--win-card);
+}
+.newMail,
+.send,
+.dialogPrimary {
+  --fill: var(--win-accent-hover);
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: var(--win-accent);
+  color: var(--win-on-accent);
+  font: inherit;
+  white-space: nowrap;
+}
+.command {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text);
+  font: inherit;
+  white-space: nowrap;
+}
+.command[aria-label] {
+  justify-content: center;
+  padding: 0;
+}
+.command:disabled {
+  color: var(--win-text-disabled);
+}
+.command svg,
+.newMail svg {
+  flex: none;
+}
+.divider {
+  flex: none;
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--win-hairline);
+}
+
+/* --- Panes -------------------------------------------------------------------------------------------------------- */
+.panes {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: 200px minmax(260px, 320px) minmax(0, 1fr);
+  gap: 4px;
+  min-height: 0;
+}
+
+/* The clipboard was blocked: the text, selected, in a read-only field (an informational InfoBar under the ribbon). */
+.manual {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 7px 8px 7px 16px;
+  border: 1px solid var(--win-card-stroke);
+  border-radius: var(--radius-control);
+  background: var(--win-subtle-fill);
+  animation: out-infobar var(--win-d250) var(--win-ease-in) both;
+}
+.manualLabel {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+.manualField {
+  flex: 1 1 240px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 5px 10px;
+  border: 1px solid var(--win-field-border);
+  border-bottom-color: var(--win-accent);
+  border-radius: var(--radius-control);
+  background: var(--win-field);
+  color: var(--win-text);
+  font: inherit;
+  resize: none;
+}
+.app[data-folders='icons'] .panes {
+  grid-template-columns: 48px minmax(260px, 320px) minmax(0, 1fr);
+}
+
+/* Folder pane (on Mica). */
+.folders {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+.hamburger {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text);
+}
+.folderList {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.folder {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 32px;
+  padding: 0 10px 0 12px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text);
+  font: inherit;
+  text-align: left;
+}
+.folder svg {
+  flex: none;
+}
+.folder[aria-current='page'] {
+  background: var(--win-nav-current);
+}
+.folder[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 0;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--win-accent);
+}
+.folderLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.folder:has(.count[data-kind='inbox']) .folderLabel {
+  font-weight: 600;
+}
+.count {
+  flex: none;
+  font-size: var(--win-fs-caption);
+}
+.count[data-kind='inbox'] {
+  color: var(--win-accent-text);
+  font-weight: 600;
+}
+.count[data-kind='drafts'] {
+  color: var(--win-text-dim);
+}
+
+/* Collapsed to icons (medium, the ☰ toggle, or a narrow window): names stay for assistive tech, counts become badges. */
+.app[data-folders='icons'] .folder {
+  justify-content: center;
+  gap: 0;
+  width: 40px;
+  padding: 0;
+}
+.app[data-folders='icons'] .folderLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.app[data-folders='icons'] .count {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--win-accent);
+  color: var(--win-on-accent);
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* Message list (card). */
+.list,
+.reading {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--win-card-stroke);
+  border-radius: 8px;
+  background: var(--win-content);
+}
+.listHeader {
+  display: flex;
+  flex: none;
+  align-items: center;
+  height: 40px;
+  padding: 0 16px;
+}
+.folderTitle {
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--win-fs-body);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pivot {
+  display: flex;
+  flex: none;
+  gap: 12px;
+  height: 36px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--win-hairline);
+}
+.tab {
+  height: 100%;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--win-text-dim);
+  font: inherit;
+}
+.tab:hover {
+  color: var(--win-text);
+}
+.tab[aria-selected='true'] {
+  color: var(--win-text);
+  font-weight: 600;
+}
+.tab[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  right: 4px;
+  bottom: 0;
+  left: 4px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--win-accent);
+}
+.panel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rows > li + li {
+  border-top: 1px solid var(--win-hairline);
+}
+.row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  column-gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 10px 12px 10px 16px;
+  border: 0;
+  background: transparent;
+  color: var(--win-text);
+  font: inherit;
+  text-align: left;
+}
+.row[aria-current='true'] {
+  background: var(--win-row-selected);
+}
+.row[data-unread]::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--win-accent);
+}
+.avatar,
+.avatarLarge {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--win-accent) 18%, var(--win-content));
+  color: var(--win-accent-text);
+  font-weight: 600;
+}
+.avatar {
+  grid-row: 1 / span 2;
+  grid-column: 1;
+  align-self: start;
+  width: 32px;
+  height: 32px;
+  font-size: var(--win-fs-caption);
+}
+.rowFrom,
+.rowSubject,
+.rowPreview {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rowFrom {
+  grid-row: 1;
+  grid-column: 2;
+}
+.rowIcons {
+  display: flex;
+  grid-row: 1;
+  grid-column: 3;
+  gap: 4px;
+  justify-self: end;
+  color: var(--win-text-dim);
+}
+.rowSubject {
+  grid-row: 2;
+  grid-column: 2;
+}
+.rowTime {
+  grid-row: 2;
+  grid-column: 3;
+  justify-self: end;
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+  white-space: nowrap;
+}
+.rowPreview {
+  grid-row: 3;
+  grid-column: 2 / span 2;
+  color: var(--win-text-dim);
+}
+.row[data-unread] .rowFrom {
+  font-weight: 600;
+}
+.row[data-unread] .rowSubject,
+.row[data-unread] .rowTime {
+  color: var(--win-accent-text);
+  font-weight: 600;
+}
+.draftMark {
+  color: var(--win-accent-text);
+}
+
+/* Reading pane (card). */
+.readingBar {
+  display: none;
+  flex: none;
+  align-items: center;
+  height: 44px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--win-hairline);
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text);
+  font: inherit;
+}
+.status {
+  flex: none;
+}
+.status:not(:empty) {
+  padding: 12px 16px 0;
+}
+.pane {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: out-fade var(--win-d167) var(--win-ease-in) both;
+}
+
+.message {
+  padding: 16px 20px 24px;
+}
+.subject {
+  margin: 0 0 16px;
+  font-family: var(--font-display);
+  font-size: var(--win-fs-subtitle);
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.header {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  column-gap: 12px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+.avatarLarge {
+  width: 40px;
+  height: 40px;
+  font-size: var(--win-fs-body);
+}
+.headerText p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.senderName {
+  font-weight: 600;
+}
+.senderAddress {
+  color: var(--win-text-dim);
+  user-select: text;
+}
+.recipients,
+.headerDate {
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+.headerDate {
+  white-space: nowrap;
+}
+
+/* Attachment chip: open (a real link to Edge's PDF tab) + the chevron menu. */
+.attachment {
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+  margin-bottom: 16px;
+  overflow: hidden;
+  border: 1px solid var(--win-field-border);
+  border-radius: var(--radius-control);
+  background: var(--win-field);
+}
+.attachmentOpen {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 6px 12px 6px 8px;
+  color: var(--win-text);
+  text-decoration: none;
+}
+.attachmentText {
+  display: grid;
+  min-width: 0;
+}
+.attachmentName {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attachmentSize {
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+.attachmentMore {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--win-hairline);
+  background: transparent;
+  color: var(--win-text);
+}
+
+.body p {
+  margin: 0 0 12px;
+  overflow-wrap: anywhere;
+}
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--win-hairline);
+}
+
+/* The WinUI standard button. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--win-hairline);
+  border-bottom-color: var(--win-field-border);
+  border-radius: var(--radius-control);
+  background: var(--win-card);
+  color: var(--win-text);
+  font: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.button svg {
+  flex: none;
+}
+.dim {
+  color: var(--win-text-dim);
+}
+
+/* InfoBar (informational): slides down after the form has collapsed. */
+.infobar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 7px 8px 7px 16px;
+  border: 1px solid var(--win-card-stroke);
+  border-radius: var(--radius-control);
+  background: var(--win-subtle-fill);
+  animation: out-infobar var(--win-d250) var(--win-ease-in) var(--win-d167) both;
+}
+.infoIcon {
+  flex: none;
+  color: var(--win-accent);
+}
+.infoText {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+.infoText strong {
+  font-weight: 600;
+}
+.infoClose {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text);
+}
+
+/* Compose, inside the reading pane. */
+.compose {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  padding: 12px 16px;
+}
+.compose[data-leaving] {
+  animation: out-collapse var(--win-d167) var(--win-ease-out) both;
+}
+.composeBar {
+  display: flex;
+  flex: none;
+  gap: 8px;
+  padding-bottom: 12px;
+}
+.send {
+  padding: 0 16px;
+}
+.field {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  border-bottom: 1px solid var(--win-hairline);
+}
+.field:focus-within {
+  border-bottom-color: var(--win-accent);
+}
+.fieldLabel {
+  flex: none;
+  min-width: 24px;
+  color: var(--win-text-dim);
+}
+.recipient {
+  min-width: 0;
+  max-width: 100%;
+  height: 24px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--win-subtle-fill);
+  color: var(--win-text);
+  font: inherit;
+  text-overflow: ellipsis;
+}
+.subjectInput,
+.bodyInput {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--win-text);
+  font: inherit;
+  outline: none;
+}
+.app .subjectInput:focus-visible,
+.app .bodyInput:focus-visible {
+  outline: none;
+}
+.subjectInput {
+  flex: 1 1 auto;
+  height: 40px;
+}
+.subjectInput::placeholder {
+  color: var(--win-text-dim);
+}
+.bodyInput {
+  flex: 1 1 auto;
+  min-height: 160px;
+  margin-top: 12px;
+  border-bottom: 2px solid transparent;
+  line-height: 1.43;
+  resize: none;
+}
+.bodyInput:focus {
+  border-bottom-color: var(--win-accent);
+}
+.hint {
+  flex: none;
+  margin: 8px 0 0;
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+
+/* Empty states. */
+.empty {
+  display: grid;
+  flex: 1 1 auto;
+  align-content: center;
+  justify-items: center;
+  gap: 4px;
+  padding: 32px 24px;
+  text-align: center;
+}
+.emptyIcon {
+  margin-bottom: 8px;
+  color: var(--win-text-dim);
+}
+.emptyTitle {
+  margin: 0;
+  font-weight: 600;
+}
+.empty[data-large] .emptyTitle {
+  font-family: var(--font-display);
+  font-size: var(--win-fs-subtitle);
+}
+.emptyLine {
+  margin: 0;
+  color: var(--win-text-dim);
+}
+
+/* Discard confirmation — a ContentDialog over the app (SmokeFillColorDefault: 30 % black in both themes). */
+.smoke {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: var(--win-smoke);
+  animation: out-fade var(--win-d167) linear both;
+}
+.dialogScope {
+  display: contents;
+}
+.dialog {
+  width: min(100%, 400px);
+  overflow: hidden;
+  border: 1px solid var(--win-flyout-stroke);
+  border-radius: 8px;
+  background: var(--win-content);
+  color: var(--win-text);
+  box-shadow: var(--win-flyout-shadow);
+  animation: out-dialog var(--win-d250) var(--win-ease-in) both;
+}
+.dialogContent {
+  padding: 24px;
+}
+.dialogContent p {
+  margin: 0;
+}
+.dialogTitle {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: var(--win-fs-subtitle);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.dialogButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 24px;
+  border-top: 1px solid var(--win-hairline);
+  background: var(--win-titlebar-inactive);
+}
+.dialogButtons > button {
+  justify-content: center;
+  width: 100%;
+}
+
+/* --- Postures ----------------------------------------------------------------------------------------------------- */
+@media (any-pointer: coarse) {
+  .folder,
+  .command,
+  .newMail,
+  .button,
+  .send,
+  .back,
+  .infoClose {
+    min-height: 40px;
+  }
+  .command[aria-label],
+  .infoClose {
+    min-width: 40px;
+  }
+  .ribbon {
+    height: 48px;
+  }
+}
+
+/* A narrow window: folders as icons … */
+@container outlook (max-width: 900px) {
+  .app:not([data-compact]) .panes {
+    grid-template-columns: 48px minmax(240px, 300px) minmax(0, 1fr);
+  }
+  .app:not([data-compact]) .hamburger {
+    display: none;
+  }
+  .app:not([data-compact]) .folder {
+    justify-content: center;
+    gap: 0;
+    width: 40px;
+    padding: 0;
+  }
+  .app:not([data-compact]) .folderLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .app:not([data-compact]) .count {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background: var(--win-accent);
+    color: var(--win-on-accent);
+    font-size: 10px;
+    line-height: 16px;
+    text-align: center;
+  }
+}
+
+/* … and under 720 px the list pushes to the message, with the back arrow. */
+@container outlook (max-width: 719px) {
+  .app:not([data-compact]) .panes {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+  .app:not([data-compact])[data-view='list'] .reading,
+  .app:not([data-compact])[data-view='message'] .list {
+    display: none;
+  }
+  .app:not([data-compact]) .readingBar {
+    display: flex;
+  }
+}
+
+/* Compact: one pane at a time (folders ⇄ list → message), the ribbon is the header, Send sticks to the bottom. */
+.app[data-compact] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.app[data-compact] .rail {
+  display: none;
+}
+.app[data-compact] .main {
+  gap: 0;
+  padding: 0;
+}
+.app[data-compact] .manual {
+  margin: 8px;
+}
+.app[data-compact] .manualField {
+  font-size: max(16px, var(--win-fs-body));
+}
+.app[data-compact] .ribbon {
+  height: 48px;
+  padding: 0 8px;
+  border-width: 0 0 1px;
+  border-color: var(--win-hairline);
+  border-radius: 0;
+  background: transparent;
+}
+.app[data-compact] .newMail {
+  margin-left: auto;
+  min-height: 40px;
+}
+.app[data-compact] .command {
+  min-width: 40px;
+  min-height: 40px;
+}
+.app[data-compact] .panes {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+.app[data-compact] .list,
+.app[data-compact] .reading {
+  border: 0;
+  border-radius: 0;
+}
+.app[data-compact] .folders {
+  padding: 8px;
+  background: var(--win-content);
+}
+.app[data-compact] .folder {
+  height: 44px;
+}
+.app[data-compact] .readingBar {
+  display: flex;
+}
+.app[data-compact] .message {
+  padding: 16px;
+}
+.app[data-compact] :is(.subjectInput, .bodyInput, .recipient) {
+  font-size: max(16px, var(--win-fs-body));
+}
+.app[data-compact] .compose {
+  padding-bottom: 0;
+}
+.app[data-compact] .composeBar {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  margin: 12px -16px 0;
+  padding: 8px 16px max(8px, var(--sa-b));
+  border-top: 1px solid var(--win-hairline);
+  background: var(--win-content);
+}
+.app[data-compact] .send {
+  flex: 1 1 auto;
+  min-height: 40px;
+}
+.app[data-compact] .composeBar .button {
+  min-height: 40px;
+}
+
+/* --- Motion (WinUI ladder; durations are 0 under reduced motion) ------------------------------------------------ */
+@keyframes out-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes out-collapse {
+  from {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+  to {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+  }
+}
+@keyframes out-infobar {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes out-dialog {
+  from {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .row[aria-current='true'],
+  .folder[aria-current='page'] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+  .railItem[aria-current='page']::after,
+  .folder[aria-current='page']::after,
+  .tab[aria-selected='true']::after,
+  .row[data-unread]::after {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+  .newMail,
+  .send,
+  .dialogPrimary,
+  .button {
+    border: 1px solid ButtonText;
+  }
+}

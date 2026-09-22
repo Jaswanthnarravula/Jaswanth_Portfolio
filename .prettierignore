@@ -21,5 +21,5 @@ lib/welcome/*.generated.json
 public/assets
 public/resume
 tests/**/__snapshots__
-.next-original
-.next-production
+.next-*
+components/os/windows/fluent.generated.ts

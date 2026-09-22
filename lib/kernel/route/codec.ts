@@ -73,7 +73,7 @@ export function refForLocation(
   if (location.kind === 'content') return location.ref;
   if (location.kind === 'root') {
     const binding = getBinding(os, role, registry);
-    const only = binding?.owns.length === 1 ? binding.owns[0] : undefined;
+    const only = binding?.owns.length === 1 ? binding.owns[0] : binding?.home;
     return only ? ({ section: only } as ContentRef) : null;
   }
   const [first, second] = location.path;
@@ -127,6 +127,8 @@ export function createRouteCodec({ registry, catalog, visible }: CodecDeps): Rou
       tail = rest.slice(1);
     }
 
+    // An app's home section *is* its root: the long form canonicalizes to `/{os}/{app}`.
+    if (tail.length === 0 && section === binding.home) return ok(root);
     const sectionRoute = at({ kind: 'content', ref: sectionRef(section) });
     if (tail.length === 0) return ok(sectionRoute);
     const [slug, ...extra] = tail;
@@ -197,6 +199,7 @@ export function createRouteCodec({ registry, catalog, visible }: CodecDeps): Rou
     const { ref } = location;
     if (!binding.owns.includes(ref.section)) return base;
     const slug = refSlug(ref);
+    if (!slug && ref.section === binding.home) return base;
     const sectionPart = binding.owns.length === 1 ? '' : `/${ref.section}`;
     return `${base}${sectionPart}${slug ? `/${encodeURIComponent(slug)}` : ''}`;
   }

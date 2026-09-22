@@ -37,59 +37,141 @@ export type MenuEntry =
       readonly onSelect: () => void;
     }
   | { readonly kind: 'separator'; readonly id: string }
-  | { readonly kind: 'heading'; readonly id: string; readonly label: string };
+  | { readonly kind: 'heading'; readonly id: string; readonly label: string }
+  /**
+   * addition (plans/windows/02 system menu "Snap ▸", surfaces/context-menus "View ▸"): a nested menu. Right / Enter /
+   * Space (or a 150 ms hover) opens it on its first item; Left or Esc closes it back to its item.
+   */
+  | {
+      readonly kind: 'submenu';
+      readonly id: string;
+      readonly label: string;
+      readonly icon?: ReactNode;
+      readonly disabled?: boolean;
+      readonly items: readonly MenuEntry[];
+    };
 
-type Actionable = Extract<MenuEntry, { kind: 'item' | 'checkbox' }>;
-const isActionable = (entry: MenuEntry): entry is Actionable =>
-  (entry.kind === 'item' || entry.kind === 'checkbox') && !entry.disabled;
+/**
+ * addition (plans/windows/surfaces/context-menus "command row"): icon buttons across the top of a menu — a labelled
+ * `group` of `menuitem`s (the visible tooltip mirrors the name). Left/Right move along the row; Up/Down continue into
+ * the items below.
+ */
+export interface MenuCommand {
+  readonly id: string;
+  readonly label: string;
+  readonly icon: ReactNode;
+  readonly disabled?: boolean;
+  readonly onSelect: () => void;
+}
+
+type Actionable = Extract<MenuEntry, { kind: 'item' | 'checkbox' | 'submenu' }> | (MenuCommand & { kind: 'command' });
+const isActionable = (entry: MenuEntry): entry is Extract<MenuEntry, { kind: 'item' | 'checkbox' | 'submenu' }> =>
+  (entry.kind === 'item' || entry.kind === 'checkbox' || entry.kind === 'submenu') && !entry.disabled;
 
 type CloseReason = 'escape' | 'tab' | 'select' | 'outside';
+
+/** Hover intent before a submenu opens (plans/windows/surfaces/context-menus "Motion"). */
+export const SUBMENU_HOVER_MS = 150;
 
 interface MenuListProps {
   readonly items: readonly MenuEntry[];
   readonly label: string;
   readonly id?: string;
-  readonly initial: 'first' | 'last';
+  /** Which item takes focus on open; `none` keeps focus where it is (a submenu opened by hover). */
+  readonly initial: 'first' | 'last' | 'none';
   readonly onClose: (reason: CloseReason) => void;
   /** Left/Right: move to the neighbouring menu (menubar only). */
   readonly onSideways?: (delta: -1 | 1) => void;
+  readonly commands?: readonly MenuCommand[];
+  readonly commandsLabel?: string;
+  /** A submenu: Left closes it back to its item. */
+  readonly nested?: boolean;
   readonly className?: string;
   readonly style?: React.CSSProperties;
 }
 
-function MenuList({ items, label, id, initial, onClose, onSideways, className, style }: MenuListProps) {
+function MenuList({
+  items,
+  label,
+  id,
+  initial,
+  onClose,
+  onSideways,
+  commands = [],
+  commandsLabel = 'Commands',
+  nested = false,
+  className,
+  style,
+}: MenuListProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const listId = useId();
   const typeahead = useRef({ buffer: '', at: 0 });
-  const actionable = items.filter(isActionable);
+  const [sub, setSub] = useState<{ id: string; focus: boolean } | null>(null);
+  const hover = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const liveCommands = commands.filter((command) => !command.disabled);
+  const actionable: Actionable[] = [
+    ...liveCommands.map((command) => ({ ...command, kind: 'command' as const })),
+    ...items.filter(isActionable),
+  ];
+  const rowLength = liveCommands.length;
 
-  const focusIndex = (index: number) => {
-    const target = ref.current?.querySelectorAll<HTMLElement>('[data-menu-actionable]')[index];
-    target?.focus({ preventScroll: true });
-  };
+  /** This list's own items (never a nested submenu's). */
+  const nodes = () => [...(ref.current?.querySelectorAll<HTMLElement>(`[data-menu-of="${listId}"]`) ?? [])];
+
+  const focusIndex = (index: number) => nodes()[index]?.focus({ preventScroll: true });
 
   useLayoutEffect(() => {
-    focusIndex(initial === 'first' ? 0 : actionable.length - 1);
+    if (initial !== 'none') focusIndex(initial === 'first' ? 0 : actionable.length - 1);
     // Only on open.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(
+    () => () => {
+      if (hover.current) clearTimeout(hover.current);
+    },
+    [],
+  );
+
   const current = () => {
-    const nodes = [...(ref.current?.querySelectorAll<HTMLElement>('[data-menu-actionable]') ?? [])];
-    return { nodes, index: nodes.indexOf(document.activeElement as HTMLElement) };
+    const list = nodes();
+    return { list, index: list.indexOf(document.activeElement as HTMLElement) };
+  };
+
+  const openSub = (entryId: string, focus: boolean) => {
+    if (hover.current) clearTimeout(hover.current);
+    setSub({ id: entryId, focus });
   };
 
   const activate = (entry: Actionable) => {
+    if (entry.kind === 'submenu') {
+      openSub(entry.id, true);
+      return;
+    }
     onClose('select');
     entry.onSelect();
   };
 
+  const closeSub = (entryId: string, reason: CloseReason) => {
+    setSub(null);
+    if (reason === 'select' || reason === 'tab' || reason === 'outside') onClose(reason);
+    else
+      ref.current
+        ?.querySelector<HTMLElement>(`[data-menu-of="${listId}"][data-menu-sub-for="${entryId}"]`)
+        ?.focus({ preventScroll: true });
+  };
+
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    const { nodes, index } = current();
-    const count = nodes.length;
+    // The innermost open list handles every key: a submenu's keys never reach its parent menu.
+    if (nested || event.key === 'Escape') event.stopPropagation();
+    const { list, index } = current();
+    const count = list.length;
+    const inRow = index >= 0 && index < rowLength;
+    const entry = index >= 0 ? actionable[index] : undefined;
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault();
-        focusIndex(count ? (index + 1) % count : 0);
+        focusIndex(count ? (inRow ? rowLength % count : (index + 1) % count) : 0);
         return;
       case 'ArrowUp':
         event.preventDefault();
@@ -104,15 +186,19 @@ function MenuList({ items, label, id, initial, onClose, onSideways, className, s
         focusIndex(count - 1);
         return;
       case 'ArrowRight':
+        event.preventDefault();
+        if (inRow && index < rowLength - 1) focusIndex(index + 1);
+        else if (entry?.kind === 'submenu') openSub(entry.id, true);
+        else if (onSideways && !inRow) onSideways(1);
+        return;
       case 'ArrowLeft':
-        if (onSideways) {
-          event.preventDefault();
-          onSideways(event.key === 'ArrowRight' ? 1 : -1);
-        }
+        event.preventDefault();
+        if (inRow && index > 0) focusIndex(index - 1);
+        else if (nested) onClose('escape');
+        else if (onSideways && !inRow) onSideways(-1);
         return;
       case 'Escape':
         event.preventDefault();
-        event.stopPropagation();
         onClose('escape');
         return;
       case 'Tab':
@@ -121,13 +207,12 @@ function MenuList({ items, label, id, initial, onClose, onSideways, className, s
       case 'Enter':
       case ' ': {
         event.preventDefault();
-        const entry = actionable[index];
         if (entry) activate(entry);
         return;
       }
       default: {
         if (event.key.length !== 1 || event.ctrlKey || event.metaKey || event.altKey) return;
-        const now = event.timeStamp || Date.now();
+        const now = event.timeStamp;
         const state = typeahead.current;
         state.buffer = now - state.at > 500 ? event.key.toLowerCase() : state.buffer + event.key.toLowerCase();
         state.at = now;
@@ -143,7 +228,15 @@ function MenuList({ items, label, id, initial, onClose, onSideways, className, s
     }
   };
 
-  let actionableIndex = -1;
+  /** Hovering an item focuses it; resting on a submenu item for 150 ms opens it, anywhere else closes it. */
+  const onHover = (target: HTMLElement, submenuId: string | null) => {
+    target.focus({ preventScroll: true });
+    if (hover.current) clearTimeout(hover.current);
+    if (submenuId === sub?.id) return;
+    hover.current = setTimeout(() => setSub(submenuId ? { id: submenuId, focus: false } : null), SUBMENU_HOVER_MS);
+  };
+
+  let actionableIndex = liveCommands.length - 1;
   return (
     <div
       ref={ref}
@@ -155,7 +248,34 @@ function MenuList({ items, label, id, initial, onClose, onSideways, className, s
       style={style}
       onKeyDown={onKeyDown}
       data-menu=""
+      data-menu-submenu={nested ? '' : undefined}
     >
+      {commands.length > 0 ? (
+        <div role="group" aria-label={commandsLabel} data-menu-commands="">
+          {commands.map((command) => (
+            <button
+              key={command.id}
+              type="button"
+              role="menuitem"
+              aria-label={command.label}
+              title={command.label}
+              aria-disabled={command.disabled || undefined}
+              tabIndex={-1}
+              data-menu-command=""
+              data-menu-of={command.disabled ? undefined : listId}
+              data-menu-actionable={command.disabled ? undefined : ''}
+              onClick={() => {
+                if (command.disabled) return;
+                onClose('select');
+                command.onSelect();
+              }}
+              onPointerMove={(event) => !command.disabled && onHover(event.currentTarget, null)}
+            >
+              {command.icon}
+            </button>
+          ))}
+        </div>
+      ) : null}
       {items.map((entry) => {
         if (entry.kind === 'separator') return <div key={entry.id} role="separator" data-menu-separator="" />;
         if (entry.kind === 'heading')
@@ -166,6 +286,45 @@ function MenuList({ items, label, id, initial, onClose, onSideways, className, s
           );
         const enabled = !entry.disabled;
         if (enabled) actionableIndex++;
+        if (entry.kind === 'submenu') {
+          const open = sub?.id === entry.id;
+          return (
+            <div key={entry.id} role="none" data-menu-sub-slot="">
+              <button
+                type="button"
+                role="menuitem"
+                aria-haspopup="menu"
+                aria-expanded={open}
+                aria-disabled={entry.disabled || undefined}
+                tabIndex={-1}
+                data-menu-item=""
+                data-menu-of={enabled ? listId : undefined}
+                data-menu-actionable={enabled ? '' : undefined}
+                data-menu-sub-for={entry.id}
+                data-index={enabled ? actionableIndex : undefined}
+                data-open={open || undefined}
+                onClick={() => enabled && openSub(entry.id, true)}
+                onPointerMove={(event) => enabled && onHover(event.currentTarget, entry.id)}
+              >
+                {entry.icon ? <span data-menu-icon="">{entry.icon}</span> : null}
+                <span data-menu-label="">{entry.label}</span>
+                <span data-menu-chevron="" aria-hidden="true" />
+              </button>
+              {open ? (
+                <MenuList
+                  key={`${entry.id}-${String(sub?.focus)}`}
+                  label={entry.label}
+                  items={entry.items}
+                  initial={sub?.focus ? 'first' : 'none'}
+                  nested
+                  className={className}
+                  onSideways={onSideways}
+                  onClose={(reason) => closeSub(entry.id, reason)}
+                />
+              ) : null}
+            </div>
+          );
+        }
         return (
           <div key={entry.id} role="none">
             <button
@@ -175,10 +334,11 @@ function MenuList({ items, label, id, initial, onClose, onSideways, className, s
               aria-disabled={entry.disabled || undefined}
               tabIndex={-1}
               data-menu-item=""
+              data-menu-of={enabled ? listId : undefined}
               data-menu-actionable={enabled ? '' : undefined}
               data-index={enabled ? actionableIndex : undefined}
               onClick={() => enabled && activate(entry)}
-              onPointerMove={(event) => enabled && event.currentTarget.focus({ preventScroll: true })}
+              onPointerMove={(event) => enabled && onHover(event.currentTarget, null)}
             >
               {entry.kind === 'item' && entry.icon ? <span data-menu-icon="">{entry.icon}</span> : null}
               <span data-menu-label="">{entry.label}</span>
@@ -323,10 +483,25 @@ export interface MenuProps {
   readonly returnFocusTo?: RefObject<HTMLElement | null>;
   readonly position?: { readonly x: number; readonly y: number };
   readonly className?: string;
+  /** addition: an icon command row across the top (Windows context menus). */
+  readonly commands?: readonly MenuCommand[];
+  readonly commandsLabel?: string;
+  /** addition: the element that holds the menu (skins measure it to clamp the menu inside the workspace). */
+  readonly anchorRef?: RefObject<HTMLDivElement | null>;
 }
 
 /** Standalone menu (context menus, "⋯" menus). Closes on outside press; focus returns to the invoker. */
-export function Menu({ label, items, onClose, returnFocusTo, position, className }: MenuProps) {
+export function Menu({
+  label,
+  items,
+  onClose,
+  returnFocusTo,
+  position,
+  className,
+  commands,
+  commandsLabel,
+  anchorRef,
+}: MenuProps) {
   const wrapper = useRef<HTMLDivElement>(null);
   const close = (reason: CloseReason) => {
     onClose();
@@ -344,11 +519,22 @@ export function Menu({ label, items, onClose, returnFocusTo, position, className
 
   return (
     <div
-      ref={wrapper}
+      ref={(node) => {
+        wrapper.current = node;
+        if (anchorRef) anchorRef.current = node;
+      }}
       data-menu-anchor=""
       style={position ? { position: 'fixed', left: position.x, top: position.y } : undefined}
     >
-      <MenuList label={label} items={items} initial="first" onClose={close} className={className} />
+      <MenuList
+        label={label}
+        items={items}
+        initial="first"
+        onClose={close}
+        className={className}
+        commands={commands}
+        commandsLabel={commandsLabel}
+      />
     </div>
   );
 }

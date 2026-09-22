@@ -1,8 +1,11 @@
 /**
- * Name wordmark for the intro — plans/03-netflix-page.md "Wordmark" (`NFLX-MARK-01`).
- * "JASWANTH" (from `person.givenName`) in a streaming-intro arc style: condensed capitals whose height grows toward
- * both ends, so the top and bottom edges curve. Original artwork in both asset modes — generated from Bebas Neue
- * (SIL OFL 1.1), never a third-party logo. Deterministic.
+ * Name wordmark for the intro — plans/03-netflix-page.md "Wordmark" + "Visual target" (`NFLX-MARK-01`).
+ * "JASWANTH" (from `person.givenName`) exactly as the owner's storyboard frame sets it (plans/visual-targets/intro.png,
+ * source CSS `.mark` in plans/visual-targets/storyboard.html): Bebas Neue capitals, letter-spacing .015em, line-height
+ * .9, padding 0 .1em .12em, and a dark ellipse (`.mark::after`) that trims the letters' feet into a shallow arc.
+ * The output is that whole `.mark` box — view box = the box, glyphs on its baseline, the ellipse as a mask — so the
+ * SVG sized to 13 em wide-per-em lands on the frame's pixels with no offsets. Original artwork in both asset modes,
+ * generated from Bebas Neue (SIL OFL 1.1), never a third-party logo. Deterministic.
  *   node --experimental-strip-types scripts/build-wordmark.mjs → lib/welcome/wordmark.generated.json
  * The font is a build input only (assets-inbox/fonts/), never shipped.
  */
@@ -11,78 +14,61 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-export const WORDMARK_VIEW = { width: 1000, pad: 8 };
-/** Relative height gain at the outermost letters (0 = flat). */
-export const ARC = 0.24;
-const TRACKING = 0.02; // em
+/** Units per em of the output (the frame's font size is 1 em = 1000 units). */
+export const EM = 1000;
+/** The frame's `.mark` and `.mark::after`, in em. */
+export const MARK = {
+  tracking: 0.015,
+  lineHeight: 0.9,
+  padX: 0.1,
+  padBottom: 0.12,
+  /** `left: -6%; right: -6%; bottom: -.34em; height: .62em; border-radius: 50%`. */
+  cut: { overhang: 0.06, bottom: 0.34, height: 0.62 },
+};
 
 const round = (n) => Math.round(n * 10) / 10;
 
 /**
- * Warp and normalize opentype.js path commands (y-down). Every coordinate, control points included, is scaled
- * vertically about the text's centre line by `1 + ARC·u²`, where `u` ∈ [-1, 1] is the horizontal position.
- * @param {{ type: string, x?: number, y?: number, x1?: number, y1?: number, x2?: number, y2?: number }[]} commands
+ * Lays the text out the way the browser lays out the frame's `.mark`: the content box is the text advance (letter
+ * spacing included), the baseline sits where CSS puts it in a `line-height: .9` line box (half-leading from the
+ * font's ascent and descent), and the padding surrounds it.
+ * @param {{ unitsPerEm: number, tables: { hhea: { ascender: number, descender: number } },
+ *   getPath: Function, getAdvanceWidth: Function }} font opentype.js font
  */
-export function warpWordmark(commands, arc = ARC) {
-  const xs = [];
-  const ys = [];
-  for (const c of commands)
-    for (const [x, y] of [
-      [c.x, c.y],
-      [c.x1, c.y1],
-      [c.x2, c.y2],
-    ])
-      if (x !== undefined && y !== undefined) {
-        xs.push(x);
-        ys.push(y);
-      }
-  const x0 = Math.min(...xs);
-  const x1 = Math.max(...xs);
-  const cx = (x0 + x1) / 2;
-  const half = (x1 - x0) / 2 || 1;
-  const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
-  const warp = (x, y) => {
-    const u = (x - cx) / half;
-    return [x, cy + (y - cy) * (1 + arc * u * u)];
-  };
-  const warped = commands.map((c) => {
-    const out = { type: c.type };
-    for (const [kx, ky] of [
-      ['x', 'y'],
-      ['x1', 'y1'],
-      ['x2', 'y2'],
-    ])
-      if (c[kx] !== undefined) [out[kx], out[ky]] = warp(c[kx], c[ky]);
-    return out;
-  });
-  // Normalize: fit the width, keep the aspect.
-  const wx = [];
-  const wy = [];
-  for (const c of warped)
-    for (const [kx, ky] of [
-      ['x', 'y'],
-      ['x1', 'y1'],
-      ['x2', 'y2'],
-    ])
-      if (c[kx] !== undefined) {
-        wx.push(c[kx]);
-        wy.push(c[ky]);
-      }
-  const minX = Math.min(...wx);
-  const minY = Math.min(...wy);
-  const scale = (WORDMARK_VIEW.width - 2 * WORDMARK_VIEW.pad) / (Math.max(...wx) - minX);
-  const height = Math.ceil((Math.max(...wy) - minY) * scale + 2 * WORDMARK_VIEW.pad);
-  const p = (x, y) =>
-    `${round((x - minX) * scale + WORDMARK_VIEW.pad)} ${round((y - minY) * scale + WORDMARK_VIEW.pad)}`;
+export function layoutWordmark(font, text) {
+  const scale = EM / font.unitsPerEm;
+  const ascent = font.tables.hhea.ascender * scale;
+  const descent = -font.tables.hhea.descender * scale;
+  const lineBox = MARK.lineHeight * EM;
+  const baseline = (lineBox - (ascent + descent)) / 2 + ascent;
+  const options = { kerning: true, letterSpacing: MARK.tracking };
+  const advance = font.getAdvanceWidth(text, EM, options);
+  const width = advance + 2 * MARK.padX * EM;
+  const height = lineBox + MARK.padBottom * EM;
+  const path = font.getPath(text, MARK.padX * EM, baseline, EM, options);
   let d = '';
-  for (const c of warped) {
-    if (c.type === 'M') d += `M${p(c.x, c.y)}`;
-    else if (c.type === 'L') d += `L${p(c.x, c.y)}`;
-    else if (c.type === 'Q') d += `Q${p(c.x1, c.y1)} ${p(c.x, c.y)}`;
-    else if (c.type === 'C') d += `C${p(c.x1, c.y1)} ${p(c.x2, c.y2)} ${p(c.x, c.y)}`;
+  for (const c of path.commands) {
+    if (c.type === 'M') d += `M${round(c.x)} ${round(c.y)}`;
+    else if (c.type === 'L') d += `L${round(c.x)} ${round(c.y)}`;
+    else if (c.type === 'Q') d += `Q${round(c.x1)} ${round(c.y1)} ${round(c.x)} ${round(c.y)}`;
+    else if (c.type === 'C')
+      d += `C${round(c.x1)} ${round(c.y1)} ${round(c.x2)} ${round(c.y2)} ${round(c.x)} ${round(c.y)}`;
     else if (c.type === 'Z') d += 'Z';
   }
-  return { viewBox: [0, 0, WORDMARK_VIEW.width, height], d };
+  const ry = (MARK.cut.height * EM) / 2;
+  return {
+    viewBox: [0, 0, round(width), round(height)],
+    /** The box's width in em of the frame's font size (CSS: `width: calc(13em * widthEm)` at a 13 em mark). */
+    widthEm: Math.round((width / EM) * 1e4) / 1e4,
+    baseline: round(baseline),
+    d,
+    cut: {
+      cx: round(width / 2),
+      cy: round(height + MARK.cut.bottom * EM - ry),
+      rx: round(width * (0.5 + MARK.cut.overhang)),
+      ry: round(ry),
+    },
+  };
 }
 
 async function main() {
@@ -92,12 +78,10 @@ async function main() {
   const text = portfolio.person.givenName.toUpperCase();
   const buffer = await readFile(join(root, 'assets-inbox/fonts/bebasneue-BebasNeue-Regular.ttf'));
   const font = opentype.parse(buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength));
-  const size = 1000;
-  const path = font.getPath(text, 0, 0, size, { kerning: true, letterSpacing: TRACKING });
   const output = {
     text,
     source: { font: 'Bebas Neue', licence: 'SIL OFL 1.1', copyright: 'The Bebas Neue Project Authors' },
-    ...warpWordmark(path.commands),
+    ...layoutWordmark(font, text),
   };
   const target = join(root, 'lib/welcome/wordmark.generated.json');
   await writeFile(target, `${JSON.stringify(output, null, 2)}\n`);

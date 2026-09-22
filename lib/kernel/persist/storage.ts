@@ -47,3 +47,15 @@ export function forcedTier2(): boolean {
     return false;
   }
 }
+
+/**
+ * Debug switch for the Hello lens refraction in CI (`pf.debug.refract=on` in sessionStorage): skips the frame check,
+ * which software-rendered headless browsers always fail, so the refracting path is testable there.
+ */
+export function forcedRefraction(): boolean {
+  try {
+    return typeof window !== 'undefined' && window.sessionStorage.getItem('pf.debug.refract') === 'on';
+  } catch {
+    return false;
+  }
+}

@@ -522,13 +522,13 @@
       "terms": "Artwork of Netflix, Inc.; used referentially for a profile picker. No affiliation; the Netflix name and logo never appear.",
       "derived": false,
       "monochrome": false,
-      "src": "/assets/official/avatar.adventurer.200.d722d5fe5e.webp",
-      "srcSet": "/assets/official/avatar.adventurer.100.7d4185020c.webp 100w, /assets/official/avatar.adventurer.200.d722d5fe5e.webp 200w",
+      "src": "/assets/official/avatar.adventurer.200.5902dd62ba.webp",
+      "srcSet": "/assets/official/avatar.adventurer.100.7d4185020c.webp 100w, /assets/official/avatar.adventurer.200.5902dd62ba.webp 200w",
       "width": 200,
       "height": 200,
       "bytes": [
         3534,
-        7620
+        11080
       ]
     },
     "avatar.designer": {
@@ -558,13 +558,13 @@
       "terms": "Artwork of Netflix, Inc.; used referentially for a profile picker. No affiliation; the Netflix name and logo never appear.",
       "derived": false,
       "monochrome": false,
-      "src": "/assets/official/avatar.developer.200.d66c8b2e12.webp",
-      "srcSet": "/assets/official/avatar.developer.100.586894d731.webp 100w, /assets/official/avatar.developer.200.d66c8b2e12.webp 200w",
+      "src": "/assets/official/avatar.developer.200.047631c7b7.webp",
+      "srcSet": "/assets/official/avatar.developer.100.586894d731.webp 100w, /assets/official/avatar.developer.200.047631c7b7.webp 200w",
       "width": 200,
       "height": 200,
       "bytes": [
         3578,
-        7844
+        13406
       ]
     },
     "avatar.guest": {
@@ -576,13 +576,13 @@
       "terms": "Artwork of Netflix, Inc.; used referentially for a profile picker. No affiliation; the Netflix name and logo never appear.",
       "derived": true,
       "monochrome": false,
-      "src": "/assets/official/avatar.guest.200.a18d086578.webp",
-      "srcSet": "/assets/official/avatar.guest.100.fe40090005.webp 100w, /assets/official/avatar.guest.200.a18d086578.webp 200w",
+      "src": "/assets/official/avatar.guest.200.c765dc17d9.webp",
+      "srcSet": "/assets/official/avatar.guest.100.68d34c590d.webp 100w, /assets/official/avatar.guest.200.c765dc17d9.webp 200w",
       "width": 200,
       "height": 200,
       "bytes": [
-        4046,
-        6830
+        4120,
+        13758
       ]
     },
     "avatar.recruiter": {
@@ -594,13 +594,13 @@
       "terms": "Artwork of Netflix, Inc.; used referentially for a profile picker. No affiliation; the Netflix name and logo never appear.",
       "derived": false,
       "monochrome": false,
-      "src": "/assets/official/avatar.recruiter.200.6f4a451340.webp",
-      "srcSet": "/assets/official/avatar.recruiter.100.d88b00d27a.webp 100w, /assets/official/avatar.recruiter.200.6f4a451340.webp 200w",
+      "src": "/assets/official/avatar.recruiter.200.c9c90ff768.webp",
+      "srcSet": "/assets/official/avatar.recruiter.100.d88b00d27a.webp 100w, /assets/official/avatar.recruiter.200.c9c90ff768.webp 200w",
       "width": 200,
       "height": 200,
       "bytes": [
         4300,
-        7146
+        14046
       ]
     },
     "system.android-boot": {
@@ -635,6 +635,24 @@
         656
       ]
     },
+    "system.windows-folder": {
+      "kind": "system-icon",
+      "label": "Windows folder",
+      "owner": "Microsoft Corporation",
+      "sourceUrl": "https://github.com/blueedgetechno/win11React/tree/master/public/img/icon/win",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Microsoft Corporation; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/system.windows-folder.96.40673cffc9.webp",
+      "srcSet": "/assets/official/system.windows-folder.48.acd992d6e6.webp 48w, /assets/official/system.windows-folder.96.40673cffc9.webp 96w",
+      "width": 96,
+      "height": 96,
+      "bytes": [
+        844,
+        1462
+      ]
+    },
     "system.windows-logo": {
       "kind": "system-icon",
       "label": "Windows logo",
@@ -649,6 +667,42 @@
       "height": 512,
       "bytes": [
         3049
+      ]
+    },
+    "system.windows-recycle-bin": {
+      "kind": "system-icon",
+      "label": "Recycle Bin",
+      "owner": "Microsoft Corporation",
+      "sourceUrl": "https://github.com/blueedgetechno/win11React/tree/master/public/img/icon/win",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Microsoft Corporation; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/system.windows-recycle-bin.96.8e157a7c34.webp",
+      "srcSet": "/assets/official/system.windows-recycle-bin.48.a569f0f738.webp 48w, /assets/official/system.windows-recycle-bin.96.8e157a7c34.webp 96w",
+      "width": 96,
+      "height": 96,
+      "bytes": [
+        1998,
+        4260
+      ]
+    },
+    "system.windows-this-pc": {
+      "kind": "system-icon",
+      "label": "This PC",
+      "owner": "Microsoft Corporation",
+      "sourceUrl": "https://github.com/blueedgetechno/win11React/tree/master/public/img/icon/win",
+      "retrieved": "2026-09-21",
+      "terms": "Trademark and artwork of Microsoft Corporation; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/system.windows-this-pc.96.e4a0d32a96.webp",
+      "srcSet": "/assets/official/system.windows-this-pc.48.bf52d44585.webp 48w, /assets/official/system.windows-this-pc.96.e4a0d32a96.webp 96w",
+      "width": 96,
+      "height": 96,
+      "bytes": [
+        996,
+        2468
       ]
     }
   }

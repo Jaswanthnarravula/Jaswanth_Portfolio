@@ -4,6 +4,7 @@
  * avatar landed, and the greeting loop restores the static Hello when stopped. HELLO-GL-01's bootstrap: Tier 2
  * decides before three.js is imported, and a stopped stage never restarts in the same session.
  */
+import { gsap } from 'gsap';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { greetingLoop, handOff, playIntro, profilesEntrance } from '@/components/welcome/motion';
 import paths from '@/lib/welcome/hello-paths.generated.json';
@@ -58,14 +59,42 @@ describe('profiles entrance and hand-off', () => {
 });
 
 describe('greeting loop', () => {
+  const svgGroup = () => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    document.body.append(g);
+    return g;
+  };
+  const nodes = () => ({ glyph: svgPath('M0 0L10 10'), alt: svgPath(), ink: svgGroup(), inkAlt: svgGroup() });
+
   it('starts after the draw and, when stopped, restores the static Hello', () => {
-    const glyph = svgPath('M0 0L10 10');
-    const alt = svgPath();
-    const stop = greetingLoop(glyph, alt);
-    expect(glyph.style.strokeDasharray).toBe('none');
+    const hello = nodes();
+    const stop = greetingLoop(hello);
+    expect(hello.ink.style.strokeDasharray).toBe('none');
     stop();
-    expect(glyph.getAttribute('d')).toBe(paths.greetings[0]!.d);
-    expect(alt.style.opacity).toBe('0');
+    expect(hello.glyph.getAttribute('d')).toBe(paths.greetings[0]!.d);
+    expect(hello.ink.style.opacity).toBe('1');
+    expect(hello.inkAlt.style.opacity).toBe('0');
+  });
+
+  it('a crossfade goes out, then in: two greetings are never visible at once', () => {
+    expect(paths.pairs[0]!.mode).toBe('crossfade'); // hello → hola
+    const hello = nodes();
+    const stop = greetingLoop(hello);
+    const loop = gsap.globalTimeline.getChildren(false, false, true).at(-1) as gsap.core.Timeline;
+    // The first pair: 1.5 s hold, then the 0.9 s crossfade. The alt rod is hidden by CSS until it is set.
+    let peakIncoming = 0;
+    for (let t = 0; t <= 2.39; t += 0.01) {
+      loop.seek(t);
+      const shown = Number(hello.ink.style.opacity || 1);
+      const incoming = Number(hello.inkAlt.style.opacity || 0);
+      peakIncoming = Math.max(peakIncoming, incoming);
+      expect(Math.min(shown, incoming), `both visible at ${t.toFixed(2)} s`).toBeLessThan(0.02);
+    }
+    expect(peakIncoming, 'Hola faded in').toBeGreaterThan(0.95);
+    loop.seek(2.41);
+    expect(hello.glyph.getAttribute('d')).toBe(paths.greetings[1]!.d); // the main rod now carries Hola
+    expect(hello.ink.style.opacity).toBe('1');
+    stop();
   });
 });
 

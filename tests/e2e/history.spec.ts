@@ -1,10 +1,17 @@
 /**
- * H1 (stub OS) — ROUTE-CONTRACT-01 · ROUTE-PORT-01 (native and next-router adapters) · ARCH-SHELL-01 ·
+ * H1 (on the real macOS shell; the OS-switch case starts in the Windows preview stub) — ROUTE-CONTRACT-01 · ROUTE-PORT-01 (native and next-router adapters) · ARCH-SHELL-01 ·
  * ROUTE-GO-01 · ROUTE-DEEP-01 (D1 on the stub) · ROUTE-CODEC-02 (client repair) · ROUTE-TITLE-01 (titles unique) ·
  * ROUTE-SER-01 (traversal spam never duplicates consecutive URLs).
  */
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { expectFocusNotOnBody, plantSentinel, sentinel, shellInstance, waitForOs } from './helpers';
+
+/** A macOS Dock icon by app name (its name reads "Finder", "Finder, open" or "Finder, minimized"). */
+const dockApp = (page: Page, name: string) =>
+  page
+    .getByRole('navigation', { name: 'Dock' })
+    .getByRole('link', { name: new RegExp(`^${name}(, (open|minimized))?$`) });
 
 for (const adapter of ['native', 'next-router'] as const) {
   test(`history contract: push → back → forward → refresh → back, no full reload (${adapter}) @smoke`, async ({
@@ -18,10 +25,10 @@ for (const adapter of ['native', 'next-router'] as const) {
     expect(instance).not.toBeNull();
 
     // push ×2
-    await page.getByRole('link', { name: 'Finder' }).click();
+    await dockApp(page, 'Finder').click();
     await expect(page).toHaveURL(/\/macos\/finder$/);
     await expect(page.getByRole('region', { name: 'Finder' })).toBeFocused();
-    await page.getByRole('link', { name: 'Safari' }).click();
+    await dockApp(page, 'Safari').click();
     await expect(page).toHaveURL(/\/macos\/safari$/);
     await expect(page.getByRole('region', { name: 'Safari' })).toBeFocused();
 
@@ -53,24 +60,25 @@ for (const adapter of ['native', 'next-router'] as const) {
 }
 
 test('the shell instance survives app open, OS switch and Back/Forward @smoke', async ({ page }) => {
-  await page.goto('/macos');
-  await waitForOs(page, 'macos');
+  // The preview stub still carries an OS switcher (macOS gains its own Switch OS entry points in P3).
+  await page.goto('/windows');
+  await waitForOs(page, 'windows');
   await plantSentinel(page);
   const instance = await shellInstance(page);
-  await page.getByRole('link', { name: 'Finder' }).click();
-  await expect(page).toHaveURL(/\/macos\/finder$/);
+  await page.getByRole('navigation', { name: 'Apps' }).getByRole('link', { name: 'File Explorer' }).click();
+  await expect(page).toHaveURL(/\/windows\/explorer$/);
   await page
     .getByRole('navigation', { name: 'Switch operating system' })
-    .getByRole('button', { name: 'Windows 11' })
+    .getByRole('button', { name: 'macOS' })
     .click();
-  await expect(page).toHaveURL(/\/windows$/);
-  await waitForOs(page, 'windows');
-  await page.goBack();
-  await expect(page).toHaveURL(/\/macos\/finder$/);
+  await expect(page).toHaveURL(/\/macos$/);
   await waitForOs(page, 'macos');
-  await expect(page.getByRole('region', { name: 'Finder' })).toBeVisible(); // parked session restored
-  await page.goForward();
+  await page.goBack();
+  await expect(page).toHaveURL(/\/windows\/explorer$/);
   await waitForOs(page, 'windows');
+  await expect(page.getByRole('region', { name: 'File Explorer' })).toBeVisible(); // parked session restored
+  await page.goForward();
+  await waitForOs(page, 'macos');
   expect(await sentinel(page)).toBe('alive');
   expect(await shellInstance(page)).toBe(instance);
 });
@@ -79,11 +87,10 @@ test('toggling between two apps never grows history (back-collapse)', async ({ p
   await page.goto('/macos');
   await waitForOs(page, 'macos');
   const start = await page.evaluate(() => window.history.length);
-  const apps = page.getByRole('navigation', { name: 'Apps' });
   for (let i = 0; i < 4; i++) {
-    await apps.getByRole('link', { name: 'Mail' }).click();
+    await dockApp(page, 'Mail').click();
     await expect(page).toHaveURL(/\/macos\/mail$/);
-    await apps.getByRole('link', { name: 'GitHub' }).click();
+    await dockApp(page, 'GitHub').click();
     await expect(page).toHaveURL(/\/macos\/github$/);
   }
   expect(await page.evaluate(() => window.history.length)).toBeLessThanOrEqual(start + 3);
@@ -103,22 +110,21 @@ test('spamming Back/Forward mid-click never duplicates consecutive URLs and sett
   });
   await page.goto('/macos');
   await waitForOs(page, 'macos');
-  const apps = page.getByRole('navigation', { name: 'Apps' });
-  for (const name of ['Finder', 'Safari', 'Mail', 'GitHub']) await apps.getByRole('link', { name }).click();
+  for (const name of ['Finder', 'Safari', 'Mail', 'GitHub']) await dockApp(page, name).click();
   await expect(page).toHaveURL(/\/macos\/github$/);
 
   // A burst of traversals, then an app open while they are still in flight (the serializer queues it).
   await page.evaluate(() => {
     for (const step of [-1, -1, 1, -1, -1, 1]) window.history.go(step);
   });
-  await apps.getByRole('link', { name: 'Safari' }).click();
+  await dockApp(page, 'Safari').click();
 
   // Settled = the URL is stable and the title's app segment ("About · Safari · macOS — …") names the focused window,
   // twice in a row.
   const snapshot = () =>
     page.evaluate(() => {
-      const focused = document.querySelector('[data-window][data-focused]');
-      const title = focused?.querySelector('h2')?.textContent ?? '';
+      const focused = document.querySelector<HTMLElement>('[data-window][data-focused]');
+      const title = focused?.dataset.appTitle ?? '';
       const segments = document.title.split(' · ');
       return `${window.location.pathname}|${title !== '' && segments.at(-2) === title}|${title}`;
     });
@@ -146,7 +152,7 @@ test('spamming Back/Forward mid-click never duplicates consecutive URLs and sett
   expect(await page.evaluate(() => (window as unknown as { __duplicates: string[] }).__duplicates)).toEqual([]);
 });
 
-test('D1 cold deep link opens only the named app (stub OS)', async ({ page }) => {
+test('D1 cold deep link opens only the named app', async ({ page }) => {
   await page.goto('/macos/github/enterprise-sso');
   await waitForOs(page, 'macos');
   await expect(page.getByRole('region', { name: 'GitHub' })).toBeVisible();

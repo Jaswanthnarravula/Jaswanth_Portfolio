@@ -1,0 +1,1260 @@
+/*
+ * Windows 11 Settings — plans/windows/apps/settings.md + 01-identity + 03-motion. The window's Mica layer shows through
+ * (Settings is Mica everywhere); NavigationView 280 px; breadcrumb header in the 28 px Title ramp; cards with a 1 px
+ * stroke, 8 px radius and 68 px rows; expander bodies revealed by clip-path (167 ms, no height animation); 40 × 20
+ * toggle switches whose thumb moves in 83 ms. Tokens from styles/os/windows.css (light/dark/contrast/accent follow
+ * them); only transform, opacity and clip-path animate — hover fills fade an overlay's opacity.
+ */
+
+.root {
+  container: settings / inline-size;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  color: var(--win-text);
+  font-family: var(--font-ui);
+  font-size: var(--win-fs-body);
+  line-height: 1.43;
+}
+
+.frame {
+  position: relative;
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: 280px minmax(0, 1fr);
+  /* One row the height of the window body: the pane and the page scroll inside it. */
+  grid-template-rows: minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+}
+
+/* --- NavigationView ------------------------------------------------------------------------------------------------ */
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 4px 8px 16px 16px;
+  overflow-y: auto;
+}
+.pane[hidden],
+.content[hidden] {
+  display: none;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 4px 20px;
+}
+.avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border: var(--win-stroke-w) solid var(--win-card-stroke);
+  border-radius: 50%;
+  background: var(--win-subtle-fill);
+  color: var(--win-text-2);
+  font-family: var(--font-display);
+  font-size: var(--win-fs-subtitle);
+  font-weight: 600;
+}
+.userText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.userName {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.userKind {
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+
+/* "Find a setting" — the AutoSuggestBox: 32 px field, bottom stroke, glyph on the right, a suggestion flyout. */
+.search {
+  position: relative;
+  margin: 0 4px 12px 0;
+}
+.combo {
+  position: relative;
+}
+.searchInput {
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  padding: 0 36px 0 12px;
+  border: var(--win-stroke-w) solid var(--win-field-border);
+  border-bottom-color: var(--win-field-underline);
+  border-radius: var(--radius-control);
+  background: var(--win-field);
+  color: var(--win-text);
+  font: inherit;
+  font-size: var(--win-fs-body);
+  outline: none;
+}
+.searchInput::placeholder {
+  color: var(--win-text-dim);
+}
+.searchInput:focus {
+  border-bottom-color: var(--win-accent);
+  box-shadow: inset 0 -1px 0 var(--win-accent);
+}
+.searchGlyph {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  color: var(--win-text-dim);
+  pointer-events: none;
+}
+.suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  z-index: 6;
+  max-height: 320px;
+  padding: 4px;
+  overflow-y: auto;
+  border: 1px solid var(--win-flyout-stroke);
+  border-radius: 8px;
+  background: var(--win-flyout-solid);
+  box-shadow: var(--win-flyout-shadow);
+  animation: settings-flyout-in var(--win-d167) var(--win-ease-in) both;
+}
+.suggestions:empty {
+  display: none;
+}
+.suggestions [data-combobox-group-label] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.suggestions [data-combobox-option] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 4px 12px;
+  border-radius: var(--radius-control);
+  cursor: default;
+}
+.suggestions [data-combobox-option][data-active] {
+  background: var(--win-subtle-fill);
+}
+.suggestionGlyph {
+  display: grid;
+  flex: none;
+  place-items: center;
+  color: var(--win-text);
+}
+.suggestionText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.suggestionWhere {
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+.search [data-combobox-empty] {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  z-index: 6;
+  padding: 10px 12px;
+  border: 1px solid var(--win-flyout-stroke);
+  border-radius: 8px;
+  background: var(--win-flyout-solid);
+  box-shadow: var(--win-flyout-shadow);
+}
+.noResults {
+  color: var(--win-text-dim);
+}
+
+.nav {
+  min-height: 0;
+}
+.navList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.navItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 12px 0 16px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text);
+  font: inherit;
+  text-align: start;
+  isolation: isolate;
+}
+/* Hover and selection fill (an overlay whose opacity fades — never a background transition). */
+.navItem::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--win-subtle-fill);
+  opacity: 0;
+  transition: opacity var(--win-d83) linear;
+}
+.navItem:hover::before,
+.navItem[aria-current='page']::before {
+  opacity: 1;
+}
+.navItem:active::before {
+  background: var(--win-subtle-press);
+}
+/* The 3 px accent selection bar. */
+.navItem::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 3px;
+  height: 16px;
+  margin-top: -8px;
+  border-radius: 2px;
+  background: var(--win-accent);
+  transform: scaleY(0);
+  transition: transform var(--win-d167) var(--win-ease-p2p);
+}
+.navItem[aria-current='page']::after {
+  transform: scaleY(1);
+}
+.navItem:focus-visible,
+.crumbLink:focus-visible,
+.iconButton:focus-visible,
+.expanderHead:focus-visible,
+.button:focus-visible {
+  outline: 2px solid var(--win-text);
+  outline-offset: 1px;
+}
+.navLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.navChevron {
+  flex: none;
+  color: var(--win-text-dim);
+}
+
+/* --- Content: breadcrumb header + page -------------------------------------------------------------------------- */
+.content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding-left: 24px;
+}
+/* Only the page scrolls; 4 px of room on the left keeps focus rings unclipped. */
+.scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0 36px 36px 4px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+.infobar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 1000px;
+  margin: 12px 36px 0 4px;
+  padding: 10px 16px;
+  border: var(--win-stroke-w) solid var(--win-card-stroke);
+  border-radius: var(--radius-control);
+  background: color-mix(in srgb, var(--win-accent) 10%, var(--win-content));
+  font-size: var(--win-fs-caption);
+}
+.infobar svg {
+  flex: none;
+  color: var(--win-accent-text);
+}
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  min-height: 52px;
+  padding: 8px 36px 20px 4px;
+}
+.iconButton {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 36px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text);
+  isolation: isolate;
+}
+.iconButton::before,
+.expanderHead::before,
+.button::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--win-subtle-fill);
+  opacity: 0;
+  transition: opacity var(--win-d83) linear;
+}
+.iconButton:hover::before,
+.expanderHead:hover::before,
+.button:hover::before {
+  opacity: 1;
+}
+.iconButton:active::before,
+.expanderHead:active::before,
+.button:active::before {
+  background: var(--win-subtle-press);
+}
+.hamburger {
+  display: none;
+}
+.breadcrumb {
+  min-width: 0;
+}
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.crumbCurrent,
+.crumbLink {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--win-fs-title);
+  font-weight: 600;
+  line-height: 1.29;
+}
+.crumbCurrent {
+  outline: none;
+}
+.crumbLink {
+  padding: 0 4px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--win-text-dim);
+}
+.crumbLink:hover {
+  color: var(--win-text);
+}
+.crumbChevron {
+  flex: none;
+  color: var(--win-text-dim);
+}
+.page {
+  min-width: 0;
+}
+
+/* --- Cards ------------------------------------------------------------------------------------------------------ */
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 1000px;
+}
+.lede {
+  margin: 0 0 12px;
+  color: var(--win-text-2);
+}
+.groupHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.groupTitle {
+  margin: 20px 0 6px;
+  font-size: var(--win-fs-body);
+  font-weight: 600;
+}
+.cards > .groupTitle:first-child,
+.groupHead:first-child .groupTitle {
+  margin-top: 0;
+}
+.count {
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  position: relative;
+  border: var(--win-stroke-w) solid var(--win-card-stroke);
+  border-radius: var(--radius-card);
+  background: var(--win-card);
+  outline: none;
+}
+.card:focus-visible {
+  outline: 2px solid var(--win-text);
+  outline-offset: 1px;
+}
+/* Search / intent flash: an accent ring + tint that fades in and out (opacity only). */
+.card::after {
+  content: '';
+  position: absolute;
+  inset: calc(var(--win-stroke-w) * -1);
+  border-radius: inherit;
+  box-shadow:
+    0 0 0 2px var(--win-accent),
+    inset 0 0 0 999px color-mix(in srgb, var(--win-accent) 12%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+.card[data-flash]::after {
+  animation: settings-flash 1200ms var(--win-ease-p2p) both;
+}
+:root[data-motion='reduced'] .card[data-flash]::after {
+  animation: none;
+  opacity: 1;
+}
+
+.row,
+.subRow,
+.expanderHead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 68px;
+  padding: 10px 16px;
+}
+.subRow {
+  min-height: 56px;
+  padding-left: 52px;
+  border-top: var(--win-stroke-w) solid var(--win-card-stroke);
+}
+.subRow:first-child {
+  border-top: 0;
+}
+.glyph {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  color: var(--win-text);
+}
+.appIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin: 0 -6px;
+}
+.text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+.title {
+  font-size: var(--win-fs-body);
+  line-height: 1.43;
+}
+.desc {
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+  line-height: 1.33;
+}
+.control {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+.value,
+.summary {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  color: var(--win-text-dim);
+}
+.note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 16px 12px 52px;
+  padding: 8px 12px;
+  border-radius: var(--radius-control);
+  background: color-mix(in srgb, var(--win-accent) 10%, transparent);
+  font-size: var(--win-fs-caption);
+}
+.note svg {
+  flex: none;
+  color: var(--win-accent-text);
+}
+
+/* Expander and navigation cards: the whole header is one button. */
+.expanderHead {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  border: 0;
+  border-radius: calc(var(--radius-card) - 1px);
+  background: transparent;
+  color: var(--win-text);
+  font: inherit;
+  text-align: start;
+  isolation: isolate;
+}
+.card[data-open] .expanderHead {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.chevron {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-right: -8px;
+  color: var(--win-text);
+  transition: transform var(--win-d167) var(--win-ease-p2p);
+}
+.card[data-open] .chevron {
+  transform: rotate(180deg);
+}
+.expanderBody {
+  border-top: var(--win-stroke-w) solid var(--win-card-stroke);
+}
+.expanderBody[hidden] {
+  display: none;
+}
+.card[data-open] .expanderBody {
+  animation: settings-reveal var(--win-d167) var(--win-ease-in) both;
+}
+.prose {
+  padding: 16px 16px 16px 52px;
+  color: var(--win-text-2);
+  font-size: var(--win-fs-body);
+}
+.prose h4 {
+  margin: 0 0 8px;
+  color: var(--win-text);
+  font-size: var(--win-fs-body);
+  font-weight: 600;
+}
+.prose p,
+.prose ul {
+  margin: 0 0 10px;
+}
+.prose p:last-child {
+  margin-bottom: 0;
+}
+.prose a {
+  color: var(--win-accent-text);
+}
+
+/* Device specifications (System › About). */
+.specs {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0 16px 16px 52px;
+}
+.spec {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+  gap: 16px;
+}
+.spec dt {
+  color: var(--win-text-dim);
+}
+.spec dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* --- Buttons --------------------------------------------------------------------------------------------------- */
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 96px;
+  min-height: 32px;
+  padding: 4px 12px;
+  border: var(--win-stroke-w) solid var(--win-field-border);
+  border-bottom-color: color-mix(in srgb, var(--win-field-border) 70%, var(--win-field-underline));
+  border-radius: var(--radius-control);
+  background: var(--win-field);
+  color: var(--win-text);
+  font: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  isolation: isolate;
+}
+.accentButton {
+  border-color: transparent;
+  background: var(--win-accent);
+  color: var(--win-on-accent);
+}
+.accentButton::before {
+  background: color-mix(in srgb, var(--win-on-accent) 10%, transparent);
+}
+
+/* --- Toggle switch: 40 × 20 track, 12 px thumb, 83 ms (the button itself is 40 × 32 — a full target). ---------- */
+.switchWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.switchState {
+  min-width: 24px;
+  text-align: end;
+}
+.switch {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+}
+.switch::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 0;
+  left: 0;
+  box-sizing: border-box;
+  height: 20px;
+  border: 1px solid var(--win-text-dim);
+  border-radius: 10px;
+  background: var(--win-subtle-fill);
+}
+.switch[aria-checked='true']::before {
+  border-color: var(--win-accent);
+  background: var(--win-accent);
+}
+.thumb {
+  position: absolute;
+  top: 10px;
+  left: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--win-text-2);
+  transition: transform var(--win-d83) var(--win-ease-p2p);
+}
+.switch:hover .thumb {
+  transform: scale(1.17);
+}
+.switch[aria-checked='true'] .thumb {
+  background: var(--win-on-accent);
+  transform: translateX(20px);
+}
+.switch[aria-checked='true']:hover .thumb {
+  transform: translateX(20px) scale(1.17);
+}
+.switch:active .thumb {
+  transform: scaleX(1.25);
+}
+.switch[aria-checked='true']:active .thumb {
+  transform: translateX(18px) scaleX(1.25);
+}
+.switch:focus-visible {
+  outline: 2px solid var(--win-text);
+  outline-offset: -3px;
+}
+
+/* --- Radio buttons (20 px, accent fill + 8 px on-accent dot) ------------------------------------------------------- */
+.radio {
+  display: inline-block;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border: 1px solid var(--win-text-dim);
+  border-radius: 50%;
+  background: var(--win-subtle-fill);
+  vertical-align: middle;
+  appearance: none;
+}
+.radio:checked {
+  border-color: var(--win-accent);
+  background: radial-gradient(circle, var(--win-on-accent) 0 4px, var(--win-accent) 4.5px);
+}
+.radio:focus-visible {
+  outline: 2px solid var(--win-text);
+  outline-offset: 2px;
+}
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+.option,
+.tileLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+}
+
+/* Choose your mode: theme thumbnails (artwork in fixed light / dark tones, whatever the current theme). */
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0 16px 16px 52px;
+}
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 128px;
+}
+.tileArt {
+  position: relative;
+  display: block;
+  height: 76px;
+  overflow: hidden;
+  border: var(--win-stroke-w) solid var(--win-card-stroke);
+  border-radius: 6px;
+  background: var(--wallpaper-windows);
+}
+.tileWindow {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  width: 72px;
+  height: 46px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.25);
+}
+.tileArt[data-mode='light'] .tileWindow {
+  background: #fafbfd;
+}
+.tileArt[data-mode='dark'] .tileWindow {
+  background: #202020;
+}
+.tileArt[data-mode='system'] .tileWindow {
+  background: linear-gradient(90deg, #fafbfd 50%, #202020 50%);
+}
+
+/* Accent colour palette. The swatch tones mirror the light-theme accents in styles/os/windows.css. */
+.swatchBlock {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px 16px 52px;
+}
+.subTitle {
+  font-size: var(--win-fs-body);
+}
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 40px);
+  gap: 6px;
+}
+.swatch {
+  position: relative;
+  display: block;
+  width: 40px;
+  height: 40px;
+}
+.swatchInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+}
+.swatchChip,
+.swatchDot {
+  background: var(--swatch);
+}
+.swatchChip {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-control);
+  color: #ffffff;
+  pointer-events: none;
+}
+.swatchInput:checked + .swatchChip {
+  box-shadow:
+    inset 0 0 0 2px var(--swatch),
+    inset 0 0 0 4px var(--win-content);
+}
+.swatchInput:focus-visible + .swatchChip {
+  outline: 2px solid var(--win-text);
+  outline-offset: 2px;
+}
+.swatchDot {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+}
+.swatch[data-accent='auto'],
+.swatchDot[data-accent='auto'] {
+  --swatch: linear-gradient(135deg, #2f6fe0, #60cdff);
+}
+.swatch[data-accent='blue'],
+.swatchDot[data-accent='blue'] {
+  --swatch: #2f6fe0;
+}
+.swatch[data-accent='navy'],
+.swatchDot[data-accent='navy'] {
+  --swatch: #0f4a9e;
+}
+.swatch[data-accent='teal'],
+.swatchDot[data-accent='teal'] {
+  --swatch: #00736e;
+}
+.swatch[data-accent='green'],
+.swatchDot[data-accent='green'] {
+  --swatch: #107c10;
+}
+.swatch[data-accent='purple'],
+.swatchDot[data-accent='purple'] {
+  --swatch: #744da9;
+}
+.swatch[data-accent='plum'],
+.swatchDot[data-accent='plum'] {
+  --swatch: #9a0089;
+}
+.swatch[data-accent='red'],
+.swatchDot[data-accent='red'] {
+  --swatch: #c42b1c;
+}
+.swatch[data-accent='orange'],
+.swatchDot[data-accent='orange'] {
+  --swatch: #b3440c;
+}
+.swatch[data-accent='graphite'],
+.swatchDot[data-accent='graphite'] {
+  --swatch: #4c5b6a;
+}
+.swatch[data-accent='auto'] .swatchInput:checked + .swatchChip {
+  box-shadow:
+    inset 0 0 0 2px #2f6fe0,
+    inset 0 0 0 4px var(--win-content);
+}
+
+/* --- Slider (native range): 4 px track, accent fill, 20 px thumb with an accent core ------------------------------- */
+.slider {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.range {
+  width: 180px;
+  height: 32px;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+}
+.range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--win-accent) var(--fill, 0%), var(--win-text-dim) var(--fill, 0%));
+}
+.range::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  margin-top: -8px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--win-accent);
+  box-shadow:
+    inset 0 0 0 5px var(--win-field),
+    0 0 0 1px var(--win-field-border);
+  appearance: none;
+}
+.range:hover::-webkit-slider-thumb {
+  box-shadow:
+    inset 0 0 0 4px var(--win-field),
+    0 0 0 1px var(--win-field-border);
+}
+.range::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--win-text-dim);
+}
+.range::-moz-range-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--win-accent);
+}
+.range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--win-accent);
+  box-shadow:
+    inset 0 0 0 5px var(--win-field),
+    0 0 0 1px var(--win-field-border);
+}
+.range:focus-visible {
+  border-radius: var(--radius-control);
+  outline: 2px solid var(--win-text);
+  outline-offset: 2px;
+}
+.rangeValue {
+  min-width: 40px;
+  color: var(--win-text-dim);
+  text-align: end;
+}
+
+/* Text size preview (sized by the same --text-scale the setting writes). */
+.textPreview {
+  display: grid;
+  gap: 4px;
+  margin: 0 16px 16px 52px;
+  padding: 16px;
+  border: var(--win-stroke-w) solid var(--win-card-stroke);
+  border-radius: var(--radius-control);
+  background: var(--win-content);
+}
+.textPreviewLabel {
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+.textPreviewSample {
+  margin: 0;
+  font-size: var(--win-fs-body);
+}
+
+/* --- Device picture (System hero, Personalization preview) --------------------------------------------------------- */
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  max-width: 1000px;
+  margin-bottom: 24px;
+}
+.heroText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.heroName {
+  font-family: var(--font-display);
+  font-size: var(--win-fs-subtitle);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.heroMeta {
+  color: var(--win-text-dim);
+}
+.device {
+  display: block;
+  flex: none;
+  width: 168px;
+  padding: 5px;
+  border-radius: 8px;
+  background: #1c1c1c;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.2);
+}
+.device[data-large] {
+  width: 300px;
+  padding: 7px;
+}
+.screen {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--wallpaper-windows);
+}
+.miniWindow {
+  position: absolute;
+  top: 16%;
+  left: 18%;
+  width: 52%;
+  height: 50%;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--win-window);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.25);
+}
+.miniTitle {
+  display: block;
+  height: 14%;
+  background: var(--win-titlebar);
+}
+.miniAccent {
+  position: absolute;
+  bottom: 14%;
+  left: 10%;
+  width: 34%;
+  height: 12%;
+  border-radius: 2px;
+  background: var(--win-accent);
+}
+.miniTaskbar {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 3%;
+  height: 11%;
+  padding: 0 4%;
+  background: var(--win-taskbar);
+}
+.miniTaskbar[data-align='left'] {
+  justify-content: flex-start;
+}
+.miniTaskbar span {
+  width: 4%;
+  aspect-ratio: 1;
+  border-radius: 1px;
+  background: var(--win-text-dim);
+}
+.miniTaskbar .miniStart {
+  background: var(--win-accent);
+}
+
+/* --- Collapsed NavigationView (`medium`, or a window narrower than 760 px): the hamburger opens the pane. ---------- */
+.frame[data-layout='collapsed'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.frame[data-layout='collapsed'] .pane {
+  display: none;
+}
+.frame[data-layout='collapsed'] .hamburger {
+  display: grid;
+}
+.frame[data-layout='collapsed'][data-nav-open] .pane {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 8;
+  display: flex;
+  width: 280px;
+  border-right: 1px solid var(--win-flyout-stroke);
+  background: var(--win-flyout-solid);
+  box-shadow: var(--win-flyout-shadow);
+  animation: settings-pane-in var(--win-d167) var(--win-ease-in) both;
+}
+.frame[data-layout='collapsed'] .content {
+  padding-left: 12px;
+}
+
+@container settings (max-width: 759px) {
+  .frame[data-layout='full'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .frame[data-layout='full'] .pane {
+    display: none;
+  }
+  .frame[data-layout='full'] .hamburger {
+    display: grid;
+  }
+  .frame[data-layout='full'][data-nav-open] .pane {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 8;
+    display: flex;
+    width: 280px;
+    border-right: 1px solid var(--win-flyout-stroke);
+    background: var(--win-flyout-solid);
+    box-shadow: var(--win-flyout-shadow);
+    animation: settings-pane-in var(--win-d167) var(--win-ease-in) both;
+  }
+  .frame[data-layout='full'] .content {
+    padding-left: 12px;
+  }
+}
+
+/* --- Compact: the page list, then a pushed page with a back arrow; full-width cards, rows ≥ 48 px. ---------------- */
+.frame[data-layout='compact'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.frame[data-layout='compact'] .pane {
+  padding: 4px 16px 16px;
+}
+.frame[data-layout='compact'] .navItem {
+  min-height: 48px;
+}
+.frame[data-layout='compact'] .content {
+  padding-left: 12px;
+}
+.frame[data-layout='compact'] .header {
+  padding-right: 16px;
+}
+.frame[data-layout='compact'] .scroll {
+  padding: 0 16px 24px 4px;
+}
+.frame[data-layout='compact'] .row,
+.frame[data-layout='compact'] .subRow,
+.frame[data-layout='compact'] .expanderHead {
+  flex-wrap: wrap;
+  min-height: 56px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.frame[data-layout='compact'] .subRow,
+.frame[data-layout='compact'] .prose,
+.frame[data-layout='compact'] .specs,
+.frame[data-layout='compact'] .tiles,
+.frame[data-layout='compact'] .swatchBlock,
+.frame[data-layout='compact'] .textPreview,
+.frame[data-layout='compact'] .note {
+  padding-left: 16px;
+}
+.frame[data-layout='compact'] .textPreview,
+.frame[data-layout='compact'] .note {
+  margin-left: 16px;
+  padding-left: 12px;
+}
+.frame[data-layout='compact'] .range {
+  width: 140px;
+}
+.frame[data-layout='compact'] .button,
+.frame[data-layout='compact'] .switch {
+  min-height: 44px;
+}
+.frame[data-layout='compact'] .switch::before {
+  top: 12px;
+}
+.frame[data-layout='compact'] .thumb {
+  top: 16px;
+}
+.frame[data-layout='compact'] .spec {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+/* Touch posture: 40 px list rows (plans/windows/04 "tablet posture"). */
+@media (any-pointer: coarse) {
+  .navItem {
+    min-height: 40px;
+  }
+}
+
+@keyframes settings-reveal {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes settings-flash {
+  0% {
+    opacity: 0;
+  }
+  15%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes settings-flyout-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+@keyframes settings-pane-in {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+}
+
+@media (forced-colors: active) {
+  .card,
+  .button,
+  .searchInput {
+    border-color: CanvasText;
+  }
+  .switch::before {
+    border-color: ButtonText;
+    background: Canvas;
+  }
+  .switch[aria-checked='true']::before {
+    border-color: Highlight;
+    background: Highlight;
+  }
+  .thumb {
+    background: ButtonText;
+  }
+  .switch[aria-checked='true'] .thumb {
+    background: HighlightText;
+  }
+  .navItem::after {
+    background: Highlight;
+  }
+  .radio:checked {
+    border-color: Highlight;
+    background: radial-gradient(circle, HighlightText 0 4px, Highlight 4.5px);
+  }
+  .swatchChip {
+    forced-color-adjust: none;
+  }
+}

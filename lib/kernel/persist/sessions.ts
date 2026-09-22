@@ -2,7 +2,7 @@
  * Session persistence rules — shared/04 `KRN-SES-01/02`, `KRN-PERSIST-*`.
  * URL always wins for OS + focused role + location; the snapshot wins for everything else.
  */
-import { OS_IDS, type OsId, type SizeClass } from '../ids';
+import { isAppRole, OS_IDS, type OsId, type SizeClass } from '../ids';
 import { topmostFocusable } from '../state';
 import type {
   AppLocation,
@@ -50,6 +50,7 @@ export function parsePersistedSessions(value: Json): PersistedSessionsV1 | null 
         contentRev: typeof raw.contentRev === 'string' ? raw.contentRev : '',
         bootSeen: raw.bootSeen === true,
         lockSeen: raw.lockSeen === true,
+        running: Array.isArray(raw.running) ? [...new Set(raw.running.filter(isAppRole))] : [],
       };
     }
   }
@@ -109,7 +110,13 @@ export function toPersisted(state: KernelState, now: number, contentRev: string)
   const sessions: Partial<Record<OsId, OsSession>> = {};
   for (const os of OS_IDS) {
     const session = state.sessions[os];
-    if (Object.keys(session.windows).length || session.terminal || session.bootSeen || session.lockSeen)
+    if (
+      Object.keys(session.windows).length ||
+      session.terminal ||
+      session.bootSeen ||
+      session.lockSeen ||
+      session.running.length
+    )
       sessions[os] = session;
   }
   return { v: 1, savedAt: now, contentRev, sessions, learnedRects: state.learnedRects };

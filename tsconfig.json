@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["DOM", "DOM.Iterable", "ES2023"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2023"
+    ],
     "module": "esnext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
@@ -23,7 +27,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     }
   },
   "include": [
@@ -36,7 +42,18 @@
     ".next-original/types/**/*.ts",
     ".next-original/dev/types/**/*.ts",
     ".next-production/types/**/*.ts",
-    ".next-production/dev/types/**/*.ts"
+    ".next-production/dev/types/**/*.ts",
+    ".next-p4/types/**/*.ts",
+    ".next-p4/dev/types/**/*.ts",
+    ".next-p3/types/**/*.ts",
+    ".next-p3/dev/types/**/*.ts",
+    ".next-p4b/types/**/*.ts",
+    ".next-p4b/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", ".next", "out", ".dist"]
+  "exclude": [
+    "node_modules",
+    ".next",
+    "out",
+    ".dist"
+  ]
 }

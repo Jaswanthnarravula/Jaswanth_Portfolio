@@ -23,6 +23,7 @@ import {
 import { browserAudioEnvironment, createAudioEngine, type AudioEngine } from '@/lib/audio/engine';
 import { isPersonaId, type PersonaId } from '@/lib/kernel/ids';
 import { beginHandoff } from '@/lib/motion/handoff';
+import { afterFirstPaint } from '@/lib/motion/idle';
 import type { GlassStage } from '@/lib/webgl';
 import { attachedKernel, sendToKernel, whenKernel } from '@/stores/kernel-bridge';
 
@@ -34,8 +35,10 @@ const loadMotion = (): Promise<Motion> => (motionModule ??= import('./motion'));
 
 const DEFAULT_VOLUME = 0.8;
 const STALL_MS = 6000;
+/** Headroom for the React commit after the full intro's hand-over (plans/03: profiles by 3500 ms). */
+const HANDOVER_MARGIN_MS = 100;
 const subscribeNever = () => () => undefined;
-const htmlData = (key: 'welcome' | 'sound' | 'persona') => () => document.documentElement.dataset[key] ?? null;
+const htmlData = (key: 'sound' | 'persona') => () => document.documentElement.dataset[key] ?? null;
 const onServer = () => null;
 const reducedMotion = () => document.documentElement.dataset.motion === 'reduced';
 
@@ -53,17 +56,6 @@ function whenQuiet(ms: number, signal: AbortSignal): Promise<void> {
   });
 }
 
-/** After the load event, in idle time: nothing heavy competes with first paint (shared/10 `PERF-LAZY-01`). */
-function afterLoadIdle(run: () => void, signal: AbortSignal): void {
-  const idle = () => {
-    const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
-    if (w.requestIdleCallback) w.requestIdleCallback(() => !signal.aborted && run(), { timeout: 2000 });
-    else setTimeout(() => !signal.aborted && run(), 200);
-  };
-  if (document.readyState === 'complete') idle();
-  else window.addEventListener('load', idle, { once: true, signal });
-}
-
 interface WelcomeApi {
   readonly screen: WelcomeScreen;
   readonly soundOn: boolean;
@@ -71,6 +63,7 @@ interface WelcomeApi {
   tap(): void;
   skip(): void;
   replay(): void;
+  restart(): void;
   select(id: PersonaId, card: HTMLElement): void;
   toggleSound(): void;
 }
@@ -94,19 +87,21 @@ export function WelcomeRoot({
   stalledClassName?: string;
   children: ReactNode;
 }) {
-  const returning = useSyncExternalStore(subscribeNever, htmlData('welcome'), onServer) === 'profiles';
   const mutedAtLoad = useSyncExternalStore(subscribeNever, htmlData('sound'), onServer) === 'off';
   const persona = useSyncExternalStore(subscribeNever, htmlData('persona'), onServer);
   const [override, setOverride] = useState<WelcomeScreen | null>(null);
   const [soundChoice, setSoundChoice] = useState<boolean | null>(null);
   const [stalled, setStalled] = useState(false);
-  const screen: WelcomeScreen = override ?? (returning ? 'profiles' : 'hello');
+  // `/` is always the deliberate start of the experience. Saved preferences never replace Hello at this URL.
+  const screen: WelcomeScreen = override ?? 'hello';
   const soundOn = soundChoice ?? !mutedAtLoad;
 
   const rootRef = useRef<HTMLDivElement>(null);
   const screenRef = useRef<WelcomeScreen>('hello');
   const engineRef = useRef<AudioEngine | null>(null);
   const introRef = useRef<{ finish(): void } | null>(null);
+  /** When the visitor started the intro (tap or replay): its length is measured on the wall clock from here. */
+  const introStartRef = useRef(0);
   const stageRef = useRef<GlassStage | null>(null);
   const fromIntroRef = useRef(false);
 
@@ -138,6 +133,9 @@ export function WelcomeRoot({
     lastPersona: isPersonaId(persona) ? persona : null,
     tap() {
       if (screenRef.current !== 'hello') return;
+      // The intro's clock starts at the tap itself: the first AudioContext of a browser session can take hundreds of
+      // milliseconds to open the audio device, and that must not push the hand-over past 3.5 s.
+      introStartRef.current = performance.now();
       engine().unlock(); // inside the user gesture
       go('intro');
       sendToKernel({ type: 'ONBOARDING_ADVANCE', to: 'intro' });
@@ -152,10 +150,19 @@ export function WelcomeRoot({
     },
     replay() {
       if (screenRef.current !== 'profiles') return;
+      introStartRef.current = performance.now();
       engine().unlock();
       go('intro');
       sendToKernel({ type: 'ONBOARDING_ADVANCE', to: 'intro' });
       engine().playIntro({ enabled: soundOn, volume: volume() });
+    },
+    restart() {
+      // Returning visitors normally resume at profiles. This is the durable, explicit route back to Hello.
+      if (screenRef.current !== 'profiles') return;
+      document.documentElement.dataset.welcome = 'hello';
+      delete document.documentElement.dataset.persona;
+      go('hello');
+      sendToKernel({ type: 'SET_PREF', patch: { introSeen: false, persona: null } });
     },
     select(id, card) {
       if (screenRef.current !== 'profiles') return; // first wins
@@ -187,29 +194,39 @@ export function WelcomeRoot({
     },
   };
 
-  // Idle after load: fetch the intro sound (never before first paint) and the motion chunk.
+  // After load and the first paint, in idle time: fetch the intro sound and the motion chunk.
   useEffect(() => {
     const lifetime = new AbortController();
-    afterLoadIdle(() => {
-      engine().prefetch();
-      void loadMotion().catch(() => undefined); // offline: the static Hello and CSS states still work
-      // Tier 2 only: the liquid-glass shader, decided (and three.js requested) only now and only on Hello.
-      void whenQuiet(500, lifetime.signal)
-        .then(() => (screenRef.current === 'hello' ? import('@/lib/webgl') : null))
-        .then(async (webgl) => {
-          const root = rootRef.current;
-          if (!webgl || !root || lifetime.signal.aborted) return;
-          const radius = (el: Element) => () => Number.parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0;
-          const panels = ['[data-lens]', '[data-tap-to-begin]']
-            .map((selector) => root.querySelector(selector))
-            .filter((el): el is Element => el !== null)
-            .map((element) => ({ element, radius: radius(element) }));
-          const stage = await webgl.startHelloStage({ container: root, panels });
-          if (lifetime.signal.aborted || screenRef.current !== 'hello') stage?.dispose();
-          else stageRef.current = stage;
-        })
-        .catch(() => undefined); // any failure keeps the CSS glass
-    }, lifetime.signal);
+    afterFirstPaint(
+      () => {
+        engine().prefetch();
+        void loadMotion().catch(() => undefined); // offline: the static Hello and CSS states still work
+        // The lens's edge refraction: refraction.ts decides (Chromium, desktop, full glass); else the CSS blur stays.
+        const lens = query<HTMLElement>('[data-lens]');
+        const filter = query<SVGFilterElement>('[data-refract-filter]');
+        if (lens && filter)
+          void import('./refraction')
+            .then((m) => m.startLensRefraction(lens, filter, lifetime.signal))
+            .catch(() => undefined);
+        // Tier 2 only: the liquid-glass shader, decided (and three.js requested) only now and only on Hello.
+        void whenQuiet(500, lifetime.signal)
+          .then(() => (screenRef.current === 'hello' ? import('@/lib/webgl') : null))
+          .then(async (webgl) => {
+            const root = rootRef.current;
+            if (!webgl || !root || lifetime.signal.aborted) return;
+            const radius = (el: Element) => () => Number.parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0;
+            const panels = ['[data-lens]', '[data-tap-to-begin]']
+              .map((selector) => root.querySelector(selector))
+              .filter((el): el is Element => el !== null)
+              .map((element) => ({ element, radius: radius(element) }));
+            const stage = await webgl.startHelloStage({ container: root, panels });
+            if (lifetime.signal.aborted || screenRef.current !== 'hello') stage?.dispose();
+            else stageRef.current = stage;
+          })
+          .catch(() => undefined); // any failure keeps the CSS glass
+      },
+      { signal: lifetime.signal },
+    );
     return () => {
       lifetime.abort();
       engineRef.current?.dispose();
@@ -234,19 +251,22 @@ export function WelcomeRoot({
     if (screen !== 'hello' || reducedMotion()) return;
     const glyph = query<SVGPathElement>('[data-glyph]');
     const alt = query<SVGPathElement>('[data-glyph-alt]');
-    if (!glyph || !alt) return;
+    // The draw runs on the rod group, which every glass layer inherits it from.
+    const ink = query<SVGGElement>('[data-ink]');
+    const inkAlt = query<SVGGElement>('[data-ink-alt]');
+    if (!glyph || !alt || !ink || !inkAlt) return;
     let stop: (() => void) | null = null;
     let cancelled = false;
     const start = () =>
       void loadMotion().then(
         (m) => {
-          if (!cancelled) stop = m.greetingLoop(glyph, alt);
+          if (!cancelled) stop = m.greetingLoop({ glyph, alt, ink, inkAlt });
         },
         () => undefined, // the static drawn Hello stays
       );
-    const drawing = glyph.getAnimations?.().some((a) => a.playState === 'running') ?? false;
+    const drawing = ink.getAnimations?.().some((a) => a.playState === 'running') ?? false;
     const lifetime = new AbortController();
-    if (drawing) glyph.addEventListener('animationend', start, { once: true, signal: lifetime.signal });
+    if (drawing) ink.addEventListener('animationend', start, { once: true, signal: lifetime.signal });
     else start();
     return () => {
       cancelled = true;
@@ -270,12 +290,17 @@ export function WelcomeRoot({
     let playback: { finish(): void; kill(): void } | null = null;
     const reduced = reducedMotion();
     const { muted } = introSettings();
-    // If the motion chunk cannot arrive (offline), the intro still ends on time.
-    const fallback = setTimeout(() => onIntroDone(), reduced ? 800 : muted ? 1200 : 3500);
+    // The intro ends on the wall clock, counted from the tap: a late motion chunk (or none, offline) or a janky device
+    // whose frames GSAP lag-smooths never holds the profiles back. The full intro hands over 100 ms early so the
+    // profiles commit lands inside plans/03's "≤ 3500 ms"; the zoom's last 100 ms are below 0.2 % opacity.
+    const length = reduced ? 800 : muted ? 1200 : 3500 - HANDOVER_MARGIN_MS;
+    const deadline = setTimeout(
+      () => (introRef.current ? introRef.current.finish() : onIntroDone()),
+      Math.max(0, length - (performance.now() - introStartRef.current)),
+    );
     void loadMotion().then(
       (m) => {
         if (signal.aborted || !wordmark) return;
-        clearTimeout(fallback);
         playback = m.playIntro(wordmark, { muted, reduced, onDone: () => onIntroDone() });
         introRef.current = playback;
       },
@@ -292,7 +317,7 @@ export function WelcomeRoot({
     document.addEventListener('visibilitychange', () => document.hidden && onIntroInput(), { signal });
     return () => {
       lifetime.abort();
-      clearTimeout(fallback);
+      clearTimeout(deadline);
       playback?.kill();
       introRef.current = null;
     };
@@ -379,6 +404,15 @@ export function ReplayIntro({ className, children }: { className?: string; child
   const { replay } = useWelcome();
   return (
     <button type="button" className={className} onClick={replay} aria-label="Replay intro" data-profiles-fade>
+      {children}
+    </button>
+  );
+}
+
+export function RestartWelcome({ className, children }: { className?: string; children: ReactNode }) {
+  const { restart } = useWelcome();
+  return (
+    <button type="button" className={className} onClick={restart}>
       {children}
     </button>
   );

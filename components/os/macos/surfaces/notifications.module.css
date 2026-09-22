@@ -1,0 +1,339 @@
+/*
+ * Banners + Notification Center (plans/macos/surfaces/notifications.md): a 344 px banner 12 px under the menu bar at the
+ * right, thick material, 16 px radius; a 360 px Center panel down the right side of the workspace. The live blur is
+ * dropped while another overlay (Spotlight, the Center, Mission Control) holds the third backdrop-filter slot.
+ */
+.stack {
+  position: fixed;
+  top: calc(var(--mb-h, 24px) + 12px);
+  right: 12px;
+  z-index: var(--z-system);
+  width: 344px;
+  max-width: calc(100vw - 24px);
+  pointer-events: none;
+}
+.banner {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: var(--material-thick);
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+  box-shadow: var(--elevation-4);
+  color: var(--text-primary);
+  pointer-events: auto;
+  touch-action: pan-y;
+  will-change: transform;
+}
+:global([data-mac-overlay]) .banner,
+:global([data-glass='solid']) .banner,
+:global([data-tier='0']) .banner {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: var(--surface-raised);
+}
+.body {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+button.body:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+.icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+}
+.text {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+.appName {
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.title {
+  font-size: 13px;
+  font-weight: 600;
+}
+.message {
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.35;
+}
+.controls {
+  display: none;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.banner:hover .controls,
+.banner:focus-within .controls {
+  display: flex;
+}
+.action {
+  min-height: 24px;
+  padding: 2px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: rgb(0 0 0 / 0.08);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+}
+.action:focus-visible,
+.close:focus-visible,
+.clear:focus-visible,
+.centerClose:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+.close {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  box-shadow: var(--elevation-2);
+  color: var(--text-secondary);
+  opacity: 0;
+}
+.banner:hover .close,
+.banner:focus-within .close {
+  opacity: 1;
+}
+@media (any-pointer: coarse) {
+  .controls {
+    display: flex;
+  }
+  .close {
+    opacity: 1;
+    width: 32px;
+    height: 32px;
+  }
+  .action {
+    min-height: 44px;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme='light'])) .action {
+    background: rgb(255 255 255 / 0.12);
+  }
+}
+:global(:root[data-theme='dark']) .action {
+  background: rgb(255 255 255 / 0.12);
+}
+
+/* --- Notification Center ---------------------------------------------------------------------------------------- */
+.center {
+  position: fixed;
+  top: calc(var(--mb-h, 24px) + 8px);
+  right: 8px;
+  bottom: calc(var(--dock-reserve, 0px) + 8px);
+  z-index: calc(var(--z-overlays) + 5);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 360px;
+  max-width: calc(100vw - 16px);
+  padding: 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 18px;
+  background: var(--material-thick);
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+  box-shadow: var(--elevation-5);
+  color: var(--text-primary);
+  animation: center-in var(--mac-dur-center, 300ms) var(--mac-ease-out, ease-out);
+}
+@keyframes center-in {
+  from {
+    transform: translateX(calc(100% + 16px));
+  }
+}
+:global([data-motion='reduced']) .center {
+  animation: none;
+}
+:global([data-glass='solid']) .center,
+:global([data-tier='0']) .center {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: var(--surface-raised);
+}
+.centerHead,
+.listHead,
+.groupHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.centerTitle {
+  margin: 0;
+  font-size: 15px;
+  outline: none;
+}
+.centerTitle:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.centerClose {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.06);
+  color: var(--text-secondary);
+}
+.widgets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.widget {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.45);
+}
+.widget:nth-child(2) {
+  grid-row: span 2;
+}
+.widgetLabel {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.widgetValue {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.widgetText {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.listTitle,
+.groupTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.groupTitle {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.clear {
+  min-height: 22px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 11px;
+  background: rgb(0 0 0 / 0.06);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 11px;
+}
+.none {
+  margin: 8px 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: center;
+}
+.group {
+  display: grid;
+  gap: 6px;
+}
+.items {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.55);
+}
+.time {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme='light'])) .widget,
+  :global(:root:not([data-theme='light'])) .item {
+    background: rgb(255 255 255 / 0.08);
+  }
+}
+:global(:root[data-theme='dark']) .widget,
+:global(:root[data-theme='dark']) .item {
+  background: rgb(255 255 255 / 0.08);
+}
+
+/* Compact: full-width banners under the menu bar; the Center is a full-screen sheet from the top. */
+:global([data-mac-posture='compact']) .stack {
+  right: 8px;
+  left: 8px;
+  width: auto;
+  max-width: none;
+}
+.center[data-compact] {
+  top: var(--mb-h, 24px);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: auto;
+  max-width: none;
+  padding-bottom: calc(12px + var(--sa-b, 0px));
+  border-radius: 0 0 18px 18px;
+  animation-name: sheet-in;
+}
+@keyframes sheet-in {
+  from {
+    transform: translateY(-100%);
+  }
+}
+
+@media (forced-colors: active) {
+  .banner,
+  .center {
+    border: 1px solid CanvasText;
+  }
+}

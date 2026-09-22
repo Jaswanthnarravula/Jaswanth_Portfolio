@@ -59,3 +59,11 @@ export const byteSize = (bytes: number): string =>
     : bytes < 1024 * 1024
       ? `${Math.round(bytes / 1024)} KB`
       : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+
+export interface ResumeFileMeta {
+  readonly bytes: number;
+  readonly pages: number;
+}
+
+/** "PDF, 13 KB" — the Download action states the file type and size (shared/14 accessibility). */
+export const resumeFileLabel = (file: ResumeFileMeta | null) => (file ? `PDF, ${byteSize(file.bytes)}` : 'PDF');

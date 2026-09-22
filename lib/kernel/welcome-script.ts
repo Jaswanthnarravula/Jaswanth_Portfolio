@@ -9,5 +9,5 @@ import { PREFS_KEY } from './persist/prefs';
 
 export const WELCOME_SCRIPT =
   `{try{let p=JSON.parse(localStorage['${PREFS_KEY}']).state,d=document.documentElement.dataset;` +
-  "p.introSeen&&(d.welcome='profiles');/^[a-z]{1,12}$/.test(p.persona||'')&&(d.persona=p.persona);" +
+  "/^[a-z]{1,12}$/.test(p.persona||'')&&(d.persona=p.persona);" +
   "p.sound?.enabled===false&&(d.sound='off')}catch{}}";

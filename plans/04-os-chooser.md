@@ -29,10 +29,24 @@ version of the page, the enter transition is a clean uniform scale from card to 
   expanded → macOS; nothing else. Exactly one badge.
 - Only **released** OSes are rendered (`ARCH-REL-01`); the grid reflows for fewer than five.
 
+## Visual target (owner storyboard — `plans/visual-targets/chooser.png`, full screen `frames/chooser.png`)
+Rules: `shared/06-design-system.md` → Owner visual targets. Same unit as the welcome screens (1 em = 1.42 % of a
+16:10 screen); values are the frame's (`.choose`, `.card`, `.snap`, `.badge`).
+
+| Element | Exactly as the frame |
+|---|---|
+| Field | `radial-gradient(60% 70% at 10% 10%, #b9ccff 0, transparent 60%), radial-gradient(60% 70% at 95% 90%, #ffd0e4 0, transparent 60%), #eef2fb` |
+| Column | Heading and cards centred as one column, `2em` apart, `4%` side padding |
+| Heading | Bricolage Grotesque 700, `2.4em`, `#1b2347` |
+| Cards | Five equal columns, gap `1.2em`; each `rgb(255 255 255 / .55)` with a 1 px `rgb(255 255 255 / .9)` rim, radius `1.4em`, padding `1.2em 1em`, IBM Plex Sans; name `1.25em` weight 600, character `.88em` `#4a5576`. The frame's 10 px card blur renders as its tint over this smooth field (≤ 3 blur cap) |
+| Snapshot | Viewport-shaped (16:10 on the frame's screen), radius `.6em`, shadow `0 .3em .8em rgb(20 30 70 / .25)`; until an OS home is built, the frame's miniature of it (`scripts/snapshot-miniatures.mjs`) |
+| Badge | "Suits your device", `#2447d6` pill centred on the card's top edge (`top: -.8em`), `.78em` white |
+| Footer | The one addition to the frame: "Résumé" · "Skip the OS" under the foyer, `#4a5576` — résumé reach is required on every surface (`RES-PRE-01`) |
+
 ## Behaviour & states
 | State | Behaviour |
 |---|---|
-| Entrance | Cards stagger in (60 ms apart, 320 ms, rise 16 px); arriving avatar from the profiles screen settles into the header |
+| Entrance | The foyer fades in over the profiles screen once the avatar hand-off lands (the avatar dissolves beneath it — the frame has no avatar); cards stagger in (60 ms apart, 320 ms, rise 16 px) |
 | Hover / focus | Card tilts ≤ 4° toward the pointer (fine pointer only), preview brightens; **prefetch that OS chunk** |
 | Idle | Prefetch `prefs.lastOs` chunk, else the badged OS |
 | Press | Card scales 0.98; release starts the enter transition |

@@ -1,0 +1,655 @@
+/*
+ * macOS surfaces — plans/macos/01-identity "Visual target" (composition + colour from the storyboard frame) with real
+ * macOS metrics: 24 px menu bar (28 px on touch/compact), 13 px menu type, 48 px Dock icons (64 px on `large`) on a
+ * floating pill 8 px above the bottom edge, desktop items top-right in 104 × 100 px cells. Chrome heights arrive as
+ * CSS custom properties written from the kernel's own numbers (`--mb-h`, `--dock-reserve`, `--dock-icon`).
+ * Live blur only on the menu bar and the Dock (+ one transient in P3): ≤ 3 (shared/06 cap); none at T0 / solid glass.
+ */
+
+.mac {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The wallpaper: static CSS gradient, 8 px of bleed for the tier-2 parallax (never animated on T0/T1). */
+.wallpaper {
+  position: absolute;
+  inset: -8px;
+  z-index: var(--z-wallpaper);
+  background: var(--wallpaper-macos);
+}
+/* Settings → Appearance → Wallpaper: a fixed light or dark variant (Automatic follows the theme). */
+.mac[data-wallpaper-variant='light'] .wallpaper {
+  background: var(--wallpaper-macos-light);
+}
+.mac[data-wallpaper-variant='dark'] .wallpaper {
+  background: var(--wallpaper-macos-dark);
+}
+
+/* `main` holds the desktop and the windows; it never creates a stacking context (windows compete with the chrome). */
+.main {
+  position: absolute;
+  inset: 0;
+  outline: none;
+}
+
+/* --- Menu bar --------------------------------------------------------------------------------------------------- */
+.menubar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: var(--z-menus);
+  display: flex;
+  align-items: center;
+  height: calc(var(--mb-h) + var(--sa-t));
+  padding: var(--sa-t) max(10px, var(--sa-r)) 0 max(10px, var(--sa-l));
+  background: var(--mac-menubar);
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+  color: var(--mac-menubar-text);
+  font-size: 13px;
+  line-height: 1;
+  white-space: nowrap;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.menuLeft {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 100%;
+}
+.apple {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 11px 0 8px;
+}
+.appName {
+  margin: 0;
+  padding: 0 10px;
+  font-weight: 700;
+}
+.menuTitles {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+.menuTitles [data-menubar-slot] {
+  position: relative;
+  height: 100%;
+}
+.menuTitles [data-menubar-item] {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  min-height: var(--mb-h);
+  padding: 0 10px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+}
+/* The Apple logo sits a little tighter; the focused app's name is bold (the bar's second title). */
+.menuTitles [data-menubar-slot]:first-child [data-menubar-item] {
+  padding: 0 11px 0 8px;
+}
+.menuTitles [data-menubar-slot]:nth-child(2) [data-menubar-item] {
+  font-weight: 700;
+}
+.menuTitles [data-menubar-item][data-open],
+.menuTitles [data-menubar-item]:focus-visible {
+  outline: none;
+  background: rgb(0 0 0 / 0.12);
+}
+.menuTitles [data-menubar-item]:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--focus-ring);
+}
+.menuTitles [role='menu'] {
+  position: absolute;
+  top: calc(100% + 1px);
+  left: 0;
+  z-index: 1;
+}
+.status {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 100%;
+  margin-left: auto;
+}
+.statusItem {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  min-height: var(--mb-h);
+  padding: 0 9px;
+  border-radius: 4px;
+  color: inherit;
+  text-decoration: none;
+}
+.statusItem:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+button.statusItem {
+  gap: 5px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+}
+.statusItem[aria-expanded='true'] {
+  background: rgb(0 0 0 / 0.12);
+}
+.statusItem {
+  gap: 5px;
+}
+.statusLabel {
+  line-height: 1;
+}
+.statusGlyph {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 9px;
+}
+.clock {
+  padding: 0 4px 0 9px;
+}
+
+/* The Konami shimmer: one soft opacity pulse over the wallpaper (EGG-KONAMI-01). */
+.shimmer {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-wallpaper);
+  background: linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.28) 50%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+}
+/* Closing menus' inert copies (the 60 ms blink + 130 ms fade) live here. */
+.ghosts {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlays);
+  pointer-events: none;
+}
+
+/* --- Desktop items: top-right column, 104 × 100 px cells, labels on a text-shadow scrim --------------------------- */
+.desktop {
+  position: absolute;
+  top: calc(var(--mb-h) + var(--sa-t) + 20px);
+  right: max(8px, var(--sa-r));
+  z-index: var(--z-desktop);
+  display: flex;
+  flex-flow: column wrap-reverse;
+  align-content: flex-start;
+  max-height: calc(100% - var(--mb-h) - var(--dock-reserve) - 40px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.deskItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 104px;
+  min-height: 100px;
+  padding: 4px 4px 6px;
+  border-radius: 8px;
+  color: #fff;
+  text-decoration: none;
+}
+.deskIcon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.3));
+}
+.deskLabel {
+  max-width: 96px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  text-shadow: var(--mac-label-shadow);
+}
+.deskItem:focus-visible {
+  outline: none;
+}
+.deskItem:focus-visible .deskIcon {
+  border-radius: 6px;
+  background: rgb(0 0 0 / 0.2);
+  outline: 2px solid var(--focus-ring);
+}
+.deskItem:focus-visible .deskLabel,
+.deskItem[data-selected] .deskLabel {
+  background: var(--mac-selection);
+  text-shadow: none;
+}
+.deskItem[data-selected] .deskIcon {
+  border-radius: 6px;
+  background: rgb(0 0 0 / 0.2);
+}
+.deskCell {
+  position: relative;
+}
+.deskMore {
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.85);
+  color: #1d1d1f;
+}
+@media (any-pointer: fine) {
+  .deskMore {
+    display: none;
+  }
+}
+@media (any-pointer: coarse) {
+  .deskMore {
+    width: 44px;
+    height: 44px;
+    top: -8px;
+    right: -4px;
+  }
+}
+/* The marquee: a full-size fixed layer revealed by clip-path on the ticker (no layout writes — MAC-DESK-03). */
+.marquee {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-desktop) + 1);
+  border: 1px solid var(--accent);
+  background: color-mix(in oklch, var(--accent) 20%, transparent);
+  pointer-events: none;
+}
+
+/* --- Dock: a floating pill centred 8 px above the bottom edge -------------------------------------------------- */
+.dock {
+  position: absolute;
+  right: 0;
+  bottom: calc(var(--dock-margin) + var(--sa-b));
+  left: 0;
+  z-index: var(--z-dock);
+  width: max-content;
+  max-width: calc(100% - 16px);
+  margin: 0 auto;
+  padding: 0;
+  border: 1px solid var(--mac-dock-rim);
+  border-radius: 20px;
+  background: var(--mac-dock);
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+}
+/* The plate's padding lives on the (horizontally scrolling) list, so the running dots in it are never clipped. */
+.dockList {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  margin: 0;
+  padding: var(--dock-pad);
+  border-radius: inherit;
+  list-style: none;
+  scrollbar-width: none;
+}
+/* Only the compact Dock scrolls (a scrolling list would also clip the labels above the icons). */
+[data-mac-posture='compact'] .dockList {
+  overflow-x: auto;
+}
+.dockList::-webkit-scrollbar {
+  display: none;
+}
+.dockItem {
+  flex: none;
+}
+.dockItem[hidden] {
+  display: none;
+}
+.dockLink {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: inherit;
+}
+.dockLink:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+.dockIcon {
+  display: block;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.22));
+}
+.dockItem {
+  position: relative;
+}
+/* Magnification scales the icon from its bottom edge (transforms written on the ticker). */
+.magnifyIcon {
+  display: block;
+  transform-origin: 50% 100%;
+}
+.bounce {
+  display: block;
+}
+/* Reduced motion: no bounce — a pulsing dot says "loading" instead (plans/macos/03). */
+:global([data-motion='reduced']) .bounce[data-loading]::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: loading-pulse 1s ease-in-out infinite alternate;
+}
+@keyframes loading-pulse {
+  from {
+    opacity: 0.35;
+  }
+}
+/* The focused icon grows to 1.25 (no neighbour effect) and shows its label (MAC-DOCK-05). */
+.dockLink:focus-visible .magnifyIcon {
+  transform: scale(1.25);
+}
+.dockLabel {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: var(--surface-overlay);
+  box-shadow: var(--elevation-2);
+  color: var(--text-primary);
+  font-size: 12px;
+  white-space: nowrap;
+  transform: translate3d(-50%, 0, 0);
+  opacity: 0;
+  pointer-events: none;
+}
+.dockItem:has(.dockLink:hover) .dockLabel,
+.dockItem:has(.dockLink:focus-visible) .dockLabel {
+  opacity: 1;
+}
+.dockItem:has(.dockLink:focus-visible) .dockLabel {
+  transform: translate3d(-50%, calc(var(--dock-icon) * -0.25), 0);
+}
+@media (hover: none) {
+  .dockItem:has(.dockLink:hover) .dockLabel {
+    opacity: 0;
+  }
+}
+.dockMore {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  box-shadow: var(--elevation-2);
+  color: var(--text-primary);
+}
+@media (any-pointer: coarse) {
+  .dockItem:focus-within .dockMore {
+    display: grid;
+  }
+}
+/* The running indicator: a 4 px dot under the icon, in the pill's padding. */
+.runningDot {
+  position: absolute;
+  bottom: calc(var(--dock-pad) * -1 + 1px);
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--mac-dock-dot);
+}
+.dockSeparator {
+  flex: none;
+  align-self: stretch;
+  width: 1px;
+  margin: 4px 4px;
+  background: var(--mac-dock-separator);
+}
+.stack,
+.tile,
+.windowsButton {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.stack {
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.25));
+}
+.tileBadge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  line-height: 0;
+}
+.windowsButton {
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.55);
+  color: #1d1d1f;
+}
+
+/* --- Compact window switcher (Mission Control carousel) --------------------------------------------------------- */
+.mission {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-overlays);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: calc(var(--mb-h) + var(--sa-t) + 16px) 16px calc(var(--dock-reserve) + var(--sa-b) + 16px);
+  background: rgb(0 0 0 / 0.35);
+  scroll-snap-type: y mandatory;
+}
+.missionEmpty {
+  margin: 30dvh 0 0;
+  color: #fff;
+  font-size: 17px;
+  text-align: center;
+  text-shadow: var(--mac-label-shadow);
+}
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cardItem {
+  position: relative;
+  height: 70dvh;
+  scroll-snap-align: center;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--mac-window);
+  box-shadow: var(--mac-window-shadow);
+  color: var(--mac-row-text);
+  font: inherit;
+  font-size: 15px;
+}
+.card[aria-current='true'] {
+  box-shadow:
+    0 0 0 3px var(--mac-selection),
+    var(--mac-window-shadow);
+}
+.card:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+.cardChrome {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  gap: 8px;
+}
+.cardChrome i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--mac-light-off);
+}
+.cardTitle {
+  font-weight: 600;
+}
+.cardState {
+  color: var(--mac-dim);
+  font-size: 13px;
+}
+.cardClose {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.08);
+  color: var(--mac-row-text);
+}
+.cardClose:focus-visible {
+  outline: 2px solid var(--focus-ring);
+}
+
+/* --- Compact posture (plans/macos/04): slim menu bar, one window, a scrolling Dock ------------------------------- */
+/* Compact: ` · AppName ▾` (MAC-MENU-07) — the app's menus are submenus of its one menu; the ▾ is CSS. */
+[data-mac-posture='compact'] .menuTitles [data-menubar-slot]:nth-child(2) [data-menubar-item]::after {
+  content: '▾';
+  margin-left: 2px;
+  font-size: 10px;
+}
+[data-mac-posture='compact'] .statusLabel {
+  display: none;
+}
+[data-mac-posture='compact'] .statusItem {
+  min-width: 44px;
+  justify-content: center;
+}
+@media (max-width: 359.98px) {
+  .clock {
+    display: none;
+  }
+}
+/* Coarse pointers: 44 px targets (shared/08 RESP-TAP-01); the status items and menu titles reach past the slim bar
+   invisibly. */
+@media (any-pointer: coarse) {
+  .menuTitles [data-menubar-item] {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+  .statusItem {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+}
+[data-mac-posture='compact'] .desktop {
+  flex-flow: column nowrap;
+}
+[data-mac-posture='compact'] .deskItem {
+  min-height: 44px;
+}
+/* Compact landscape: the Dock is a left rail under the menu bar (MAC-DOCK-10, MAC-RESP-04). */
+.dock[data-rail] {
+  top: calc(var(--mb-h) + var(--sa-t) + 8px);
+  right: auto;
+  bottom: auto;
+  left: max(8px, var(--sa-l));
+  width: auto;
+  max-width: none;
+  max-height: calc(100% - var(--mb-h) - var(--sa-t) - 16px);
+  margin: 0;
+}
+.dock[data-rail] .dockList {
+  flex-direction: column;
+  align-items: center;
+  max-height: inherit;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.dock[data-rail] .dockSeparator {
+  width: auto;
+  height: 1px;
+  margin: 4px;
+  align-self: stretch;
+}
+.dock[data-rail] .runningDot {
+  top: 50%;
+  bottom: auto;
+  left: calc(var(--dock-pad) * -1 + 1px);
+  margin: -2px 0 0;
+}
+.dock[data-rail] .dockLabel {
+  display: none;
+}
+/* The on-screen keyboard is up in compact portrait: the Dock steps aside (returns on blur). */
+[data-mac-posture='compact'][data-mac-orientation='portrait'][data-keyboard] .dock {
+  visibility: hidden;
+}
+
+/* --- Preferences ------------------------------------------------------------------------------------------------ */
+@media (prefers-contrast: more) {
+  .menubar,
+  .dock {
+    background: var(--surface-raised);
+    border-color: var(--border-strong);
+  }
+}
+@media (forced-colors: active) {
+  .menubar,
+  .dock {
+    background: Canvas;
+    border: 1px solid CanvasText;
+  }
+}

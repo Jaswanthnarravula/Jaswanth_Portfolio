@@ -40,6 +40,21 @@ Both; default system. Dark uses `surface` tone 6 with containers lifting by tone
 ## Sound
 Off by default; if enabled: original soft "tock" on Back and a rising two-note on unlock (synthesized).
 
+## Visual target (owner storyboard — `plans/visual-targets/android-home.png`, `android-gmail.png`)
+Rules: `shared/06-design-system.md` → Owner visual targets. These are the **full-page large-screen** layouts used on
+tablets, laptops and desktops; phones keep the phone layout (`04-responsive.md`). Positions are fractions of the page
+(W × H); sizes are the real Android (dp) metrics. No blur anywhere.
+
+| Element | Exactly as the frame |
+|---|---|
+| Wallpaper + seed | `radial-gradient(55% 80% at 82% 12%, #4a9c80 0, transparent 60%), linear-gradient(165deg, #0d3a30 0, #1f6a57 45%, #7cc9a6 85%, #c9f0dc 100%)`; its build-time seed gives the green tonal palette the frame shows (`#e7f3ec`, `#e3f1e9`, `#c9e8da`, `#b3f0dc`, `#2f6a5b`) |
+| Status bar | `9:41` left; real Wi-Fi, signal and battery glyphs right (the frame's `▾ ◢ ▮` are stand-ins) |
+| At-a-glance | Top-left from x 4.8 %: date "Mon, Sep 21" large, chip "Résumé ready · Open" on `rgb(255 255 255 / .2)` |
+| Search bar | Top centre, pill `#e7f3ec`, 40 % W: "G" mark + "Search apps and more" |
+| App grid | 7 fixed columns centred, from y 34 %: GitHub · Keep · Settings · **Career** folder (Files, Keep, Gmail); circle icons |
+| Taskbar | Full-width bar `#e3f1e9`: centred app-drawer button (circle `#c9e2d6`) · Files · Chrome · GitHub · Gmail (notification dot) · divider · Keep (recent); **Back · Home · Recents** at the right in the real Material glyphs (the frame's `◀ ● ■` are stand-ins); browser Back = that Back |
+| Gmail app | Nav rail 9 % W: menu, compose FAB `#b3f0dc` (pencil), Inbox (active pill `#c9e8da`) · Starred · Sent. List pane 35 % W with right hairline `#d8e6de`: search pill "Search in mail" + account avatar, threads with initial avatars, selected thread `#c9e8da`. Reading pane: subject in regular weight, sender row (avatar, name, "to you · {time}"), body, attachment chip (red **PDF** badge `#d93025`, "Résumé.pdf · {size}"), outlined [Reply] [Copy address] with `#7f9a90` outline. Taskbar stays, with a `#d0e3d9` top hairline |
+
 ## Feature IDs + acceptance tests
 | ID | Feature | Acceptance test | Phase |
 |---|---|---|---|

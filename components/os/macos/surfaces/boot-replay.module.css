@@ -1,0 +1,40 @@
+/* The replayed startup beat — the same stage as the chooser's boot frame (plans/macos/surfaces/boot.md "Anatomy"). */
+.boot {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-system) + 60);
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 56px;
+  padding: var(--sa-t, 0) var(--sa-r, 0) var(--sa-b, 0) var(--sa-l, 0);
+  background: #000;
+  color: #fff;
+}
+.mark {
+  display: grid;
+  place-items: center;
+  line-height: 0;
+}
+.track {
+  position: relative;
+  width: 200px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.25);
+}
+.bar {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+@media (max-width: 699.98px) {
+  .mark :global([data-asset]) {
+    width: 52px !important;
+    height: 64px !important;
+  }
+}

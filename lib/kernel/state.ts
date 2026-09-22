@@ -42,6 +42,13 @@ export const DEFAULT_PREFS: UserPreferences = {
   tourOffered: false,
   eggsFound: [],
   demotion: null,
+  taskbarAlign: 'center',
+  accent: null,
+  textScale: 1,
+  contrast: 'system',
+  notifications: true,
+  wallpaper: 'auto',
+  dock: { magnification: true, size: 'medium' },
 };
 
 export function emptySession(os: OsId, sizeClass: SizeClass, contentRev: string): OsSession {
@@ -56,6 +63,7 @@ export function emptySession(os: OsId, sizeClass: SizeClass, contentRev: string)
     contentRev,
     bootSeen: false,
     lockSeen: false,
+    running: [],
   };
 }
 

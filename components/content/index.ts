@@ -30,3 +30,18 @@ export {
   type ViewProps,
 } from './slots';
 export { ContentFor, viewDataFor, type ContentForProps } from './content-for';
+export {
+  buildInbox,
+  replySubject,
+  sendTarget,
+  MAILTO_BODY_LIMIT,
+  CONTINUED_NOTE,
+  type InboxData,
+  type InboxMessage,
+  type InboxMessageId,
+  type InboxSender,
+  type InboxAttachment,
+  type SendTarget,
+} from './inbox';
+export { buildWorkspace, workspaceName, fileKey, skillHint, type WorkspaceFile, type WorkspaceData } from './workspace';
+export { tokenize, inlineMarkdown, type SyntaxLanguage, type Token, type TokenKind, type TokenLine } from './syntax';

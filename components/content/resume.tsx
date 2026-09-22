@@ -1,20 +1,14 @@
 import type { Credential, Education, Experience, Person, Project, Resume, SkillGroup, Contact } from '@/data/schema';
-import { byteSize, formatPeriod } from './format';
+import { formatPeriod, resumeFileLabel, type ResumeFileMeta } from './format';
 import { Heading, withSlots, type ViewProps } from './slots';
 
-export interface ResumeFileMeta {
-  readonly bytes: number;
-  readonly pages: number;
-}
+export { resumeFileLabel, type ResumeFileMeta };
 
 export interface ResumeData {
   readonly resume: Resume;
   readonly person: Person;
   readonly file: ResumeFileMeta | null;
 }
-
-/** "PDF, 13 KB" — the Download action states the file type and size (shared/14 accessibility). */
-export const resumeFileLabel = (file: ResumeFileMeta | null) => (file ? `PDF, ${byteSize(file.bytes)}` : 'PDF');
 
 /**
  * `ResumeView` — viewer / Quick Look / Edge PDF tab, `open resume`. Offers Open (the OS viewer or the PDF) and

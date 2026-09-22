@@ -1,0 +1,300 @@
+/*
+ * TerminalView structure (shared). Each OS skins it through variables on an ancestor:
+ *   --term-bg --term-fg --term-dim --term-dir --term-exe --term-pdf --term-err --term-ok --term-match --term-head
+ *   --term-link --term-caret --term-selection --term-font --term-size --term-pad
+ * Monospace, line height 1.35 (plans/linux/01-identity); inputs 16 px on coarse pointers (no iOS focus zoom).
+ */
+.terminal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--term-bg, #1e1e1e);
+  color: var(--term-fg, #e6e6e6);
+  font-family: var(--term-font, ui-monospace, 'SF Mono', Menlo, Consolas, monospace);
+  font-size: var(--term-size, 13px);
+  line-height: 1.35;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.terminal[data-bell] {
+  box-shadow: inset 0 0 0 2px var(--term-dim, #888);
+}
+
+.scroller {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--term-pad, 8px);
+  outline: none;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.scroller:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--focus-ring, #4d90fe);
+}
+.scroller ::selection {
+  background: var(--term-selection, rgb(80 130 255 / 0.4));
+}
+
+.list [data-block] {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1.35em;
+}
+.list [data-line] {
+  min-height: 1.35em;
+}
+.list [data-prompt] {
+  color: var(--term-prompt, var(--term-fg, #e6e6e6));
+}
+
+.terminal [data-cls='dir'] {
+  color: var(--term-dir, #6cb6ff);
+  font-weight: 600;
+}
+.terminal [data-cls='exe'] {
+  color: var(--term-exe, #56d4dd);
+}
+.terminal [data-cls='pdf'] {
+  color: var(--term-pdf, #e28df1);
+}
+.terminal [data-cls='err'] {
+  color: var(--term-err, #ff7b72);
+}
+.terminal [data-cls='warn'] {
+  color: var(--term-warn, #e3b341);
+}
+.terminal [data-cls='ok'] {
+  color: var(--term-ok, #7ee787);
+}
+.terminal [data-cls='dim'] {
+  color: var(--term-dim, #9da5b4);
+}
+.terminal [data-cls='head'] {
+  color: var(--term-head, inherit);
+  font-weight: 700;
+}
+.terminal [data-cls='match'] {
+  color: var(--term-match, #ff7b72);
+  font-weight: 700;
+}
+.terminal a {
+  color: var(--term-link, var(--term-dir, #6cb6ff));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.terminal button[data-insert] {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+.terminal button[data-insert]:hover {
+  text-decoration: underline;
+}
+.terminal button[data-insert]:focus-visible,
+.terminal a:focus-visible {
+  outline: 2px solid var(--focus-ring, #4d90fe);
+  outline-offset: 1px;
+}
+@media (any-pointer: coarse) {
+  .terminal button[data-insert] {
+    min-height: 28px;
+  }
+}
+
+.promptLine {
+  display: flex;
+  align-items: baseline;
+  margin: 0;
+}
+.prompt {
+  flex: none;
+  white-space: pre;
+  color: var(--term-prompt, var(--term-fg, #e6e6e6));
+}
+.prompt[data-exit] {
+  color: var(--term-prompt-error, var(--term-prompt, var(--term-fg, #e6e6e6)));
+}
+.field {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+.input {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  caret-color: transparent;
+  font: inherit;
+  line-height: inherit;
+}
+@media (any-pointer: coarse) {
+  .input {
+    font-size: 16px;
+  }
+}
+.searchMatch {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: var(--term-dim, #9da5b4);
+  pointer-events: none;
+  white-space: pre;
+}
+/* The block caret: solid and blinking (1060 ms, steps) when the window is active; hollow when it is not. */
+.caret {
+  position: absolute;
+  top: 0.1em;
+  left: 0;
+  width: 0.6em;
+  height: 1.2em;
+  background: var(--term-caret, currentColor);
+  opacity: 0;
+  pointer-events: none;
+}
+.input:focus ~ .caret {
+  opacity: 1;
+  animation: blink 1060ms steps(1) infinite;
+}
+.terminal:not([data-active]) .input:focus ~ .caret {
+  animation: none;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--term-caret, currentColor);
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+:global([data-motion='reduced']) .caret {
+  animation: none !important;
+}
+.mirror,
+.measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  white-space: pre;
+  pointer-events: none;
+}
+
+.chip {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 4px 10px;
+  border: 1px solid var(--term-dim, #9da5b4);
+  border-radius: 12px;
+  background: var(--term-bg, #1e1e1e);
+  color: var(--term-fg, #e6e6e6);
+  font: inherit;
+  font-size: 12px;
+}
+.chip:focus-visible {
+  outline: 2px solid var(--focus-ring, #4d90fe);
+}
+
+.pager {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--term-bg, #1e1e1e);
+  outline: none;
+}
+.pager [data-pager-body] {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--term-pad, 8px);
+  white-space: pre-wrap;
+}
+.pager [data-pager-bar] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 8px;
+  background: var(--term-fg, #e6e6e6);
+  color: var(--term-bg, #1e1e1e);
+}
+.pager [data-pager-bar] input {
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.pager [data-pager-actions] {
+  display: flex;
+  gap: 4px;
+}
+.pager [data-pager-actions] button {
+  padding: 0 6px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+}
+@media (any-pointer: coarse) {
+  .pager [data-pager-actions] button {
+    min-height: 44px;
+  }
+}
+.pager:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--focus-ring, #4d90fe);
+}
+.pager[data-pager='vim'] [data-pager-body] [data-line] {
+  color: var(--term-dir, #6cb6ff);
+}
+
+@media (forced-colors: active) {
+  .caret {
+    background: Highlight;
+  }
+}
+
+/* Accessory key row (linux/10 `LNX-RESP-03`): 44 px keys above the keyboard, scrolls sideways when narrow. */
+.accessory {
+  display: flex;
+  flex: none;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 6px var(--term-pad, 8px) calc(6px + var(--sa-b, 0px));
+  border-top: 1px solid color-mix(in oklch, var(--term-fg, #e6e6e6) 16%, transparent);
+  background: color-mix(in oklch, var(--term-fg, #e6e6e6) 6%, var(--term-bg, #1e1e1e));
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.accessory > button {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--term-fg, #e6e6e6) 12%, var(--term-bg, #1e1e1e));
+  color: var(--term-fg, #e6e6e6);
+  font: inherit;
+  font-size: 15px;
+  touch-action: manipulation;
+}
+.accessory > button:focus-visible {
+  outline: 2px solid var(--focus-ring, #4d90fe);
+}

@@ -1,0 +1,2184 @@
+/*
+ * Windows 11 shell surfaces — plans/windows/01-identity ("Visual target": composition + colour from the storyboard frame)
+ * with real Windows 11 metrics: a 48 px taskbar (40 px compact landscape) with 40 × 40 buttons and pill indicators,
+ * desktop shortcuts top-left in 76 × 96 cells, Start / Search as one 640 × 720 Acrylic panel rising 12 px above the
+ * taskbar, 8 px flyouts and menus, 364 px toasts bottom-right. Chrome heights arrive as custom properties written from the
+ * kernel's own numbers (`--tb-h`). Live blur only where the shell's budget allows (`data-acrylic="live"`, ≤ 3 surfaces);
+ * every Acrylic surface keeps its tint without it. Motion from the WinUI ladder (`--win-d*`, `--win-ease-*`), scaled to
+ * 0 under reduced motion.
+ */
+
+.win {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  color: var(--win-text);
+  font-family: var(--font-ui);
+  font-size: var(--win-fs-body);
+  line-height: 1.43;
+  -webkit-font-smoothing: antialiased;
+}
+.win :focus-visible {
+  outline: 2px solid var(--win-accent);
+  outline-offset: 1px;
+}
+
+.wallpaper {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-wallpaper);
+  background: var(--wallpaper-windows);
+}
+
+/* `main` holds the desktop and the windows; no stacking context (windows compete with the shell's layers). */
+.main {
+  position: absolute;
+  inset: 0;
+  outline: none;
+}
+
+.win [data-acrylic='live'] {
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+}
+
+/* --- Desktop -------------------------------------------------------------------------------------------------------- */
+.desktop {
+  position: absolute;
+  top: calc(4px + var(--sa-t));
+  bottom: calc(var(--tb-h) + var(--sa-b));
+  left: calc(4px + var(--sa-l));
+  right: 0;
+  z-index: var(--z-desktop);
+}
+.deskGrid {
+  display: grid;
+  grid-auto-columns: 76px;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(auto-fill, 96px);
+  gap: 4px 2px;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+.deskCell {
+  pointer-events: auto;
+}
+.desktop[data-icon-size='large'] .deskGrid {
+  grid-auto-columns: 92px;
+  grid-template-rows: repeat(auto-fill, 112px);
+}
+.desktop[data-icon-size='small'] .deskGrid {
+  grid-auto-columns: 72px;
+  grid-template-rows: repeat(auto-fill, 76px);
+}
+.deskItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  padding: 4px 2px 2px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #ffffff;
+  text-decoration: none;
+  transition: background-color var(--win-d83) linear;
+}
+.deskItem:hover {
+  background: var(--win-desk-hover);
+}
+.deskItem[data-selected] {
+  border-color: var(--win-desk-selection-stroke);
+  background: var(--win-desk-selection);
+}
+.deskItem:focus-visible {
+  outline: 1px solid #ffffff;
+  outline-offset: -1px;
+}
+.deskIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));
+}
+.desktop[data-blink] .deskIcon {
+  visibility: hidden;
+}
+.deskComposite {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+.deskComposite > [data-asset] {
+  color: #ffffff;
+}
+.deskArrow {
+  position: absolute;
+  bottom: 0;
+  left: 2px;
+  line-height: 0;
+}
+.deskLabel {
+  display: -webkit-box;
+  overflow: hidden;
+  max-width: 72px;
+  font-size: var(--win-fs-caption);
+  line-height: 1.3;
+  text-align: center;
+  text-shadow: var(--win-label-shadow);
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.marquee {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.marquee rect {
+  fill: color-mix(in srgb, var(--win-accent) 20%, transparent);
+  stroke: var(--win-accent);
+  stroke-width: 1;
+}
+
+/* --- Snap preview (plans/windows/02): translucent, rounded, inset — appears 167 ms, scale 0.98 → 1 ------------------- */
+.snapPreview {
+  position: absolute;
+  left: calc(var(--px) + 8px);
+  top: calc(var(--py) + 8px);
+  width: calc(var(--pw) - 16px);
+  height: calc(var(--ph) - 16px);
+  border: 1px solid var(--win-snap-preview-stroke);
+  border-radius: 8px;
+  background: var(--win-snap-preview);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 0.18);
+  pointer-events: none;
+}
+.snapPreview[data-visible] {
+  animation: win-pop-in var(--win-d167) var(--win-ease-in) both;
+}
+
+/* --- Taskbar ---------------------------------------------------------------------------------------------------------- */
+.taskbar {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-dock);
+  display: flex;
+  align-items: center;
+  height: calc(var(--tb-h) + var(--sa-b));
+  padding: 0 max(4px, var(--sa-r)) var(--sa-b) max(12px, var(--sa-l));
+  border-top: 1px solid var(--win-taskbar-edge);
+  background: var(--win-taskbar);
+  color: var(--win-text);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.win[data-reveal] .taskbar {
+  animation: win-taskbar-up var(--win-d250) var(--win-ease-in) both;
+}
+.win[data-reveal] .deskGrid {
+  animation: win-fade-in var(--win-d167) linear both;
+}
+.taskbarList {
+  position: absolute;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: calc(100% - 260px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transform: translateX(-50%);
+}
+.taskbar[data-align='left'] .taskbarList {
+  left: max(12px, var(--sa-l));
+  transform: none;
+}
+.tbItem {
+  position: relative;
+  flex: none;
+}
+.tbButton {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  transition: background-color var(--win-d83) linear;
+}
+.tbButton:hover,
+.tbButton[data-pressed] {
+  background: var(--win-taskbar-hover);
+}
+.tbButton[data-pill='active'] {
+  background: var(--win-taskbar-button-on);
+}
+.tbIcon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+}
+.tbGlyph {
+  color: var(--win-text);
+}
+#tb-start .tbGlyph,
+.tbItem:first-child .tbGlyph {
+  color: #0078d4;
+}
+.srOnlyHint {
+  display: none;
+}
+/* Indicator pills: none · 6 × 3 grey (running) · 16 × 3 accent (active) — `scaleX` only, 167 ms point-to-point. */
+.pill {
+  position: absolute;
+  bottom: 2px;
+  left: calc(50% - 8px);
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--win-pill-idle);
+  opacity: 0;
+  transform: scaleX(0);
+  transition:
+    transform var(--win-d167) var(--win-ease-p2p),
+    opacity var(--win-d83) linear,
+    background-color var(--win-d83) linear;
+}
+.pill[data-pill='running'] {
+  opacity: 1;
+  transform: scaleX(0.375);
+}
+.pill[data-pill='active'] {
+  background: var(--win-accent);
+  opacity: 1;
+  transform: scaleX(1);
+}
+.pill[data-attention] {
+  background: var(--win-accent);
+  animation: win-attention 1s ease-in-out infinite alternate;
+}
+.tbButton[data-launching]::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 8px;
+  width: 24px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--win-accent), transparent);
+  background-size: 200% 100%;
+  animation: win-shimmer 700ms linear infinite;
+}
+.taskbar[data-shimmer]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in srgb, var(--win-accent) 45%, transparent) 50%,
+    transparent 80%
+  );
+  background-size: 250% 100%;
+  pointer-events: none;
+  animation: win-shimmer 1200ms var(--win-ease-p2p) 1 both;
+}
+
+/* Tray: overflow chevron · Quick Settings (network + volume) · clock/date → Notification Center · Show desktop. */
+.tray {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 100%;
+  margin-left: auto;
+}
+.trayButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  min-width: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--win-fs-caption);
+  transition: background-color var(--win-d83) linear;
+}
+.trayButton:hover,
+.trayButton[data-pressed] {
+  background: var(--win-taskbar-hover);
+}
+.clock {
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+}
+.showDesktop {
+  width: 12px;
+  height: 100%;
+  margin-left: 4px;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid transparent;
+  background: transparent;
+}
+.showDesktop:hover {
+  border-left-color: var(--win-hairline);
+}
+.overflow {
+  position: relative;
+}
+.overflowFlyout {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 12px);
+  padding: 8px 12px;
+  border: 1px solid var(--win-flyout-stroke);
+  border-radius: 8px;
+  background: var(--win-flyout-solid);
+  box-shadow: var(--win-flyout-shadow);
+  white-space: nowrap;
+  animation: win-flyout-in var(--win-d167) var(--win-ease-in) both;
+}
+
+/* Thumbnail preview (hover 400 ms): a titled card per window, ✕ to close; hovering it peeks. */
+.preview {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  z-index: 2;
+  padding: 8px;
+  border: 1px solid var(--win-flyout-stroke);
+  border-radius: 8px;
+  background: var(--win-flyout-solid);
+  box-shadow: var(--win-flyout-shadow);
+  transform: translateX(-50%);
+  animation: win-flyout-in var(--win-d167) var(--win-ease-in) both;
+}
+/* An invisible bridge over the 10 px gap: moving up from the button to the card never leaves the taskbar item. */
+.preview::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  height: 12px;
+}
+.previewItem {
+  position: relative;
+  list-style: none;
+}
+.previewCard {
+  display: grid;
+  gap: 6px;
+  width: 220px;
+  padding: 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.previewCard:hover,
+.previewCard:focus-visible {
+  background: var(--win-subtle-fill);
+}
+.previewHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 24px;
+  font-size: var(--win-fs-caption);
+}
+.previewTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.previewThumb {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  height: 118px;
+  border: 1px solid var(--win-card-stroke);
+  border-radius: 4px;
+  background: var(--win-window);
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+.previewClose {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+}
+.previewClose:hover {
+  background: var(--caption-close);
+  color: #ffffff;
+}
+
+/* --- Start / Search (one panel) ------------------------------------------------------------------------------------ */
+.panelSlot {
+  display: contents;
+}
+.launcher {
+  position: absolute;
+  bottom: calc(var(--tb-h) + var(--sa-b) + 12px);
+  left: 50%;
+  z-index: var(--z-overlays);
+  width: min(640px, 92vw);
+  height: min(720px, calc(100% - var(--tb-h) - var(--sa-b) - 24px));
+  border: 1px solid var(--win-flyout-stroke);
+  border-radius: 8px;
+  background: var(--win-flyout);
+  box-shadow: var(--win-flyout-shadow);
+  color: var(--win-text);
+  transform: translateX(-50%);
+  animation: win-launcher-in var(--win-d250) var(--win-ease-in) both;
+}
+.win[data-win-posture='touch'] .launcher {
+  width: min(560px, 92vw);
+}
+.taskbar[data-align='left'] ~ .panelSlot .launcher {
+  left: 12px;
+  transform: none;
+}
+.launcher[data-state='closing'] {
+  animation: win-launcher-out var(--win-d167) var(--win-ease-out) both;
+  pointer-events: none;
+}
+.launcherScope {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+}
+.launcher[data-launcher='search'] .launcherScope {
+  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+}
+.searchBox {
+  display: contents;
+}
+.searchInput {
+  grid-column: 1 / -1;
+  width: calc(100% - 64px);
+  height: 36px;
+  margin: 32px 32px 0;
+  padding: 0 16px 0 40px;
+  border: 1px solid var(--win-field-border);
+  border-bottom-color: var(--win-field-underline);
+  border-radius: 18px;
+  background:
+    no-repeat 14px 50% / 16px 16px
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23606060' d='M13.73 14.44a6.5 6.5 0 1 1 .7-.7l3.42 3.4a.5.5 0 0 1-.63.77l-.07-.06zm-.71-.71A5.5 5.5 0 0 0 15 9.5a5.5 5.5 0 1 0-1.98 4.23'/%3E%3C/svg%3E"),
+    var(--win-field);
+  color: var(--win-text);
+  font: inherit;
+}
+.searchInput:focus {
+  border-bottom: 2px solid var(--win-accent);
+  outline: none;
+}
+.launcher[data-launcher='start'] [data-combobox-list],
+.launcher[data-launcher='start'] [data-combobox-empty] {
+  display: none;
+}
+.chips {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 8px;
+  padding: 12px 32px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.chip {
+  flex: none;
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--win-field-border);
+  border-radius: 16px;
+  background: var(--win-field);
+  color: var(--win-text);
+  font: inherit;
+  font-size: var(--win-fs-caption);
+}
+.chip[aria-checked='true'] {
+  border-color: var(--win-accent);
+  background: var(--win-accent);
+  color: var(--win-on-accent);
+}
+.results {
+  grid-column: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 4px 8px 16px 24px;
+  overflow-y: auto;
+}
+.results [data-combobox-group-label] {
+  padding: 12px 8px 4px;
+  font-size: var(--win-fs-caption);
+  font-weight: 600;
+}
+.results [data-combobox-option] {
+  border-radius: 4px;
+  cursor: default;
+}
+.results [data-combobox-option][data-active] {
+  background: var(--win-subtle-fill);
+  box-shadow: inset 3px 0 0 var(--win-accent);
+}
+.resultRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 36px;
+  padding: 2px 8px;
+}
+.resultRow[data-best] {
+  min-height: 56px;
+}
+.resultIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+}
+.resultText {
+  display: grid;
+  min-width: 0;
+}
+.resultTitle,
+.resultSub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.resultSub {
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+.searchEmpty {
+  grid-column: 1;
+  margin: 16px 32px;
+  color: var(--win-text-dim);
+}
+.previewPane {
+  display: flex;
+  grid-row: 3;
+  grid-column: 2;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 0;
+  margin: 4px 24px 24px 8px;
+  padding: 24px 16px;
+  overflow-y: auto;
+  border: 1px solid var(--win-card-stroke);
+  border-radius: 8px;
+  background: var(--win-card);
+  text-align: center;
+}
+.previewEmpty {
+  margin: auto;
+  color: var(--win-text-dim);
+}
+.previewIcon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 8px;
+}
+.previewName {
+  margin: 0;
+  font-size: var(--win-fs-subtitle);
+  font-weight: 600;
+  line-height: 1.3;
+}
+.previewKind {
+  margin: 0 0 12px;
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+.previewProject {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 12px;
+  text-align: left;
+}
+.previewProject p {
+  margin: 0;
+}
+.previewHighlight {
+  color: var(--win-text-2);
+  font-size: var(--win-fs-caption);
+}
+.previewTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.previewTags li {
+  padding: 2px 8px;
+  border: 1px solid var(--win-card-stroke);
+  border-radius: 10px;
+  font-size: var(--win-fs-caption);
+}
+.previewActions {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding-top: 12px;
+  border-top: 1px solid var(--win-hairline);
+}
+.previewAction {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+}
+.previewAction:hover {
+  background: var(--win-subtle-fill);
+}
+.startBody {
+  min-height: 0;
+  padding: 16px 32px 0;
+  overflow-y: auto;
+  animation: win-fade-in var(--win-d167) linear both;
+}
+.startSection + .startSection {
+  margin-top: 16px;
+}
+.startHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 32px;
+  padding: 0 16px;
+}
+.startTitle {
+  margin: 0;
+  font-size: var(--win-fs-body);
+  font-weight: 600;
+}
+.startTitle:focus {
+  outline: none;
+}
+.startMore,
+.startMoreDisabled {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--win-card-stroke);
+  border-radius: 4px;
+  background: var(--win-card);
+  color: inherit;
+  font: inherit;
+  font-size: var(--win-fs-caption);
+}
+.startMoreDisabled {
+  color: var(--win-text-disabled);
+}
+.pinned {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 96px));
+  justify-content: space-between;
+  gap: 4px 0;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 96px;
+  height: 84px;
+  padding: 10px 4px 4px;
+  border-radius: 4px;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    background-color var(--win-d83) linear,
+    transform var(--win-d83) linear;
+}
+.tile:hover {
+  background: var(--win-subtle-fill);
+}
+.tile:active {
+  transform: scale(0.97);
+}
+.tileIcon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+}
+.tileLabel {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: var(--win-fs-caption);
+  line-height: 1.3;
+  text-align: center;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.recommended {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 16px;
+  margin: 4px 0 16px;
+  padding: 0;
+  list-style: none;
+}
+.recItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 6px 16px;
+  border-radius: 4px;
+  color: inherit;
+  text-decoration: none;
+}
+.recItem:hover {
+  background: var(--win-subtle-fill);
+}
+.recIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+}
+.recText {
+  display: grid;
+  min-width: 0;
+}
+.recTitle,
+.recDetail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.recTitle {
+  font-size: var(--win-fs-caption);
+  font-weight: 600;
+}
+.recDetail {
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+.allList {
+  display: grid;
+  gap: 2px;
+  padding: 8px 0 16px;
+}
+.letterHeader {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin: 8px 0 4px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+}
+.letterHeader:hover {
+  background: var(--win-subtle-fill);
+}
+.allGroup {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.allItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 4px;
+  color: inherit;
+  text-decoration: none;
+}
+.allItem:hover {
+  background: var(--win-subtle-fill);
+}
+.letterGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 64px);
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 0;
+}
+.letter {
+  height: 64px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--win-subtle-fill);
+  color: inherit;
+  font: inherit;
+  font-size: var(--win-fs-subtitle);
+}
+.letter:disabled {
+  color: var(--win-text-disabled);
+  background: transparent;
+}
+.startFooter {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 48px;
+  border-top: 1px solid var(--win-flyout-stroke);
+  background: var(--win-flyout-footer);
+}
+.userTile {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--win-fs-caption);
+}
+.userTile:hover,
+.powerButton:hover {
+  background: var(--win-subtle-fill);
+}
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--win-accent);
+  color: var(--win-on-accent);
+  font-size: var(--win-fs-caption);
+  font-weight: 600;
+}
+.powerButton {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+}
+
+/* --- Tray flyouts: Quick Settings · Notification Center (+ calendar) · the compact combined sheet ------------------- */
+.flyout {
+  position: absolute;
+  right: 12px;
+  bottom: calc(var(--tb-h) + var(--sa-b) + 12px);
+  z-index: var(--z-overlays);
+  display: grid;
+  gap: 12px;
+  max-height: calc(100% - var(--tb-h) - var(--sa-b) - 24px);
+  overflow-y: auto;
+  animation: win-flyout-in var(--win-d167) var(--win-ease-in) both;
+}
+.flyout[data-state='closing'] {
+  animation: win-flyout-out var(--win-d83) var(--win-ease-out) both;
+  pointer-events: none;
+}
+.flyout[data-kind='quick'] {
+  width: 360px;
+}
+.flyout[data-kind='center'] {
+  width: 384px;
+}
+.flyout[data-acrylic] > * {
+  border: 1px solid var(--win-flyout-stroke);
+  border-radius: 8px;
+  background: var(--win-flyout);
+  box-shadow: var(--win-flyout-shadow);
+}
+.flyout[data-acrylic='live'] > * {
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+}
+.flyout[data-acrylic] {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.quick {
+  display: grid;
+  gap: 16px;
+  padding: 20px 20px 0;
+}
+.quickTiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.quickTile {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+.quickButton {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 48px;
+  border: 1px solid var(--win-card-stroke);
+  border-radius: 4px;
+  background: var(--win-card);
+  color: inherit;
+  transition: background-color var(--win-d83) linear;
+}
+.quickButton[data-on] {
+  border-color: var(--win-accent);
+  background: var(--win-accent);
+  color: var(--win-on-accent);
+}
+.quickLabel {
+  font-size: var(--win-fs-caption);
+  text-align: center;
+}
+.volume {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.volume input {
+  flex: 1;
+  accent-color: var(--win-accent);
+}
+.quickFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  margin: 0 -20px;
+  padding: 0 12px 0 20px;
+  border-top: 1px solid var(--win-flyout-stroke);
+  background: var(--win-flyout-footer);
+  border-radius: 0 0 8px 8px;
+}
+.quickStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--win-fs-caption);
+}
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+}
+.iconButton:hover {
+  background: var(--win-subtle-fill);
+}
+.center {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+}
+.centerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.flyoutTitle {
+  margin: 0;
+  font-size: var(--win-fs-body);
+  font-weight: 600;
+}
+.linkButton {
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--win-accent-text);
+  font: inherit;
+  font-size: var(--win-fs-caption);
+}
+.linkButton:hover {
+  background: var(--win-subtle-fill);
+}
+.centerEmpty {
+  margin: 24px 0;
+  color: var(--win-text-dim);
+  text-align: center;
+}
+.centerGroup {
+  display: grid;
+  gap: 4px;
+}
+.centerApp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 0;
+  font-size: var(--win-fs-caption);
+  font-weight: 400;
+}
+.centerList {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.centerItem {
+  position: relative;
+  border: 1px solid var(--win-card-stroke);
+  border-radius: 8px;
+  background: var(--win-card);
+}
+.centerItemBody {
+  display: grid;
+  width: 100%;
+  padding: 10px 40px 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.centerItem .toastClose {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+.calendar {
+  padding-top: 8px;
+  border-top: 1px solid var(--win-hairline);
+}
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 36px;
+}
+.calendarDate {
+  font-weight: 600;
+}
+.calendarGrid {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--win-fs-caption);
+  text-align: center;
+}
+.calendarGrid th {
+  height: 32px;
+  font-weight: 400;
+}
+.calendarGrid td {
+  height: 36px;
+  border-radius: 50%;
+}
+.calendarGrid td:focus-visible {
+  outline: 2px solid var(--win-accent);
+  outline-offset: -2px;
+}
+.today {
+  background: var(--win-accent);
+  color: var(--win-on-accent);
+  font-weight: 600;
+}
+
+/* --- Toasts (plans/windows/surfaces/notification-center): 364 px, 16 px above the taskbar, bottom-right ------------ */
+.toastRegion {
+  position: absolute;
+  right: 12px;
+  bottom: calc(var(--tb-h) + var(--sa-b) + 16px);
+  z-index: var(--z-system);
+  width: 364px;
+  pointer-events: none;
+}
+.toast {
+  display: grid;
+  gap: 4px;
+  padding: 12px 16px 16px;
+  border: 1px solid var(--win-flyout-stroke);
+  border-radius: 8px;
+  background: var(--win-toast);
+  box-shadow: var(--win-flyout-shadow);
+  color: var(--win-text);
+  pointer-events: auto;
+  touch-action: pan-y;
+  animation: win-toast-in var(--win-d333) var(--win-ease-in) both;
+}
+.toast[data-state='leaving'] {
+  animation: win-toast-out var(--win-d167) var(--win-ease-out) both;
+}
+.toastHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: var(--win-fs-caption);
+}
+.toastApp {
+  flex: 1;
+}
+.toastTime {
+  color: var(--win-text-dim);
+}
+.toastClose {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: -6px -8px -6px 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+}
+.toastClose:hover {
+  background: var(--win-subtle-fill);
+}
+.toastTitle {
+  margin: 0;
+  font-size: var(--win-fs-body);
+  font-weight: 600;
+}
+.toastBody {
+  margin: 0;
+  color: var(--win-text-2);
+}
+.toastActions {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+.toastAction {
+  height: 32px;
+  border: 1px solid var(--win-field-border);
+  border-radius: 4px;
+  background: var(--win-field);
+  color: var(--win-text);
+  font: inherit;
+}
+.toastAction[data-primary] {
+  border-color: var(--win-accent);
+  background: var(--win-accent);
+  color: var(--win-on-accent);
+}
+
+/* --- Menus (the Windows skin of the APG Menu primitive — plans/windows/surfaces/context-menus) --------------------- */
+.menuLayer [data-menu-anchor] {
+  z-index: var(--z-menus);
+}
+.menu {
+  min-width: 220px;
+  max-width: 360px;
+  padding: 4px;
+  border: 1px solid var(--win-flyout-stroke);
+  border-radius: 8px;
+  background: var(--win-menu);
+  box-shadow: var(--win-flyout-shadow);
+  color: var(--win-text);
+  font-family: var(--font-ui);
+  font-size: var(--win-fs-body);
+  outline: none;
+  transform-origin: top;
+  animation: win-menu-in var(--win-d167) var(--win-ease-in) both;
+}
+.menuLayer[data-acrylic='live'] .menu {
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+}
+/* The layer only carries the budget flag; the menu is the one Acrylic surface (never two per menu — shared/10). */
+.win .menuLayer[data-acrylic] {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+[data-origin='bottom'] .menu {
+  transform-origin: bottom;
+}
+.menu [data-menu-item] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 32px;
+  padding: 0 12px 0 10px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.menu [data-menu-item]:focus {
+  background: var(--win-subtle-fill);
+  outline: none;
+}
+.menu [data-menu-item]:focus-visible {
+  outline: 2px solid var(--win-accent);
+  outline-offset: -2px;
+}
+.menu [data-menu-item][aria-disabled='true'] {
+  color: var(--win-text-disabled);
+}
+.menu [data-menu-icon] {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 16px;
+}
+.menu [data-menu-label] {
+  flex: 1;
+}
+.menu [data-menu-shortcut] {
+  color: var(--win-text-dim);
+  font-family: inherit;
+  font-size: var(--win-fs-caption);
+}
+.menu [role='menuitemcheckbox'][aria-checked='true']::before {
+  content: '•';
+  width: 16px;
+  text-align: center;
+}
+.menu [role='menuitemcheckbox'][aria-checked='false']::before {
+  content: '';
+  width: 16px;
+}
+.menu [data-menu-separator] {
+  height: 1px;
+  margin: 4px -4px;
+  background: var(--win-hairline);
+}
+.menu [data-menu-heading] {
+  padding: 8px 12px 4px;
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+  font-weight: 600;
+}
+.menu [data-menu-commands] {
+  display: flex;
+  gap: 4px;
+  margin: -4px -4px 4px;
+  padding: 4px;
+  border-bottom: 1px solid var(--win-hairline);
+}
+.menu [data-menu-command] {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+}
+.menu [data-menu-command]:focus,
+.menu [data-menu-command]:hover {
+  background: var(--win-subtle-fill);
+  outline: none;
+}
+.menu [data-menu-command][aria-disabled='true'] {
+  color: var(--win-text-disabled);
+}
+.menu [data-menu-sub-slot] {
+  position: relative;
+}
+.menu [data-menu-submenu] {
+  position: absolute;
+  top: -5px;
+  left: calc(100% + 2px);
+}
+.menu [data-menu-chevron] {
+  width: 6px;
+  height: 6px;
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  transform: rotate(45deg);
+}
+.menuLayer[data-legacy] .menu [data-menu-item] {
+  min-height: 26px;
+  font-size: var(--win-fs-caption);
+}
+@media (any-pointer: coarse) {
+  .menu [data-menu-item] {
+    min-height: 40px;
+  }
+  .menu [data-menu-command] {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* --- Task View ------------------------------------------------------------------------------------------------------ */
+.taskViewBackdrop {
+  position: absolute;
+  inset: 0 0 calc(var(--tb-h) + var(--sa-b));
+  z-index: 95;
+  background: color-mix(in srgb, var(--win-flyout-solid) 55%, rgb(0 0 0 / 0.35));
+  animation: win-fade-in var(--win-d333) var(--win-ease-in) both;
+}
+.taskViewBackdrop[data-state='closing'] {
+  animation: win-fade-out var(--win-d250) var(--win-ease-out) both;
+}
+.taskView {
+  position: absolute;
+  inset: 0 0 calc(var(--tb-h) + var(--sa-b));
+  z-index: var(--z-overlays);
+}
+.taskView[data-state='closing'] {
+  pointer-events: none;
+}
+.taskViewScope {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.taskViewScope > * {
+  pointer-events: auto;
+}
+.taskTiles {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+.taskTileItem {
+  position: absolute;
+  pointer-events: auto;
+  transition:
+    left var(--win-d167) var(--win-ease-in),
+    top var(--win-d167) var(--win-ease-in);
+}
+.taskTileTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 32px 0 2px;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: var(--win-fs-caption);
+  text-shadow: var(--win-label-shadow);
+  white-space: nowrap;
+}
+.taskTile {
+  position: absolute;
+  inset: 32px 0 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: calc(100% - 32px);
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+}
+.taskTile:hover {
+  box-shadow: 0 0 0 3px color-mix(in srgb, #ffffff 60%, transparent);
+}
+.taskTile:focus-visible {
+  outline: 3px solid var(--win-accent);
+  outline-offset: 2px;
+}
+.taskTile[data-minimized] {
+  border: 1px solid var(--win-card-stroke);
+  background: var(--win-window);
+}
+.taskTileCard {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+}
+.taskTileState {
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+.taskTileClose {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--caption-close);
+  color: #ffffff;
+  opacity: 0;
+  transition: opacity var(--win-d83) linear;
+}
+.taskTileItem:hover .taskTileClose,
+.taskTileItem:focus-within .taskTileClose,
+.taskCardItem .taskTileClose {
+  opacity: 1;
+}
+.taskViewEmpty {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  color: #ffffff;
+  font-size: var(--win-fs-subtitle);
+  text-shadow: var(--win-label-shadow);
+  transform: translate(-50%, -50%);
+}
+.taskViewEmpty p {
+  margin: 0;
+}
+.taskViewEmptyActions {
+  display: flex;
+  gap: 8px;
+}
+.desktops {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--win-flyout-stroke);
+  border-radius: 8px;
+  background: var(--win-flyout-solid);
+  box-shadow: var(--win-flyout-shadow);
+  transform: translateX(-50%);
+}
+.desktopThumb {
+  display: grid;
+  gap: 6px;
+  font-size: var(--win-fs-caption);
+  text-align: center;
+}
+.desktopThumbArt {
+  display: block;
+  width: 120px;
+  height: 68px;
+  border: 2px solid var(--win-accent);
+  border-radius: 6px;
+  background: var(--wallpaper-windows);
+}
+.newDesktop {
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  width: 120px;
+  height: 90px;
+  border: 1px dashed var(--win-field-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--win-text-disabled);
+  font: inherit;
+  font-size: var(--win-fs-caption);
+}
+.taskCards {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  margin: 0;
+  padding: calc(16px + var(--sa-t)) 16px 16px;
+  overflow-y: auto;
+  list-style: none;
+  background: color-mix(in srgb, var(--win-flyout-solid) 94%, transparent);
+}
+.taskCardItem {
+  position: relative;
+  min-height: 120px;
+  border: 1px solid var(--win-card-stroke);
+  border-radius: 8px;
+  background: var(--win-window);
+}
+.taskCardItem .taskTileTitle {
+  color: var(--win-text);
+  text-shadow: none;
+  padding-left: 12px;
+}
+.taskCardItem .taskTile {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+.taskCardItem .taskTileClose {
+  top: 6px;
+  right: 6px;
+  width: 44px;
+  height: 44px;
+}
+
+/* --- Lock screen ------------------------------------------------------------------------------------------------------ */
+.lock {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-system);
+  overflow: hidden;
+  color: var(--win-lock-text);
+  outline: none;
+}
+.lockWallpaper {
+  position: absolute;
+  inset: 0;
+  background: var(--wallpaper-windows);
+}
+.lock[data-lock='signin'] .lockWallpaper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.28);
+  animation: win-fade-in var(--win-d333) linear both;
+}
+.lockStage {
+  position: absolute;
+  inset: 0;
+  transition:
+    transform var(--win-d333) var(--win-ease-wm),
+    opacity var(--win-d333) var(--win-ease-wm);
+}
+.lockStage[data-step='signin'] {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+.lockClock {
+  position: absolute;
+  bottom: calc(56px + var(--sa-b));
+  left: calc(56px + var(--sa-l));
+  display: grid;
+  margin: 0;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 0.35);
+}
+.lockTime {
+  font-family: var(--font-display);
+  font-size: 72px;
+  font-weight: 300;
+  line-height: 1;
+}
+.lockDate {
+  margin-top: 8px;
+  font-size: 20px;
+}
+.lockContinue {
+  position: absolute;
+  bottom: calc(24px + var(--sa-b));
+  left: 50%;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: rgb(255 255 255 / 0.9);
+  font: inherit;
+  text-shadow: 0 1px 6px rgb(0 0 0 / 0.4);
+  transform: translateX(-50%);
+}
+.lockContinue:focus-visible {
+  outline: 2px solid #ffffff;
+}
+.lockCards {
+  position: absolute;
+  right: calc(56px + var(--sa-r));
+  bottom: calc(64px + var(--sa-b));
+  display: grid;
+  gap: 8px;
+  width: 340px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lockCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 12px 16px;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 8px;
+  background: rgb(32 40 60 / 0.46);
+  color: #ffffff;
+  text-decoration: none;
+  transition: background-color var(--win-d83) linear;
+}
+.lockCard:hover {
+  background: rgb(32 40 60 / 0.62);
+}
+.lockCardText {
+  display: grid;
+  min-width: 0;
+}
+.lockCardTitle {
+  font-weight: 600;
+}
+.lockCardBody {
+  overflow: hidden;
+  color: rgb(255 255 255 / 0.86);
+  font-size: var(--win-fs-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.signin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+  transform: translate(-50%, -54%);
+  animation: win-fade-in var(--win-d167) linear var(--win-d167) both;
+}
+.signinAvatar {
+  display: grid;
+  place-items: center;
+  width: 176px;
+  height: 176px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.22);
+  font-family: var(--font-display);
+  font-size: 64px;
+  font-weight: 300;
+}
+.signinName {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--win-fs-title);
+  font-weight: 600;
+}
+.signinHeadline {
+  max-width: 420px;
+  margin: 0 0 16px;
+  color: rgb(255 255 255 / 0.9);
+}
+.signinButton {
+  min-width: 120px;
+  height: 36px;
+  padding: 0 24px;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 4px;
+  background: rgb(255 255 255 / 0.18);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+}
+.signinButton:hover {
+  background: rgb(255 255 255 / 0.28);
+}
+.lock[data-compact] .lockClock {
+  top: calc(64px + var(--sa-t));
+  bottom: auto;
+  left: 50%;
+  justify-items: center;
+  transform: translateX(-50%);
+}
+.lock[data-compact] .lockCards {
+  right: 16px;
+  bottom: calc(72px + var(--sa-b));
+  left: 16px;
+  width: auto;
+}
+
+/* --- Dialogs (Properties, keyboard shortcuts; winver brings its own) ------------------------------------------------ */
+.dialogLayer {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-system);
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 0.28);
+  animation: win-fade-in var(--win-d167) linear both;
+}
+.dialog {
+  width: min(440px, calc(100% - 32px));
+  max-height: calc(100% - 64px);
+  overflow: auto;
+  border: 1px solid var(--win-border);
+  border-radius: 8px;
+  background: var(--win-window);
+  box-shadow: var(--win-window-shadow);
+  color: var(--win-text);
+  animation: win-pop-in var(--win-d167) var(--win-ease-in) both;
+}
+.shortcutsDialog {
+  width: min(560px, calc(100% - 32px));
+}
+.dialogTitlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  padding-left: 16px;
+  background: var(--win-titlebar);
+}
+.dialogTitle {
+  margin: 0;
+  font-size: var(--win-fs-caption);
+  font-weight: 400;
+}
+.dialogClose {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 40px;
+  border: 0;
+  border-top-right-radius: 7px;
+  background: transparent;
+  color: inherit;
+}
+.dialogClose:hover {
+  background: var(--caption-close);
+  color: #ffffff;
+}
+.dialogBody {
+  padding: 20px 24px;
+}
+.dialogFooter {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--win-hairline);
+  background: var(--win-titlebar-inactive);
+}
+.buttonAccent,
+.buttonSubtle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 16px;
+  border-radius: 4px;
+  font: inherit;
+  text-decoration: none;
+}
+.buttonAccent {
+  border: 1px solid var(--win-accent);
+  background: var(--win-accent);
+  color: var(--win-on-accent);
+}
+.buttonAccent:hover {
+  background: var(--win-accent-hover);
+}
+.buttonSubtle {
+  border: 1px solid var(--win-field-border);
+  background: var(--win-field);
+  color: var(--win-text);
+}
+.buttonSubtle:hover {
+  background: var(--win-subtle-fill);
+}
+.propertiesName {
+  margin: 0 0 16px;
+  font-size: var(--win-fs-subtitle);
+  font-weight: 600;
+}
+.properties {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+.properties > div {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 12px;
+}
+.properties dt {
+  color: var(--win-text-dim);
+}
+.properties dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.propertiesLink {
+  display: grid;
+  gap: 8px;
+}
+.propertiesField {
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--win-field-border);
+  border-radius: 4px;
+  background: var(--win-field);
+  color: inherit;
+  font: inherit;
+}
+.shortcuts {
+  width: 100%;
+  border-collapse: collapse;
+}
+.shortcuts th,
+.shortcuts td {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--win-hairline);
+  text-align: left;
+  vertical-align: top;
+}
+.shortcuts th {
+  font-weight: 400;
+}
+.shortcuts kbd {
+  display: inline-block;
+  margin: 0 0 2px 6px;
+  padding: 1px 6px;
+  border: 1px solid var(--win-field-border);
+  border-radius: 4px;
+  background: var(--win-field);
+  font-family: inherit;
+  font-size: var(--win-fs-caption);
+}
+
+/* --- Tour coach mark: an Acrylic teaching tip with a tail and an accent ring on its target ------------------------ */
+.coach {
+  position: fixed;
+  z-index: var(--z-system);
+  width: 320px;
+  padding: 16px;
+  border: 1px solid var(--win-flyout-stroke);
+  border-radius: 8px;
+  background: var(--win-flyout-solid);
+  box-shadow: var(--win-flyout-shadow);
+  animation: win-fade-in var(--win-d167) linear both;
+}
+.coach::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--tail-x, 50%) - 7px);
+  width: 14px;
+  height: 14px;
+  border: inherit;
+  background: inherit;
+  transform: rotate(45deg);
+}
+.coach[data-tail='up']::before {
+  top: -8px;
+  border-right: 0;
+  border-bottom: 0;
+}
+.coach[data-tail='down']::before {
+  bottom: -8px;
+  border-top: 0;
+  border-left: 0;
+}
+.coach[data-tail='none']::before {
+  display: none;
+}
+.coachCount {
+  margin: 0 0 4px;
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+.coachText {
+  margin: 0 0 16px;
+  font-size: var(--win-fs-body);
+  font-weight: 600;
+}
+.coachActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.tourRing {
+  position: fixed;
+  z-index: var(--z-system);
+  border: 2px solid var(--win-accent);
+  border-radius: 8px;
+  pointer-events: none;
+  animation: win-ring 1.6s ease-in-out infinite;
+}
+
+/* --- Night light, restart boot ---------------------------------------------------------------------------------- */
+.nightLight {
+  position: absolute;
+  inset: 0;
+  z-index: calc(var(--z-stage) - 1);
+  background: var(--win-night-light);
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+:root[data-contrast='more'] .nightLight {
+  display: none;
+}
+.restartBoot {
+  z-index: calc(var(--z-system) + 20);
+}
+
+/* --- Postures ----------------------------------------------------------------------------------------------------- */
+.win[data-win-posture='touch'] .taskbarList {
+  gap: 4px;
+}
+.win[data-win-posture='touch'] .tbButton {
+  width: 44px;
+  height: 44px;
+}
+
+/* Compact: 48 px taskbar (40 px landscape), Start / Search as full-height sheets, the tray → one button. */
+.win[data-win-posture='compact'] .taskbar {
+  padding-left: max(4px, var(--sa-l));
+}
+/* Only compact scrolls a long row of running apps; elsewhere the list never clips (its preview cards sit above it). */
+.win[data-win-posture='compact'] .taskbarList {
+  position: static;
+  max-width: calc(100% - 64px);
+  overflow-x: auto;
+  scrollbar-width: none;
+  transform: none;
+}
+.win[data-win-posture='compact'] .tbItem[data-running='false'] {
+  display: none;
+}
+.win[data-win-posture='compact'] .launcher {
+  top: var(--sa-t);
+  right: 0;
+  bottom: calc(var(--tb-h) + var(--sa-b));
+  left: 0;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  transform: none;
+}
+.win[data-win-posture='compact'] .launcher[data-launcher='search'] .launcherScope {
+  grid-template-columns: minmax(0, 1fr);
+}
+.win[data-win-posture='compact'] .previewPane {
+  display: none;
+}
+.win[data-win-posture='compact'] .searchInput {
+  width: calc(100% - 32px);
+  margin: 16px 16px 0;
+  font-size: 16px;
+}
+.win[data-win-posture='compact'] .startBody {
+  padding: 12px 16px 0;
+}
+.win[data-win-posture='compact'] .pinned {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.win[data-win-posture='compact'] .tile {
+  width: 100%;
+}
+.win[data-win-posture='compact'] .recommended {
+  grid-template-columns: minmax(0, 1fr);
+}
+.win[data-win-posture='compact'] .startFooter {
+  padding: 0 16px;
+}
+.win[data-win-posture='compact'] .results {
+  max-height: calc(var(--vvh, 100dvh) - var(--tb-h) - 160px);
+  padding-left: 8px;
+}
+.win[data-win-posture='compact'] .flyout {
+  right: 8px;
+  left: 8px;
+  width: auto;
+  max-height: 85%;
+}
+.win[data-win-posture='compact'] .toastRegion {
+  right: 8px;
+  left: 8px;
+  width: auto;
+}
+.win[data-win-posture='compact'] .desktop {
+  top: calc(8px + var(--sa-t));
+  left: 8px;
+  right: 8px;
+}
+.win[data-win-posture='compact'] .deskGrid {
+  grid-auto-flow: row;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: none;
+  grid-auto-rows: 96px;
+}
+
+/* --- Keyframes (WinUI: entrances decelerate hard, exits accelerate and are shorter) ------------------------------- */
+@keyframes win-launcher-in {
+  from {
+    opacity: 0;
+    translate: 0 56px;
+  }
+}
+@keyframes win-launcher-out {
+  to {
+    opacity: 0;
+    translate: 0 24px;
+  }
+}
+@keyframes win-flyout-in {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+  }
+}
+@keyframes win-flyout-out {
+  to {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+@keyframes win-menu-in {
+  from {
+    opacity: 0;
+    transform: scaleY(0.92);
+  }
+}
+@keyframes win-toast-in {
+  from {
+    opacity: 0;
+    translate: 120% 0;
+  }
+}
+@keyframes win-toast-out {
+  to {
+    opacity: 0;
+    translate: 32px 0;
+  }
+}
+@keyframes win-pop-in {
+  from {
+    opacity: 0;
+    scale: 0.98;
+  }
+}
+@keyframes win-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes win-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes win-taskbar-up {
+  from {
+    translate: 0 100%;
+  }
+}
+@keyframes win-attention {
+  to {
+    opacity: 0.35;
+  }
+}
+@keyframes win-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@keyframes win-ring {
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--win-accent) 25%, transparent);
+  }
+}
+
+/* Reduced motion: flights and slides become fades (the --win-d* tokens are 0 for durations; these keep a crossfade). */
+:root[data-motion='reduced'] .launcher,
+:root[data-motion='reduced'] .flyout,
+:root[data-motion='reduced'] .toast,
+:root[data-motion='reduced'] .menu,
+:root[data-motion='reduced'] .snapPreview[data-visible] {
+  animation-name: win-fade-in;
+  animation-duration: 150ms;
+}
+:root[data-motion='reduced'] .tourRing,
+:root[data-motion='reduced'] .pill[data-attention],
+:root[data-motion='reduced'] .taskbar[data-shimmer]::after,
+:root[data-motion='reduced'] .tbButton[data-launching]::after {
+  animation: none;
+}
+
+@media (forced-colors: active) {
+  .taskbar,
+  .launcher,
+  .flyout > *,
+  .toast,
+  .menu,
+  .dialog,
+  .coach {
+    border: 2px solid CanvasText;
+    background: Canvas;
+  }
+  .pill[data-pill='running'],
+  .pill[data-pill='active'] {
+    background: Highlight;
+  }
+  .deskItem[data-selected] {
+    outline: 2px solid Highlight;
+  }
+  .nightLight {
+    display: none;
+  }
+}

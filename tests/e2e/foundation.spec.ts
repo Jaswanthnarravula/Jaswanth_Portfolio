@@ -68,13 +68,14 @@ test('reload with populated storage logs zero hydration warnings', async ({ page
   page.on('pageerror', (error) => problems.push(error.message));
   await page.goto('/macos/github');
   await waitForOs(page, 'macos');
-  await page.getByRole('link', { name: 'Mail' }).click();
+  await page.getByRole('navigation', { name: 'Dock' }).getByRole('link', { name: /^Mail/ }).click();
   await expect(page).toHaveURL(/\/macos\/mail$/);
   await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 400))); // debounced write lands
   await page.reload();
   await waitForOs(page, 'macos');
   await expect(page.getByRole('region', { name: 'Mail' })).toBeVisible();
-  await expect(page.getByRole('region', { name: 'GitHub' })).toBeVisible(); // restored from the session
+  // Restored from the session (on phones macOS shows one window at a time, so GitHub is kept but hidden).
+  await expect(page.locator('[data-window="macos:github"]')).toBeAttached();
   expect(problems).toEqual([]);
 });
 

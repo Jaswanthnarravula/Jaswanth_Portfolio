@@ -1,0 +1,137 @@
+/*
+ * Mission Control at desktop sizes (plans/macos/surfaces/mission-control.md): the wallpaper dims (35 % scrim), the
+ * live windows fly into tiles (transforms written by GSAP); this layer only holds the focusable tile buttons laid
+ * over them, each with its app icon and title below, an accent ring on hover / focus, and a ✕ to close.
+ */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-windows) - 1);
+  background: rgb(0 0 0 / 0.35);
+  pointer-events: none;
+}
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlays);
+}
+.tiles {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tile {
+  position: absolute;
+}
+.pick {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  cursor: pointer;
+}
+.pick:hover,
+.pick:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent);
+}
+.pick[aria-current='true'] {
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--accent) 60%, transparent);
+}
+.label {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  overflow: hidden;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-shadow: var(--mac-label-shadow);
+}
+.pick:focus-visible .label,
+.pick:hover .label {
+  font-weight: 700;
+}
+.close {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  box-shadow: var(--elevation-2);
+  color: var(--text-primary);
+  opacity: 0;
+}
+.tile:hover .close,
+.tile:focus-within .close {
+  opacity: 1;
+}
+.close:focus-visible {
+  outline: 2px solid var(--focus-ring);
+}
+@media (any-pointer: coarse) {
+  .close {
+    width: 44px;
+    height: 44px;
+    opacity: 1;
+  }
+}
+.empty {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  transform: translateX(-50%);
+  color: #fff;
+  text-shadow: var(--mac-label-shadow);
+}
+.emptyTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+.shortcuts {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.shortcuts button {
+  min-height: 32px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.85);
+  color: #1d1d1f;
+  font: inherit;
+  font-size: 13px;
+  text-shadow: none;
+}
+.shortcuts button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  .pick:focus-visible {
+    outline: 3px solid Highlight;
+  }
+}

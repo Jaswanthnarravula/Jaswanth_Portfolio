@@ -1,10 +1,11 @@
 /**
  * GlassStage — plans/02-hello-page.md "Liquid glass by tier" (T2) · `HELLO-GL-01`, `PERF-GL-01`, `PERF-GL-02`.
  * Imperative three.js (never R3F, never inside an OS): one fullscreen triangle, one fragment shader, zero render
- * targets. Lens rects come from a ResizeObserver (never measured per frame). GSAP's ticker is the clock: 30 fps idle,
- * full rate for 1 s after pointer input, nothing while the tab is hidden. The governor steps DPR 1.5 → 1.25 → 1.0 and
- * then gives up to T1; a lost context drops to T1 for the session (no restore loop). dispose() frees every GPU
- * resource so `renderer.info.memory` returns to zero.
+ * targets. Lens rects come from a ResizeObserver (never measured per frame). GSAP's ticker is the clock, but the field
+ * is the storyboard frame's static light field (plans/02 "Visual target"), so a frame is drawn only when something
+ * changed — the 600 ms refraction fade-in, the dim, a resize or a lens move — and nothing while the tab is hidden.
+ * The governor steps DPR 1.5 → 1.25 → 1.0 and then gives up to T1; a lost context drops to T1 for the session (no
+ * restore loop). dispose() frees every GPU resource so `renderer.info.memory` returns to zero.
  */
 import { gsap } from 'gsap';
 import {
@@ -16,7 +17,6 @@ import {
   RawShaderMaterial,
   Scene,
   Vector2,
-  Vector3,
   Vector4,
   WebGLRenderer,
 } from 'three';
@@ -45,8 +45,6 @@ export interface GlassStage {
   memory(): { geometries: number; textures: number };
 }
 
-const IDLE_FRAME_MS = 1000 / 30;
-const INPUT_WINDOW_MS = 1000;
 const DPR_STEPS = [1.5, 1.25, 1] as const;
 const MAX_PANELS = 4;
 
@@ -64,9 +62,8 @@ export function createGlassStage({ container, dpr: startDpr, panels, onStop }: G
   geometry.setAttribute('position', new BufferAttribute(new Float32Array([-1, -1, 0, 3, -1, 0, -1, 3, 0]), 3));
   const uniforms = {
     uResolution: { value: new Vector2(1, 1) },
-    uTime: { value: 0 },
-    uPointer: { value: new Vector2(0.5, 0.6) },
-    uAccent: { value: new Vector3(0.36, 0.52, 1) },
+    /** Device px per CSS px: the refraction band and bend are set in CSS px, as the DOM lens's are. */
+    uPx: { value: 1 },
     uIntensity: { value: 0 },
     uDim: { value: 0 },
     uPanels: { value: Array.from({ length: MAX_PANELS }, () => new Vector4()) },
@@ -83,16 +80,17 @@ export function createGlassStage({ container, dpr: startDpr, panels, onStop }: G
   const lifetime = new AbortController();
   const { signal } = lifetime;
   let disposed = false;
-  let lastInput = 0;
-  let lastRender = 0;
   let lastTick = 0;
   let started = performance.now();
-  const pointerTarget = new Vector2(0.5, 0.6);
+  /** Something the picture depends on changed since the last frame. */
+  let dirty = true;
   const deltas: number[] = [];
 
   const size = () => {
     renderer.setSize(window.innerWidth, window.innerHeight, false);
     uniforms.uResolution.value.set(window.innerWidth * dpr, window.innerHeight * dpr);
+    uniforms.uPx.value = dpr;
+    dirty = true;
   };
   const measure = () => {
     const height = window.innerHeight;
@@ -105,6 +103,7 @@ export function createGlassStage({ container, dpr: startDpr, panels, onStop }: G
       count++;
     }
     uniforms.uPanelCount.value = count;
+    dirty = true;
   };
   size();
   measure();
@@ -114,14 +113,6 @@ export function createGlassStage({ container, dpr: startDpr, panels, onStop }: G
   });
   for (const panel of panels) observer.observe(panel.element);
   window.addEventListener('resize', measure, { signal });
-  window.addEventListener(
-    'pointermove',
-    (event) => {
-      lastInput = performance.now();
-      pointerTarget.set(event.clientX / window.innerWidth, 1 - event.clientY / window.innerHeight);
-    },
-    { signal, passive: true },
-  );
   canvas.addEventListener(
     'webglcontextlost',
     (event) => {
@@ -152,12 +143,13 @@ export function createGlassStage({ container, dpr: startDpr, panels, onStop }: G
     const now = performance.now();
     if (lastTick) govern(now - lastTick);
     lastTick = now;
-    const interacting = now - lastInput < INPUT_WINDOW_MS;
-    if (!interacting && now - lastRender < IDLE_FRAME_MS) return;
-    lastRender = now;
-    uniforms.uTime.value = now / 1000;
-    uniforms.uPointer.value.lerp(pointerTarget, 0.08);
-    uniforms.uIntensity.value = Math.min(1, (now - started) / 600);
+    const intensity = Math.min(1, (now - started) / 600);
+    if (intensity !== uniforms.uIntensity.value) {
+      uniforms.uIntensity.value = intensity;
+      dirty = true;
+    }
+    if (!dirty) return;
+    dirty = false;
     renderer.render(scene, camera);
   };
   renderer.render(scene, camera); // the first frame exists before the canvas shows
@@ -185,7 +177,13 @@ export function createGlassStage({ container, dpr: startDpr, panels, onStop }: G
   return {
     dim(seconds) {
       return new Promise((resolve) => {
-        gsap.to(uniforms.uDim, { value: 1, duration: seconds, ease: 'power1.out', onComplete: () => resolve() });
+        gsap.to(uniforms.uDim, {
+          value: 1,
+          duration: seconds,
+          ease: 'power1.out',
+          onUpdate: () => void (dirty = true),
+          onComplete: () => resolve(),
+        });
       });
     },
     dispose,

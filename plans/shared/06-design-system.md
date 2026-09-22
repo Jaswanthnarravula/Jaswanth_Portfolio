@@ -46,7 +46,9 @@ Exact per-OS values are owned by `{os}/01-identity.md`; this table fixes what mu
 ### Fonts (`DS-FONT-01`)
 `next/font`: Inter variable (≤ 50 KB, `size-adjust` metric-matched) as the universal fallback, in the root.
 Roboto Flex subset loads only in the Android chunk; a mono face (JetBrains Mono, OFL) only in the Linux /
-terminal chunk. `font-display: swap`; LCP text never waits for a webfont.
+terminal chunk. `font-display: swap`; LCP text never waits for a webfont. The welcome screens and the chooser set
+the storyboard's faces (Owner visual targets): IBM Plex Sans (latin variable, 46 KB) is declared and preloaded on `/`
+only; Bricolage Grotesque 700 (40 KB) is registered when the chooser mounts. Both OFL, self-hosted, hashed.
 
 ### Glass material by tier (`DS-GLASS-01`)
 
@@ -74,6 +76,30 @@ full page, macOS Dock 48 px
 base, Windows taskbar 24 px glyph in 40 px button), identical box sizes in `official` and
 `original` modes so switching never shifts layout.
 
+### Owner visual targets (owner decision 2026-09-21)
+The owner's approved storyboard frames in `plans/visual-targets/` are **the** look of the welcome screens, the chooser
+and every OS: `chooser.png` · `macos-desktop.png` · `windows-desktop.png` · `ios-home.png` + `ios-github.png` ·
+`android-home.png` + `android-gmail.png` · `linux-terminal.png` (source CSS: `plans/visual-targets/storyboard.html`).
+`plans/visual-targets/frames/` holds every frame rendered full screen at 1440 × 900 (`hello`, `intro`, `profiles`,
+`chooser`, `macos`, `windows`, `ios-1` + `ios-2`, `android-1` + `android-2`, `linux`; regenerate with
+`node scripts/render-visual-targets.mjs`) — the pixels the Storyboard test compares against. Exact values: the
+"Visual target" section of `02-hello-page.md`, `03-netflix-page.md`, `04-os-chooser.md` and each OS's
+`01-identity.md`. The frames are drawn at 1 em = 1.42 % of a 16:10 screen; the welcome screens and the chooser use that
+unit (`--u`) so they land on the frame at any 16:10 size. Rules, in order:
+1. **Composition, colour and structure come from the frame** — which surfaces are on screen, where they sit, the
+   wallpaper gradient, surface tints, selection colours, what each window/list/tile contains and in what order.
+2. **The real OS decides every detail the frame abbreviates** — measurements in real px/pt/dp (the frames are drawn
+   ≈ 1.4× zoomed), the real system font stack, genuine artwork from `lib/assets`, and the real system glyphs where the
+   frame uses a stand-in character (`⌕ ⧉ ▢ ◀ ● ■ ▾ ◢ ▮ ☰ ✎ ✉ ☆ ➤ ▦`). "Close to the OS" is not the bar; the OS is.
+3. **Sample content is replaced by real data** — "Acme", "Globex", "Initech", "flowgraph", "tinyqueue", "★ 128",
+   "60 %", "120 KB" and the like are storyboard examples; the same slots show `data/portfolio.ts` through selectors and
+   content views (north-star B8, B9). A slot with no real fact is left out, never filled with an invented one.
+4. The performance and accessibility caps still hold where a frame breaks them: ≤ 3 live `backdrop-filter` surfaces
+   (a blur over a smooth gradient is rendered as its tint), none on Android, focus rings and contrast (`DS-SCRIM-01`).
+Checked by north-star smell test 8 and the "Storyboard test" line in each OS's definition-of-done audit; the welcome
+screens and the chooser by `e2e/welcome-visual.spec.ts` and `e2e/chooser-visual.spec.ts` (the frame's boxes at
+1440 × 900, ≤ 1.5 px).
+
 ## Edge cases
 System font missing (e.g. Segoe on macOS) → Inter fallback with matched metrics; no reflow on swap.
 `backdrop-filter` unsupported → tier 0 styles by feature query. High-contrast mode → materials collapse to solid.
@@ -83,7 +109,7 @@ System font missing (e.g. Segoe on macOS) → Inter fallback with matched metric
 | ID | Feature | Acceptance test |
 |---|---|---|
 | `DS-TOKEN-01` | Three-layer tokens + `[data-os]` scopes | `unit: every semantic token defined for all five OS scopes` |
-| `DS-FONT-01` | Font strategy | `perf: no non-Inter font in welcome first load; Linux chunk owns mono` |
+| `DS-FONT-01` | Font strategy | `perf: Inter only on every route but / (Inter + the storyboard IBM Plex Sans); Linux chunk owns mono` |
 | `DS-GLASS-01` | Material by tier / glass preference | `e2e: X5 count of live backdrop-filter elements ≤ 3 per OS home` |
 | `DS-SCRIM-01` | Guaranteed contrast | `unit: scrim tokens ≥ 4.5:1 on worst-case backdrop` |
 | `DS-THEME-01` | Light/dark + forced-colors | `e2e: forced-colors project legible on every OS home` |

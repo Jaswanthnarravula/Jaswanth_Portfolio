@@ -1,242 +1,115 @@
 /*
- * Welcome layer — the Hello stage in Jaswanth's own liquid-glass brand (plans/02), then the streaming-style intro and
- * "Who's watching?" on a flat black stage (plans/03). Never an OS's chrome.
- * Glass by tier (shared/06 `DS-GLASS-01`, shared/10): T1 blurs at most three surfaces (top bar, lens, pill);
- * T0 or `data-glass=solid` → tinted solid; WebGL on (`data-webgl=on`, T2) → hairline + specular only.
- * Only transform and opacity animate, plus the stroke draw of one SVG path (plans/02 "Motion").
+ * Welcome layer — plans/02 (Hello) and plans/03 (intro + "Who's watching?"), each exactly the owner's storyboard frame
+ * (plans/visual-targets/hello.png · intro.png · profiles.png; source CSS plans/visual-targets/storyboard.html `.hello`,
+ * `.nflx`, `.mark`, `.who-t`, `.prof`, `.nfoot`). Every value below is the frame's own, in its unit: the frame is drawn
+ * at 1 em = 1.42 % of a 16:10 screen, so `--u` scales each screen with the viewport exactly as the frame does (and by
+ * height when the screen is wider than 16:10). Smaller and portrait screens keep the composition in a centred column.
+ * Exception: the Hello's glass (lens, glyph ink, pill) is the owner's liquid-glass decision of 2026-09-21, not the
+ * frame's (plans/06 Deviations log).
+ * Glass by tier (shared/06 `DS-GLASS-01`, shared/10): one live blur (the lens); T0 or `data-glass=solid` → no blur;
+ * WebGL on (`data-webgl=on`, T2) → the shader draws the frosted body, the DOM keeps rim and shadow.
+ * Only transform and opacity animate, plus the stroke draw of one SVG group (plans/02 "Motion").
  */
 
 .root {
+  --u: max(12px, min(1.42vw, 2.272vh));
   --w-stage: #eaf0ff;
   --w-ink: #1b2347;
-  --w-ink-2: #3a4468;
   --w-bar-ink: #2a3350;
-  --w-accent: #2447d6;
-  --w-line: rgb(255 255 255 / 0.75);
-  --w-fill: rgb(255 255 255 / 0.34);
-  --w-solid: rgb(246 248 255 / 0.94);
-  --w-blur: blur(14px) saturate(160%);
   --w-flat: #141414;
   --w-ease: cubic-bezier(0.2, 0.9, 0.3, 1);
   --w-fade: 240ms;
   --focus-ring: #2447d6;
+  --face-text: 'IBM Plex Sans', var(--font-sans);
   position: relative;
   isolation: isolate;
-  display: grid;
-  grid-template-rows: auto 1fr;
   min-height: 100svh;
   overflow-x: clip;
-  color: var(--w-ink);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
+  color: #111;
+  font-family: var(--face-text);
+  font-size: var(--u);
+  line-height: 1.3;
 }
 
-/* --- Ambient light field (CSS; the WebGL stage replaces it on T2) ------------------------------------------------ */
+/* --- The frame's light field (`.hello` background); the WebGL stage draws the same field on T2 ------------------- */
 
 .field {
   position: fixed;
   inset: 0;
   z-index: -1;
-  overflow: hidden;
   pointer-events: none;
-  background: var(--w-stage);
-}
-.field::before,
-.field::after {
-  content: '';
-  position: absolute;
-  inset: -25%;
-  animation: drift 28s ease-in-out infinite alternate;
-}
-.field::before {
   background:
-    radial-gradient(48% 56% at 30% 36%, #9db9ff, transparent 60%),
-    radial-gradient(44% 48% at 78% 38%, #ffc0de, transparent 60%);
-}
-.field::after {
-  background: radial-gradient(48% 56% at 58% 88%, #ffd9a0, transparent 60%);
-  animation-duration: 36s;
-  animation-direction: alternate-reverse;
-}
-@keyframes drift {
-  from {
-    transform: translate3d(-3%, -2%, 0) rotate(0deg) scale(1);
-  }
-  to {
-    transform: translate3d(3%, 2.5%, 0) rotate(8deg) scale(1.08);
-  }
-}
-/* Film grain, 3 %: one static layer, T1 only. */
-.root::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-.root:not([data-screen='hello']) .field::before,
-.root:not([data-screen='hello']) .field::after {
-  animation-play-state: paused;
+    radial-gradient(60% 70% at 18% 20%, #9db9ff 0, transparent 60%),
+    radial-gradient(55% 60% at 85% 25%, #ffc0de 0, transparent 60%),
+    radial-gradient(60% 70% at 60% 95%, #ffd9a0 0, transparent 60%), var(--w-stage);
 }
 
-/* --- Glass ---------------------------------------------------------------------------------------------------------- */
-
-.glass {
-  position: relative;
-  background: var(--w-fill);
-  -webkit-backdrop-filter: var(--w-blur);
-  backdrop-filter: var(--w-blur);
-  border: 1px solid var(--w-line);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.9),
-    0 32px 64px -32px rgb(40 60 140 / 0.5);
-}
-/* Specular sheen along the top-left edge. */
-.glass::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background: linear-gradient(140deg, rgb(255 255 255 / 0.4), transparent 42%);
-}
-
-/* --- Top bar ---------------------------------------------------------------------------------------------------------- */
+/* --- Top bar (`.top`): "Skip the OS" left, "Résumé  ·  Sound on" right --------------------------------------------- */
 
 .bar {
+  position: fixed;
+  top: max(2.2em, calc(var(--sa-t) + 12px));
+  right: max(2.6em, calc(var(--sa-r) + 12px));
+  left: max(2.6em, calc(var(--sa-l) + 12px));
   z-index: 20;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin: max(12px, calc(var(--sa-t) + 8px)) max(12px, calc(var(--sa-r) + 8px)) 0 max(12px, calc(var(--sa-l) + 8px));
-  padding: 4px;
-  border-radius: 999px;
-}
-.barEnd {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.barLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 40px;
-  padding: 0 14px;
-  border-radius: 999px;
   color: var(--w-bar-ink);
-  font-size: 14px;
-  font-weight: 560;
+  font-size: 0.95em;
+}
+/* Inline text, so the separator's spaces set exactly as the frame's. */
+.barEnd {
+  display: block;
+}
+/* The text sits where the frame puts it; padding with an equal negative margin widens the hit area without moving it. */
+.barLink {
+  display: inline-block;
+  margin: -10px -8px;
+  padding: 10px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font: inherit;
   text-decoration: none;
-  transition:
-    background-color 180ms var(--w-ease),
-    color 180ms var(--w-ease);
+  cursor: pointer;
 }
 .barLink:hover {
-  color: var(--w-ink);
-  background: rgb(255 255 255 / 0.45);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
-.barLink:focus-visible,
-.sound:focus-visible {
+.barLink:focus-visible {
   outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-.barIcon {
-  flex: none;
-}
-.sound {
-  display: inline-grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  color: var(--w-bar-ink);
-  cursor: pointer;
-  transition:
-    background-color 180ms var(--w-ease),
-    color 180ms var(--w-ease);
-}
-.sound:hover {
-  color: var(--w-ink);
-  background: rgb(255 255 255 / 0.45);
-}
-.sound > svg {
-  grid-area: 1 / 1;
+  outline-offset: -2px;
 }
 .soundOff,
 .sound[aria-pressed='false'] .soundOn {
   display: none;
 }
 .sound[aria-pressed='false'] .soundOff {
-  display: block;
+  display: inline;
 }
 /* Before hydration the button renders "on"; a muted visitor's pre-paint hint shows the real state. */
 :global(html[data-sound='off']) .sound[aria-pressed='true'] .soundOn {
   display: none;
 }
 :global(html[data-sound='off']) .sound[aria-pressed='true'] .soundOff {
-  display: block;
+  display: inline;
 }
-@media (pointer: coarse) {
-  .barLink,
-  .sound {
-    min-height: 44px;
-    min-width: 44px;
-  }
-}
-@media (max-width: 420px) {
-  .barText {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-  .barLink {
-    justify-content: center;
-    padding: 0 12px;
-  }
-}
-/* On the intro and profiles the bar keeps only the Sound toggle, flat (the streaming stage has no glass). */
+/* The frame's intro and first-visit profiles carry no top bar: "Skip intro" stops the sound. */
 .root:not([data-screen='hello']) .bar,
 :global(html[data-welcome='profiles']) .root[data-screen='hello'] .bar {
-  background: none;
-  border-color: transparent;
-  box-shadow: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  pointer-events: none;
-}
-.root:not([data-screen='hello']) .bar::before,
-:global(html[data-welcome='profiles']) .root[data-screen='hello'] .bar::before {
-  display: none;
-}
-.root:not([data-screen='hello']) .barLink,
-:global(html[data-welcome='profiles']) .root[data-screen='hello'] .barLink {
   visibility: hidden;
 }
-.root:not([data-screen='hello']) .sound,
-:global(html[data-welcome='profiles']) .root[data-screen='hello'] .sound {
-  pointer-events: auto;
-  color: #d9d9d9;
+/* Returning visitors land straight on the profiles; Sound stays theirs there (with the replay mark, top left). */
+:global(html[data-welcome='profiles']) .root:is([data-screen='hello'], [data-screen='profiles']) .sound {
+  visibility: visible;
+  color: #9a9a9a;
 }
 
 /* --- Screens -------------------------------------------------------------------------------------------------------- */
 
-.screens {
-  display: grid;
-  place-items: center;
-  padding: clamp(16px, 4svh, 40px) max(16px, var(--sa-r)) max(24px, calc(var(--sa-b) + 16px)) max(16px, var(--sa-l));
-}
 .screen {
-  grid-area: 1 / 1;
   visibility: hidden;
   opacity: 0;
   transition:
@@ -258,47 +131,137 @@
   visibility: hidden;
   opacity: 0;
 }
+/* First visit: the profiles screen is not rendered behind the Hello, so its lazy avatars never compete with the first
+   paint; they load during the intro. Returning visitors land on the profiles, so there it renders from the start. */
+:global(html:not([data-welcome='profiles'])) .root[data-screen='hello'] .profiles {
+  content-visibility: hidden;
+}
 
-/* --- Hello ---------------------------------------------------------------------------------------------------------- */
+/* --- Hello (`.glass`, `.hi`, `.who`, `.pill`) ----------------------------------------------------------------------- */
 
 .hello {
-  display: grid;
-  place-items: center;
-  width: min(100%, 860px);
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+.lens {
+  position: absolute;
+  inset: 16% 22% 14%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1em;
+  isolation: isolate;
+  border-radius: 2.4em;
   text-align: center;
 }
-/* One liquid-glass panel holds the glyph, the name and the pill (the storyboard's Hello). */
-.lens {
-  display: grid;
-  justify-items: center;
-  gap: clamp(14px, 2.6svh, 26px);
-  width: 100%;
-  padding: clamp(28px, 6svh, 64px) clamp(18px, 5vw, 72px) clamp(28px, 5.4svh, 56px);
-  border-radius: clamp(28px, 4vw, 44px);
+/* Liquid glass (owner decision 2026-09-21), in three layers under the content, bottom to top: the backdrop (blur, or
+   edge refraction), the surface (tint, rim light, drop shadow) and the corner speculars. The surface paints above the
+   backdrop, so the refraction bends only the page behind the glass, never the glass's own tint or shadow. */
+.lensBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  border-radius: inherit;
+  -webkit-backdrop-filter: blur(6px) saturate(185%) brightness(1.04);
+  backdrop-filter: blur(6px) saturate(185%) brightness(1.04);
+  pointer-events: none;
+}
+/* Chromium, refraction on (refraction.ts): the layer reaches `margin` past the lens so outward samples stay inside
+   its backdrop, and is clipped back to the lens. The field's colours bend into the rim. */
+:global(html[data-refract='on']) .lensBackdrop {
+  inset: -135px;
+  clip-path: inset(135px round 2.4em);
+  -webkit-backdrop-filter: url(#hello-refract) blur(1.5px) saturate(160%) brightness(1.04);
+  backdrop-filter: url(#hello-refract) blur(1.5px) saturate(160%) brightness(1.04);
+}
+.lens::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.3), rgb(255 255 255 / 0.12) 55%, rgb(255 255 255 / 0.22));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
+    inset 0 -1px 0 rgb(255 255 255 / 0.45),
+    inset 0 0 0 1px rgb(255 255 255 / 0.28),
+    inset 0 22px 36px -26px rgb(255 255 255 / 0.9),
+    inset 0 -26px 40px -30px rgb(255 255 255 / 0.75),
+    inset 18px 0 30px -28px rgb(120 150 255 / 0.35),
+    inset -18px 0 30px -28px rgb(255 140 200 / 0.35),
+    0 40px 80px -40px rgb(30 45 120 / 0.38),
+    0 2px 8px rgb(30 45 120 / 0.06);
+  pointer-events: none;
+}
+/* With refraction the glass is clearer (the bend, not the frost, shows it is there) and its rim carries a fresnel glow:
+   light concentrated in the last few px of a thick edge, as the WebGL tier's shader draws it. */
+:global(html[data-refract='on']) .lens::after {
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.2), rgb(255 255 255 / 0.05) 55%, rgb(255 255 255 / 0.14));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255),
+    inset 0 -1px 0 rgb(255 255 255 / 0.6),
+    inset 0 0 0 1px rgb(255 255 255 / 0.5),
+    inset 0 0 6px 1px rgb(255 255 255 / 0.7),
+    inset 0 0 22px 2px rgb(255 255 255 / 0.35),
+    inset 0 22px 36px -26px rgb(255 255 255 / 0.8),
+    inset 0 -26px 40px -30px rgb(255 255 255 / 0.7),
+    0 40px 80px -40px rgb(30 45 120 / 0.38),
+    0 2px 8px rgb(30 45 120 / 0.06);
+}
+/* The rim's specular light, concentrated on the top-left and bottom-right corners. */
+.lens::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 225deg,
+    rgb(255 255 255) 0deg,
+    rgb(255 255 255 / 0.15) 50deg,
+    rgb(255 255 255 / 0.1) 130deg,
+    rgb(255 255 255 / 0.9) 180deg,
+    rgb(255 255 255 / 0.15) 230deg,
+    rgb(255 255 255 / 0.1) 310deg,
+    rgb(255 255 255) 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
 }
 .glyph {
   display: block;
-  width: min(100%, 560px);
+  flex: none;
+  width: 25em;
+  max-width: 100%;
   height: auto;
   overflow: visible;
 }
-/* The storyboard's glass ink: gradient body + SVG light filter (GlassInk in Welcome.tsx). */
-.glyphPath,
-.glyphAlt {
+/* The glass rod (`ROD` in Welcome.tsx): the group carries the draw, so every layer draws together. */
+.ink,
+.inkAlt {
   fill: none;
-  stroke: url(#hello-ink);
-  stroke-width: 36;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: url(#hello-glass);
 }
-.glyphPath {
+.ink {
   stroke-dasharray: 1 2;
   stroke-dashoffset: 1;
   animation: draw 3200ms cubic-bezier(0.6, 0.12, 0.36, 0.96) 500ms both;
 }
-.glyphAlt {
+.inkAlt {
   opacity: 0;
+}
+.inkShadow {
+  filter: url(#hello-soft);
 }
 @keyframes draw {
   to {
@@ -306,82 +269,67 @@
   }
 }
 .title {
-  display: grid;
-  gap: 8px;
+  max-width: 100%;
   margin: 0;
   color: var(--w-ink);
-}
-.name {
-  font-size: clamp(28px, 3.8vw, 46px);
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.026em;
-}
-.headline {
-  max-width: 40ch;
-  margin-inline: auto;
-  color: var(--w-ink-2);
-  font-size: clamp(15px, 1.6vw, 18px);
-  font-weight: 500;
-  line-height: 1.45;
+  font-size: 1.5em;
+  font-weight: 600;
+  line-height: 1.3;
   text-wrap: balance;
 }
 
-/* Tap to begin — a frosted pill with a rotating conic border beam (3.2 s linear, transform only). */
+/* Tap to begin — the frame's pill with its rotating conic border beam (3.2 s linear, transform only). */
 .pill {
   position: relative;
-  isolation: isolate;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 56px;
-  margin-top: 4px;
-  padding: 0 26px 0 30px;
+  display: inline-block;
+  flex: none;
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 0.9);
-  border-radius: 999px;
-  background: rgb(255 255 255 / 0.55);
-  box-shadow: 0 10px 24px -14px rgb(40 60 140 / 0.55);
+  padding: 0.7em 1.6em;
+  border: 1px solid rgb(255 255 255 / 0.7);
+  border-radius: 99em;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.62), rgb(255 255 255 / 0.34));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255),
+    inset 0 -10px 16px -12px rgb(255 255 255 / 0.9),
+    0 10px 24px -12px rgb(30 45 120 / 0.35),
+    0 1px 3px rgb(30 45 120 / 0.08);
   color: var(--w-ink);
   font: inherit;
-  font-size: 17px;
-  font-weight: 620;
-  letter-spacing: -0.005em;
+  font-size: 1.05em;
+  font-weight: 500;
+  line-height: 1.3;
   text-decoration: none;
   cursor: pointer;
+  appearance: none;
   -webkit-tap-highlight-color: transparent;
   transition: transform 180ms var(--w-ease);
 }
 .pill::before {
   content: '';
   position: absolute;
-  z-index: -2;
-  left: 50%;
-  top: 50%;
-  width: 180%;
-  aspect-ratio: 1;
-  background: conic-gradient(from 0deg, transparent 0 78%, rgb(36 71 214 / 0.55) 96%, transparent);
-  opacity: 0.85;
-  transform: translate(-50%, -50%) rotate(0deg);
+  inset: -150%;
+  background: conic-gradient(transparent 0 80%, rgb(90 120 255 / 0.55) 93%, rgb(255 140 210 / 0.5) 97%, transparent);
   animation: beam 3.2s linear infinite;
-  transition: opacity 200ms var(--w-ease);
 }
 .pill::after {
   content: '';
   position: absolute;
-  z-index: -1;
   inset: 1.5px;
   border-radius: inherit;
-  background: rgb(255 255 255 / 0.82);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.55), transparent 65%) rgb(242 245 255 / 0.8);
+  transition: background-color 200ms var(--w-ease);
+}
+.pill > span {
+  position: relative;
+  z-index: 1;
 }
 @keyframes beam {
   to {
-    transform: translate(-50%, -50%) rotate(360deg);
+    transform: rotate(1turn);
   }
 }
-.pill:hover::before,
-.pill:focus-visible::before {
-  opacity: 1;
+.pill:hover::after {
+  background-color: rgb(252 253 255 / 0.94);
 }
 .pill:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -390,71 +338,80 @@
 .pill:active {
   transform: scale(0.97);
 }
-.pillIcon {
-  transition: transform 220ms var(--w-ease);
-}
-.pill:hover .pillIcon {
-  transform: translateX(3px);
-}
 
 .noJs {
   display: none;
 }
 @media (scripting: none) {
   .noJs {
-    display: inline-flex;
+    display: inline-block;
   }
   .jsOnly {
     display: none;
   }
 }
 
-/* --- Intro ------------------------------------------------------------------------------------------------------------ */
+/* --- Intro (`.nflx`, `.mark`, `.skip`) -------------------------------------------------------------------------------- */
 
 .intro {
   position: fixed;
   inset: 0;
   z-index: 5;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: var(--w-flat);
+  color: #fff;
 }
+/* The whole `.mark` box: 13 em Bebas Neue, so its width is 13 em × the box's width in em of that size. */
 .wordmark {
-  width: min(74vw, 640px);
+  display: block;
+  flex: none;
+  width: min(calc(13em * var(--mark-em)), 92vw);
   height: auto;
   fill: #e50914;
   opacity: 0;
 }
 .skip {
   position: absolute;
-  right: max(20px, calc(var(--sa-r) + 16px));
-  bottom: max(20px, calc(var(--sa-b) + 16px));
-  min-height: 44px;
-  padding: 0 18px;
-  border: 1px solid oklch(1 0 0 / 0.32);
-  border-radius: 4px;
-  background: oklch(1 0 0 / 0.06);
-  color: #fff;
+  right: max(2.4em, calc(var(--sa-r) + 12px));
+  bottom: max(2em, calc(var(--sa-b) + 12px));
+  padding: 0.45em 1em;
+  border: 1px solid #555;
+  border-radius: 0.3em;
+  background: none;
+  color: #cfcfcf;
   font: inherit;
-  font-size: 15px;
-  font-weight: 560;
+  font-size: 1em;
+  line-height: 1.3;
   cursor: pointer;
-  transition: background-color 160ms var(--w-ease);
+  transition:
+    color 160ms var(--w-ease),
+    border-color 160ms var(--w-ease);
 }
 .skip:hover {
-  background: oklch(1 0 0 / 0.16);
+  border-color: #8a8a8a;
+  color: #fff;
+}
+.skip:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
 }
 
-/* --- Who's watching? --------------------------------------------------------------------------------------------- */
+/* --- Who's watching? (`.who-t`, `.profs`, `.prof`, `.av`, `.nfoot`) --------------------------------------------- */
 
 .profiles {
   position: fixed;
   inset: 0;
   z-index: 6;
-  display: grid;
-  grid-template-rows: 1fr auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   background: var(--w-flat);
+  color: #fff;
 }
+/* Returning visitors only: the small wordmark replays the intro (the frame shows a first visit, without it). */
 .replay {
   position: absolute;
   top: max(12px, calc(var(--sa-t) + 8px));
@@ -467,6 +424,10 @@
   border-radius: 6px;
   background: none;
   cursor: pointer;
+  visibility: hidden;
+}
+:global(html[data-welcome='profiles']) .replay {
+  visibility: visible;
 }
 .replay > svg {
   display: block;
@@ -474,19 +435,21 @@
   height: auto;
   fill: #e50914;
 }
+.replay:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
 .profilesMain {
-  display: grid;
-  align-content: center;
-  justify-items: center;
-  gap: clamp(24px, 4.5svh, 48px);
-  padding: 72px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .who {
-  margin: 0;
+  margin: 0 0 1.1em;
   color: #fff;
-  font-size: clamp(30px, 3.5vw, 56px);
+  font-size: 3.3em;
   font-weight: 400;
-  letter-spacing: -0.01em;
+  line-height: 1.3;
   text-align: center;
 }
 .who:focus {
@@ -495,49 +458,50 @@
 .grid {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 2em;
 }
 .card {
-  display: grid;
-  justify-items: center;
-  align-content: start;
-  gap: 10px;
-  width: clamp(84px, 10vw, 200px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8em;
   padding: 0;
   border: 0;
   background: none;
   color: #808080;
   font: inherit;
-  font-size: clamp(14px, 1.3vw, 20px);
+  font-size: 1.1em;
+  line-height: 1.3;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition:
-    transform 320ms var(--w-ease),
-    color 200ms var(--w-ease);
+  transition: color 200ms var(--w-ease);
 }
+/* `.av`: the avatar box with its (transparent until chosen) white border. */
 .avatar {
   display: block;
-  width: 100%;
-  border-radius: 8px;
+  width: 8.2em;
+  height: 8.2em;
   overflow: hidden;
-  outline: 3px solid transparent;
-  outline-offset: -3px;
+  border: 0.22em solid transparent;
+  border-radius: 0.5em;
   transition:
-    outline-color 200ms var(--w-ease),
-    box-shadow 260ms var(--w-ease);
+    border-color 200ms var(--w-ease),
+    transform 320ms var(--w-ease);
 }
 .avatarArt {
   display: block;
+  width: 100%;
+  height: 100%;
 }
 .profileName {
-  line-height: 1.2;
+  line-height: 1.3;
 }
 /* Shown only for the last profile; the pre-paint hint sets it before first paint, so it never shifts layout. */
 .last {
   display: none;
-  margin-top: -4px;
+  margin-top: -0.5em;
   color: #b3b3b3;
-  font-size: 12px;
+  font-size: 0.6em;
 }
 :global(html[data-persona='recruiter']) .card[data-profile='recruiter'] .last,
 :global(html[data-persona='developer']) .card[data-profile='developer'] .last,
@@ -546,46 +510,57 @@
 :global(html[data-persona='guest']) .card[data-profile='guest'] .last {
   display: block;
 }
+/* `.prof.on`: white name, white border, the avatar lifted .4 em. */
 @media (hover: hover) {
   .card:hover {
     color: #fff;
-    transform: translateY(-6px) scale(1.02);
   }
   .card:hover .avatar {
-    outline-color: #fff;
-    box-shadow: 0 0 30px oklch(1 0 0 / 0.26);
+    border-color: #fff;
+    transform: translateY(-0.4em);
   }
 }
 .card:focus-visible {
   outline: none;
   color: #fff;
-  transform: translateY(-6px) scale(1.02);
 }
 .card:focus-visible .avatar {
-  outline-color: #fff;
-  box-shadow: 0 0 30px oklch(1 0 0 / 0.26);
+  border-color: #fff;
+  transform: translateY(-0.4em);
 }
-.card:active {
-  transform: scale(0.98);
+.card:active .avatar {
+  transform: translateY(-0.4em) scale(0.98);
 }
 .footer {
+  position: absolute;
+  bottom: max(1.8em, calc(var(--sa-b) + 12px));
   display: flex;
-  justify-content: center;
-  gap: 28px;
-  padding: 0 16px max(20px, calc(var(--sa-b) + 12px));
+  gap: 2em;
+  font-size: 0.95em;
 }
-.footer a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  color: #b3b3b3;
-  font-size: 15px;
+.footer a,
+.restart {
+  display: inline-block;
+  margin: -10px -8px;
+  padding: 10px 8px;
+  border-radius: 6px;
+  border: 0;
+  background: none;
+  color: #9a9a9a;
+  font: inherit;
   text-decoration: none;
+  cursor: pointer;
 }
-.footer a:hover {
+.footer a:hover,
+.restart:hover {
   color: #fff;
   text-decoration: underline;
-  text-underline-offset: 4px;
+  text-underline-offset: 0.2em;
+}
+.footer a:focus-visible,
+.restart:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
 }
 
 .stalled {
@@ -642,124 +617,163 @@
   color: var(--text-secondary);
 }
 
-/* --- Responsive ----------------------------------------------------------------------------------------------------- */
+/* --- Responsive: the frame is a 16:10 desktop; smaller and portrait screens keep its composition in a column ------ */
 
-@media (min-width: 600px) and (max-width: 1023px) {
-  .hello {
-    width: min(100%, 680px);
+@media (max-width: 1023px), (orientation: portrait) {
+  .root {
+    --u: clamp(13px, 3.3vw, 18px);
+  }
+  .bar {
+    top: max(14px, calc(var(--sa-t) + 10px));
+    right: max(16px, calc(var(--sa-r) + 12px));
+    left: max(16px, calc(var(--sa-l) + 12px));
+    font-size: 15px;
+  }
+  .lens {
+    inset: max(72px, 16svh) max(16px, calc(50% - 330px)) max(40px, 14svh);
+    padding: 24px 20px;
+  }
+}
+@media (pointer: coarse) {
+  .skip {
+    min-height: 44px;
+    padding-inline: 16px;
+    font-size: 15px;
   }
 }
 @media (max-width: 768px) {
+  .who {
+    margin-bottom: 32px;
+    font-size: 30px;
+  }
   .grid {
     display: grid;
     grid-template-columns: repeat(2, 100px);
     gap: 30px 20px;
   }
   .card {
+    gap: 10px;
+    font-size: 15px;
+  }
+  .avatar {
     width: 100px;
+    height: 100px;
+    border-width: 3px;
+    border-radius: 8px;
+  }
+  .card:hover .avatar,
+  .card:focus-visible .avatar {
+    transform: translateY(-6px);
   }
   .card:last-child {
     grid-column: 1 / -1;
     justify-self: center;
+  }
+  .footer {
+    font-size: 15px;
   }
 }
 @media (max-width: 340px) {
   .grid {
     grid-template-columns: repeat(2, 84px);
   }
-  .card {
+  .avatar {
     width: 84px;
+    height: 84px;
   }
 }
-/* Phone landscape: inside the panel the glyph sits left, title and pill right; profiles in one row; nothing scrolls. */
+/* Phone landscape: glyph left, title and pill right inside the lens; profiles in one row; nothing scrolls. */
 @media (orientation: landscape) and (max-height: 500px) {
-  .hello {
-    width: min(100%, 860px);
+  .root {
+    --u: 12px;
+  }
+  .bar {
+    top: max(10px, calc(var(--sa-t) + 6px));
+    font-size: 14px;
   }
   .lens {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    inset: 48px max(16px, calc(var(--sa-r) + 12px)) max(12px, var(--sa-b)) max(16px, calc(var(--sa-l) + 12px));
+    display: grid;
+    grid-template-columns: auto auto;
     grid-template-areas:
       'glyph title'
       'glyph pill';
-    align-items: center;
-    column-gap: 28px;
-    row-gap: 12px;
+    align-content: center;
+    justify-content: center;
     justify-items: start;
-    padding: 18px 28px;
+    column-gap: 32px;
+    row-gap: 12px;
+    padding: 12px 24px;
     text-align: left;
   }
   .glyph {
     grid-area: glyph;
+    align-self: center;
+    width: min(22em, 40vw);
   }
   .title {
     grid-area: title;
     align-self: end;
-    gap: 4px;
   }
-  .name {
-    font-size: 28px;
-  }
-  .headline {
-    margin-inline: 0;
-    font-size: 14px;
-  }
-  .pill {
+  .lens > .pill {
     grid-area: pill;
     align-self: start;
-    margin-top: 0;
   }
-  .profilesMain {
-    gap: 18px;
-    padding-top: 56px;
+  .who {
+    margin-bottom: 18px;
+    font-size: 26px;
   }
   .grid {
     display: flex;
     gap: 18px;
   }
   .card {
+    font-size: 14px;
+  }
+  .avatar {
     width: 84px;
+    height: 84px;
   }
   .card:last-child {
     grid-column: auto;
+  }
+  .footer {
+    bottom: max(8px, var(--sa-b));
   }
 }
 
 /* --- Tiers, glass preference, WebGL and reduced motion -------------------------------------------------------------- */
 
-:global(html[data-tier='0']) .glass,
-:global(html[data-glass='solid']) .glass,
-:global(html[data-tier='0']) .pill::after,
-:global(html[data-glass='solid']) .pill::after {
-  background: var(--w-solid);
+:global(html[data-tier='0']) .lensBackdrop,
+:global(html[data-glass='solid']) .lensBackdrop {
+  display: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
-:global(html[data-tier='0']) .glyphPath,
-:global(html[data-tier='0']) .glyphAlt {
-  filter: none;
+:global(html[data-glass='solid']) .lens::after,
+:global(html[data-glass='solid']) .pill::after {
+  background: rgb(246 248 255 / 0.94);
 }
-:global(html[data-tier='0']) .field::before,
-:global(html[data-tier='0']) .field::after {
-  animation: none;
-}
-:global(html[data-tier='0']) .root::after {
+:global(html[data-tier='0']) .inkShadow {
   display: none;
 }
-:global(html[data-webgl='on']) .glass {
-  background: rgb(255 255 255 / 0.14);
+/* T2: the shader draws the field, the lens's body and its edge refraction; the DOM keeps the rim light and shadow. */
+:global(html[data-webgl='on']) .lensBackdrop {
+  display: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
+}
+:global(html[data-webgl='on']) .lens::after {
+  background: none;
 }
 :global(html[data-webgl='on']) .field {
   opacity: 0;
 }
 
-:global(html[data-motion='reduced']) .glyphPath {
+:global(html[data-motion='reduced']) .ink {
   animation: none;
   stroke-dashoffset: 0;
 }
-:global(html[data-motion='reduced']) .field::before,
-:global(html[data-motion='reduced']) .field::after,
 :global(html[data-motion='reduced']) .pill::before {
   animation: none;
 }
@@ -767,22 +781,23 @@
   --w-fade: 150ms;
 }
 :global(html[data-motion='reduced']) .card,
+:global(html[data-motion='reduced']) .avatar,
 :global(html[data-motion='reduced']) .pill,
-:global(html[data-motion='reduced']) .pillIcon {
+:global(html[data-motion='reduced']) .pill::after {
   transition: none;
 }
 
 @media (forced-colors: active) {
-  .glass,
+  .lens,
   .pill,
   .skip {
     border: 1px solid CanvasText;
   }
   .avatar {
-    outline-color: Canvas;
+    border-color: Canvas;
   }
   .card:focus-visible .avatar,
   .card:hover .avatar {
-    outline-color: Highlight;
+    border-color: Highlight;
   }
 }

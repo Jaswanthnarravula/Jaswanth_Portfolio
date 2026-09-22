@@ -14,24 +14,35 @@ const HOLD_S = 1.5; // greeting visible; with the 0.9 s morph → a new greeting
 const MORPH_S = 0.9;
 const byId = new Map(paths.greetings.map((greeting) => [greeting.id, greeting]));
 
+/** The Hello's geometry paths (morphed) and the glass rods that draw them (faded). */
+export interface GreetingNodes {
+  readonly glyph: SVGPathElement;
+  readonly alt: SVGPathElement;
+  readonly ink: SVGGElement;
+  readonly inkAlt: SVGGElement;
+}
+
 /**
  * The greeting loop, started once the CSS stroke draw has finished. Morph pairs use MorphSVG; pairs whose shapes are
- * too different crossfade through the second path. Pauses while the tab is hidden. Returns stop().
+ * too different crossfade through the second path — out, then in, so two greetings never show at once.
+ * Pauses while the tab is hidden. Returns stop().
  */
-export function greetingLoop(glyph: SVGPathElement, alt: SVGPathElement): () => void {
+export function greetingLoop({ glyph, alt, ink, inkAlt }: GreetingNodes): () => void {
   const first = paths.greetings[0]!;
-  glyph.style.strokeDasharray = 'none'; // the draw is over; dashes would fight the morph
+  ink.style.strokeDasharray = 'none'; // the draw is over; dashes would fight the morph
   const tl = gsap.timeline({ repeat: -1 });
   for (const pair of paths.pairs) {
     const to = byId.get(pair.to)!;
     if (pair.mode === 'morph') {
       tl.to(glyph, { morphSVG: to.d, duration: MORPH_S, ease: 'power2.inOut' }, `+=${HOLD_S}`);
     } else {
-      tl.set(alt, { attr: { d: to.d }, opacity: 0 }, `+=${HOLD_S}`)
-        .to(glyph, { opacity: 0, duration: MORPH_S / 2, ease: 'power2.inOut' }, '<')
-        .to(alt, { opacity: 1, duration: MORPH_S / 2, ease: 'power2.inOut' }, '<')
-        .set(glyph, { attr: { d: to.d }, opacity: 1 })
-        .set(alt, { opacity: 0 });
+      tl.set(alt, { attr: { d: to.d } }, `+=${HOLD_S}`)
+        .set(inkAlt, { opacity: 0 })
+        .to(ink, { opacity: 0, duration: MORPH_S / 2, ease: 'power2.in' })
+        .to(inkAlt, { opacity: 1, duration: MORPH_S / 2, ease: 'power2.out' })
+        .set(glyph, { attr: { d: to.d } })
+        .set(ink, { opacity: 1 })
+        .set(inkAlt, { opacity: 0 });
     }
   }
   const onVisibility = () => (document.hidden ? tl.pause() : tl.resume());
@@ -39,8 +50,9 @@ export function greetingLoop(glyph: SVGPathElement, alt: SVGPathElement): () => 
   return () => {
     document.removeEventListener('visibilitychange', onVisibility);
     tl.kill();
-    gsap.set(glyph, { attr: { d: first.d }, opacity: 1 });
-    gsap.set(alt, { opacity: 0 });
+    gsap.set(glyph, { attr: { d: first.d } });
+    gsap.set(ink, { opacity: 1 });
+    gsap.set(inkAlt, { opacity: 0 });
   };
 }
 

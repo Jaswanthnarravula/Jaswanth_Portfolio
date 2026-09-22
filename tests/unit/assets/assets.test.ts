@@ -11,7 +11,24 @@ import { describe, expect, it } from 'vitest';
 import { ASSET_MANIFEST, assetCredits, getAsset, resolveAsset } from '@/lib/assets/manifest';
 import { OS_IDS } from '@/lib/kernel/ids';
 import { OS_REGISTRY } from '@/lib/kernel/registry';
-import { BUDGETS, ingestAssets } from '../../../scripts/ingest-assets.mjs';
+import { BUDGETS, GUEST_GREEN, cssHueSaturate, ingestAssets } from '../../../scripts/ingest-assets.mjs';
+
+describe('the derived green avatar is the storyboard’s CSS filter, baked in (plans/03 "Visual target")', () => {
+  const apply = (m: number[][], v: number[]) => m.map((row) => row.reduce((sum, k, i) => sum + k * v[i]!, 0));
+  it('hue-rotate(0) saturate(1) is the identity', () => {
+    const identity = cssHueSaturate(0, 1);
+    identity.forEach((row, i) => row.forEach((v, j) => expect(v).toBeCloseTo(i === j ? 1 : 0, 10)));
+  });
+  it('GUEST_GREEN is hue-rotate(-62deg) then saturate(1.15), as Filter Effects defines them', () => {
+    expect(GUEST_GREEN).toEqual(cssHueSaturate(-62, 1.15));
+    // Grey stays grey (both matrices preserve luminance-weighted neutrals) …
+    apply(GUEST_GREEN, [0.5, 0.5, 0.5]).forEach((v) => expect(v).toBeCloseTo(0.5, 6));
+    // … and the blue avatar's cyan fur turns green: the green channel dominates.
+    const [r, g, b] = apply(GUEST_GREEN, [0.1, 0.7, 0.85]);
+    expect(g).toBeGreaterThan(r!);
+    expect(g).toBeGreaterThan(b!);
+  });
+});
 
 describe('ASSET-MAN-01 typed manifest + resolver', () => {
   it('every manifest entry resolves in both modes', () => {

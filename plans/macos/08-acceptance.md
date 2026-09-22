@@ -11,27 +11,27 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 ### `01-identity.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `MAC-ID-01` | macOS token scope complete | P2 | planned | | |
-| `MAC-ID-02` | Active vs inactive window appearance | P2 | planned | | |
-| `MAC-ID-03` | Traffic lights: size, hit pitch, glyph visibility rules | P2 | planned | | |
-| `MAC-ID-04` | Wallpaper static, light/dark, tier-2 parallax only | P2 | planned | | |
+| `MAC-ID-01` | macOS token scope complete | P2 | verified | `unit/design/tokens.test.ts` › MAC-ID-01 the macOS token scope carries plans/macos/01-identity · `e2e/macos.spec.ts` › A11Y-AXE-01 · VIEW-HEAD-01 X1 axe WCAG 2.2 AA: macOS home and Finder, no heading-order issue in a window · green locally 2026-09-22 (preview build) | Deviations log 2026-09-22 |
+| `MAC-ID-02` | Active vs inactive window appearance | P2 | verified | `e2e/macos.spec.ts` › MAC-WM-02 · MAC-ID-02 z-order follows presses; the inactive window is grey-lit with a lighter shadow; one press acts · green locally 2026-09-22 (preview build) | Deviations log 2026-09-22 |
+| `MAC-ID-03` | Traffic lights: size, hit pitch, glyph visibility rules | P2 | verified | `e2e/macos.spec.ts` › MAC-ID-03 traffic lights: 24 px hit areas on a 20 px pitch; glyphs on focus and under increased contrast · green locally 2026-09-22 (preview build) |  |
+| `MAC-ID-04` | Wallpaper static, light/dark, tier-2 parallax only | P2 | verified | `e2e/macos.spec.ts` › MAC-ID-04 the wallpaper is the storyboard gradient and static at T0/T1; tier 2 adds ±8 px parallax · green locally 2026-09-22 (preview build) |  |
 | `MAC-ID-05` | Vibrancy materials within the 3-surface cap | P3 | planned | | |
 | `MAC-ID-06` | Light/dark parity | P3 | planned | | |
 
 ### `02-window-manager.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `MAC-WM-01` | Open from launcher rect with cascade + learned rects | P2 | planned | | |
-| `MAC-WM-02` | Focus + layering + inactive appearance; click acts in one press | P2 | planned | | |
-| `MAC-WM-03` | Drag with clamps, commit once, zero React renders | P2 | planned | | |
+| `MAC-WM-01` | Open from launcher rect with cascade + learned rects | P2 | verified | `unit/kernel/macos-wm.test.ts` › MAC-WM-01 open placement, cascade and learned rects · `e2e/macos.spec.ts` › MAC-WM-01 the storyboard placement, the 24 px cascade and learned rects on reopen · green locally 2026-09-22 (preview build) |  |
+| `MAC-WM-02` | Focus + layering + inactive appearance; click acts in one press | P2 | verified | `e2e/macos.spec.ts` › MAC-WM-02 · MAC-ID-02 z-order follows presses; the inactive window is grey-lit with a lighter shadow; one press acts · green locally 2026-09-22 (preview build) |  |
+| `MAC-WM-03` | Drag with clamps, commit once, zero React renders | P2 | verified | `e2e/macos.spec.ts` › MAC-WM-03 · MOTION-DRAG-01 drag: clamped under the menu bar, ≥ 48 px reachable, one commit, zero window renders · `e2e/macos.spec.ts` › RESP-ROT-01 O1 a resize mid-drag commits the last valid rect and re-clamps · green locally 2026-09-22 (preview build) |  |
 | `MAC-WM-04` | Eight-zone resize with min size; ghost at T0 | P3 | planned | | |
-| `MAC-WM-05` | Minimize (Scale) into Dock + restore, reversible mid-flight | P2 | planned | | |
-| `MAC-WM-06` | Zoom / restore via green button and title double-click | P2 | planned | | |
+| `MAC-WM-05` | Minimize (Scale) into Dock + restore, reversible mid-flight | P2 | verified | `e2e/macos.spec.ts` › MAC-WM-05 · MAC-DOCK-04 minimize (Scale) into a Dock tile; the tile restores; clicking mid-flight reverses · green locally 2026-09-22 (preview build) |  |
+| `MAC-WM-06` | Zoom / restore via green button and title double-click | P2 | verified | `e2e/macos.spec.ts` › MAC-WM-06 zoom fills the workspace without distorting text; the title bar double-click restores · green locally 2026-09-22 (preview build) |  |
 | `MAC-WM-07` | Close keeps app running; Quit removes dot | P3 | planned | | |
-| `MAC-WM-08` | Dock click semantics (open / restore / focus / no-op) | P2 | planned | | |
+| `MAC-WM-08` | Dock click semantics (open / restore / focus / no-op) | P2 | verified | `unit/kernel/macos-wm.test.ts` › MAC-WM-08 Dock click decision table · `e2e/macos.spec.ts` › MAC-WM-08 Dock clicks: open, then no-op when focused, focus when behind, restore when minimized · green locally 2026-09-22 (preview build) |  |
 | `MAC-WM-09` | Window menu: Move / Size / Center by keyboard | P3 | planned | | |
-| `MAC-WM-10` | Compact mode: single maximized window, controls menu | P2 | planned | | |
-| `MAC-WM-11` | History rules per window event | P2 | planned | | |
+| `MAC-WM-10` | Compact mode: single maximized window, controls menu | P2 | verified | `component/macos/shell.test.tsx` › MAC-WM-10 compact: one controls menu · `e2e/macos.spec.ts` › MAC-WM-10 · MAC-RESP-03 · MAC-MC-03 M3 compact: one maximized window, a 44 px controls menu, the Windows switcher · green locally 2026-09-22 (preview build) |  |
+| `MAC-WM-11` | History rules per window event | P2 | verified | `unit/kernel/macos-wm.test.ts` › MAC-WM-11 history rule per window event · `e2e/macos.spec.ts` › MAC-FIND-03 · ROUTE-EVENT-01 · MAC-WM-11 H1: in-app Back equals browser Back; window events follow the history table · green locally 2026-09-22 (preview build) |  |
 | `MAC-WM-12` | Hide others / Show all | P3 | planned | | |
 
 ### `surfaces/boot.md`
@@ -56,7 +56,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 ### `surfaces/desktop.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `MAC-DESK-01` | Wallpaper + data-driven desktop items as links | P2 | planned | | |
+| `MAC-DESK-01` | Wallpaper + data-driven desktop items as links | P2 | verified | `e2e/macos.spec.ts` › MAC-MENU-01 · MAC-DESK-01 · MAC-DOCK-01 the home: static menu bar, desktop items and Dock as real links · green locally 2026-09-22 (preview build) |  |
 | `MAC-DESK-02` | Select vs open by pointer type; keyboard opens immediately | P3 | planned | | |
 | `MAC-DESK-03` | Marquee selection, no layout writes | P3 | planned | | |
 | `MAC-DESK-04` | Roving 2-D keyboard navigation + type-ahead | P3 | planned | | |
@@ -66,15 +66,15 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 ### `surfaces/dock.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `MAC-DOCK-01` | Dock pill with pinned apps as links, running dots | P2 | planned | | |
+| `MAC-DOCK-01` | Dock pill with pinned apps as links, running dots | P2 | verified | `e2e/macos.spec.ts` › MAC-MENU-01 · MAC-DESK-01 · MAC-DOCK-01 the home: static menu bar, desktop items and Dock as real links · green locally 2026-09-22 (preview build) |  |
 | `MAC-DOCK-02` | Magnification (formula, transform-only, spring envelope) | P3 | planned | | |
 | `MAC-DOCK-03` | Launch bounce only while loading | P3 | planned | | |
-| `MAC-DOCK-04` | Minimized tiles + restore | P2 | planned | | |
+| `MAC-DOCK-04` | Minimized tiles + restore | P2 | verified | `e2e/macos.spec.ts` › MAC-WM-05 · MAC-DOCK-04 minimize (Scale) into a Dock tile; the tile restores; clicking mid-flight reverses · green locally 2026-09-22 (preview build) |  |
 | `MAC-DOCK-05` | Labels on hover and on focus-visible | P3 | planned | | |
 | `MAC-DOCK-06` | Dock context menu | P3 | planned | | |
 | `MAC-DOCK-07` | Résumé stack (Open / Download) | P3 | planned | | |
 | `MAC-DOCK-08` | Handoff slot for continuity offers | P4 | planned | | |
-| `MAC-DOCK-09` | Roving keyboard model, names with state suffix | P2 | planned | | |
+| `MAC-DOCK-09` | Roving keyboard model, names with state suffix | P2 | verified | `component/macos/shell.test.tsx` › MAC-DOCK-09 the Dock: roving keyboard model and names with state · green locally 2026-09-22 (preview build) |  |
 | `MAC-DOCK-10` | Compact bottom scroll + landscape left rail | P3 | planned | | |
 
 ### `surfaces/lock-screen.md`
@@ -89,7 +89,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 ### `surfaces/menu-bar.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `MAC-MENU-01` | Static bar with Apple menu, app name, status items | P2 | planned | | |
+| `MAC-MENU-01` | Static bar with Apple menu, app name, status items | P2 | verified | `e2e/macos.spec.ts` › MAC-MENU-01 · MAC-DESK-01 · MAC-DOCK-01 the home: static menu bar, desktop items and Dock as real links · `component/macos/shell.test.tsx` › MAC-FIND-01 Finder lists come from the selectors; MAC-MENU-01 the app name follows focus · green locally 2026-09-22 (preview build) |  |
 | `MAC-MENU-02` | Menus follow the focused app (data-driven per app) | P3 | planned | | |
 | `MAC-MENU-03` | Instant open, hover-switch, blink + fade close | P3 | planned | | |
 | `MAC-MENU-04` | APG menubar keyboard model | P3 | planned | | |
@@ -103,7 +103,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 |---|---|---|---|---|---|
 | `MAC-MC-01` | Overview grid from live windows via flight (pure packing function) | P3 | planned | | |
 | `MAC-MC-02` | Select / exit / reversible animation | P3 | planned | | |
-| `MAC-MC-03` | Compact carousel as the primary switcher + close buttons | P2 | planned | | |
+| `MAC-MC-03` | Compact carousel as the primary switcher + close buttons | P2 | verified | `e2e/macos.spec.ts` › MAC-WM-10 · MAC-RESP-03 · MAC-MC-03 M3 compact: one maximized window, a 44 px controls menu, the Windows switcher · `e2e/macos.spec.ts` › A11Y-AXE-01 X1 axe on the compact window switcher (an open overlay) · green locally 2026-09-22 (preview build) |  |
 | `MAC-MC-04` | Keyboard model + dialog semantics | P3 | planned | | |
 | `MAC-MC-05` | Empty state with shortcuts | P3 | planned | | |
 
@@ -130,13 +130,13 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 ### `apps/finder.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `MAC-FIND-01` | Window with sidebar, toolbar, column view fed by selectors | P2 | planned | | |
-| `MAC-FIND-02` | Select → preview column + URL; open → document view | P2 | planned | | |
-| `MAC-FIND-03` | Back/Forward nav stack tied to history collapse | P2 | planned | | |
+| `MAC-FIND-01` | Window with sidebar, toolbar, column view fed by selectors | P2 | verified | `component/macos/shell.test.tsx` › MAC-FIND-01 Finder lists come from the selectors; MAC-MENU-01 the app name follows focus · `e2e/macos.spec.ts` › MAC-FIND-01 · MAC-FIND-02 Finder: sidebar, columns from data, select → URL + preview, open → document · green locally 2026-09-22 (preview build) |  |
+| `MAC-FIND-02` | Select → preview column + URL; open → document view | P2 | verified | `e2e/macos.spec.ts` › MAC-FIND-01 · MAC-FIND-02 Finder: sidebar, columns from data, select → URL + preview, open → document · `e2e/macos.spec.ts` › ROUTE-DEEP-01 · MAC-FIND-02 D1 cold deep link: only Finder opens, the selection is restored, no boot screen · green locally 2026-09-22 (preview build) |  |
+| `MAC-FIND-03` | Back/Forward nav stack tied to history collapse | P2 | verified | `e2e/macos.spec.ts` › MAC-FIND-03 · ROUTE-EVENT-01 · MAC-WM-11 H1: in-app Back equals browser Back; window events follow the history table · green locally 2026-09-22 (preview build) |  |
 | `MAC-FIND-04` | Icons / List (sortable table) / Columns views | P3 | planned | | |
 | `MAC-FIND-05` | Quick Look (Space) | P3 | planned | | |
 | `MAC-FIND-06` | Aliases open the right apps | P3 | planned | | |
-| `MAC-FIND-07` | Compact drill-down layout | P2 | planned | | |
+| `MAC-FIND-07` | Compact drill-down layout | P2 | verified | `e2e/macos.spec.ts` › MAC-FIND-07 M3 compact Finder drill-down: favourites → folder → document, back chevron up each level · green locally 2026-09-22 (preview build) |  |
 | `MAC-FIND-08` | Empty/loading states | P3 | planned | | |
 | `MAC-FIND-09` | Menu-bar menus wired | P3 | planned | | |
 
@@ -228,7 +228,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 |---|---|---|---|---|---|
 | `MAC-RESP-01` | Full-fidelity posture (`expanded`/`large`) | P3 | planned | | |
 | `MAC-RESP-02` | Touch desktop posture: touch drag, resize corner, Tile menu, long-press | P3 | planned | | |
-| `MAC-RESP-03` | Compact window mode (single window, controls menu, Windows button) | P2 | planned | | |
+| `MAC-RESP-03` | Compact window mode (single window, controls menu, Windows button) | P2 | verified | `e2e/macos.spec.ts` › MAC-WM-10 · MAC-RESP-03 · MAC-MC-03 M3 compact: one maximized window, a 44 px controls menu, the Windows switcher · green locally 2026-09-22 (preview build) |  |
 | `MAC-RESP-04` | Compact landscape left-rail Dock | P3 | planned | | |
 | `MAC-RESP-05` | Safe areas + dvh; keyboard-aware sheets | P3 | planned | | |
 | `MAC-RESP-06` | Size-class transitions restore/maximize without storms | P3 | planned | | |
@@ -237,7 +237,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 ### `05-accessibility.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `MAC-A11Y-01` | Landmark structure + DOM order = open order | P2 | planned | | |
+| `MAC-A11Y-01` | Landmark structure + DOM order = open order | P2 | verified | `component/macos/shell.test.tsx` › MAC-A11Y-01 · VIEW-HEAD-01 landmarks, regions and heading order · `e2e/macos.spec.ts` › MAC-A11Y-01 · A11Y-SEM-01 X2 landmarks in reading order, windows as labelled regions in open order · green locally 2026-09-22 (preview build) |  |
 | `MAC-A11Y-02` | macOS semantics map rows | P3 | planned | | |
 | `MAC-A11Y-03` | Keyboard-only journey M1 | P3 | planned | | |
 | `MAC-A11Y-04` | Focus specifics (Dock icon/tile targets, menus return focus) | P3 | planned | | |
@@ -247,7 +247,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 ### `06-edge-cases.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `MAC-EDGE-01` | Scenarios E1–E7 (window abuse + resize) | P2 | planned | | |
+| `MAC-EDGE-01` | Scenarios E1–E7 (window abuse + resize) | P2 | verified | `e2e/macos.spec.ts` › KRN-EDGE-01 · MAC-EDGE-01 impatience (E1–E7): spam, cancel, reverse, cycle, resize — state stays valid · green locally 2026-09-22 (preview build) |  |
 | `MAC-EDGE-02` | Scenarios E8–E12 (refresh, deep link, Back, OS switch/return) | P3 | planned | | |
 | `MAC-EDGE-03` | Scenarios E13–E18 (failure, storage, stale data, hidden tab) | P3 | planned | | |
 | `MAC-EDGE-04` | Scenarios E19–E22 + overlay arbiter | P3 | planned | | |
@@ -269,6 +269,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 - [ ] Tokens only (no magic numbers); system font stack; icons resolve in both asset modes with identical boxes.
 - [ ] Focus ring ≥ 3:1; glyphs never rely on colour alone; forced-colors legible.
 - [ ] Grayscale smell test against every already-released OS passes.
+- [ ] Storyboard test (north-star smell test 8): the reference state side by side with `macos-desktop.png` in `plans/visual-targets/` — only real data and real-OS details differ (`01-identity.md` → Visual target).
 
 **Interactions**
 - [ ] Every gesture has its non-gesture alternative; nothing hover-only, drag-only or double-click-only.
@@ -304,4 +305,5 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 ## Deviations log
 | Date | ID | What changed vs the spec | Why | Owner sign-off |
 |---|---|---|---|---|
-| | | | | |
+| 2026-09-22 | `MAC-ID-01` | Link and accent **text** inside window bodies uses `--mac-link` (`#0066d6` light · `#4aa0ff` dark), not the accent `oklch(0.62 0.19 255)`; fills, selection and focus rings keep the accent | The accent as text on the white window surface is 3.7 : 1, below WCAG AA 4.5 : 1 (`DS-SCRIM-01`, `A11Y-AXE-01` failed on it); macOS itself draws links in a darker blue than its accent | Owner authorization 2026-09-21 (plans/README); for review at the P2 gate |
+| 2026-09-22 | `MAC-ID-02` | Inactive window title text is a solid grey (`#68686c` light · `#a4a4aa` dark) instead of the title colour at 50 % opacity | 50 % opacity measured below 4.5 : 1 on the inactive title bar; the solid grey reads as the same dimmed title and passes AA (`A11Y-AXE-01`) | Owner authorization 2026-09-21 (plans/README); for review at the P2 gate |

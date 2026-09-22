@@ -3,6 +3,7 @@
  * Site-level branding never carries third-party marks (`ASSET-MARK-01`); OS routes name the OS nominatively.
  */
 import { SECTION_TITLES, type ContentCatalog } from '@/data/content-index';
+import type { ContentRef } from '@/data/schema';
 import { getBinding, OS_REGISTRY } from '../registry';
 import type { OsRegistry, RouteState } from '../types';
 import { refForLocation } from './codec';
@@ -38,6 +39,8 @@ export function titleFor(route: RouteState, { catalog, registry = OS_REGISTRY }:
               ?.title ?? null;
       } else if (location.kind === 'content') {
         place = catalog.get(location.ref)?.title ?? SECTION_TITLES[location.ref.section];
+      } else if (location.kind === 'root' && binding?.home) {
+        place = catalog.get({ section: binding.home } as ContentRef)?.title ?? SECTION_TITLES[binding.home];
       }
       return place ? `${place} · ${app} · ${os.name}${SUFFIX}` : `${app} · ${os.name}${SUFFIX}`;
     }

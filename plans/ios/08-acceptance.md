@@ -254,6 +254,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 - [ ] Tokens only (no magic numbers); system font stack; icons resolve in both asset modes with identical boxes.
 - [ ] Focus ring ≥ 3:1; glyphs never rely on colour alone; forced-colors legible.
 - [ ] Grayscale smell test against every already-released OS passes.
+- [ ] Storyboard test (north-star smell test 8): the reference state side by side with `ios-home.png` + `ios-github.png` in `plans/visual-targets/` — only real data and real-OS details differ (`01-identity.md` → Visual target).
 
 **Interactions**
 - [ ] Every gesture has its non-gesture alternative; nothing hover-only, drag-only or double-click-only.

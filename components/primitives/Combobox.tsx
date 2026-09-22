@@ -35,6 +35,14 @@ export interface ComboboxProps {
   readonly className?: string;
   readonly inputClassName?: string;
   readonly listClassName?: string;
+  /** addition (plans/windows/surfaces/search): content between the input and the list (filter chips). */
+  readonly beforeList?: ReactNode;
+  /** addition: the active option changed (a preview pane follows the selection). */
+  readonly onActiveChange?: (id: string | null) => void;
+  /** addition: runs before the built-in keys; calling `preventDefault()` skips them (e.g. Right into a preview pane). */
+  readonly onInputKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
+  /** addition: the input's id (a label or skin can point at it). */
+  readonly inputId?: string;
 }
 
 export const resultCountText = (count: number) =>
@@ -55,6 +63,10 @@ export function Combobox({
   className,
   inputClassName,
   listClassName,
+  beforeList,
+  onActiveChange,
+  onInputKeyDown,
+  inputId,
 }: ComboboxProps) {
   const baseId = useId();
   const listId = `${baseId}-listbox`;
@@ -83,9 +95,17 @@ export function Combobox({
   const statusText = value ? status : '';
 
   const activeOption = flat[Math.min(active, flat.length - 1)];
+  const activeId = activeOption?.id ?? null;
+  useEffect(() => {
+    onActiveChange?.(activeId);
+    // The callback identity may change every render; only the active option matters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId]);
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (composing.current) return;
+    onInputKeyDown?.(event);
+    if (event.defaultPrevented) return;
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault();
@@ -121,6 +141,7 @@ export function Combobox({
     <div className={className} data-combobox="">
       <input
         ref={input}
+        id={inputId}
         type="text"
         role="combobox"
         aria-label={label}
@@ -150,6 +171,7 @@ export function Combobox({
           onChange(event.currentTarget.value);
         }}
       />
+      {beforeList}
       <div role="listbox" id={listId} aria-label={`${label} results`} className={listClassName} data-combobox-list="">
         {groups.map((group) => {
           const groupLabelId = `${baseId}-group-${group.id}`;

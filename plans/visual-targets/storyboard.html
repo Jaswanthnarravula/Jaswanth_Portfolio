@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jaswanth Portfolio Storyboard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&family=Caveat:wght@600&family=Bebas+Neue&display=swap">
+<style>
+:root{--ground:#e9edf2;--surface:#ffffff;--ink:#101623;--muted:#566074;--line:#cdd5e0;--accent:#2447d6;--accent-ink:#ffffff;--stage:#dbe2ec}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#0d1219;--surface:#151c27;--ink:#e7ecf4;--muted:#93a0b4;--line:#273244;--accent:#8aa4ff;--accent-ink:#0d1219;--stage:#1a2230}}
+:root[data-theme="dark"]{--ground:#0d1219;--surface:#151c27;--ink:#e7ecf4;--muted:#93a0b4;--line:#273244;--accent:#8aa4ff;--accent-ink:#0d1219;--stage:#1a2230}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.55;padding-inline:clamp(16px,4vw,56px);padding-block:36px 72px}
+.wrap{max-width:1240px;margin-inline:auto;display:flex;flex-direction:column;gap:56px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+.eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:700;font-size:clamp(34px,5vw,58px);line-height:1.02;margin:10px 0 14px;text-wrap:balance;letter-spacing:-.02em}
+h2{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:700;font-size:clamp(24px,2.6vw,32px);line-height:1.1;margin:6px 0 12px;text-wrap:balance;letter-spacing:-.01em}
+.lede{max-width:64ch;color:var(--muted);margin:0}
+.lede b{color:var(--ink);font-weight:600}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:22px}
+.flow a{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink);text-decoration:none;border:1px solid var(--line);background:var(--surface);padding:6px 12px;border-radius:999px}
+.flow a:hover,.flow a:focus-visible{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px var(--accent)}
+.flow span{color:var(--muted);font-size:13px}
+.frame{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.3fr);gap:clamp(20px,3vw,44px);align-items:start;scroll-margin-top:24px}
+@media (max-width:900px){.frame{grid-template-columns:minmax(0,1fr)}}
+.meta ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:8px;color:var(--muted);max-width:46ch}
+.meta li::marker{color:var(--accent)}
+.meta li b{color:var(--ink);font-weight:600}
+.step{display:inline-flex;gap:8px;align-items:center}
+.step i{font-style:normal;background:var(--accent);color:var(--accent-ink);border-radius:6px;padding:1px 7px;font-weight:700}
+.divider{border:0;border-top:1px solid var(--line);margin:0}
+.group-title{display:flex;flex-direction:column;gap:6px}
+.foot{color:var(--muted);font-size:14px;max-width:70ch}
+
+/* ---------- mock screens ---------- */
+.screen{container-type:inline-size;aspect-ratio:16/10;max-width:100%;position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);box-shadow:0 18px 40px -18px rgb(10 20 40 / .45)}
+.s{position:absolute;inset:0;font-size:1.42cqw;line-height:1.3;color:#111;font-family:"IBM Plex Sans",system-ui,sans-serif}
+.stage{container-type:inline-size;aspect-ratio:16/10;max-width:100%;border-radius:14px;border:1px solid var(--line);background:var(--stage);display:flex;justify-content:center;align-items:center;gap:6%;padding:3%;overflow:hidden}
+.phone{container-type:inline-size;height:100%;aspect-ratio:9/19;border-radius:9% / 4.3%;border:.45cqw solid #11151c;background:#11151c;position:relative;overflow:hidden;box-shadow:0 14px 30px -12px rgb(0 0 0 / .55)}
+.p{position:absolute;inset:0;font-size:4.1cqw;line-height:1.25;border-radius:inherit;overflow:hidden;font-family:"IBM Plex Sans",system-ui,sans-serif}
+.ic{width:3em;height:3em;border-radius:23%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:1em;flex:none;box-shadow:0 .15em .4em rgb(0 0 0 / .25)}
+.ic small{font-size:.95em;font-weight:700;letter-spacing:-.02em}
+.g1{background:linear-gradient(160deg,#6fd0ff,#1672f0)}.g2{background:linear-gradient(160deg,#9aa4b5,#3a4354)}.g3{background:linear-gradient(160deg,#ffce5c,#f08a1c)}.g4{background:linear-gradient(160deg,#7ee6a5,#1f9e5a)}.g5{background:linear-gradient(160deg,#ff8e8e,#d92d3a)}.g6{background:linear-gradient(160deg,#c7a6ff,#6a3fd6)}.g7{background:linear-gradient(160deg,#3b4454,#0f141c)}.g8{background:linear-gradient(160deg,#5fe3d6,#0e8f9a)}
+
+/* Hello */
+.hello{background:radial-gradient(60% 70% at 18% 20%,#9db9ff 0,transparent 60%),radial-gradient(55% 60% at 85% 25%,#ffc0de 0,transparent 60%),radial-gradient(60% 70% at 60% 95%,#ffd9a0 0,transparent 60%),#eaf0ff}
+.hello .top{position:absolute;inset:2.2em 2.6em auto;display:flex;justify-content:space-between;font-size:.95em;color:#2a3350}
+.glass{position:absolute;inset:16% 22% 14%;border-radius:2.4em;background:rgb(255 255 255 / .34);backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);border:1px solid rgb(255 255 255 / .75);box-shadow:0 2em 4em -2em rgb(40 60 140 / .5),inset 0 1px 0 rgb(255 255 255 / .9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.1em;text-align:center}
+.glass .hi{width:17em;height:auto;display:block;overflow:visible}
+.hi .ink{fill:none;stroke:url(#hiBody);stroke-width:36;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1 2;stroke-dashoffset:1;filter:url(#hiGlass);animation:hi-draw 3.2s cubic-bezier(.6,.12,.36,.96) .5s both}
+@keyframes hi-draw{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.hi .ink{animation:none;stroke-dashoffset:0}}
+.glass .who{font-size:1.5em;font-weight:600;color:#1b2347}
+.pill{position:relative;padding:.7em 1.6em;border-radius:99em;font-size:1.05em;color:#1b2347;background:rgb(255 255 255 / .55);border:1px solid rgb(255 255 255 / .9);overflow:hidden}
+.pill::before{content:"";position:absolute;inset:-150%;background:conic-gradient(transparent 0 78%,rgb(36 71 214 / .55) 96%,transparent);animation:spin 3.2s linear infinite}
+.pill::after{content:"";position:absolute;inset:1.5px;border-radius:inherit;background:rgb(255 255 255 / .82)}
+.pill span{position:relative;z-index:1}
+@keyframes spin{to{transform:rotate(1turn)}}
+
+/* Netflix-style */
+.nflx{background:#141414;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.mark{position:relative;font-family:"Bebas Neue",Impact,sans-serif;font-size:13em;line-height:.9;color:#e50914;letter-spacing:.015em;padding:0 .1em .12em}
+.mark::after{content:"";position:absolute;left:-6%;right:-6%;bottom:-.34em;height:.62em;border-radius:50%;background:#141414}
+.skip{position:absolute;right:2.4em;bottom:2em;font-size:1em;color:#cfcfcf;border:1px solid #555;padding:.45em 1em;border-radius:.3em}
+.who-t{font-size:3.3em;font-weight:400;margin:0 0 1.1em}
+.profs{display:flex;gap:2em}
+.prof{display:flex;flex-direction:column;align-items:center;gap:.8em;color:#808080;font-size:1.1em}
+.av{width:8.2em;height:8.2em;border-radius:.5em;position:relative;border:.22em solid transparent}
+.av::before,.av::after{content:"";position:absolute}
+.av::before{left:26%;top:32%;width:48%;height:10%;background:radial-gradient(circle at 12% 50%,#fff 0 .5em,transparent .55em),radial-gradient(circle at 88% 50%,#fff 0 .5em,transparent .55em)}
+.av::after{left:24%;top:48%;width:52%;height:26%;border-bottom:.5em solid #fff;border-radius:0 0 50% 50% / 0 0 100% 100%}
+.prof.on{color:#fff}.prof.on .av{border-color:#fff;transform:translateY(-.4em)}
+.nfoot{position:absolute;bottom:1.8em;display:flex;gap:2em;font-size:.95em;color:#9a9a9a}
+
+/* Chooser */
+.choose{background:radial-gradient(60% 70% at 10% 10%,#b9ccff 0,transparent 60%),radial-gradient(60% 70% at 95% 90%,#ffd0e4 0,transparent 60%),#eef2fb;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2em;padding:0 4%}
+.choose h3{font-family:"Bricolage Grotesque",sans-serif;font-size:2.4em;margin:0;color:#1b2347;font-weight:700}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:1.2em;width:100%}
+.card{background:rgb(255 255 255 / .55);border:1px solid rgb(255 255 255 / .9);border-radius:1.4em;padding:1.2em 1em;display:flex;flex-direction:column;align-items:center;gap:.7em;text-align:center;color:#1b2347;position:relative;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.card b{font-size:1.25em}.card em{font-style:normal;font-size:.88em;color:#4a5576}
+.dev{width:70%;aspect-ratio:4/3;display:grid;place-items:center}
+.d-phone{width:34%;aspect-ratio:9/18;border:.28em solid #1b2347;border-radius:.9em;background:linear-gradient(160deg,#9db9ff,#ffc0de)}
+.d-lap{width:88%;aspect-ratio:16/10;border:.28em solid #1b2347;border-radius:.5em;background:linear-gradient(160deg,#7ad0c8,#5b6bd9);position:relative}
+.d-lap::after{content:"";position:absolute;left:-12%;right:-12%;bottom:-.75em;height:.4em;background:#1b2347;border-radius:0 0 .5em .5em}
+.d-mon{width:86%;aspect-ratio:16/9;border:.28em solid #1b2347;border-radius:.4em;background:linear-gradient(160deg,#4ea3ff,#1b3fb8);position:relative}
+.d-mon::after{content:"";position:absolute;left:38%;right:38%;bottom:-1em;height:.75em;background:#1b2347;clip-path:polygon(25% 0,75% 0,100% 100%,0 100%)}
+.d-term{width:86%;aspect-ratio:16/10;border-radius:.4em;background:#10151d;color:#7ee6a5;font-family:"IBM Plex Mono",monospace;font-size:.85em;display:grid;place-items:center}
+.badge{position:absolute;top:-.8em;font-size:.78em;background:#2447d6;color:#fff;padding:.25em .8em;border-radius:99em;white-space:nowrap}
+
+/* macOS */
+.mac{background:linear-gradient(150deg,#1f4f7a 0,#3f78a8 35%,#e3a873 78%,#f3d3a4 100%)}
+.mbar{position:absolute;inset:0 0 auto;height:2.1em;background:rgb(255 255 255 / .55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;gap:1.3em;padding:0 1.2em;font-size:.95em;color:#111}
+.mbar .sq{width:.9em;height:.9em;border-radius:.22em;background:#111}
+.mbar .r{margin-left:auto;display:flex;gap:1.3em}
+.deski{position:absolute;right:1.6em;top:3.4em;display:flex;flex-direction:column;gap:1.3em;align-items:center;color:#fff;font-size:.85em;text-shadow:0 1px 3px rgb(0 0 0 / .6)}
+.deski div{display:flex;flex-direction:column;align-items:center;gap:.35em}
+.doc{width:2.6em;height:3.2em;border-radius:.3em;background:#fff;box-shadow:0 .2em .5em rgb(0 0 0 / .3)}.fold{width:3.2em;height:2.5em;border-radius:.35em;background:linear-gradient(#7cc4ff,#3a8ef0)}
+.win{position:absolute;border-radius:.9em;background:#f6f6f7;box-shadow:0 1.6em 4em rgb(0 0 0 / .45),0 0 0 1px rgb(0 0 0 / .2);overflow:hidden;display:flex;flex-direction:column}
+.tb{height:2.6em;display:flex;align-items:center;gap:.5em;padding:0 .9em;background:#e9e9eb;border-bottom:1px solid #d3d3d6;font-weight:600;font-size:.95em;color:#333}
+.tl{display:flex;gap:.45em;margin-right:.8em}.tl i{width:.8em;height:.8em;border-radius:50%;background:#c9c9cc}
+.act .tl i:nth-child(1){background:#ff5f57}.act .tl i:nth-child(2){background:#febc2e}.act .tl i:nth-child(3){background:#28c840}
+.cols{flex:1;display:grid;grid-template-columns:1fr 1.1fr 1.3fr 1.6fr;font-size:.9em;min-height:0}
+.cols>div{border-right:1px solid #dcdce0;padding:.6em .5em;display:flex;flex-direction:column;gap:.2em;color:#222}
+.cols .side{background:rgb(225 229 236 / .9);color:#444}
+.row{padding:.28em .5em;border-radius:.35em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row.sel{background:#2f6fe4;color:#fff}.dim{color:#888}
+.prev{gap:.5em!important}.prev b{font-size:1.15em}.tag{display:inline-block;border:1px solid #c9ccd3;border-radius:.4em;padding:.05em .45em;font-size:.85em;margin:.1em .2em 0 0;color:#444}
+.dock{position:absolute;left:50%;bottom:.9em;transform:translateX(-50%);display:flex;align-items:flex-end;gap:.55em;padding:.5em .7em;border-radius:1.5em;background:rgb(255 255 255 / .38);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgb(255 255 255 / .55)}
+.dock .ic{position:relative}.dock .big{transform:scale(1.45);transform-origin:bottom;margin:0 .7em}.dock .mid{transform:scale(1.2);transform-origin:bottom;margin:0 .25em}
+.dock .run::after{content:"";position:absolute;bottom:-.42em;left:50%;width:.3em;height:.3em;margin-left:-.15em;border-radius:50%;background:#222}
+.dock .sep{width:1px;height:2.6em;background:rgb(0 0 0 / .25);margin:0 .2em}
+
+/* Windows */
+.winos{background:radial-gradient(70% 90% at 50% 110%,#7fc0ff 0,#2f6fe0 35%,#0b1f5c 75%)}
+.ww{position:absolute;border-radius:.55em;background:#fafbfd;border:1px solid rgb(0 0 0 / .18);box-shadow:0 .8em 2.4em rgb(0 0 0 / .4);display:flex;flex-direction:column;overflow:hidden;color:#1b1b1b}
+.wt{height:2.3em;display:flex;align-items:center;background:#e8eef7;font-size:.9em}
+.wt .tab{background:#fafbfd;height:100%;display:flex;align-items:center;gap:.5em;padding:0 1em;border-radius:.5em .5em 0 0;margin:.35em 0 0 .6em}
+.cap{margin-left:auto;display:flex;height:100%}.cap span{width:3em;display:grid;place-items:center;font-size:1em}.cap span:last-child{background:#c42b1c;color:#fff}
+.crumb{display:flex;gap:.6em;align-items:center;padding:.5em .9em;font-size:.9em;border-bottom:1px solid #e4e7ec}.crumb .addr{flex:1;border:1px solid #d5dae2;border-radius:.4em;padding:.25em .7em;background:#fff}
+.cmd{display:flex;gap:1.2em;padding:.45em .9em;font-size:.85em;color:#444;border-bottom:1px solid #e4e7ec}
+.wbody{flex:1;display:grid;grid-template-columns:1fr 3fr;font-size:.88em;min-height:0}
+.nav{border-right:1px solid #e4e7ec;padding:.6em .5em;display:flex;flex-direction:column;gap:.15em}
+.nav .row.cur{background:#e5eefc;box-shadow:inset .22em 0 0 #2f6fe0}
+table.det{width:100%;border-collapse:collapse}table.det th{text-align:left;font-weight:500;color:#666;padding:.4em .6em;border-bottom:1px solid #e4e7ec}table.det td{padding:.42em .6em;white-space:nowrap}
+table.det tr.sel td{background:#dce8fb}
+.taskbar{position:absolute;inset:auto 0 0;height:3.1em;background:rgb(236 242 250 / .8);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgb(255 255 255 / .6);display:flex;align-items:center;justify-content:center;gap:.5em}
+.tbi{width:2.5em;height:2.5em;border-radius:.4em;display:grid;place-items:center;position:relative}.tbi .ic{width:1.75em;height:1.75em;font-size:.95em;border-radius:22%}
+.tbi.on{background:rgb(255 255 255 / .7)}.tbi.on::after,.tbi.runn::after{content:"";position:absolute;bottom:.12em;left:50%;height:.2em;border-radius:1em;transform:translateX(-50%)}
+.tbi.on::after{width:1.1em;background:#2f6fe0}.tbi.runn::after{width:.4em;background:#7d8795}
+.start4{width:1.5em;height:1.5em;display:grid;grid-template-columns:1fr 1fr;gap:.12em}.start4 i{background:#2f6fe0;border-radius:.12em}
+.tray{position:absolute;right:1em;font-size:.82em;color:#1b1b1b;text-align:right;line-height:1.2}
+.toast{position:absolute;right:1em;bottom:3.9em;width:22em;background:rgb(244 247 252 / .92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgb(0 0 0 / .12);border-radius:.6em;padding:.8em 1em;font-size:.88em;box-shadow:0 .6em 1.6em rgb(0 0 0 / .35);color:#1b1b1b}
+.toast .bt{display:flex;gap:.5em;margin-top:.6em}.toast .bt span{flex:1;text-align:center;border:1px solid #cfd6e0;border-radius:.35em;padding:.3em;background:#fff}.toast .bt span:first-child{background:#2f6fe0;color:#fff;border-color:#2f6fe0}
+.snaphint{position:absolute;border:.15em dashed rgb(255 255 255 / .75);background:rgb(255 255 255 / .16);border-radius:.55em}
+
+/* phones shared */
+.sb{position:absolute;inset:0 0 auto;display:flex;justify-content:space-between;padding:1em 1.5em 0;font-size:.85em;font-weight:600;z-index:3}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25em .6em;justify-items:center}
+.app{display:flex;flex-direction:column;align-items:center;gap:.3em;font-size:.72em;color:#fff;text-shadow:0 1px 2px rgb(0 0 0 / .45)}
+.app .ic{width:3.6em;height:3.6em;font-size:1.25em}
+/* iOS */
+.ios{background:linear-gradient(165deg,#2a1d63 0,#7a3fa8 45%,#ff8f70 100%);color:#fff}
+.ios .body{position:absolute;inset:3.4em 1.2em 0;display:flex;flex-direction:column;gap:1.3em}
+.widget{border-radius:1.5em;padding:1em 1.1em;background:linear-gradient(140deg,rgb(255 255 255 / .92),rgb(235 240 255 / .85));color:#16183a;display:flex;flex-direction:column;gap:.25em}
+.widget small{font-size:.66em;letter-spacing:.08em;text-transform:uppercase;color:#5a5f8a}.widget b{font-size:1.02em}.widget span{font-size:.78em;color:#3a3f66}
+.widget .acts{display:flex;gap:.5em;margin-top:.4em}.widget .acts i{font-style:normal;font-size:.72em;padding:.3em .9em;border-radius:99em;background:#16183a;color:#fff}.widget .acts i+i{background:transparent;color:#16183a;border:1px solid #16183a}
+.bdg{position:relative}.bdg::after{content:"1";position:absolute;top:-.35em;right:-.35em;width:1.5em;height:1.5em;border-radius:50%;background:#ff3b30;color:#fff;font-size:.7em;display:grid;place-items:center;font-weight:700}
+.spill{align-self:center;font-size:.72em;padding:.35em 1em;border-radius:99em;background:rgb(255 255 255 / .25);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.idock{position:absolute;left:.8em;right:.8em;bottom:1.7em;border-radius:2em;padding:.9em .6em;background:rgb(255 255 255 / .28);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:grid;grid-template-columns:repeat(4,1fr);justify-items:center}
+.idock .ic{width:3.6em;height:3.6em;font-size:1.15em}
+.hind{position:absolute;bottom:.55em;left:50%;width:34%;height:.32em;margin-left:-17%;border-radius:1em;background:#fff;z-index:4}
+.iosapp{background:#f2f2f7;color:#000}.iosapp .sb{color:#000}
+.lt{position:absolute;inset:3.2em 1em 0;display:flex;flex-direction:column;gap:.7em}
+.lt h4{font-size:2em;margin:0;font-weight:700;letter-spacing:-.02em}
+.srch{background:#e3e3e8;border-radius:.7em;padding:.45em .8em;color:#77777d;font-size:.82em}
+.list{background:#fff;border-radius:.8em;overflow:hidden;font-size:.82em}
+.li{padding:.7em .9em;border-bottom:1px solid #e5e5ea;display:flex;flex-direction:column;gap:.1em}.li:last-child{border:0}.li span{color:#77777d;font-size:.88em}
+.tabbar{position:absolute;inset:auto 0 0;height:4.4em;background:rgb(249 249 249 / .94);border-top:1px solid #d9d9de;display:flex;justify-content:space-around;padding-top:.6em;font-size:.68em;color:#8e8e93}.tabbar b{color:#0a7aff;font-weight:600}
+.iosapp .hind{background:#000}
+/* Android */
+.and{background:linear-gradient(170deg,#0f3d33 0,#2f7d68 50%,#b9e6c9 100%);color:#fff}
+.and .body{position:absolute;inset:3.4em 1.3em 0;display:flex;flex-direction:column;gap:1.4em}
+.glance{font-size:1.25em;line-height:1.25}.glance i{font-style:normal;display:inline-block;margin-top:.4em;font-size:.6em;background:rgb(255 255 255 / .22);padding:.35em .9em;border-radius:99em}
+.and .ic{border-radius:32%}
+.fav{position:absolute;left:1em;right:1em;bottom:6.4em;display:grid;grid-template-columns:repeat(4,1fr);justify-items:center}.fav .ic{width:3.6em;height:3.6em;font-size:1.15em}
+.dot{position:relative}.dot::after{content:"";position:absolute;top:-.1em;right:-.1em;width:.75em;height:.75em;border-radius:50%;background:#b3f0dc;border:.12em solid #0f3d33}
+.gbar{position:absolute;left:1em;right:1em;bottom:2.6em;height:3em;border-radius:99em;background:#e7f3ec;color:#3d5a51;display:flex;align-items:center;padding:0 1.2em;font-size:.85em}
+.npill{position:absolute;bottom:.75em;left:50%;width:28%;height:.28em;margin-left:-14%;border-radius:1em;background:#fff;z-index:4}
+.andapp{background:#f4fbf7;color:#17211d}.andapp .sb{color:#17211d}
+.asearch{margin:3.2em 1em .8em;height:3em;border-radius:99em;background:#dfeee6;display:flex;align-items:center;padding:0 1.1em;font-size:.82em;color:#3d5a51;gap:.7em}
+.asearch u{margin-left:auto;width:1.9em;height:1.9em;border-radius:50%;background:#2f6a5b;color:#fff;display:grid;place-items:center;text-decoration:none;font-size:.85em}
+.mail{display:flex;gap:.8em;padding:.75em 1em;font-size:.8em;align-items:flex-start}.mail .c{width:2.5em;height:2.5em;border-radius:50%;background:#2f6a5b;color:#fff;display:grid;place-items:center;flex:none}.mail .c.b{background:#7a5ea8}.mail .c.o{background:#b5651d}
+.mail p{margin:0;display:flex;flex-direction:column;min-width:0}.mail p b{font-weight:700}.mail p span{color:#52635c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fab{position:absolute;right:1em;bottom:4.6em;background:#b3f0dc;color:#0b3a2e;border-radius:1.1em;padding:.9em 1.2em;font-size:.85em;font-weight:600;box-shadow:0 .4em 1em rgb(0 0 0 / .25)}
+.nav3{position:absolute;inset:auto 0 0;height:3.2em;display:flex;justify-content:space-around;align-items:center;color:#3d5a51;font-size:1em;background:#eaf5ef}
+
+/* Linux */
+.lnx{background:#0c1016;color:#d9dee8;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+.lbar{position:absolute;inset:0 0 auto;height:2em;border-bottom:1px solid #2a3240;display:flex;align-items:center;gap:1em;padding:0 1em;font-size:.85em;color:#9aa6b8}
+.lbar b{color:#0c1016;background:#7ee6a5;padding:0 .5em;font-weight:500}.lbar .r{margin-left:auto;display:flex;gap:1.4em}.lbar a{color:#6fb6ff}
+.tiles{position:absolute;inset:2.7em .7em .7em;display:grid;grid-template-columns:1.25fr 1fr;gap:.7em}
+.tile{border:1px solid #2a3240;border-radius:.4em;display:flex;flex-direction:column;min-width:0;overflow:hidden}.tile.f{border-color:#7ee6a5}
+.tt{font-size:.78em;color:#8693a6;padding:.3em .8em;border-bottom:1px solid #2a3240}
+.term{flex:1;padding:.7em .9em;font-size:.86em;line-height:1.45;white-space:pre-wrap;overflow:hidden;display:flex;flex-direction:column}
+.u{color:#7ee6a5}.pth{color:#6fb6ff}.d{color:#77849a}.y{color:#f0d37a}.m{color:#e59be0}.c{color:#7fdcdc}
+.hint{margin-top:auto;border:1px solid #2a3240;border-radius:.3em;padding:.45em .7em;color:#8693a6;display:flex;flex-wrap:wrap;gap:.3em 1em;align-items:center}
+.hint code{color:#d9dee8;background:#1a212c;padding:.05em .45em;border-radius:.25em}.hint u{color:#d9dee8;text-underline-offset:.2em}
+.caret{display:inline-block;width:.6em;height:1.1em;background:#d9dee8;vertical-align:-.18em;animation:blink 1.06s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.view{flex:1;padding:.9em 1em;font-size:.84em;line-height:1.5;overflow:hidden}.view h5{margin:0 0 .2em;font-size:1.25em;color:#f0d37a;font-weight:700}.view hr{border:0;border-top:1px dashed #2a3240;margin:.6em 0}
+@media (prefers-reduced-motion:reduce){.pill::before,.caret{animation:none}}
+
+/* ===== full-page iOS / Android (no device frames) ===== */
+.pair{display:flex;flex-direction:column;gap:18px;min-width:0}
+.s .hind{width:12em;margin-left:-6em;height:.3em;bottom:.6em}
+.s .hind.dk{background:#111}
+.ist,.ast{position:absolute;inset:0 0 auto;height:2em;display:flex;justify-content:space-between;align-items:center;padding:0 1.6em;font-size:.9em;font-weight:600;color:#fff;z-index:3}
+.ist.dk,.ast.dk{color:#111}
+.iosf{background:radial-gradient(60% 90% at 12% 8%,#8e6bd8 0,transparent 60%),radial-gradient(55% 80% at 92% 18%,#ff9f7a 0,transparent 55%),linear-gradient(160deg,#2a1d63 0,#6c3aa3 45%,#e27a86 85%,#ffb07a 100%);color:#fff}
+.iwid{position:absolute;left:4em;top:3.4em;width:18em;display:flex;flex-direction:column;gap:1.2em}
+.iwid .widget.big{padding:1.3em 1.4em;gap:.35em;min-height:12.5em;justify-content:center}
+.iwid .widget.big b{font-size:1.6em}.iwid .widget.big span{font-size:.9em}.iwid .widget .upd{color:#6a6f96}
+.iwid .wrow{display:grid;grid-template-columns:1fr 1fr;gap:1.2em}
+.iwid .widget.sq2{aspect-ratio:1/1;justify-content:flex-end;padding:1em}.iwid .widget.sq2 b{font-size:.92em}
+.igrid{position:absolute;left:26em;right:3em;top:4em;display:grid;grid-template-columns:repeat(5,1fr);row-gap:1.8em;justify-items:center}
+.iosf .app,.andf .app{font-size:.9em;gap:.45em}
+.iosf .app .ic,.andf .app .ic{width:4em;height:4em;font-size:1em}
+.ispill{position:absolute;left:50%;bottom:11.6em;transform:translateX(-50%);font-size:.8em;padding:.35em 1.3em;border-radius:99em;background:rgb(255 255 255 / .25);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.ipdock{position:absolute;left:50%;bottom:2.1em;transform:translateX(-50%);display:flex;align-items:center;gap:1em;padding:.9em 1.1em;border-radius:1.9em;background:rgb(255 255 255 / .28);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgb(255 255 255 / .35)}
+.ipdock .ic{width:4em;height:4em;font-size:1em}
+.ipdock .dsep{width:1px;height:3.2em;background:rgb(255 255 255 / .5)}
+.ipapp{background:#fff;color:#111}
+.ipside{position:absolute;left:0;top:0;bottom:0;width:22em;background:#f2f2f7;border-right:1px solid #d9d9de;padding:2.7em 1.2em 1em;display:flex;flex-direction:column;gap:.7em}
+.ipside h5{margin:0;font-size:2.1em;font-weight:700;letter-spacing:-.02em}
+.grp{background:#fff;border-radius:.8em;overflow:hidden}
+.li2{padding:.6em .9em;border-bottom:1px solid #e5e5ea;font-size:.85em;display:flex;flex-direction:column;gap:.1em}.li2:last-child{border:0}.li2 span{color:#8e8e93;font-size:.9em}
+.li2.on{color:#0a7aff;font-weight:600}.li2.sel{background:#0a7aff;color:#fff}.li2.sel span{color:#dbe8ff}
+.cap2{font-size:.72em;color:#6d6d72;text-transform:uppercase;letter-spacing:.05em;margin:.4em 0 -.3em .8em}
+.ipmain{position:absolute;left:22em;right:0;top:0;bottom:0;padding:2.7em 5em 2em 3.2em;display:flex;flex-direction:column;gap:.85em}
+.ipnav{display:flex;justify-content:space-between;color:#0a7aff;font-size:.95em}
+.ipmain h4{margin:.2em 0 0;font-size:2.5em;font-weight:700;letter-spacing:-.02em}
+.tagl{margin:0;color:#6d6d72;font-size:1.05em}
+.seg{display:inline-flex;background:#eeeef0;border-radius:.6em;padding:.15em;align-self:flex-start;font-size:.85em}.seg span{padding:.3em 1.4em;border-radius:.5em}.seg .on{background:#fff;box-shadow:0 1px 3px rgb(0 0 0 / .15);font-weight:600}
+.ipbody{font-size:.98em;line-height:1.5;color:#1c1c1e;max-width:36em;display:flex;flex-direction:column;gap:.6em}
+.chips2{display:flex;gap:.5em;flex-wrap:wrap}.chips2 span{font-size:.8em;background:#eef3ff;color:#0a4fd6;padding:.25em .8em;border-radius:99em}
+.btns2{display:flex;gap:.7em;margin-top:.3em}.btns2 span{font-size:.85em;padding:.5em 1.2em;border-radius:.7em;background:#0a7aff;color:#fff;font-weight:600}.btns2 span+span{background:#eef3ff;color:#0a7aff}
+.andf{background:radial-gradient(55% 80% at 82% 12%,#4a9c80 0,transparent 60%),linear-gradient(165deg,#0d3a30 0,#1f6a57 45%,#7cc9a6 85%,#c9f0dc 100%);color:#fff}
+.aglance{position:absolute;left:3.4em;top:3.3em;font-size:1.9em;line-height:1.2;display:flex;flex-direction:column;gap:.35em}
+.aglance i{font-style:normal;font-size:.42em;background:rgb(255 255 255 / .2);padding:.45em 1.1em;border-radius:99em;align-self:flex-start}
+.asrch{position:absolute;left:50%;top:3.5em;transform:translateX(-50%);width:28em;height:2.8em;border-radius:99em;background:#e7f3ec;color:#3d5a51;display:flex;align-items:center;gap:.8em;padding:0 1.3em;font-size:.95em}
+.asrch b{color:#1f6a57;font-size:1.15em}
+.agrid{position:absolute;left:0;right:0;top:15em;display:grid;grid-template-columns:repeat(7,7.6em);justify-content:center;row-gap:1.4em;justify-items:center}
+.atask{position:absolute;left:0;right:0;bottom:0;height:4.6em;background:#e3f1e9;display:flex;align-items:center;justify-content:center;gap:1.1em}
+.atask .ic{width:3em;height:3em;font-size:.95em}
+.tall{width:3em;height:3em;border-radius:50%;background:#c9e2d6;display:grid;place-items:center;color:#2d4a41;font-size:1.05em}
+.tsep{width:1px;height:2.2em;background:#9bb9ad}
+.tnav{position:absolute;right:2.2em;display:flex;gap:2.4em;color:#2d4a41;font-size:1.05em}
+.atask.tbl{border-top:1px solid #d0e3d9}
+.aapp{background:#f4fbf7;color:#17211d}
+.rail{position:absolute;left:0;top:2.2em;bottom:4.6em;width:6.6em;display:flex;flex-direction:column;align-items:center;gap:1.1em;padding-top:.8em}
+.rail .mn{font-size:1.2em;color:#3d5a51}
+.cfab{width:3.4em;height:3.4em;border-radius:1em;background:#b3f0dc;color:#0b3a2e;display:grid;place-items:center;font-size:1.1em;box-shadow:0 .2em .5em rgb(0 0 0 / .2)}
+.ri{display:flex;flex-direction:column;align-items:center;gap:.25em;font-size:.72em;color:#3d5a51}.ri i{font-style:normal;width:4.4em;height:2.2em;border-radius:99em;display:grid;place-items:center;font-size:1.2em}.ri.on i{background:#c9e8da;color:#0b3a2e}.ri.on{font-weight:600;color:#17211d}
+.alist{position:absolute;left:6.6em;top:2.2em;bottom:4.6em;width:25em;border-right:1px solid #d8e6de;display:flex;flex-direction:column;gap:.2em;padding:0 .6em}
+.asearch2{margin:.6em .2em .5em;height:2.6em;border-radius:99em;background:#dfeee6;display:flex;align-items:center;justify-content:space-between;padding:0 .5em 0 1.1em;font-size:.82em;color:#3d5a51}
+.asearch2 u{width:1.9em;height:1.9em;border-radius:50%;background:#2f6a5b;color:#fff;display:grid;place-items:center;text-decoration:none;font-size:.85em}
+.alist .mail{font-size:.8em;border-radius:1.2em}.alist .mail.sel{background:#c9e8da}.alist .ink{color:#17211d}
+.adet{position:absolute;left:31.6em;right:0;top:2.2em;bottom:4.6em;padding:1.6em 3.6em;display:flex;flex-direction:column;gap:.9em}
+.adet h4{margin:0;font-size:1.8em;font-weight:400}
+.from{display:flex;gap:.8em;align-items:center;font-size:.85em}.from p{margin:0;display:flex;flex-direction:column}.from p span{color:#52635c}
+.av2{width:2.5em;height:2.5em;border-radius:50%;background:#2f6a5b;color:#fff;display:grid;place-items:center;flex:none}
+.adet p.body{margin:0;font-size:.95em;line-height:1.55;max-width:38em;color:#2b3a34}
+.att{align-self:flex-start;display:flex;align-items:center;gap:.6em;border:1px solid #c5d8ce;border-radius:.8em;padding:.5em .9em;font-size:.82em}.att b{background:#d93025;color:#fff;font-size:.8em;padding:.1em .35em;border-radius:.2em}
+.abtn{display:flex;gap:.7em}.abtn span{font-size:.85em;padding:.55em 1.3em;border-radius:99em;border:1px solid #7f9a90;color:#1f5f4f}
+/* chooser snapshots */
+.snap{width:100%;aspect-ratio:16/10;border-radius:.6em;position:relative;overflow:hidden;box-shadow:0 .3em .8em rgb(20 30 70 / .25);margin-bottom:.2em}
+.snap i,.snap span{position:absolute;display:block}
+.sn-ios{background:linear-gradient(160deg,#2a1d63,#6c3aa3 50%,#e27a86)}
+.sn-mac{background:linear-gradient(150deg,#1f4f7a,#3f78a8 40%,#e3a873)}
+.sn-win{background:radial-gradient(70% 90% at 50% 110%,#7fc0ff,#2f6fe0 40%,#0b1f5c 80%)}
+.sn-and{background:linear-gradient(165deg,#0d3a30,#1f6a57 50%,#9ad7b9)}
+.sn-lnx{background:#0c1016}
+.snap .mw{left:7%;top:16%;width:24%;height:44%;border-radius:.35em;background:rgb(255 255 255 / .85)}
+.snap .mg{right:7%;top:18%;width:56%;display:grid;grid-template-columns:repeat(4,1fr);gap:.35em}
+.snap .mg b{display:block;aspect-ratio:1;border-radius:24%;background:rgb(255 255 255 / .85)}
+.snap .mg.circ{left:50%;right:auto;transform:translateX(-50%);top:38%;width:48%}.snap .mg.circ b{border-radius:50%}
+.snap .md{left:33%;width:34%;bottom:7%;height:12%;border-radius:99em;background:rgb(255 255 255 / .38)}
+.snap .mb{left:0;right:0;top:0;height:7%;background:rgb(255 255 255 / .6)}
+.snap .mwin{border-radius:.3em;background:rgb(255 255 255 / .92);box-shadow:0 .2em .5em rgb(0 0 0 / .3)}.snap .mwin.sq{border-radius:.15em}
+.snap .mt{left:0;right:0;bottom:0;height:11%;background:rgb(236 242 250 / .85)}.snap .mt.tbl{background:#e3f1e9}
+.snap .ms{left:30%;right:30%;top:9%;height:10%;border-radius:99em;background:#e7f3ec}
+.snap .ml{left:8%;right:8%;top:14%;display:flex;flex-direction:column;gap:.45em}.snap .ml i{position:static;height:.32em;border-radius:1em;background:#77849a}.snap .ml i.g{background:#7ee6a5}
+
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 0;font-family:"IBM Plex Mono",monospace;font-size:13px}
+.legend span{padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+.legend .ok::before{content:"● ";color:#1f9e5a}.legend .no::before{content:"◌ ";color:#d9822b}
+.ic.real{background:none;box-shadow:none;overflow:visible}
+.ic.real img{width:100%;height:100%;display:block;object-fit:contain}
+.ic.real.sq{overflow:hidden;border-radius:22.37%;box-shadow:0 .18em .5em rgb(0 0 0 / .32)}
+.ic.real.sq img{object-fit:cover;transform:scale(1.04)}
+.ic.real.pad img{transform:scale(1.22);filter:drop-shadow(0 .12em .25em rgb(0 0 0 / .3))}
+.ic.real.pad.soft img{transform:scale(1.06)}
+.ic.real.free img{transform:scale(.9);filter:drop-shadow(0 .08em .16em rgb(0 0 0 / .22))}
+.ic.real.sqpad{overflow:hidden;border-radius:22.37%;box-shadow:0 .18em .5em rgb(0 0 0 / .32)}
+.ic.real.sqpad img{object-fit:cover;transform:scale(1.26)}
+.ic.real.circ{border-radius:50%;overflow:hidden;background:#fff;box-shadow:0 .15em .4em rgb(0 0 0 / .3)}
+.ic.real.circ img{transform:scale(.8)}
+.ic.real.circ.fg{background:#3f7d6b}.ic.real.circ.fg img{transform:scale(1.7)}
+.ic.miss{background:transparent;border:.12em dashed rgb(20 30 50 / .6);box-shadow:none;color:#1b2438}
+.ic.doc{background:#fff;border-radius:.22em;width:2.35em;height:3em;box-shadow:0 .15em .4em rgb(0 0 0 / .3);display:flex;flex-direction:column;justify-content:center;align-items:stretch;gap:.24em;padding:.45em .38em}
+.ic.doc i{display:block;height:.13em;border-radius:1em;background:#b9c0cc}.ic.doc i:first-child{width:60%;background:#5d6676;height:.17em}.ic.doc i:last-child{width:75%}
+.ic.doc.pdfedge{display:grid;place-items:center;padding:0}.ic.doc.pdfedge img{width:62%;height:62%;object-fit:contain}
+.tbi .ic.doc{width:1.4em}
+.ic.folder{background:rgb(255 255 255 / .32);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:grid;grid-template-columns:1fr 1fr;gap:6%;padding:14%;place-items:stretch;box-shadow:none}
+.ic.folder img{width:100%;height:100%;border-radius:24%;display:block;object-fit:cover}
+.ic.folder.circf{border-radius:32%}.ic.folder.circf img{border-radius:50%;background:#fff}
+.winlogo{width:1.5em;height:1.5em;display:block}
+.applelogo{width:.95em;height:1.1em;display:block}
+.dock .run::after{bottom:-.55em}
+img.av.real{display:block;object-fit:cover;padding:0}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Preview with the real icons · local file</div>
+    <h1>What a visitor will see, screen by screen</h1>
+    <p class="lede">The same screens, now using the <b>genuine app icons, system icons and profile avatars</b> collected in <span class="mono">assets-inbox/</span>. Sources are listed in <span class="mono">assets-inbox/README.md</span>. Names like “Acme” are example content until your résumé is added.</p>
+    <p class="legend"><span class="ok">39 icon placements use real artwork</span><span class="ok">0 slots still need a file</span></p>
+    <nav class="flow" aria-label="Storyboard steps">
+      <a href="#hello">Hello</a><span>→</span><a href="#intro">Intro</a><span>→</span><a href="#profiles">Who’s watching?</a><span>→</span><a href="#chooser">Choose OS</a><span>→</span>
+      <a href="#macos">macOS</a><a href="#windows">Windows 11</a><a href="#ios">iOS</a><a href="#android">Android</a><a href="#linux">Linux</a>
+    </nav>
+  </header>
+
+  <section class="frame" id="hello">
+    <div class="meta">
+      <div class="eyebrow step"><i>1</i> First screen</div>
+      <h2>Hello</h2>
+      <ul>
+        <li><b>“Hello” draws itself</b>, then morphs through five greetings.</li>
+        <li>Liquid-glass panel over a soft light field. Powerful desktops get real refraction; phones get a lighter version.</li>
+        <li><b>Tap to begin</b> unlocks the sound. Résumé and mute are always in the corner.</li>
+      </ul>
+    </div>
+    <div class="screen"><div class="s hello">
+      <div class="top"><span>Skip the OS</span><span>Résumé &nbsp;·&nbsp; Sound on</span></div>
+      <div class="glass"><svg class="hi" viewBox="216 205 844 307" role="img" aria-label="Hello"><defs><linearGradient id="hiBody" gradientUnits="userSpaceOnUse" x1="240" y1="0" x2="1040" y2="0"><stop offset="0" stop-color="#8fb0ff" stop-opacity=".62"/><stop offset=".5" stop-color="#d9d2ff" stop-opacity=".5"/><stop offset="1" stop-color="#ffb3d9" stop-opacity=".62"/></linearGradient><filter id="hiGlass" filterUnits="userSpaceOnUse" x="190" y="180" width="900" height="370" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="10" result="sb"/><feOffset in="sb" dy="12" result="so"/><feFlood flood-color="#23306e" flood-opacity=".3"/><feComposite in2="so" operator="in" result="shadow"/><feMorphology in="SourceAlpha" operator="dilate" radius="1.4" result="dl"/><feComposite in="dl" in2="SourceAlpha" operator="out" result="ol"/><feFlood flood-color="#1b2347" flood-opacity=".3"/><feComposite in2="ol" operator="in" result="hair"/><feOffset in="SourceAlpha" dy="-9" result="up"/><feComposite in="SourceAlpha" in2="up" operator="out" result="low"/><feGaussianBlur in="low" stdDeviation="4" result="lowb"/><feFlood flood-color="#3f4fc4" flood-opacity=".6"/><feComposite in2="lowb" operator="in"/><feComposite in2="SourceAlpha" operator="in" result="depth"/><feGaussianBlur in="SourceAlpha" stdDeviation="7" result="bump"/><feSpecularLighting in="bump" surfaceScale="8" specularConstant="1.15" specularExponent="30" lighting-color="#fff" result="sp"><feDistantLight azimuth="235" elevation="55"/></feSpecularLighting><feComposite in="sp" in2="SourceAlpha" operator="in" result="spec"/><feMorphology in="SourceAlpha" operator="erode" radius="3" result="er"/><feComposite in="SourceAlpha" in2="er" operator="out" result="ring"/><feGaussianBlur in="ring" stdDeviation=".9" result="ringb"/><feFlood flood-color="#fff" flood-opacity=".95"/><feComposite in2="ringb" operator="in" result="rim"/><feOffset in="ringb" dx="2" dy="1" result="rr"/><feFlood flood-color="#ff8fcf" flood-opacity=".45"/><feComposite in2="rr" operator="in"/><feComposite in2="SourceAlpha" operator="in" result="fr"/><feOffset in="ringb" dx="-2" dy="-1" result="rb"/><feFlood flood-color="#7fa8ff" flood-opacity=".5"/><feComposite in2="rb" operator="in"/><feComposite in2="SourceAlpha" operator="in" result="fb"/><feMerge><feMergeNode in="shadow"/><feMergeNode in="hair"/><feMergeNode in="SourceGraphic"/><feMergeNode in="depth"/><feMergeNode in="fr"/><feMergeNode in="fb"/><feMergeNode in="spec"/><feMergeNode in="rim"/></feMerge></filter></defs><path class="ink" pathLength="1" d="M 242.5 467.4 C 351 372 304.8 427.6 351 372 C 386.5 329.2 405.1 271.6 390.9 246.8 C 338.9 156.6 308 485.3 315.5 485.4 C 323.1 485.4 322.6 389.7 360.9 368 C 399.1 346.3 412.5 375.2 414.3 388.7 C 417.1 410.5 405.6 445 407.5 457.6 C 415.7 510.1 547.7 458.5 558.1 398.9 C 569.2 334.7 471.4 337.8 490.8 440.3 C 497.9 477.9 542 487.6 565.5 482 C 650.4 461.6 708.6 357.6 706.6 277.7 C 703.8 174.3 612.6 278.8 634.5 438.2 C 643 499.6 714.8 479.7 736 463.3 C 775.2 433.1 844.4 346 831.7 261.5 C 818.5 173.2 719.1 318.6 764.7 450.8 C 780 494.9 825.6 480 838.1 473.2 C 867.9 457.1 877.4 398.6 902.1 373.1 C 933.2 340.8 982.2 364.9 984.3 403.3 C 988.7 487.7 923.6 487.8 899.4 468.8 C 878.4 452.3 873.5 403.4 901.7 373.1 C 921 352.4 951.8 351.9 992.4 375.1 C 1009 384.6 1023.2 382.9 1034.3 367.7"/></svg><div class="who">Jaswanth — Software Engineer</div><div class="pill"><span>Tap to begin</span></div></div>
+    </div></div>
+  </section>
+
+  <section class="frame" id="intro">
+    <div class="meta">
+      <div class="eyebrow step"><i>2</i> About 3 seconds</div>
+      <h2>The intro</h2>
+      <ul>
+        <li>Your name in the red arc style zooms toward the viewer while the sound plays.</li>
+        <li><b>Any click or key skips it.</b> Returning visitors never see it again.</li>
+        <li>It is your name — never Netflix’s logo or wording.</li>
+      </ul>
+    </div>
+    <div class="screen"><div class="s nflx"><div class="mark">JASWANTH</div><div class="skip">Skip intro</div></div></div>
+  </section>
+
+  <section class="frame" id="profiles">
+    <div class="meta">
+      <div class="eyebrow step"><i>3</i> Pick anyone</div>
+      <h2>Who’s watching?</h2>
+      <ul>
+        <li>Five profiles: Recruiter, Developer, Adventurer, Designer, Guest.</li>
+        <li><b>All five do exactly the same thing</b> — go to the OS chooser. The choice is only remembered for next time.</li>
+        <li>Cards lift and get a white border on hover, as in the reference.</li>
+      </ul>
+    </div>
+    <div class="screen"><div class="s nflx">
+      <p class="who-t">Who’s watching?</p>
+      <div class="profs">
+        <div class="prof"><img class="av real" src="../netflix/avatar-blue.png" alt="">Recruiter</div>
+        <div class="prof on"><img class="av real" src="../netflix/avatar-grey.png" alt="">Developer</div>
+        <div class="prof"><img class="av real" src="../netflix/avatar-yellow.png" alt="">Adventurer</div>
+        <div class="prof"><img class="av real" src="../netflix/avatar-red.png" alt="">Designer</div>
+        <div class="prof"><img class="av real" src="../netflix/avatar-blue.png" alt="" style="filter:hue-rotate(-62deg) saturate(1.15)">Guest</div>
+      </div>
+      <div class="nfoot"><span>Résumé</span><span>Skip the OS</span></div>
+    </div></div>
+  </section>
+
+  <section class="frame" id="chooser">
+    <div class="meta">
+      <div class="eyebrow step"><i>4</i> The foyer</div>
+      <h2>Choose an operating system</h2>
+      <ul>
+        <li>Five cards with a one-line character each. One gets a “suits your device” badge.</li>
+        <li>Each card is a <b>small snapshot of that OS’s full page</b> — no device outlines. The chosen card <b>expands to fill the screen</b> and becomes that OS.</li>
+        <li>Back from any OS returns here, never to Hello.</li>
+      </ul>
+    </div>
+    <div class="screen"><div class="s choose">
+      <h3>Choose how you want to explore</h3>
+      <div class="cards">
+        <div class="card"><div class="snap sn-ios"><i class="mw"></i><span class="mg"><b></b><b></b><b></b><b></b><b></b><b></b></span><i class="md"></i></div><b>iOS</b><em>Tap through apps</em></div>
+        <div class="card"><span class="badge">Suits your device</span><div class="snap sn-mac"><i class="mb"></i><i class="mwin" style="left:14%;top:22%;width:48%;height:46%"></i><i class="mwin" style="left:34%;top:34%;width:44%;height:40%"></i><i class="md"></i></div><b>macOS</b><em>A desktop of windows</em></div>
+        <div class="card"><div class="snap sn-win"><i class="mwin sq" style="left:4%;top:6%;width:45%;height:76%"></i><i class="mwin sq" style="left:51%;top:6%;width:45%;height:76%"></i><i class="mt"></i></div><b>Windows 11</b><em>Start, taskbar, snap</em></div>
+        <div class="card"><div class="snap sn-and"><i class="ms"></i><span class="mg circ"><b></b><b></b><b></b><b></b></span><i class="mt tbl"></i></div><b>Android</b><em>Launcher and Material</em></div>
+        <div class="card"><div class="snap sn-lnx"><span class="ml"><i style="width:62%"></i><i style="width:40%"></i><i class="g" style="width:52%"></i><i style="width:70%"></i><i class="g" style="width:30%"></i></span></div><b>Linux</b><em>A real terminal</em></div>
+      </div>
+    </div></div>
+  </section>
+
+  <hr class="divider">
+  <div class="group-title"><div class="eyebrow">Inside — five operating systems, five personalities</div></div>
+
+  <section class="frame" id="macos">
+    <div class="meta">
+      <div class="eyebrow">Built first</div>
+      <h2>macOS</h2>
+      <ul>
+        <li><b>Real windows:</b> drag, layer, minimize into the Dock, zoom, close. Traffic lights on the left.</li>
+        <li>A global menu bar that changes with the focused app. The Dock <b>magnifies</b> under the pointer.</li>
+        <li>Finder holds experience as folders; GitHub holds projects; the résumé sits in a Dock stack.</li>
+      </ul>
+    </div>
+    <div class="screen"><div class="s mac">
+      <div class="mbar"><img class="applelogo" src="../icons/system/apple-logo.svg" alt=""><b>Finder</b><span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Window</span><span>Help</span><div class="r"><span>Résumé</span><span>Search</span><span>Tue 9:41 AM</span></div></div>
+      <div class="deski"><div><span class="doc"></span>Résumé.pdf</div><div><span class="fold"></span>Projects</div><div><span class="fold"></span>Experience</div></div>
+      <div class="win" style="left:30%;top:13%;width:50%;height:52%"><div class="tb"><div class="tl"><i></i><i></i><i></i></div>GitHub</div><div style="flex:1;background:#fff"></div></div>
+      <div class="win act" style="left:7%;top:24%;width:62%;height:54%">
+        <div class="tb"><div class="tl"><i></i><i></i><i></i></div>Experience</div>
+        <div class="cols">
+          <div class="side"><span class="dim">Favourites</span><div class="row">Jaswanth</div><div class="row sel">Experience</div><div class="row">Education</div><div class="row">Projects</div><div class="row">Résumé</div></div>
+          <div><div class="row sel">Experience</div><div class="row">Education</div><div class="row">Projects</div></div>
+          <div><div class="row sel">Acme — Senior Engineer</div><div class="row">Globex — Engineer</div><div class="row">Initech — Intern</div></div>
+          <div class="prev"><b>Senior Engineer</b><span class="dim">Acme · 2022 – present</span><span>Led the platform team; cut build times by 60 %.</span><span><span class="tag">TypeScript</span><span class="tag">React</span><span class="tag">AWS</span></span></div>
+        </div>
+      </div>
+      <div class="dock"><div class="ic real pad run"><img src="../icons/system/finder.png" alt=""></div><div class="ic real sq mid"><img src="../icons/appstore/safari.png" alt=""></div><div class="ic real sq big run"><img src="../icons/appstore/github.png" alt=""></div><div class="ic real sq mid"><img src="../icons/appstore/mail.png" alt=""></div><div class="ic real pad soft"><img src="../icons/system/macos-preview.png" alt=""></div><div class="ic real free"><img src="../icons/desktop/vscode.png" alt=""></div><div class="ic real sqpad"><img src="../icons/system/macos-terminal.png" alt=""></div><div class="ic real pad"><img src="../icons/system/macos-system-settings.png" alt=""></div><span class="sep"></span><div class="ic doc"><i></i><i></i><i></i><i></i></div></div>
+    </div></div>
+  </section>
+
+  <section class="frame" id="windows">
+    <div class="meta">
+      <div class="eyebrow">Same engine, different soul</div>
+      <h2>Windows 11</h2>
+      <ul>
+        <li>Centered taskbar with <b>pill indicators</b>, Start, Search and Task View. Caption buttons on the right.</li>
+        <li>Windows <b>Snap</b> to halves and quarters (dashed area = snap preview).</li>
+        <li>The résumé opens as a PDF tab in Edge and is pinned to the taskbar. Toasts rise bottom-right.</li>
+      </ul>
+    </div>
+    <div class="screen"><div class="s winos">
+      <div class="snaphint" style="left:51%;top:3%;width:47%;height:83%"></div>
+      <div class="ww" style="left:2%;top:3%;width:48%;height:83%">
+        <div class="wt"><div class="tab">Experience ✕</div><div class="cap"><span>—</span><span>▢</span><span>✕</span></div></div>
+        <div class="crumb"><span>←</span><span>→</span><span>↑</span><div class="addr">Home › Experience</div></div>
+        <div class="cmd"><span>Copy link</span><span>Share</span><span>Sort</span><span>View</span><span>Details</span></div>
+        <div class="wbody">
+          <div class="nav"><div class="row">Home</div><div class="row cur">Experience</div><div class="row">Education</div><div class="row">Projects</div><div class="row">Résumé</div></div>
+          <div><table class="det"><tr><th>Name</th><th>Role</th><th>Dates</th></tr><tr class="sel"><td>Acme.docx</td><td>Senior Engineer</td><td>2022 – now</td></tr><tr><td>Globex.docx</td><td>Engineer</td><td>2019 – 2022</td></tr><tr><td>Initech.docx</td><td>Intern</td><td>2018</td></tr></table></div>
+        </div>
+      </div>
+      <div class="toast"><b>Continue from macOS</b><div>portfolio-os — GitHub</div><div class="bt"><span>Open</span><span>Dismiss</span></div></div>
+      <div class="taskbar">
+        <div class="tbi"><img class="winlogo" src="../icons/system/windows-logo-mark.svg" alt=""></div><div class="tbi">⌕</div><div class="tbi">⧉</div>
+        <div class="tbi on"><div class="ic real free"><img src="../icons/windows/explorer.png" alt=""></div></div><div class="tbi runn"><div class="ic real free"><img src="../icons/windows/edge.svg" alt=""></div></div><div class="tbi"><div class="ic real free"><img src="../icons/desktop/github-mark.svg" alt=""></div></div><div class="tbi"><div class="ic real free"><img src="../icons/windows/outlook.svg" alt=""></div></div><div class="tbi"><div class="ic real free"><img src="../icons/desktop/vscode.png" alt=""></div></div><div class="tbi"><div class="ic real free"><img src="../icons/desktop/windows-terminal.png" alt=""></div></div><div class="tbi"><div class="ic real free"><img src="../icons/windows/settings.svg" alt=""></div></div><div class="tbi"><div class="ic doc pdfedge"><img src="../icons/windows/edge.svg" alt=""></div></div>
+        <div class="tray">9:41 AM<br>9/21/2026</div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="frame" id="ios">
+    <div class="meta">
+      <div class="eyebrow">One app at a time · full page</div>
+      <h2>iOS</h2>
+      <ul>
+        <li><b>Fills the whole page — no phone frame.</b> On a laptop it uses the iPad-style Home Screen: widgets on the left, icons across the page, a floating Dock.</li>
+        <li>Tapping an icon makes the app <b>grow out of that icon until it fills the page</b>; going Home shrinks it back into it.</li>
+        <li>Apps use their wide layouts — GitHub opens as a sidebar + detail view (second screen). On a real iPhone it’s the normal phone layout.</li>
+      </ul>
+    </div>
+    <div class="pair">
+      <div class="screen"><div class="s iosf">
+        <div class="ist"><span>9:41&nbsp;&nbsp;Mon 21 Sep</span><span>Wi-Fi&nbsp;&nbsp;80%&nbsp;▮</span></div>
+        <div class="iwid">
+          <div class="widget big"><small>Résumé</small><b>Jaswanth</b><span>Senior Engineer · Acme</span><span class="upd">Updated Sep 2026</span><div class="acts"><i>Open</i><i>Download</i></div></div>
+          <div class="wrow"><div class="widget sq2"><small>Open to work</small><b>Senior frontend roles</b></div><div class="widget sq2"><small>Projects</small><b>portfolio‑os</b><span>TypeScript · ★ 128</span></div></div>
+        </div>
+        <div class="igrid">
+          <div class="app"><div class="ic real sq"><img src="../icons/appstore/safari.png" alt=""></div>Safari</div>
+          <div class="app"><div class="ic real sq"><img src="../icons/appstore/github.png" alt=""></div>GitHub</div>
+          <div class="app"><div class="ic real sq"><img src="../icons/appstore/notes.png" alt=""></div>Notes</div>
+          <div class="app"><div class="ic real sq"><img src="../icons/appstore/messages.png" alt=""></div>Messages</div>
+          <div class="app"><div class="ic real sqpad"><img src="../icons/ios/settings.png" alt=""></div>Settings</div>
+          <div class="app"><div class="ic folder"><img src="../icons/appstore/files.png" alt=""><img src="../icons/appstore/notes.png" alt=""><img src="../icons/appstore/mail.png" alt=""></div>Career</div>
+        </div>
+        <div class="ispill">Search</div>
+        <div class="ipdock"><div class="ic real sq"><img src="../icons/appstore/files.png" alt=""></div><div class="ic real sq"><img src="../icons/appstore/safari.png" alt=""></div><div class="ic real sq"><img src="../icons/appstore/github.png" alt=""></div><div class="ic real sq bdg"><img src="../icons/appstore/mail.png" alt=""></div><span class="dsep"></span><div class="ic real sq"><img src="../icons/appstore/notes.png" alt=""></div><div class="ic real sq"><img src="../icons/appstore/messages.png" alt=""></div></div>
+        <div class="hind"></div>
+      </div></div>
+      <div class="screen"><div class="s ipapp">
+        <div class="ist dk"><span>9:41&nbsp;&nbsp;Mon 21 Sep</span><span>Wi-Fi&nbsp;&nbsp;80%&nbsp;▮</span></div>
+        <div class="ipside">
+          <h5>GitHub</h5>
+          <div class="srch">Search</div>
+          <div class="grp"><div class="li2">Home</div><div class="li2 on">Projects</div><div class="li2">Profile</div></div>
+          <div class="cap2">Repositories</div>
+          <div class="grp"><div class="li2 sel"><b>portfolio‑os</b><span>TypeScript · ★ 128</span></div><div class="li2"><b>flowgraph</b><span>Rust · ★ 64</span></div><div class="li2"><b>tinyqueue</b><span>Go · ★ 41</span></div></div>
+        </div>
+        <div class="ipmain">
+          <div class="ipnav"><span>‹ Repositories</span><span>Share</span></div>
+          <h4>portfolio‑os</h4>
+          <p class="tagl">Five operating systems in a browser · 2026</p>
+          <div class="seg"><span class="on">README</span><span>Stack</span><span>About</span></div>
+          <div class="ipbody"><span>A portfolio built as iOS, macOS, Windows 11, Android and a Linux terminal — one shared engine, five personalities.</span><span>Every app, window and command reads from a single typed data layer, so one fact changes everywhere at once.</span></div>
+          <div class="chips2"><span>TypeScript</span><span>Next.js</span><span>GSAP</span><span>three.js</span></div>
+          <div class="btns2"><span>Repository ↗</span><span>Live site ↗</span></div>
+        </div>
+        <div class="hind dk"></div>
+      </div></div>
+    </div>
+  </section>
+
+  <section class="frame" id="android">
+    <div class="meta">
+      <div class="eyebrow">Deliberately not iOS · full page</div>
+      <h2>Android</h2>
+      <ul>
+        <li><b>Fills the whole page — no phone frame.</b> On a laptop it’s the large-screen Android launcher: At-a-glance, a search bar on top and a <b>taskbar</b> along the bottom.</li>
+        <li><b>Back / Home / Recents</b> sit at the right of the taskbar, and the browser’s Back button is that same Back. Colours come from the wallpaper; no blur anywhere.</li>
+        <li>Apps open to the full page in wide Material layouts — Gmail as a rail + list + message view (second screen).</li>
+      </ul>
+    </div>
+    <div class="pair">
+      <div class="screen"><div class="s andf">
+        <div class="ast"><span>9:41</span><span>▾&nbsp; ◢&nbsp; ▮</span></div>
+        <div class="aglance">Mon, Sep 21<i>Résumé ready · Open</i></div>
+        <div class="asrch"><b>G</b>Search apps and more</div>
+        <div class="agrid">
+          <div class="app"><div class="ic real circ"><img src="../icons/play/github.png" alt=""></div>GitHub</div>
+          <div class="app"><div class="ic real circ"><img src="../icons/play/keep.png" alt=""></div>Keep</div>
+          <div class="app"><div class="ic real circ fg"><img src="../icons/android/settings.png" alt=""></div>Settings</div>
+          <div class="app"><div class="ic folder circf"><img src="../icons/play/files.png" alt=""><img src="../icons/play/keep.png" alt=""><img src="../icons/play/gmail.png" alt=""></div>Career</div>
+        </div>
+        <div class="atask"><span class="tall">▦</span><div class="ic real circ"><img src="../icons/play/files.png" alt=""></div><div class="ic real circ"><img src="../icons/play/chrome.png" alt=""></div><div class="ic real circ"><img src="../icons/play/github.png" alt=""></div><div class="ic real circ dot"><img src="../icons/play/gmail.png" alt=""></div><span class="tsep"></span><div class="ic real circ"><img src="../icons/play/keep.png" alt=""></div><div class="tnav"><span>◀</span><span>●</span><span>■</span></div></div>
+      </div></div>
+      <div class="screen"><div class="s aapp">
+        <div class="ast dk"><span>9:41</span><span>▾&nbsp; ◢&nbsp; ▮</span></div>
+        <div class="rail"><span class="mn">☰</span><span class="cfab">✎</span><div class="ri on"><i>✉</i>Inbox</div><div class="ri"><i>☆</i>Starred</div><div class="ri"><i>➤</i>Sent</div></div>
+        <div class="alist">
+          <div class="asearch2">Search in mail<u>J</u></div>
+          <div class="mail sel"><span class="c">J</span><p><b>Jaswanth</b><b>Let’s talk</b><span>Open to senior frontend roles…</span></p></div>
+          <div class="mail"><span class="c b">J</span><p><span class="ink">Jaswanth</span><span class="ink">Where to find me</span><span>GitHub, LinkedIn and more</span></p></div>
+          <div class="mail"><span class="c o">J</span><p><span class="ink">Jaswanth</span><span class="ink">My résumé</span><span>Attachment: Résumé.pdf</span></p></div>
+        </div>
+        <div class="adet">
+          <h4>Let’s talk</h4>
+          <div class="from"><span class="av2">J</span><p><b>Jaswanth</b><span>to you · 9:12 AM</span></p></div>
+          <p class="body">Hi — thanks for stopping by. I’m open to senior frontend and design-engineering roles. The quickest way to reach me is a reply here, which opens your own email app.</p>
+          <div class="att"><b>PDF</b>Résumé.pdf · 120 KB</div>
+          <div class="abtn"><span>Reply</span><span>Copy address</span></div>
+        </div>
+        <div class="atask tbl"><span class="tall">▦</span><div class="ic real circ"><img src="../icons/play/files.png" alt=""></div><div class="ic real circ"><img src="../icons/play/chrome.png" alt=""></div><div class="ic real circ"><img src="../icons/play/github.png" alt=""></div><div class="ic real circ dot"><img src="../icons/play/gmail.png" alt=""></div><span class="tsep"></span><div class="ic real circ"><img src="../icons/play/keep.png" alt=""></div><div class="tnav"><span>◀</span><span>●</span><span>■</span></div></div>
+      </div></div>
+    </div>
+  </section>
+
+  <section class="frame" id="linux">
+    <div class="meta">
+      <div class="eyebrow">No icons at all</div>
+      <h2>Linux</h2>
+      <ul>
+        <li>A <b>real shell</b> over a filesystem built from your data: pipes, tab completion, history, honest errors.</li>
+        <li><code class="mono">open</code> shows rich content in a viewer tile beside the shell; <code class="mono">q</code> returns to the prompt.</li>
+        <li>If someone looks lost, a quiet hint offers a command and <b>pastes it without running it</b> — they press Enter.</li>
+      </ul>
+    </div>
+    <div class="screen"><div class="s lnx">
+      <div class="lbar"><b>1:term</b><span>2:view</span><div class="r"><a>résumé</a><span>?</span><span>09:41</span><span>exit</span></div></div>
+      <div class="tiles">
+        <div class="tile"><div class="tt">jaswanth@portfolio: ~/projects</div><div class="term"><span class="d">Welcome. This is Jaswanth's portfolio — as a shell.
+  * résumé ready   →  open resume
+  * 6 projects     →  cd projects &amp;&amp; ls</span>
+<span><span class="u">jaswanth@portfolio</span>:<span class="pth">~</span>$ cd projects &amp;&amp; ls</span>
+<span><span class="c">README.md</span>  flowgraph.md  portfolio-os.md  tinyqueue.md</span>
+<span><span class="u">jaswanth@portfolio</span>:<span class="pth">~/projects</span>$ open portfolio-os</span>
+<span class="d">opening projects/portfolio-os.md in viewer…</span>
+<span><span class="u">jaswanth@portfolio</span>:<span class="pth">~/projects</span>$ <span class="caret"></span></span>
+<div class="hint"><span>Lost already? Linux welcomes you.</span><span><code>open resume</code></span><u>Paste into Terminal</u></div></div></div>
+        <div class="tile f"><div class="tt">viewer — projects/portfolio-os.md &nbsp; [q] close &nbsp; [l] copy link</div><div class="view"><h5># portfolio-os</h5><span class="d">Five operating systems in a browser · 2026</span><hr><span>A portfolio built as iOS, macOS, Windows 11, Android and a Linux terminal — one shared engine, five personalities.</span><hr><span class="y">stack</span> <span class="m">[typescript]</span> <span class="m">[next.js]</span> <span class="m">[gsap]</span> <span class="m">[three.js]</span><hr><span class="c">repo ↗</span> &nbsp; <span class="c">live ↗</span> &nbsp; <span class="d">n next · p previous</span></div></div>
+      </div>
+    </div></div>
+  </section>
+
+  <p class="foot">Known soft spots: the macOS <b>Preview</b> icon is only 200 px and the Windows <b>File Explorer</b> icon only 64 px (fine at Dock/taskbar size, soft if enlarged); the fifth profile avatar is the official blue one colour-shifted to green. Sharper files dropped into <span class="mono">assets-inbox/icons/</span> replace them with no code change.</p>
+</div>
+
+</body>
+</html>

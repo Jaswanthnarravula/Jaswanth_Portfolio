@@ -24,7 +24,7 @@ test('/ draws the Hello in CSS and offers the portfolio, the résumé and the OS
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Jaswanth');
   // HELLO-DRAW-01: the stroke draw runs from first paint with no JavaScript and ends fully drawn.
-  await expect(page.locator('[data-glyph]')).toHaveCSS('stroke-dashoffset', '0px', { timeout: 6000 });
+  await expect(page.locator('[data-ink]')).toHaveCSS('stroke-dashoffset', '0px', { timeout: 6000 });
   await expect(page.getByRole('link', { name: /Skip the OS/ }).first()).toHaveAttribute('href', '/plain');
   await expect(page.getByRole('link', { name: 'Résumé', exact: true }).first()).toHaveAttribute('href', '/go/resume');
   // The pill is a real link to the chooser section; the no-JS chooser lists every visible OS as a link (CHOOSE-CARD-01 W2).

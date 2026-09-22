@@ -4,7 +4,7 @@
  */
 import { isOsId, isPersonaId } from '../ids';
 import { DEFAULT_PREFS } from '../state';
-import type { Tier, UserPreferences } from '../types';
+import { ACCENT_IDS, type Tier, type UserPreferences } from '../types';
 import { isRecord, type Json } from './validate';
 
 export const PREFS_KEY = 'pf.prefs.v1';
@@ -47,7 +47,33 @@ export function parsePrefs(value: Json, now = Date.now()): UserPreferences {
         )
       : [],
     demotion,
+    taskbarAlign: oneOf(input.taskbarAlign, ['center', 'left'], DEFAULT_PREFS.taskbarAlign),
+    accent:
+      typeof input.accent === 'string' && (ACCENT_IDS as readonly string[]).includes(input.accent)
+        ? (input.accent as UserPreferences['accent'])
+        : null,
+    textScale: parseTextScale(input.textScale),
+    contrast: oneOf(input.contrast, ['system', 'more'], DEFAULT_PREFS.contrast),
+    notifications: bool(input.notifications, DEFAULT_PREFS.notifications),
+    wallpaper: oneOf(input.wallpaper, ['auto', 'light', 'dark'], DEFAULT_PREFS.wallpaper),
+    dock: parseDock(input.dock),
   };
+}
+
+function parseDock(value: Json): UserPreferences['dock'] {
+  const input = isRecord(value) ? value : {};
+  return {
+    magnification: bool(input.magnification, DEFAULT_PREFS.dock.magnification),
+    size: oneOf(input.size, ['small', 'medium', 'large'], DEFAULT_PREFS.dock.size),
+  };
+}
+
+/** Text size: 100 – 130 % in 5 % steps (plans/windows/apps/settings "Text size"). */
+export const TEXT_SCALE_RANGE = [1, 1.3] as const;
+export function parseTextScale(value: Json): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return DEFAULT_PREFS.textScale;
+  const clamped = Math.min(TEXT_SCALE_RANGE[1], Math.max(TEXT_SCALE_RANGE[0], value));
+  return Math.round(clamped * 20) / 20;
 }
 
 function parseDemotion(value: Json, now: number): UserPreferences['demotion'] {

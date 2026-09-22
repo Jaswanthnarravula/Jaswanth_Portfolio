@@ -74,6 +74,9 @@ Every row must be visibly and behaviourally true. "Not like the others" sections
 5. **Keyboard test:** can the whole journey be done without a pointer, and is focus always visible and sensible?
 6. **Impatience test:** spam clicks, Back, rotate and resize during every animation — nothing breaks or traps.
 7. **Recruiter test:** a first-time visitor finds Projects, Résumé and Contact in under 15 seconds, uninstructed.
+8. **Storyboard test:** side by side with its frame in `plans/visual-targets/`, the screen matches in composition,
+   colour and structure; every difference is either real data replacing a sample, or the real OS replacing a
+   stand-in (`shared/06-design-system.md` → Owner visual targets).
 
 ## Process rules (non-negotiable)
 

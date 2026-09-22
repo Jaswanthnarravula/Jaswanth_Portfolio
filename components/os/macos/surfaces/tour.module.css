@@ -1,0 +1,98 @@
+/*
+ * The tour coach mark (shared/20 "Presentation"): an OS-skinned card with the step counter, the caption, End tour and
+ * Next, and a soft highlight ring around the target — never a dimming overlay (the UI stays usable). The ring pulses
+ * (opacity only) except under reduced motion.
+ */
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-system) + 5);
+  pointer-events: none;
+}
+.ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 3px var(--accent),
+    0 0 0 8px color-mix(in oklch, var(--accent) 30%, transparent);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+:global([data-motion='reduced']) .ring {
+  animation: none;
+}
+.card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  gap: 8px;
+  width: 300px;
+  max-width: calc(100vw - 16px);
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--surface-raised);
+  box-shadow: var(--elevation-5);
+  color: var(--text-primary);
+  font-size: 13px;
+  pointer-events: auto;
+}
+.counter {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+.caption {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.end,
+.next {
+  min-height: 26px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-control);
+  font: inherit;
+  font-size: 13px;
+}
+.end {
+  background: rgb(0 0 0 / 0.06);
+  color: var(--text-primary);
+}
+.next {
+  background: var(--mac-selection);
+  color: #fff;
+}
+.end:focus-visible,
+.next:focus-visible {
+  outline: 3px solid color-mix(in oklch, var(--focus-ring) 55%, transparent);
+  outline-offset: 1px;
+}
+@media (any-pointer: coarse) {
+  .end,
+  .next {
+    min-height: 44px;
+  }
+}
+@media (forced-colors: active) {
+  .card {
+    border: 1px solid CanvasText;
+  }
+  .ring {
+    outline: 3px solid Highlight;
+  }
+}

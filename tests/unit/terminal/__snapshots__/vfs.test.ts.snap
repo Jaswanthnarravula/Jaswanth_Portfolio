@@ -1,0 +1,37 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LNX-FS-04 width-aware file text > about.txt at 80 and 40 cols > about.txt @40 1`] = `
+[
+  "Ada Example",
+  "Engineer of examples",
+  "Engineer at Acme · Testville",
+  "",
+  "Builds fixtures.",
+  "",
+  "Second paragraph.",
+  "",
+  "Open to tests.",
+  "",
+  "SELECTED WORK",
+  "─────────────────",
+  "• Portfolio OS — Five operating systems.",
+]
+`;
+
+exports[`LNX-FS-04 width-aware file text > about.txt at 80 and 40 cols > about.txt @80 1`] = `
+[
+  "Ada Example",
+  "Engineer of examples",
+  "Engineer at Acme · Testville",
+  "",
+  "Builds fixtures.",
+  "",
+  "Second paragraph.",
+  "",
+  "Open to tests.",
+  "",
+  "SELECTED WORK",
+  "─────────────────",
+  "• Portfolio OS — Five operating systems.",
+]
+`;

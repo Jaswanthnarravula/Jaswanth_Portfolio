@@ -6,7 +6,7 @@
  */
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { expectFocusNotOnBody } from './helpers';
+import { expectFocusNotOnBody, skipIntro, waitForSettled } from './helpers';
 
 const PERSONAS = ['Recruiter', 'Developer', 'Adventurer', 'Designer', 'Guest'] as const;
 const webkitTouch = (project: string) => ['iphone', 'ipad-portrait', 'ipad-landscape'].includes(project);
@@ -19,7 +19,7 @@ const chooserHeading = (page: Page) => page.getByRole('heading', { name: 'Choose
 async function toProfiles(page: Page) {
   await page.goto('/');
   await tap(page);
-  await page.getByRole('button', { name: 'Skip intro' }).click();
+  await skipIntro(page);
   await expect(whoIsWatching(page)).toBeFocused();
 }
 async function toChooser(page: Page, persona: (typeof PERSONAS)[number] = 'Guest') {
@@ -45,7 +45,7 @@ test.describe('Hello', () => {
     if (info.project.name !== 'reduced-motion') {
       const drawing = await page.evaluate(() =>
         document
-          .querySelector('[data-glyph]')!
+          .querySelector('[data-ink]')!
           .getAnimations()
           .some((a) => a.playState === 'running'),
       );
@@ -54,13 +54,14 @@ test.describe('Hello', () => {
     await tap(page);
     await expect(screen(page)).toHaveAttribute('data-screen', 'intro');
     await expect(page.getByRole('button', { name: 'Skip intro' })).toBeFocused();
-    await tap(page).catch(() => undefined); // a second tap (the pill is hidden now) changes nothing
+    // A second tap (the pill is hidden now, so dispatch it directly) changes nothing.
+    await page.locator('[data-tap-to-begin]').evaluate((el: HTMLElement) => el.click());
     await expect(screen(page)).toHaveAttribute('data-screen', 'intro');
   });
 
   test('the SSR h1 names Jaswanth and the morphing glyph is hidden from assistive tech', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1, name: /^Jaswanth — Backend engineer/ })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Jaswanth — Software Engineer' })).toBeVisible();
     await expect(page.locator('svg:has([data-glyph])')).toHaveAttribute('aria-hidden', 'true');
     await expect(page.getByRole('button', { name: 'Sound' })).toHaveAttribute('aria-pressed', 'true');
   });
@@ -71,7 +72,7 @@ test.describe('Hello', () => {
     test.skip(info.project.name !== 'reduced-motion', 'reduced-motion project');
     await page.goto('/');
     expect(await longAnimations(page)).toEqual([]);
-    const offset = await page.locator('[data-glyph]').evaluate((el) => getComputedStyle(el).strokeDashoffset);
+    const offset = await page.locator('[data-ink]').evaluate((el) => getComputedStyle(el).strokeDashoffset);
     expect(offset).toMatch(/^0(px)?$/);
     await tap(page);
     expect(await longAnimations(page)).toEqual([]);
@@ -111,7 +112,7 @@ test.describe('Hello', () => {
     await page.goto('/');
     expect((await overflow())[0]).toBeLessThanOrEqual(0);
     await tap(page);
-    await page.getByRole('button', { name: 'Skip intro' }).click();
+    await skipIntro(page);
     await expect(whoIsWatching(page)).toBeVisible();
     expect((await overflow())[0]).toBeLessThanOrEqual(0);
     await page.setViewportSize({ width: 844, height: 390 });
@@ -128,11 +129,26 @@ test.describe('Hello', () => {
 test.describe('intro and profiles', () => {
   test('W1 the intro reaches the profiles within 3.5 s on its own @smoke', async ({ page }, info) => {
     await page.goto('/');
+    // Timed inside the page: from the tap to the moment the profiles screen takes over.
+    await page.evaluate(() => {
+      const w = window as unknown as { __tapAt: number; __profilesAt: number };
+      document.querySelector('[data-tap-to-begin]')!.addEventListener('click', () => (w.__tapAt = performance.now()), {
+        once: true,
+      });
+      const root = document.querySelector('[data-screen]')!;
+      new MutationObserver(() => {
+        if (root.getAttribute('data-screen') === 'profiles' && !w.__profilesAt) w.__profilesAt = performance.now();
+      }).observe(root, { attributes: true, attributeFilter: ['data-screen'] });
+    });
     await tap(page);
-    const started = Date.now();
     await expect(whoIsWatching(page)).toBeFocused({ timeout: 6000 });
-    const elapsed = Date.now() - started;
-    expect(elapsed).toBeLessThan(info.project.name === 'reduced-motion' ? 1500 : 3500 + 400); // +400: CI scheduling
+    const elapsed = await page.evaluate(() => {
+      const w = window as unknown as { __tapAt: number; __profilesAt: number };
+      return w.__profilesAt - w.__tapAt;
+    });
+    // The intro hands over at 3.4 s from the tap (800 ms reduced) so the profiles commit lands by 3.5 s; the bound
+    // keeps one more frame of slack for a loaded CI machine.
+    expect(elapsed).toBeLessThanOrEqual(info.project.name === 'reduced-motion' ? 900 : 3600);
   });
 
   test('W1 a keypress at 200 ms shows the profiles immediately', async ({ page }) => {
@@ -194,6 +210,7 @@ test.describe('intro and profiles', () => {
   });
 
   test('W1 each of the five profiles runs the identical transition to the chooser @smoke', async ({ browser }) => {
+    test.slow(); // five full journeys, each in a fresh context
     const traces: string[] = [];
     for (const persona of PERSONAS) {
       const context = await browser.newContext();
@@ -223,8 +240,10 @@ test.describe('intro and profiles', () => {
             ?.getAttribute('href') ?? null,
       }));
       traces.push(JSON.stringify(state));
-      const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('pf.prefs.v1') ?? '{}').state);
-      expect(stored).toMatchObject({ persona: persona.toLowerCase(), introSeen: true });
+      // Preferences reach storage through the debounced safe writer, a moment after the pick.
+      await expect
+        .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('pf.prefs.v1') ?? '{}').state))
+        .toMatchObject({ persona: persona.toLowerCase(), introSeen: true });
       await context.close();
     }
     expect(new Set(traces).size, traces.join('\n')).toBe(1);
@@ -232,22 +251,41 @@ test.describe('intro and profiles', () => {
 
   test('W1 no blank frame between the profiles and the chooser', async ({ page }) => {
     await toProfiles(page);
+    await waitForSettled(page, '[data-profile]'); // past the intro → profiles crossfade
+    // Every frame, something is painted over the stage: the profiles screen or the chooser (a flying avatar sits on
+    // top of either). Computed visibility + opacity, not hit-testing: the page layer turns inert while it is covered.
     await page.evaluate(() => {
       const frames: string[] = [];
       (window as unknown as { __frames: string[] }).__frames = frames;
+      const shown = (el: Element | null) => {
+        if (!el) return false;
+        const style = getComputedStyle(el);
+        return style.visibility === 'visible' && Number(style.opacity) > 0.01;
+      };
+      const profiles = document.querySelector('[aria-labelledby="profiles-heading"]');
       const sample = () => {
-        const el = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
-        frames.push(el ? el.tagName : 'none');
-        if (frames.length < 90) requestAnimationFrame(sample);
+        const chooser = document.querySelector('[data-chooser-card]')?.closest('[style*="--viewport-aspect"]') ?? null;
+        // The chooser covers the profiles screen, which stays painted beneath it: check the top layer first.
+        frames.push(shown(chooser) ? 'chooser' : shown(profiles) ? 'profiles' : 'blank');
+        // Until the chooser has been on screen for a few frames (or 6 s, whichever first).
+        if (frames.filter((frame) => frame === 'chooser').length < 5 && frames.length < 400)
+          requestAnimationFrame(sample);
       };
       requestAnimationFrame(sample);
     });
     await page.getByRole('button', { name: 'Recruiter' }).click();
     await expect(chooserHeading(page)).toBeVisible();
-    await page.waitForFunction(() => (window as unknown as { __frames: string[] }).__frames.length >= 90);
+    await page.waitForFunction(
+      () => {
+        const frames = (window as unknown as { __frames: string[] }).__frames;
+        return frames.filter((frame) => frame === 'chooser').length >= 5 || frames.length >= 400;
+      },
+      null,
+      { timeout: 15_000 },
+    );
     const frames = await page.evaluate(() => (window as unknown as { __frames: string[] }).__frames);
-    // The centre of the screen always shows the profiles, the flying avatar or the chooser — never bare page.
-    expect(frames.filter((tag) => tag === 'HTML' || tag === 'BODY' || tag === 'none')).toEqual([]);
+    expect(frames.filter((frame) => frame === 'blank')).toEqual([]);
+    expect(frames).toContain('chooser');
   });
 
   test('W1 second visit lands on the profiles, last one marked, no auto-advance', async ({ page }) => {
@@ -259,6 +297,9 @@ test.describe('intro and profiles', () => {
     await expect(designer).toHaveAttribute('aria-pressed', 'true');
     await expect(designer.getByText('Last time')).toBeVisible();
     await expect(page.getByRole('button', { name: /^Guest/ })).toHaveAttribute('aria-pressed', 'false');
+    // Returning visitors skip Hello, so the replay mark and Sound are theirs here (a first visit shows neither).
+    await expect(page.getByRole('button', { name: 'Replay intro' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Sound' })).toBeVisible();
     await page.waitForTimeout(1500);
     await expect(whoIsWatching(page)).toBeVisible(); // still here: the visitor must choose
   });
@@ -281,25 +322,39 @@ test.describe('intro and profiles', () => {
     await expect(whoIsWatching(page)).toBeFocused({ timeout: 2000 });
   });
 
-  test('NFLX-CARD-01 profile layout at 1440 and 390 px, with hover and focus states', async ({ page }) => {
+  test('NFLX-CARD-01 profile layout at 1440 and 390 px, with hover and focus states', async ({ page }, info) => {
+    test.skip(
+      Boolean(info.project.use.isMobile),
+      'desktop and phone widths are both set here; phones emulate their own',
+    );
     await page.setViewportSize({ width: 1440, height: 900 });
     await toProfiles(page);
     const boxes = async () => {
       const cards = page.locator('[data-profile]');
       return Promise.all((await cards.all()).map((card) => card.boundingBox()));
     };
-    await page.waitForTimeout(1300); // entrance finished
+    await waitForSettled(page, '[data-profile]');
     const wide = (await boxes()).map((b) => b!);
     expect(new Set(wide.map((b) => Math.round(b.y))).size, 'one row on desktop').toBe(1);
     await page.keyboard.press('Tab'); // keyboard focus, so :focus-visible applies
     await expect(page.getByRole('button', { name: /^Recruiter/ })).toBeFocused();
-    const outline = await page
-      .locator('[data-profile="recruiter"] [data-avatar]')
-      .evaluate((el) => getComputedStyle(el).outlineColor);
-    expect(outline).toMatch(/255, 255, 255|oklch\(1 0 0\)/);
+    // The white border fades in (200 ms border-color transition): wait for its end state.
+    await expect
+      .poll(() =>
+        page.locator('[data-profile="recruiter"] [data-avatar]').evaluate((el) => getComputedStyle(el).borderTopColor),
+      )
+      .toBe('rgb(255, 255, 255)');
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur()); // focus lifts a card
+    await page.mouse.move(0, 0);
     await page.setViewportSize({ width: 390, height: 844 });
+    // Two per row once the blurred card's focus lift has settled back (a transform transition).
+    await expect
+      .poll(async () => {
+        const [first, second] = await boxes();
+        return Math.abs(first!.y - second!.y) < 0.5;
+      })
+      .toBe(true);
     const narrow = (await boxes()).map((b) => b!);
-    expect(Math.round(narrow[0]!.y)).toBe(Math.round(narrow[1]!.y));
     expect(narrow[2]!.y).toBeGreaterThan(narrow[0]!.y);
     const fifth = narrow[4]!;
     expect(Math.abs(fifth.x + fifth.width / 2 - 195)).toBeLessThan(4); // centred on its own row
@@ -317,16 +372,17 @@ test.describe('accessibility and résumé reach', () => {
     new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
 
   test('X1 axe finds nothing on Hello, the profiles and the chooser', async ({ page }) => {
+    test.slow(); // three full axe scans
     await page.goto('/');
     expect((await axe(page)).violations).toEqual([]);
     await tap(page);
-    await page.getByRole('button', { name: 'Skip intro' }).click();
+    await skipIntro(page);
     await expect(whoIsWatching(page)).toBeFocused();
-    await page.waitForTimeout(1300);
+    await waitForSettled(page, '[data-profile]');
     expect((await axe(page)).violations).toEqual([]);
     await page.getByRole('button', { name: 'Adventurer' }).click();
     await expect(chooserHeading(page)).toBeFocused();
-    await page.waitForTimeout(900);
+    await waitForSettled(page, '[data-chooser-card]');
     expect((await axe(page)).violations).toEqual([]);
   });
 

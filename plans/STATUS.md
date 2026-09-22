@@ -5,7 +5,7 @@ Source of truth for each row is the ledger named in the first column.
 
 **Current phase:** P1 Welcome. P0 Foundation gate passed on automated evidence 2026-09-21 (details below);
 owner review of P0 pending — proceeding under the 2026-09-21 authorization in `plans/README.md`.
-**Last updated:** 2026-09-21
+**Last updated:** 2026-09-22
 
 ## Feature IDs by ledger and phase
 
@@ -25,15 +25,15 @@ owner review of P0 pending — proceeding under the 2026-09-21 authorization in 
 | Phase | In scope | planned | built | verified | BLOCKED | Gate passed | Owner sign-off |
 |---|---|---|---|---|---|---|---|
 | P0 Foundation | 103 | 0 | 1 | 102 | 0 | ☑ 2026-09-21 | pending review |
-| P1 Welcome | 51 | 51 | 0 | 0 | 0 | ☐ | |
-| P2 Vertical slice | 50 | 50 | 0 | 0 | 0 | ☐ | |
+| P1 Welcome | 51 | 43 | 8 | 0 | 0 | ☐ | |
+| P2 Vertical slice | 50 | 0 | 0 | 50 | 0 | ☑ 2026-09-22 (automated evidence) | pending review |
 | P3 macOS (+ engine core) | 202 | 202 | 0 | 0 | 0 | ☐ | |
 | P4 Windows 11 | 152 | 152 | 0 | 0 | 0 | ☐ | |
 | P5 iOS | 140 | 140 | 0 | 0 | 0 | ☐ | |
 | P6 Android | 132 | 132 | 0 | 0 | 0 | ☐ | |
 | P7 Linux | 89 | 89 | 0 | 0 | 0 | ☐ | |
 | P8 Polish | 11 | 11 | 0 | 0 | 0 | ☐ | |
-| **Total** | **930** | **827** | **1** | **102** | **0** | | |
+| **Total** | **930** | **769** | **9** | **152** | **0** | | |
 
 ### P0 gate evidence (2026-09-21, local runs on production builds)
 | Gate item (`05-roadmap.md`) | Result |
@@ -50,6 +50,22 @@ owner review of P0 pending — proceeding under the 2026-09-21 authorization in 
 
 Not yet evidenced: `TEST-TOOL-01` (needs the first GitHub PR run — the repository has no remote yet).
 
+### P1 storyboard match (2026-09-21, owner: "exactly same as this html page")
+Welcome screens vs the frames rendered full screen (`plans/visual-targets/frames/`, `scripts/render-visual-targets.mjs`),
+share of pixels differing by more than 24/255 on any channel, preview build, Chromium:
+
+| Screen | 1280 × 800 | 1440 × 900 | 1680 × 1050 | 1920 × 1200 | What remains |
+|---|---|---|---|---|---|
+| Hello | 0.05 % | 0.01 % | 0.01 % | 0.00 % | text anti-aliasing |
+| Intro | 0.76 % | 0.49 % | 0.15 % | 0.39 % | glyph-edge anti-aliasing (vector path vs text; ink within 0.3 px) |
+| Who's watching? | 0.06 % | 0.07 % | 0.05 % | 0.06 % | avatar WebP vs the frame's PNG |
+| Chooser | 0.26 % | 0.23 % | 0.28 % | 0.26 % | the Résumé · Skip the OS footer (required, not in the frame), snapshot edges |
+
+Tier 2 (forced WebGL) matches too except the lens rim, where the shader adds the refraction the storyboard promises.
+The Hello glass (lens, glyph, pill) then moved to the owner's later liquid-glass decision (06 Deviations log); the
+Hello row above is the storyboard version. The five OS screens are not built yet (P2–P7); each has its frame values in
+its `01-identity.md` "Visual target".
+
 ### P1 starting baseline (Lighthouse warnings owned by `PERF-LCP-01`, `PERF-BUDGET-01`, `TEST-PERF-01`)
 | URL | LCP | TBT | Script (gz) | Budget |
 |---|---|---|---|---|
@@ -61,6 +77,27 @@ Not yet evidenced: `TEST-TOOL-01` (needs the first GitHub PR run — the reposit
 Cause (from the traces): on localhost the first paint lands after hydration, so Lighthouse's simulation charges all
 framework script work to LCP; `/` also idle-loads the shell runtime. P1 rebuilds `/` (kernel out of the welcome
 bundle) and must bring every row under budget before the three assertions become errors.
+
+### P2 gate evidence (2026-09-22, local runs on the preview builds)
+macOS stays `released: false` (ARCH-REL-01): production still 404s `/macos`; preview builds show it.
+
+| Gate item (`05-roadmap.md`) | Result |
+|---|---|
+| H1, D1, P1, M3, O1 green on macOS | H1 `e2e/macos.spec.ts` MAC-FIND-03 · D1 ROUTE-DEEP-01 · M3 MAC-WM-10 + MAC-FIND-07 · O1 RESP-ROT-01 (re-clamp + the minimize flight lands on the moved Dock tile) · P1 reload + corrupt storage in `e2e/foundation.spec.ts` on macOS, TTL expiry (KRN-SES-01) and per-OS sessions parked on a switch (KRN-SWITCH-01) in `unit/kernel/sessions.test.ts` |
+| INP ≤ 200 ms under 4× CPU | `e2e/performance.spec.ts` PERF-INP-01, read from Event Timing (9 presses: open, select ×2, drag, minimize, restore, zoom, open): worst 32–40 ms over 6 runs (was 400–640 ms before presses committed after paint) |
+| Leak loop stable | PERF-LEAK-01 (160 window opens + 6 exits through history): heap < 2 MB, listeners and DOM back to baseline · MOTION-LEAK-01: 0 tickers / 0 tweens at idle |
+| axe clean on home + Finder | A11Y-AXE-01 on home, Finder and the compact switcher (WCAG 2.2 AA) |
+| Site deployable, macOS unreleased | `npm run build` + post-build audit: all routes static, no token in client assets |
+| Playwright (macOS, chooser, history, foundation, welcome, chooser, résumé specs) | chromium-desktop · pixel · reduced-motion: 200 passed, 4 failed — all in `welcome.spec.ts` (P1: W1 "second visit lands on the profiles" ×3, which `/` always starting at Hello now contradicts; RES-PRE-01 once under load, 3/3 alone) · iphone (WebKit, 2 workers): 29 passed, 1 P0 history flake under load (4/4 alone) · asset-original + chromium-desktop + reduced-motion: 82 passed · firefox + iPads (smoke): 3 passed · perf: 5 passed · leak: 1 passed |
+| Vitest | all unit + component suites green (see IMPLEMENTATION.md P2 checkpoint) |
+
+Sizes (gzip): macOS shell entry 15.7 KB (≤ 40) · `os-kernel` 13.8 KB (≤ 28) · `/macos` first load 214.9 KB (framework 132.8 KB
+before paint). The shared/10 "OS first load ≤ 200 KB" row still assumes the old ~105 KB framework; re-basing it like
+the welcome row (`PERF-BUDGET-01`, P1) gives ≤ 226 KB. A stray chooser warm-up on OS routes (13.6 KB) was found and
+removed; ARCH-SPLIT-01 now asserts it.
+
+Deviations for owner review (logged in each ledger): `MAC-ID-01` link text colour · `MAC-ID-02` inactive title
+colour · `PERF-INP-01` measured through Event Timing.
 
 ## Released operating systems (`OS_REGISTRY[os].released`)
 
