@@ -20,6 +20,12 @@ export interface DragOptions {
   readonly onEnd: (result: { dx: number; dy: number; moved: boolean; reason: DragEndReason }) => void;
   readonly threshold?: number;
   readonly ticker?: Ticker;
+  /**
+   * addition (plans/ios/surfaces/home-screen: a pull on the Home pages may start on an icon): capture the pointer only
+   * once the drag has started, so a press that stays a click keeps its native target (capture at press would retarget
+   * the click to the handle). Until then the listeners live on `window`.
+   */
+  readonly lazyCapture?: boolean;
 }
 
 export interface DragSession {
@@ -30,7 +36,7 @@ export interface DragSession {
 export const DRAG_THRESHOLD_PX = 3;
 
 export function drag(handle: HTMLElement, press: PointerEvent, options: DragOptions): DragSession {
-  const { onStart, onMove, onEnd, threshold = DRAG_THRESHOLD_PX, ticker = gsap.ticker } = options;
+  const { onStart, onMove, onEnd, threshold = DRAG_THRESHOLD_PX, ticker = gsap.ticker, lazyCapture = false } = options;
   const lifecycle = new AbortController();
   const { signal } = lifecycle;
   const startX = press.clientX;
@@ -41,16 +47,20 @@ export function drag(handle: HTMLElement, press: PointerEvent, options: DragOpti
   let moved = false;
   let ended = false;
 
-  try {
-    handle.setPointerCapture(pointerId);
-  } catch {
-    // A synthetic or already-released pointer: the window-level listeners below still end the drag.
-  }
+  const capture = () => {
+    try {
+      handle.setPointerCapture(pointerId);
+    } catch {
+      // A synthetic or already-released pointer: the window-level listeners below still end the drag.
+    }
+  };
+  if (!lazyCapture) capture();
 
   const tick = () => {
     if (!moved) {
       if (Math.hypot(latest.dx, latest.dy) < threshold) return;
       moved = true;
+      if (lazyCapture) capture();
       onStart?.();
     }
     if (latest.dx === applied.dx && latest.dy === applied.dy) return;
@@ -87,21 +97,25 @@ export function drag(handle: HTMLElement, press: PointerEvent, options: DragOpti
   };
 
   const delta = (event: PointerEvent) => ({ dx: event.clientX - startX, dy: event.clientY - startY });
-  handle.addEventListener(
+  // Without capture yet, the pointer may leave the handle: listen where it goes.
+  const source: Pick<EventTarget, 'addEventListener'> = lazyCapture ? window : handle;
+  source.addEventListener(
     'pointermove',
     (event) => {
-      if (event.pointerId === pointerId) latest = delta(event);
+      const move = event as PointerEvent;
+      if (move.pointerId === pointerId) latest = delta(move);
     },
     { signal, passive: true },
   );
-  handle.addEventListener(
+  source.addEventListener(
     'pointerup',
     (event) => {
-      if (event.pointerId === pointerId) finish('release', delta(event));
+      const up = event as PointerEvent;
+      if (up.pointerId === pointerId) finish('release', delta(up));
     },
     { signal },
   );
-  handle.addEventListener('pointercancel', () => finish('cancel'), { signal });
+  source.addEventListener('pointercancel', () => finish('cancel'), { signal });
   handle.addEventListener('lostpointercapture', () => finish('lost-capture'), { signal });
   window.addEventListener('blur', () => finish('blur'), { signal });
   window.addEventListener('resize', () => finish('resize'), { signal });

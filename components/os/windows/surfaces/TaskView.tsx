@@ -24,7 +24,8 @@ import { isFocusable } from '@/lib/kernel/state';
 import type { WindowId, WindowInstance } from '@/lib/kernel/types';
 import { useKernel } from '@/stores/kernel-context';
 import { dispatchSoon, flushQueued, getKernel } from '@/stores/kernel-store';
-import { flAdd, flDismiss } from '../fluent.generated';
+import { flDismiss } from '../fluent.generated';
+import { flAdd } from '../fluent.apps.generated';
 import { Fl, PdfFile } from '../icons';
 import { shownRect, winBinding, windowLabel, winWorkspace } from '../model';
 import { WIN_CURVES, WIN_MOTION } from '../motion';
@@ -116,7 +117,9 @@ export function TaskView({
             ? 0
             : (closing ? WIN_MOTION.taskViewOut.ms : entering ? WIN_MOTION.taskViewIn.ms : 167) / 1000,
           ease: ease(closing ? 'exit' : 'entrance'),
-          clearProps: closing ? 'transform,transformOrigin' : undefined,
+          // Only the exit clears; an explicit `clearProps: undefined` throws inside GSAP when the tween completes (at
+          // once under reduced motion, which unmounted Task View).
+          ...(closing ? { clearProps: 'transform,transformOrigin' } : {}),
           overwrite: true,
         },
         0,

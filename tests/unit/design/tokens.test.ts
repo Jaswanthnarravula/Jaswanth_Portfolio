@@ -3,9 +3,10 @@
  * (radius, font, target, material) tuple), DS-SCRIM-01 (scrims ≥ 4.5:1 on worst-case backdrops; the brand reader's
  * text, accent fills and résumé paper ≥ 4.5:1 in both themes).
  */
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { OS_IDS } from '@/lib/kernel/ids';
+import { ACCENT_IDS } from '@/lib/kernel/types';
 
 export const SEMANTIC_TOKENS = [
   '--surface-base',
@@ -81,6 +82,23 @@ describe('DS-TOKEN-01 three-layer tokens + [data-os] scopes', () => {
     const scope = baseScope(os);
     expect(SEMANTIC_TOKENS.filter((token) => !scope.has(token))).toEqual([]);
   });
+  it('WIN-ID-01 data-os=windows defines every semantic token and every --win-* token its stylesheets use', () => {
+    const scope = baseScope('windows');
+    expect(SEMANTIC_TOKENS.filter((token) => !scope.has(token))).toEqual([]);
+    const windowsCss = readFileSync('styles/os/windows.css', 'utf8');
+    const used = new Set<string>();
+    const walk = (dir: string) => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const path = `${dir}/${entry.name}`;
+        if (entry.isDirectory()) walk(path);
+        else if (entry.name.endsWith('.module.css'))
+          for (const match of readFileSync(path, 'utf8').matchAll(/var\((--win-[\w-]+)/g)) used.add(match[1]!);
+      }
+    };
+    walk('components/os/windows');
+    expect(used.size).toBeGreaterThan(20);
+    expect([...used].filter((token) => !new RegExp(`${token}\\s*:`).test(windowsCss))).toEqual([]);
+  });
   it('the brand layer defines every semantic token too', () => {
     const tokens = readFileSync('styles/tokens.css', 'utf8');
     for (const token of SEMANTIC_TOKENS) expect(tokens, token).toMatch(new RegExp(`${token}\\s*:`));
@@ -133,6 +151,14 @@ function parseColor(input: string): RGBA {
       a: 1,
     };
   }
+  const rgb = value.match(/^rgb\(\s*(\d+)\s+(\d+)\s+(\d+)\s*(?:\/\s*([\d.]+))?\s*\)$/);
+  if (rgb)
+    return {
+      r: toLinear(Number(rgb[1]) / 255),
+      g: toLinear(Number(rgb[2]) / 255),
+      b: toLinear(Number(rgb[3]) / 255),
+      a: rgb[4] === undefined ? 1 : Number(rgb[4]),
+    };
   const oklch = value.match(/^oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*(?:\/\s*([\d.]+))?\s*\)$/);
   if (!oklch) throw new Error(`Unparseable colour: ${value}`);
   const [L, C, H, A] = [
@@ -183,7 +209,8 @@ describe('DS-SCRIM-01 guaranteed contrast over wallpaper', () => {
     ],
     // The storyboard gradient's stops (plans/windows/01-identity): #7fc0ff · #2f6fe0 · #0b1f5c.
     windows: ['#7fc0ff', '#2f6fe0', '#0b1f5c'],
-    ios: ['oklch(0.86 0.08 200)', 'oklch(0.82 0.1 200)', 'oklch(0.8 0.12 30)'],
+    // The storyboard gradient's stops (plans/ios/01-identity): #8e6bd8 · #ff9f7a · #2a1d63 · #6c3aa3 · #e27a86 · #ffb07a.
+    ios: ['#8e6bd8', '#ff9f7a', '#2a1d63', '#6c3aa3', '#e27a86', '#ffb07a'],
     android: ['oklch(0.9 0.04 245)', 'oklch(0.84 0.07 200)', 'oklch(0.42 0.1 258)'],
     linux: ['oklch(0.17 0.01 260)', 'oklch(0.985 0.003 90)'],
   };
@@ -203,6 +230,47 @@ describe('DS-SCRIM-01 guaranteed contrast over wallpaper', () => {
       const declared = baseScope(os).get(`--wallpaper-${os}-worst`);
       expect(worst[os]).toContain(declared);
     }
+  });
+  it('WIN-ID-03 Windows dim text on Acrylic flyouts ≥ 4.5:1 over every worst-case backdrop (no live blur)', () => {
+    const scope = baseScope('windows');
+    const dim = parseColor(scope.get('--win-text-dim-acrylic')!);
+    for (const tint of ['--win-flyout', '--win-toast', '--win-menu'])
+      for (const backdrop of worst.windows!.map(parseColor)) {
+        const surface = over(parseColor(scope.get(tint)!), backdrop);
+        expect(contrast(dim, surface), tint).toBeGreaterThanOrEqual(4.5);
+      }
+  });
+  it('WIN-SET-07 on-accent text ≥ 4.5:1 on every Windows accent fill, at rest and on hover, light and dark', () => {
+    const stylesheet = css('windows');
+    const light = baseScope('windows');
+    const themes = {
+      light,
+      dark: new Map([...light, ...blockScope(stylesheet, ":root[data-theme='dark'] [data-os='windows']")]),
+    };
+    const chosen = blockScope(stylesheet, ":root[data-accent]:not([data-accent='blue']) [data-os='windows']");
+    // `color-mix(in srgb, a p%, b)` mixes the encoded channels.
+    const fill = (value: string): RGBA => {
+      const mix = value.match(/^color-mix\(in srgb, (#[0-9a-f]{6}) ([\d.]+)%, (#[0-9a-f]{6})\)$/i);
+      if (!mix) return parseColor(value);
+      const [a, b, p] = [parseColor(mix[1]!), parseColor(mix[3]!), Number(mix[2]) / 100];
+      const at = (x: number, y: number) => toLinear(encode(x) * p + encode(y) * (1 - p));
+      return { r: at(a.r, b.r), g: at(a.g, b.g), b: at(a.b, b.b), a: 1 };
+    };
+    for (const [theme, base] of Object.entries(themes))
+      for (const accent of ACCENT_IDS) {
+        const prefix = theme === 'dark' ? ":root[data-theme='dark']" : ':root';
+        const own =
+          accent === 'blue'
+            ? []
+            : [...blockScope(stylesheet, `${prefix}[data-accent='${accent}'] [data-os='windows']`)];
+        const scope = new Map([...base, ...own, ...(accent === 'blue' ? [] : chosen)]);
+        const text = parseColor(resolveVar(scope, scope.get('--win-on-accent')!));
+        for (const token of ['--win-accent', '--win-accent-hover'])
+          expect(
+            contrast(text, fill(resolveVar(scope, scope.get(token)!))),
+            `${theme} ${accent} ${token}`,
+          ).toBeGreaterThanOrEqual(4.5);
+      }
   });
   it('base text tokens meet 4.5:1 on their surfaces (light scopes)', () => {
     for (const os of ['macos', 'windows', 'ios'] as const) {

@@ -383,6 +383,11 @@ export function createChooserStage(deps: ChooserStageDeps): ChooserStage {
         return;
     }
   });
+  // The chooser decides it is `returning` at render but subscribes here, a passive effect later. A leaving OS whose
+  // exit ended in that gap (the chunk arrived mid-beat on a deep link) found no return stage and went idle unseen:
+  // read the state once now, or the foyer would stay covered forever.
+  const now = deps.getState?.();
+  if (coveredForReturn && now && now.transition.phase === 'idle' && now.activeOs === null) uncover();
 
   const onResize = () => {
     if (run && (run.phase === 'flying' || run.phase === 'covered')) run.flight?.retarget(full());

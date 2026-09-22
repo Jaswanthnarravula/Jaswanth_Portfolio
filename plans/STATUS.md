@@ -3,8 +3,11 @@
 Single place to see where the project stands. Update this file in the same change that updates a ledger.
 Source of truth for each row is the ledger named in the first column.
 
-**Current phase:** P1 Welcome. P0 Foundation gate passed on automated evidence 2026-09-21 (details below);
-owner review of P0 pending — proceeding under the 2026-09-21 authorization in `plans/README.md`.
+**Current phase:** P5 iOS built and verified on automated evidence — 140 of 140 P5 rows verified; paused for the
+owner's P5 gate review (details below).
+**Previous:** P3 macOS (+ terminal engine core) built — 162 verified · 39 built · 1 BLOCKED; paused for the owner's
+P3 gate review (details below). P0 and P2 gates passed on automated evidence; owner reviews pending. P4 Windows 11 built
+(120 of 152 P4 rows verified; details below), paused for the owner's P4 review.
 **Last updated:** 2026-09-22
 
 ## Feature IDs by ledger and phase
@@ -27,13 +30,13 @@ owner review of P0 pending — proceeding under the 2026-09-21 authorization in 
 | P0 Foundation | 103 | 0 | 1 | 102 | 0 | ☑ 2026-09-21 | pending review |
 | P1 Welcome | 51 | 43 | 8 | 0 | 0 | ☐ | |
 | P2 Vertical slice | 50 | 0 | 0 | 50 | 0 | ☑ 2026-09-22 (automated evidence) | pending review |
-| P3 macOS (+ engine core) | 202 | 202 | 0 | 0 | 0 | ☐ | |
-| P4 Windows 11 | 152 | 152 | 0 | 0 | 0 | ☐ | |
-| P5 iOS | 140 | 140 | 0 | 0 | 0 | ☐ | |
+| P3 macOS (+ engine core) | 202 | 0 | 39 | 162 | 1 | ☐ (awaiting review) | pending review |
+| P4 Windows 11 | 152 | 2 | 30 | 120 | 0 | ☐ (automated evidence recorded; see below) | pending review |
+| P5 iOS | 140 | 0 | 0 | 140 | 0 | ☐ (automated evidence recorded; see below) | pending review |
 | P6 Android | 132 | 132 | 0 | 0 | 0 | ☐ | |
 | P7 Linux | 89 | 89 | 0 | 0 | 0 | ☐ | |
 | P8 Polish | 11 | 11 | 0 | 0 | 0 | ☐ | |
-| **Total** | **930** | **769** | **9** | **152** | **0** | | |
+| **Total** | **930** | **277** | **78** | **574** | **1** | | |
 
 ### P0 gate evidence (2026-09-21, local runs on production builds)
 | Gate item (`05-roadmap.md`) | Result |
@@ -98,6 +101,71 @@ removed; ARCH-SPLIT-01 now asserts it.
 
 Deviations for owner review (logged in each ledger): `MAC-ID-01` link text colour · `MAC-ID-02` inactive title
 colour · `PERF-INP-01` measured through Event Timing.
+
+### P3 evidence (2026-09-22, local runs on the preview build `.next-p3`)
+All eight macOS apps and every macOS surface are built: lock screen, Spotlight, notifications + Center, Control Center,
+context menus, Mission Control, dialogs (About This Mac, Get Info, Quick Look, Switch OS), the tour, the boot replay, and the
+shared terminal engine inside Terminal and VS Code.
+
+| Check | Result |
+|---|---|
+| Typecheck | `tsc --noEmit` clean |
+| Vitest | macOS unit + component suites green; terminal engine `unit/terminal/*` green (all 50 Linux P3 engine rows cite it). Full run: 1376 passed, 2 failed — only `unit/routing/codec.test.ts` ARCH-REL-01 — see "Owner questions" |
+| Playwright macOS (`macos.spec.ts`, `macos-p3.spec.ts`, `macos-p3b.spec.ts`, `macos-chooser.spec.ts`) | chromium-desktop · reduced-motion · pixel · iphone: 135 passed; 2 load flakes (RESP-ROT-01, MAC-WM-01) pass on rerun |
+| Perf project | ARCH-SPLIT-01 · PERF-INP-01 · MOTION-RULE-02 green |
+| Leak loop (PERF-LEAK-01) | heap +1.19 MB of 2 · listeners 0 · DOM 0 · detached elements 0, after fixing a real leak in the Overview scroll effects (see the shared Deviations log) |
+| axe (X1) | A11Y-AXE-01 clean with Spotlight, Settings and Mission Control open |
+| Blur budget (X5) | ≤ 3 live `backdrop-filter` surfaces with Spotlight + a banner open |
+| `check-plans` | 148 documents · 930 IDs · 930 ledger rows |
+
+**What remains in P3**
+- `MAC-BOOT-04` **BLOCKED**: the > 4 s "Still starting up…" line lives in the chooser boot frame, which this phase was told
+  to keep unchanged. Owner decision needed (allow a one-line chooser change, or move the row).
+- 39 rows are `built`, not `verified`: each is implemented, but its named test needs a run that has not happened yet —
+  nightly projects (iphone-landscape rail, ipad touch posture, forced colours, dark visual), perf traces (marquee, lazy
+  search / tour / egg chunks, P3 flights), a real device with the keyboard up, or a named e2e still to write (throttled
+  Dock bounce, notification swipe, GitHub card flight, the cross-OS M1 keyboard journey). Each row names its gap.
+- Not in P3: `MAC-DOCK-08` and `MAC-X-02` (P4 continuity), `MAC-A11Y-06` (P8 screen-reader script).
+
+**Owner questions**
+- All five OSes are `released: true` in `lib/kernel/registry.ts` (commit cfd53de). ARCH-REL-01 expects unreleased OSes to
+  404 in production, so it fails until the flags are set back or the test is re-based on the new release set. Left as is.
+
+Deviations for owner review (logged in each ledger): macOS — `MAC-BOOT-04`, `MAC-DOCK-01` (no Trash), `MAC-DOCK-02`,
+`MAC-DOCK-03`, `MAC-DOCK-07`, `MAC-SPOT-01`, `MAC-SET-03`, `MAC-SET-06`, `MAC-MENU-03`, `MAC-CTX-03`, `MAC-RESP-01`, the
+removed placeholder and the adapted P2 tests · shared — the macOS kernel additions and `RESP-DOM-01`.
+
+### P4 evidence (2026-09-22, local runs on the preview build `.next-p4`)
+The Windows 11 shell (taskbar, Start ↔ Search, Task View, Snap, flyouts, toasts, context menus, lock, boot, About
+Windows, continuity, tour) and its seven apps are built. P4 was started at the owner's direct request before the P1–P3
+gates were reviewed. Windows ledger: 115 verified · 30 built · 1 P8 row planned; the 5 shared P4 rows verified; the 2
+macOS Handoff rows (`MAC-DOCK-08`, `MAC-X-02`) stay with the macOS session.
+
+| Check | Result |
+|---|---|
+| Typecheck · lint · format | clean (`tsc --noEmit`, `eslint`, `prettier --check`) |
+| Vitest | Windows evidence set (Windows, design tokens, terminal, welcome) 598/598; full run 1570 passed, 2 failed — only ARCH-REL-01 (every OS `released: true` since commit cfd53de) |
+| Playwright Windows (7 specs) + chooser and history specs | Final run on the rebuilt `.next-p4` and an `ASSET_MODE=original` build, after the P5 session's shared `Press` / `drag` changes: every Windows spec plus `chooser.spec` and `history.spec` on chromium-desktop, iphone, pixel, reduced-motion, no-js and asset-original — **311 passed, 0 failed, 0 flaky** (104 skipped by design). Product defects traced from flakes under load and fixed: a hovered accent button read 3.9:1 (every accent hover now darkens, and a chosen accent gets its own hover tone), About Windows and the Properties / Shortcuts dialogs could return focus into the closing Search panel and then to `<body>`, and the Windows motion probe missed a tween before its first tick, so axe scanned half-faded pages (`WIN-SET-07` on iphone went from 13/16 to 16/16 at 8 workers). Test-side: `WIN-CASE-03` waits for the keyboard snap to land (30/30), `WIN-SET-01` records the 1.2 s search flash instead of catching it mid-flight, `WIN-TERM-05` allows 15 s for Edge's first chunk, `WIN-EDGE-04` is `test.slow()`. Under heavy machine contention (five sessions building and running suites here) the iphone project still times out; those runs are environment-bound, not Windows |
+| Budgets (gzip, before idle work) | `/windows` first load 241.3 KB (macOS 259.1 KB); Windows-only 44.4 KB vs the 38 KB shell row; apps 7.1–12.3 KB, VS Code 15.3 KB, Terminal 13.8 KB + shared engine — awaits the `PERF-BUDGET-01` re-base |
+| Speed (production) | windows visible 19–82 ms after the press, settled 212–381 ms; in-app navigation 22–81 ms to the URL |
+| Not run | nightly projects (Firefox, iPad, landscape, forced colours, visual snapshots), perf traces, real devices, screen reader (P8) |
+
+### P5 evidence (2026-09-22, local runs on the preview builds `.next-p5` (official assets) and `.next-p5o` (original))
+The iOS shell (Lock Screen, boot, Home Screen with pages and widgets, Dock, folders, Spotlight, Control Center,
+Notification Center and banners, quick actions, App Switcher, status bar and Home indicator, the icon ↔ app flight and
+the Home gesture) and its seven apps (Files with Quick Look, Safari, GitHub, Mail, Messages, Notes, Settings) are built.
+iOS ledger: 137 verified · 1 P8 row planned (`IOS-A11Y-06`, the recorded screen-reader script); the 3 shared P5 rows
+(`ROUTE-MOBILE-01`, `MOTION-FLIGHT-01`, `EGG-SHAKE-01`) verified.
+
+| Check | Result |
+|---|---|
+| Typecheck · lint · format | clean (`tsc --noEmit`, `eslint`, `prettier --check`) |
+| Vitest | iOS evidence set (`tests/unit/ios`, `tests/component/ios`, `tests/unit/kernel/ios.test.ts`) 212/212; full run 1605 passed, 3 failed — the 2 ARCH-REL-01 rows (every OS `released: true` since commit cfd53de, unchanged by P5) and `MAC-WM-10`, which is order-flaky in `tests/component/macos/shell.test.tsx` with and without P5's shared changes (verified by stashing them) |
+| Playwright iOS (`ios`, `ios-surfaces`, `ios-journeys`) + chooser | Final run on both rebuilt preview builds across chromium-desktop, iphone, pixel, reduced-motion, asset-original, firefox-desktop, ipad-portrait, ipad-landscape, webkit-desktop, iphone-landscape and forced-colors: **645 passed, 0 failed** (202 skipped by design — landscape-, pad-, motion- or build-specific). The suite found 16 product defects, all fixed and re-verified (listed in `IMPLEMENTATION.md`) |
+| Playwright perf (`perf`) | `IOS-ID-03`, `IOS-WIDG-04`, `IOS-MOTION-04` green: nothing animates at rest, no timers beyond the status-bar minute tick, and no Layout > 1 ms inside a tagged flight apart from the app body's own mount at 90 % (marked `pf-app-mount:*`) |
+| Budgets (JS fetched by the load event, encoded) | /ios 163.3 KB, /ios/github 139.8 KB, measured the same way /macos reads 163.3 KB — awaits the `PERF-BUDGET-01` re-base |
+| Both asset modes | official (:3510) and `ASSET_MODE=original` (:3511) built and served; `IOS-ID-02` compares every icon box across the two builds |
+| Not run | Lighthouse, real devices (iPhone / iPad with the keyboard up), screen readers (P8), visual baselines — `IOS-ID-06` attaches light and dark screenshots but sets no pixel baseline |
 
 ## Released operating systems (`OS_REGISTRY[os].released`)
 

@@ -645,7 +645,7 @@
   color: var(--win-on-accent);
 }
 .accentButton::before {
-  background: color-mix(in srgb, var(--win-on-accent) 10%, transparent);
+  background: var(--win-accent-hover); /* the Windows accent hover tone: contrast never drops on hover */
 }
 
 /* --- Toggle switch: 40 × 20 track, 12 px thumb, 83 ms (the button itself is 40 × 32 — a full target). ---------- */

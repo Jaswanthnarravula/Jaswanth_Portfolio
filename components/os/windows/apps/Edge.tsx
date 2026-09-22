@@ -72,26 +72,21 @@ import {
 } from '@/lib/motion/overview-scroll';
 import { useKernel } from '@/stores/kernel-context';
 import { dispatchSoon } from '@/stores/kernel-store';
+import { flInfo, flLink, flMore, flOpen, flRefresh, flSearch } from '../fluent.generated';
 import {
   flAdd,
   flArrowLeft,
   flArrowRight,
   flGlobe,
-  flInfo,
-  flLink,
   flLock,
-  flMore,
-  flOpen,
   flPageFit,
   flPrint,
-  flRefresh,
   flRotate,
   flSave,
-  flSearch,
   flStarAdd,
   flZoomIn,
   flZoomOut,
-} from '../fluent.generated';
+} from '../fluent.apps.generated';
 import { Fl, PdfFile } from '../icons';
 import { EDGE_TAB_TITLES, edgeTab, userFolder, winBinding, type EdgeTab } from '../model';
 import { WIN_CURVES, WIN_MOTION } from '../motion';

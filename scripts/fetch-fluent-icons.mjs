@@ -2,7 +2,8 @@
  * Fluent UI System Icons for the Windows 11 skin — plans/windows/01-identity "Iconography": system glyphs come from
  * Fluent UI System Icons (Microsoft, MIT). Downloads a pinned version of the named SVGs from the npm package on
  * jsDelivr and writes their path data to `components/os/windows/fluent.generated.ts`, one named export per glyph so each
- * chunk bundles only the glyphs it uses (≈ 150 bytes each; no runtime dependency, no network at build time).
+ * glyph is ≈ 150 bytes (no runtime dependency, no network at build time); split-fluent-glyphs.mjs then splits the
+ * shell's glyphs from the apps' so the shell chunk carries only its own.
  * Re-run only to add a glyph:
  *   node scripts/fetch-fluent-icons.mjs
  */
@@ -188,3 +189,5 @@ ${body}
 `,
 );
 console.log(`[fluent] wrote ${entries.length} glyphs to ${out}`);
+// One module shared by many chunks is bundled whole: split the shell's glyphs from the apps' (shell budget, shared/10).
+await import('./split-fluent-glyphs.mjs');

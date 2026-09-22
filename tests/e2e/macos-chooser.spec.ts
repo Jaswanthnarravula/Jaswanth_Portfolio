@@ -154,7 +154,8 @@ test('CHOOSE-ENTER-02 a slow chunk shows the boot frame; any key skips its extra
   await unlock(page);
   await expect(page.getByRole('heading', { level: 1, name: /^macOS — / })).toBeFocused();
   // Once per session: back to the chooser and in again → no boot frame (the chunk is cached now too).
-  await page.unroute('**/_next/static/chunks/**');
+  // A held prefetch may still be waiting on its 2.5 s timer; its late fulfil must not fail the test.
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
   await page.goBack();
   await expect(heading(page)).toBeVisible();
   await card(page).click();
@@ -167,9 +168,10 @@ test('KRN-SWITCH-02 an OS switch while offline shows Retry and the plain portfol
   context,
 }, info) => {
   test.skip(info.project.name === 'firefox-desktop', 'Firefox emulation does not fire the online event');
-  // Start in the Windows preview stub (it has an OS switcher); macOS's chunk has never been requested.
-  await page.goto('/windows');
-  await waitForOs(page, 'windows');
+  // Start in a preview stub (it has an OS switcher; Windows has its real shell since P4); macOS's chunk has never been
+  // requested.
+  await page.goto('/android');
+  await waitForOs(page, 'android');
   await context.setOffline(true);
   await page
     .getByRole('navigation', { name: 'Switch operating system' })

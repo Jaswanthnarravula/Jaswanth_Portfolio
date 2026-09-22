@@ -1,0 +1,410 @@
+/* iOS Mail — plans/ios/apps/mail.md. Plain white lists with inset hairlines, the blue unread dot, 17/15 pt type; the
+   compose card sheet with 17 pt fields; the full page is three columns (mailboxes · list · message). --ios-* only. */
+
+.app {
+  position: relative;
+  height: 100%;
+}
+
+/* --- Message list ------------------------------------------------------------------------------------------------ */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.item {
+  position: relative;
+  overflow: hidden;
+  background: var(--ios-plain);
+}
+.item + .item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 32px;
+  z-index: 2;
+  height: 0.5px;
+  background: var(--ios-sep);
+}
+.swipeAction {
+  position: absolute;
+  inset: 0 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 112px;
+  border: 0;
+  background: var(--ios-tint-fill);
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.mailRow {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 6px;
+  min-height: 44px;
+  padding: 10px 16px 11px 12px;
+  background: var(--ios-plain);
+  color: var(--ios-label);
+  font-family: var(--font-ui);
+  text-decoration: none;
+  touch-action: pan-y;
+}
+.mailRow[data-selected] {
+  background: var(--ios-tint-fill);
+  color: #ffffff;
+}
+.mailRow[data-selected] .time,
+.mailRow[data-selected] .preview {
+  color: rgb(255 255 255 / 0.86);
+}
+.mailRow:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -3px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mailRow:hover {
+    background: var(--ios-grouped);
+  }
+  .mailRow[data-selected]:hover {
+    background: var(--ios-tint-fill);
+  }
+}
+.dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  margin-top: 6px;
+  border-radius: 50%;
+}
+.item[data-unread] .dot {
+  background: var(--ios-tint);
+}
+.rowBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.rowTop {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.sender {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 22px;
+  letter-spacing: -0.41px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.time {
+  flex: none;
+  color: var(--ios-label-2);
+  font-size: 15px;
+}
+.rowChevron {
+  flex: none;
+  align-self: center;
+  color: var(--ios-label-3);
+}
+.subject {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 20px;
+  letter-spacing: -0.24px;
+  white-space: nowrap;
+}
+.clip {
+  flex: none;
+  color: var(--ios-label-2);
+}
+.preview {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--ios-label-2);
+  font-size: 15px;
+  line-height: 20px;
+  letter-spacing: -0.24px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.item :global(button[aria-label$=' actions']) {
+  z-index: 3;
+}
+.empty {
+  display: grid;
+  place-items: center;
+  min-height: 40vh;
+  margin: 0;
+  padding: 0 32px;
+  color: var(--ios-label-2);
+  font-size: 17px;
+  text-align: center;
+}
+.filter {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--ios-tint);
+}
+.updated {
+  color: var(--ios-label);
+  font-size: 11px;
+  font-weight: 500;
+}
+.draftLabel {
+  color: var(--ios-red);
+  font-weight: 600;
+}
+
+/* --- Message ------------------------------------------------------------------------------------------------------ */
+/* The subject is drawn 22 bold in the body; the nav bar's title stays for assistive tech only. */
+:global([data-screen^='msg:']) :global([data-nav-bar]) h3 {
+  opacity: 0;
+}
+.message {
+  max-width: 760px;
+  padding: 8px 16px 32px;
+  font-family: var(--font-ui);
+}
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 0.5px solid var(--ios-sep);
+}
+.avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #a5abb8, #858a96);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+}
+.headerText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.from {
+  font-size: 17px;
+  font-weight: 600;
+}
+.to,
+.date {
+  color: var(--ios-label-2);
+  font-size: 15px;
+}
+.date {
+  align-self: flex-start;
+  flex: none;
+}
+.subjectLine {
+  margin: 14px 0 10px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: 0.35px;
+}
+.body {
+  font-size: 17px;
+  line-height: 1.45;
+}
+.body p {
+  margin: 0 0 12px;
+}
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 8px 0 16px;
+  padding: 0;
+  list-style: none;
+}
+.attachment {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 360px;
+  min-height: 44px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--ios-grouped);
+  color: var(--ios-label);
+  text-decoration: none;
+}
+.attachment:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 2px;
+}
+.attachmentText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.attachmentName {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attachmentMeta {
+  color: var(--ios-label-2);
+  font-size: 13px;
+}
+
+/* --- Compose sheet -------------------------------------------------------------------------------------------------- */
+.compose {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  font-family: var(--font-ui);
+}
+.field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin-left: 16px;
+  padding-right: 16px;
+  border-bottom: 0.5px solid var(--ios-sep);
+}
+.fieldLabel {
+  flex: none;
+  color: var(--ios-label-2);
+  font-size: 17px;
+}
+.token {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--ios-tint-soft);
+  color: var(--ios-tint-soft-ink);
+  font-size: 17px;
+}
+.input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ios-label);
+  font: inherit;
+  font-size: 17px;
+}
+.input:focus-visible,
+.bodyField:focus-visible {
+  outline: none;
+}
+.field:focus-within {
+  border-bottom-color: var(--ios-tint);
+}
+.bodyField {
+  flex: 1;
+  min-height: 12em;
+  margin: 0;
+  padding: 12px 16px 24px;
+  border: 0;
+  background: none;
+  color: var(--ios-label);
+  font: inherit;
+  font-size: 17px;
+  line-height: 1.4;
+  resize: none;
+  field-sizing: content;
+}
+.composeSheet {
+  --compose: 1;
+}
+.manual {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+}
+.manualLabel {
+  color: var(--ios-label-2);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+.manual .input {
+  padding: 0 12px;
+  border-radius: 10px;
+  background: var(--ios-grouped);
+}
+.manualHint {
+  margin: 0;
+  color: var(--ios-label-2);
+  font-size: 15px;
+}
+
+/* --- Full page: three columns ----------------------------------------------------------------------------------- */
+.split {
+  position: relative;
+  display: grid;
+  grid-template-columns: clamp(220px, 22%, 300px) clamp(300px, 32%, 420px) minmax(0, 1fr);
+  height: 100%;
+  background: var(--ios-plain);
+}
+.sidebar {
+  min-height: 0;
+  padding-top: calc(var(--app-top, 24px) + 22px);
+  overflow-y: auto;
+  border-right: 0.5px solid var(--ios-sep-opaque);
+  background: var(--ios-grouped);
+  --ios-margin: 12px;
+}
+.sidebarTitle {
+  margin: 0 20px 14px;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 41px;
+  letter-spacing: 0.37px;
+}
+.column {
+  position: relative;
+  min-width: 0;
+  border-right: 0.5px solid var(--ios-sep-opaque);
+  --app-top: 24px;
+}
+.column[data-detail] {
+  border-right: 0;
+}
+.column [data-screen] {
+  box-shadow: none;
+}
+.noMessage {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--ios-label-2);
+}
+.noMessage h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}

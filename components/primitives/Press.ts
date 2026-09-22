@@ -41,18 +41,23 @@ export function usePress({
     y: number;
     fired: boolean;
     firedAt: number;
+    /** Watches the pointer for the life of the press, wherever it goes (see `onPointerDown`). */
+    watch: AbortController | null;
   }>({
     timer: null,
     x: 0,
     y: 0,
     fired: false,
     firedAt: 0,
+    watch: null,
   });
 
   return useMemo<PressHandlers>(() => {
     const cancel = () => {
       if (state.current.timer) clearTimeout(state.current.timer);
       state.current.timer = null;
+      state.current.watch?.abort();
+      state.current.watch = null;
     };
     return {
       onPointerDown(event) {
@@ -64,10 +69,29 @@ export function usePress({
         if (!callbacks.current.onLongPress) return;
         state.current.timer = setTimeout(() => {
           state.current.timer = null;
+          state.current.watch?.abort();
+          state.current.watch = null;
           state.current.fired = true;
           state.current.firedAt = Date.now();
           callbacks.current.onLongPress?.('pointer', { x, y });
         }, delay);
+        // A gesture that starts meanwhile (a page swipe) captures the pointer, and the moves stop reaching this
+        // element: the press watches the window instead, so movement still cancels it.
+        const watch = new AbortController();
+        state.current.watch = watch;
+        const id = event.pointerId;
+        window.addEventListener(
+          'pointermove',
+          (move) => {
+            // The DOM event here, not React's synthetic one of the same name.
+            const pointer = move as globalThis.PointerEvent;
+            if (pointer.pointerId !== id) return;
+            if (Math.hypot(pointer.clientX - x, pointer.clientY - y) > tolerance) cancel();
+          },
+          { capture: true, passive: true, signal: watch.signal },
+        );
+        for (const type of ['pointerup', 'pointercancel', 'lostpointercapture'])
+          window.addEventListener(type, () => cancel(), { capture: true, signal: watch.signal });
       },
       onPointerMove(event) {
         if (!state.current.timer) return;

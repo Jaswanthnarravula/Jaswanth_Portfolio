@@ -1,0 +1,46 @@
+/* The iOS boot screen (plans/ios/surfaces/boot.md): black, the logo only — no progress indicator. Logo fades in 200 ms. */
+.boot {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: #000000;
+  color: #ffffff;
+  font-family: -apple-system, 'SF Pro Text', var(--font-inter), sans-serif;
+}
+.logo {
+  display: block;
+  width: 96px;
+  color: #ffffff;
+  animation: logo-in 200ms ease-out both;
+}
+.slow {
+  position: absolute;
+  bottom: 16%;
+  color: #8e8e93;
+  font-size: 13px;
+  opacity: 0;
+  animation: slow-in 300ms ease-out 4s forwards;
+}
+.slow a {
+  color: #9ec9ff;
+}
+@keyframes logo-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes slow-in {
+  to {
+    opacity: 1;
+  }
+}
+@media (max-width: 699.98px), (max-height: 499.98px) {
+  .logo {
+    width: 72px;
+  }
+}
+:root[data-motion='reduced'] .logo {
+  animation: none;
+}

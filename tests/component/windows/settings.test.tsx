@@ -11,6 +11,7 @@ import axe from 'axe-core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Settings from '@/components/os/windows/apps/Settings';
 import { requestIntent, resetIntents } from '@/components/os/windows/intents';
+import { LAUNCHER_ID } from '@/components/os/windows/model';
 import { useWinShell, WinShellProvider, type WinShellServices } from '@/components/os/windows/shell-context';
 import { Winver } from '@/components/os/windows/surfaces/Winver';
 import { WinWindow } from '@/components/os/windows/window/Window';
@@ -439,7 +440,7 @@ describe('WIN-SET-06 winver dialog (EGG-WINVER-01)', () => {
       expect(track).toHaveBeenCalledWith({ name: 'egg_found', id: 'EGG-WINVER-01' });
 
       first.unmount();
-      expect(document.activeElement).toBe(opener);
+      await waitFor(() => expect(document.activeElement).toBe(opener));
 
       // Opening it again never counts twice.
       const second = render(<Winver onClose={onClose} />);
@@ -480,6 +481,45 @@ describe('WIN-SET-06 winver dialog (EGG-WINVER-01)', () => {
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'OK' }));
     dialog.unmount();
     await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('region', { name: 'Settings' })));
+  });
+
+  it('closed while Search is still fading out, focus skips the leaving panel for the focused window — never <body>', async () => {
+    renderSettings();
+    // winver chosen in Search: the panel is closing but still mounted, its field still focused as the dialog opens.
+    const launcher = document.createElement('div');
+    launcher.id = LAUNCHER_ID;
+    launcher.dataset.state = 'closing';
+    const field = document.createElement('input');
+    launcher.append(field);
+    document.body.append(launcher);
+    field.focus();
+    try {
+      const dialog = render(<Winver onClose={() => undefined} />);
+      expect(document.activeElement).toBe(screen.getByRole('button', { name: 'OK' }));
+      dialog.unmount();
+      await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('region', { name: 'Settings' })));
+      expect(launcher.contains(document.activeElement)).toBe(false);
+    } finally {
+      launcher.remove();
+    }
+  });
+
+  it('a press outside that lands on a control keeps focus there (input wins)', async () => {
+    renderSettings();
+    const opener = document.createElement('button');
+    const elsewhere = document.createElement('button');
+    document.body.append(opener, elsewhere);
+    opener.focus();
+    try {
+      const dialog = render(<Winver onClose={() => undefined} />);
+      dialog.unmount();
+      elsewhere.focus(); // the press's default action, before the return runs
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(document.activeElement).toBe(elsewhere);
+    } finally {
+      opener.remove();
+      elsewhere.remove();
+    }
   });
 });
 

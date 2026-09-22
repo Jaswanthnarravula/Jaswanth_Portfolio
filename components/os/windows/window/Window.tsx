@@ -271,8 +271,13 @@ export function WinWindow({
         moveByPointer(event);
       },
       onDouble: (event) => {
-        // The drag gesture's pointer capture retargets the dblclick to the window: hit-test where it happened.
-        const target = (document.elementFromPoint(event.clientX, event.clientY) ?? event.target) as Element;
+        // The drag gesture's pointer capture retargets the dblclick to the window: hit-test where it happened
+        // (jsdom has no hit-testing, so the event's own target stands in there).
+        const hit =
+          typeof document.elementFromPoint === 'function'
+            ? document.elementFromPoint(event.clientX, event.clientY)
+            : null;
+        const target = (hit ?? event.target) as Element;
         if (compact || !target.closest('[data-drag-region]') || target.closest(INTERACTIVE)) return;
         dispatch({ type: 'TOGGLE_MAXIMIZE', id });
       },

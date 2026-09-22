@@ -42,6 +42,15 @@
   backdrop-filter: var(--material-blur);
 }
 
+/* Acrylic surfaces sit over the wallpaper: their dim text uses the acrylic step (4.5 : 1 over the tint, WCAG 1.4.3). */
+.preview,
+.launcher,
+.flyout,
+.toast,
+.menu {
+  --win-text-dim: var(--win-text-dim-acrylic);
+}
+
 /* --- Desktop -------------------------------------------------------------------------------------------------------- */
 .desktop {
   position: absolute;
@@ -474,6 +483,10 @@
 .taskbar[data-align='left'] ~ .panelSlot .launcher {
   left: 12px;
   transform: none;
+}
+/* Arriving in place of its loading placeholder: the panel is already up — no second rise. */
+.launcher[data-swap] {
+  animation: none;
 }
 .launcher[data-state='closing'] {
   animation: win-launcher-out var(--win-d167) var(--win-ease-out) both;

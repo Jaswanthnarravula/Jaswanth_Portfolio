@@ -42,11 +42,39 @@
   --material-blur: blur(20px) saturate(180%);
   --hairline: oklch(0.3 0.01 286 / 0.2);
   --wallpaper-ios:
-    radial-gradient(90% 60% at 20% 18%, oklch(0.82 0.1 200) 0%, transparent 60%),
-    radial-gradient(80% 70% at 88% 40%, oklch(0.74 0.14 300) 0%, transparent 62%),
-    radial-gradient(100% 70% at 30% 92%, oklch(0.8 0.12 30) 0%, transparent 60%),
-    linear-gradient(180deg, oklch(0.72 0.1 250) 0%, oklch(0.66 0.13 290) 100%);
-  --wallpaper-ios-worst: oklch(0.86 0.08 200);
+    radial-gradient(60% 90% at 12% 8%, #8e6bd8 0, transparent 60%),
+    radial-gradient(55% 80% at 92% 18%, #ff9f7a 0, transparent 55%),
+    linear-gradient(160deg, #2a1d63 0, #6c3aa3 45%, #e27a86 85%, #ffb07a 100%);
+  --wallpaper-ios-worst: #ffb07a;
+  /* iOS system palette (plans/ios/01 "Accent", grouped backgrounds). Blue text/fills use #0068da (AA 5.3:1) — the
+     frame's #0a7aff is 4.0:1 on white (deviation logged in plans/ios/08). */
+  --ios-grouped: #f2f2f7;
+  --ios-cell: #ffffff;
+  --ios-plain: #ffffff;
+  --ios-label: #000000;
+  --ios-label-2: #6d6d72;
+  --ios-label-3: #8e8e93;
+  --ios-sep: rgb(60 60 67 / 0.29);
+  --ios-sep-opaque: #c6c6c8;
+  --ios-fill: #e3e3e8;
+  --ios-fill-2: rgb(118 118 128 / 0.12);
+  --ios-tint: #0068da;
+  --ios-tint-fill: #0068da;
+  --ios-tint-soft: #eef3ff;
+  --ios-tint-soft-ink: #0a4fd6;
+  --ios-red: #d70015;
+  --ios-green: #34c759;
+  --ios-orange: #ff9500;
+  --ios-bar: rgb(249 249 249 / 0.84);
+  --ios-bar-solid: #f7f7f7;
+  --ios-paper: #fffdf6;
+  --ios-segment: #eeeef0;
+  --ios-thumb: #ffffff;
+  --ios-bubble-in: #e9e9eb;
+  --ios-bubble-out: #0068da;
+  --ios-widget: linear-gradient(140deg, rgb(255 255 255 / 0.92), rgb(235 240 255 / 0.85));
+  --ios-widget-ink: #16183a;
+  --ios-widget-ink-2: #5a5f8a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -69,11 +97,34 @@
     --material-chrome: oklch(0.16 0.004 286 / 0.78);
     --hairline: oklch(0.7 0.01 286 / 0.26);
     --wallpaper-ios:
-      radial-gradient(90% 60% at 20% 18%, oklch(0.36 0.1 220) 0%, transparent 60%),
-      radial-gradient(80% 70% at 88% 40%, oklch(0.34 0.14 300) 0%, transparent 62%),
-      radial-gradient(100% 70% at 30% 92%, oklch(0.32 0.12 20) 0%, transparent 60%),
-      linear-gradient(180deg, oklch(0.16 0.05 260) 0%, oklch(0.14 0.06 290) 100%);
-    --wallpaper-ios-worst: oklch(0.4 0.1 220);
+      radial-gradient(60% 90% at 12% 8%, #4a3480 0, transparent 60%),
+      radial-gradient(55% 80% at 92% 18%, #7a3f36 0, transparent 55%),
+      linear-gradient(160deg, #120b2e 0, #331a55 45%, #6a3048 85%, #7a4a34 100%);
+    --wallpaper-ios-worst: #7a4a34;
+    --ios-grouped: #000000;
+    --ios-cell: #1c1c1e;
+    --ios-plain: #000000;
+    --ios-label: #ffffff;
+    --ios-label-2: #a1a1a8;
+    --ios-label-3: #8d8d93;
+    --ios-sep: rgb(84 84 88 / 0.6);
+    --ios-sep-opaque: #38383a;
+    --ios-fill: #2c2c2e;
+    --ios-fill-2: rgb(118 118 128 / 0.24);
+    --ios-tint: #3d9bff;
+    --ios-tint-fill: #0068da;
+    --ios-tint-soft: #0d2a4d;
+    --ios-tint-soft-ink: #9ec9ff;
+    --ios-red: #ff6961;
+    --ios-bar: rgb(22 22 23 / 0.84);
+    --ios-bar-solid: #161617;
+    --ios-paper: #121212;
+    --ios-segment: #2c2c2e;
+    --ios-thumb: #636366;
+    --ios-bubble-in: #26252a;
+    --ios-widget: linear-gradient(140deg, rgb(44 44 50 / 0.9), rgb(30 32 48 / 0.86));
+    --ios-widget-ink: #f2f3ff;
+    --ios-widget-ink-2: #b9bddf;
   }
 }
 :root[data-theme='dark'] [data-os='ios'] {
@@ -95,9 +146,32 @@
   --material-chrome: oklch(0.16 0.004 286 / 0.78);
   --hairline: oklch(0.7 0.01 286 / 0.26);
   --wallpaper-ios:
-    radial-gradient(90% 60% at 20% 18%, oklch(0.36 0.1 220) 0%, transparent 60%),
-    radial-gradient(80% 70% at 88% 40%, oklch(0.34 0.14 300) 0%, transparent 62%),
-    radial-gradient(100% 70% at 30% 92%, oklch(0.32 0.12 20) 0%, transparent 60%),
-    linear-gradient(180deg, oklch(0.16 0.05 260) 0%, oklch(0.14 0.06 290) 100%);
-  --wallpaper-ios-worst: oklch(0.4 0.1 220);
+    radial-gradient(60% 90% at 12% 8%, #4a3480 0, transparent 60%),
+    radial-gradient(55% 80% at 92% 18%, #7a3f36 0, transparent 55%),
+    linear-gradient(160deg, #120b2e 0, #331a55 45%, #6a3048 85%, #7a4a34 100%);
+  --wallpaper-ios-worst: #7a4a34;
+  --ios-grouped: #000000;
+  --ios-cell: #1c1c1e;
+  --ios-plain: #000000;
+  --ios-label: #ffffff;
+  --ios-label-2: #a1a1a8;
+  --ios-label-3: #8d8d93;
+  --ios-sep: rgb(84 84 88 / 0.6);
+  --ios-sep-opaque: #38383a;
+  --ios-fill: #2c2c2e;
+  --ios-fill-2: rgb(118 118 128 / 0.24);
+  --ios-tint: #3d9bff;
+  --ios-tint-fill: #0068da;
+  --ios-tint-soft: #0d2a4d;
+  --ios-tint-soft-ink: #9ec9ff;
+  --ios-red: #ff6961;
+  --ios-bar: rgb(22 22 23 / 0.84);
+  --ios-bar-solid: #161617;
+  --ios-paper: #121212;
+  --ios-segment: #2c2c2e;
+  --ios-thumb: #636366;
+  --ios-bubble-in: #26252a;
+  --ios-widget: linear-gradient(140deg, rgb(44 44 50 / 0.9), rgb(30 32 48 / 0.86));
+  --ios-widget-ink: #f2f3ff;
+  --ios-widget-ink-2: #b9bddf;
 }

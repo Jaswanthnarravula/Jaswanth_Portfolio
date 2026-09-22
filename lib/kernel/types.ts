@@ -154,6 +154,12 @@ export interface WindowInstance {
   readonly invoker?: string | null;
   /** addition: Windows Snap (see `SnapState`); absent = floating. */
   readonly snap?: SnapState;
+  /**
+   * addition (plans/ios/02 "Warm apps", apps/*: "session state"): an app's own session state that is not a URL — a
+   * mobile app's tab, pushed screens that write no history, a conversation's visited branches. Short strings by key;
+   * persisted with the session, so an evicted or reloaded app restores its screen (`IOS-FLIGHT-05`, `IOS-MSG-05`).
+   */
+  readonly ui?: Readonly<Record<string, string>>;
 }
 
 export interface TerminalSession {

@@ -407,6 +407,9 @@ test.describe('accessibility and résumé reach', () => {
     await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
     await expect(page.locator('[data-os-shell]')).toBeAttached();
+    // The first card is iOS: its Lock Screen shows on a chooser entry (IOS-LOCK-02), "Open iOS" focused; Enter unlocks.
+    await expect(page.getByRole('button', { name: 'Open iOS' })).toBeFocused();
+    await page.keyboard.press('Enter');
     await expect(page.getByRole('heading', { level: 1, name: /About$/ })).toBeFocused();
     await expectFocusNotOnBody(page);
   });

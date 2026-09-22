@@ -11,7 +11,7 @@
  * Postures (plans/windows/04): `pointer` full fidelity · `touch` tablet posture · `compact` — one maximized window above
  * the taskbar, Start/Search as full-height sheets that Back closes, Task View as the window switcher.
  */
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { copyText, goHref } from '@/components/content';
 import { contentIndex } from '@/data/content-index';
 import type { ContentRef } from '@/data/schema';
@@ -27,8 +27,7 @@ import { isFocusable } from '@/lib/kernel/state';
 import { focusKeys, type WindowId } from '@/lib/kernel/types';
 import type { OsShellProps } from '@/lib/os-loaders';
 import { prefersReducedMotion } from '@/lib/motion/dur';
-import { createTourDirector, type TourDirector, type TourStep } from '@/lib/tour';
-import { WINDOWS_TOUR } from '@/lib/tour/scripts';
+import type { TourDirector, TourScript, TourStep } from '@/lib/tour';
 import { useKernel, usePrefs } from '@/stores/kernel-context';
 import { dispatch, dispatchSoon, flushQueued, getKernel, subscribeEffects } from '@/stores/kernel-store';
 import { getPrefs } from '@/stores/prefs-store';
@@ -39,6 +38,8 @@ import { OS_CHUNK_MARKER } from './marker';
 import {
   chromeVars,
   keyboardSnap,
+  LAUNCHER_ID,
+  launcherPlaceholder,
   liveAcrylic,
   lockCards,
   TASKBAR_ORDER,
@@ -58,21 +59,22 @@ import {
 } from './shell-context';
 import { WindowsBoot } from './surfaces/Boot';
 import { Desktop } from './surfaces/Desktop';
-import { CoachMark, PropertiesDialog, ShortcutsDialog } from './surfaces/Dialogs';
-import { Launcher, LAUNCHER_ID, type LauncherMode } from './surfaces/Launcher';
-import { LockScreen } from './surfaces/LockScreen';
 import {
-  INITIAL_TOASTS,
+  CoachMark,
+  Launcher,
   NotificationCenter,
+  PropertiesDialog,
   QuickSettings,
-  Toast,
-  toastReducer,
-  type CenterItem,
-} from './surfaces/Notifications';
+  ShortcutsDialog,
+  TaskView,
+  warmSurfaces,
+  Winver,
+} from './surfaces/lazy';
+import type { LauncherMode } from './surfaces/Launcher';
+import { LockScreen } from './surfaces/LockScreen';
+import { INITIAL_TOASTS, Toast, toastReducer, type CenterItem } from './surfaces/Notifications';
 import { Taskbar } from './surfaces/Taskbar';
-import { TaskView } from './surfaces/TaskView';
 import { WinMenu } from './surfaces/WinMenu';
-import { Winver } from './surfaces/Winver';
 import { WinWindow, type WindowBodyProps } from './window/Window';
 import styles from './windows.module.css';
 
@@ -177,6 +179,13 @@ export default function WindowsShell({ heading }: OsShellProps) {
       ),
     [canShowToast, centerOpen],
   );
+
+  // Start / Search, Task View, the flyouts and dialogs load in idle time after the desktop paints (shell budget).
+  useEffect(() => {
+    const controller = new AbortController();
+    warmSurfaces(controller.signal);
+    return () => controller.abort();
+  }, []);
 
   // The pinned apps' code loads one by one in idle time after the desktop paints, so a first open never waits (the
   // owner's "super smooth"); Data Saver keeps the hover / focus prefetch only.
@@ -296,6 +305,8 @@ export default function WindowsShell({ heading }: OsShellProps) {
   // --- The guided tour (shared/20, plans/windows/07) ------------------------------------------------------------
   const [coach, setCoach] = useState<{ step: TourStep; index: number; total: number } | null>(null);
   const director = useRef<TourDirector | null>(null);
+  /** The Windows script, loaded with the director when a tour first starts (shared/10: the tour is lazy). */
+  const tourScript = useRef<TourScript | null>(null);
   const startTour = useCallback(() => {
     closePanel(false);
     setMenu(null);
@@ -320,11 +331,25 @@ export default function WindowsShell({ heading }: OsShellProps) {
       setTimeout: (callback: () => void, ms: number) => window.setTimeout(callback, ms),
       clearTimeout: (handle: number) => window.clearTimeout(handle),
     };
-    director.current = createTourDirector(WINDOWS_TOUR, host);
     dispatchSoon({ type: 'SET_PREF', patch: { tourOffered: true } });
     analytics.track({ name: 'tour_started', os: 'windows' });
-    director.current.start();
-  }, [announce, closePanel, openPanel]);
+    void Promise.all([import('@/lib/tour'), import('@/lib/tour/scripts')]).then(
+      ([{ createTourDirector }, { WINDOWS_TOUR }]) => {
+        tourScript.current = WINDOWS_TOUR;
+        director.current?.cancel();
+        director.current = createTourDirector(WINDOWS_TOUR, host);
+        director.current.start();
+      },
+      () =>
+        notify({
+          id: 'tour-failed',
+          app: 'system',
+          appName: 'Windows',
+          title: "The tour couldn't load",
+          body: 'Check your connection and try again.',
+        }),
+    );
+  }, [announce, closePanel, openPanel, notify]);
 
   // Tour: an opened app settled → the director may advance; the snap step snaps Edge and GitHub side by side.
   useEffect(
@@ -333,7 +358,7 @@ export default function WindowsShell({ heading }: OsShellProps) {
         const tour = director.current;
         if (!tour?.running) return;
         if (action.type === 'PHASE_DONE' && action.target.kind === 'window') {
-          const step = WINDOWS_TOUR.steps[tour.index];
+          const step = tourScript.current?.steps[tour.index];
           const opened = step?.action?.type === 'OPEN_APP' ? winId(step.action.role) : null;
           if (opened !== action.target.id) return;
           if (step?.id === 'snap') {
@@ -728,14 +753,13 @@ export default function WindowsShell({ heading }: OsShellProps) {
       ],
     });
     offerTour();
-    // Focus lands on the desktop's home (the lock took focus; it never falls to <body>).
-    setTimeout(
-      () =>
-        document
-          .querySelector<HTMLElement>(`[data-focus-key="${focusKeys.home('windows')}"]`)
-          ?.focus({ preventScroll: true }),
-      0,
-    );
+    // Arrival focus (shared/09): the OS heading, as after any chooser entry — else the desktop; never <body>.
+    setTimeout(() => {
+      const target =
+        document.querySelector<HTMLElement>(`[data-focus-key="${focusKeys.osHeading}"]`) ??
+        document.querySelector<HTMLElement>(`[data-focus-key="${focusKeys.home('windows')}"]`);
+      target?.focus({ preventScroll: true });
+    }, 0);
   }, [notify, offerTour, openPanel]);
 
   // The tour offer on a chooser arrival without a lock screen (the lock offers it after sign-in instead).
@@ -828,12 +852,14 @@ export default function WindowsShell({ heading }: OsShellProps) {
         </main>
 
         {panel?.which === 'taskview' ? (
-          <TaskView
-            compact={compact}
-            closing={panel.closing}
-            live={blur.has('panel')}
-            onDone={() => closePanel(false)}
-          />
+          <Suspense fallback={null}>
+            <TaskView
+              compact={compact}
+              closing={panel.closing}
+              live={blur.has('panel')}
+              onDone={() => closePanel(false)}
+            />
+          </Suspense>
         ) : null}
 
         {lock ? null : (
@@ -854,26 +880,43 @@ export default function WindowsShell({ heading }: OsShellProps) {
 
         {panel && (panel.which === 'start' || panel.which === 'search') ? (
           <div data-panel="launcher" className={styles.panelSlot}>
-            <Launcher
-              key="launcher"
-              mode={panel.mode}
-              initialQuery={panel.query}
-              scope={panel.scope}
-              compact={compact}
-              coarse={coarse}
-              closing={panel.closing}
-              live={blur.has('panel')}
-              recent={recent}
-              onMode={(mode) =>
-                setPanel((current) =>
-                  current ? { ...current, mode, which: mode === 'search' ? 'search' : 'start' } : current,
-                )
+            <Suspense
+              fallback={
+                <LauncherPlaceholder
+                  mode={panel.mode}
+                  query={panel.query}
+                  compact={compact}
+                  onQuery={(query) =>
+                    setPanel((current) =>
+                      current
+                        ? { ...current, query, ...(query ? { mode: 'search' as const, which: 'search' as const } : {}) }
+                        : current,
+                    )
+                  }
+                />
               }
-              onClose={() => closePanel(false)}
-              onDismiss={() => closePanel(true)}
-              onLock={() => setLock('shown')}
-              onRestart={restart}
-            />
+            >
+              <Launcher
+                key="launcher"
+                mode={panel.mode}
+                initialQuery={panel.query}
+                scope={panel.scope}
+                compact={compact}
+                coarse={coarse}
+                closing={panel.closing}
+                live={blur.has('panel')}
+                recent={recent}
+                onMode={(mode) =>
+                  setPanel((current) =>
+                    current ? { ...current, mode, which: mode === 'search' ? 'search' : 'start' } : current,
+                  )
+                }
+                onClose={() => closePanel(false)}
+                onDismiss={() => closePanel(true)}
+                onLock={() => setLock('shown')}
+                onRestart={restart}
+              />
+            </Suspense>
           </div>
         ) : null}
 
@@ -895,30 +938,34 @@ export default function WindowsShell({ heading }: OsShellProps) {
             }
           >
             {panel.which !== 'center' ? (
-              <QuickSettings
-                nightLight={nightLight}
-                onNightLight={setNightLight}
-                onSettings={() => {
-                  closePanel(false);
-                  dispatchSoon({ type: 'OPEN_APP', os: 'windows', role: 'settings' });
-                }}
-                onSwitchOs={() => {
-                  closePanel(false);
-                  dispatchSoon({ type: 'SWITCH_OS', to: null, via: 'switch' });
-                }}
-              />
+              <Suspense fallback={null}>
+                <QuickSettings
+                  nightLight={nightLight}
+                  onNightLight={setNightLight}
+                  onSettings={() => {
+                    closePanel(false);
+                    dispatchSoon({ type: 'OPEN_APP', os: 'windows', role: 'settings' });
+                  }}
+                  onSwitchOs={() => {
+                    closePanel(false);
+                    dispatchSoon({ type: 'SWITCH_OS', to: null, via: 'switch' });
+                  }}
+                />
+              </Suspense>
             ) : null}
             {panel.which !== 'quick' ? (
-              <NotificationCenter
-                items={toasts.center}
-                sheet={panel.which === 'combined'}
-                onClear={(app) => toastEvent({ type: 'clear', app })}
-                onRemove={(id) => toastEvent({ type: 'remove', id })}
-                onRun={(item) => {
-                  closePanel(false);
-                  runCenter(item);
-                }}
-              />
+              <Suspense fallback={null}>
+                <NotificationCenter
+                  items={toasts.center}
+                  sheet={panel.which === 'combined'}
+                  onClear={(app) => toastEvent({ type: 'clear', app })}
+                  onRemove={(id) => toastEvent({ type: 'remove', id })}
+                  onRun={(item) => {
+                    closePanel(false);
+                    runCenter(item);
+                  }}
+                />
+              </Suspense>
             ) : null}
           </div>
         ) : null}
@@ -944,26 +991,38 @@ export default function WindowsShell({ heading }: OsShellProps) {
           ) : null}
         </section>
 
-        {dialog?.kind === 'winver' ? <Winver onClose={() => setDialog(null)} /> : null}
-        {dialog?.kind === 'properties' ? (
-          <PropertiesDialog
-            spec={dialog.spec}
-            onClose={() => setDialog(null)}
-            onCopy={() =>
-              dialog.spec.ref ? services.copyLink(dialog.spec.ref, dialog.spec.title) : Promise.resolve(false)
-            }
-          />
+        {dialog?.kind === 'winver' ? (
+          <Suspense fallback={null}>
+            <Winver onClose={() => setDialog(null)} />
+          </Suspense>
         ) : null}
-        {dialog?.kind === 'shortcuts' ? <ShortcutsDialog onClose={() => setDialog(null)} onTour={startTour} /> : null}
+        {dialog?.kind === 'properties' ? (
+          <Suspense fallback={null}>
+            <PropertiesDialog
+              spec={dialog.spec}
+              onClose={() => setDialog(null)}
+              onCopy={() =>
+                dialog.spec.ref ? services.copyLink(dialog.spec.ref, dialog.spec.title) : Promise.resolve(false)
+              }
+            />
+          </Suspense>
+        ) : null}
+        {dialog?.kind === 'shortcuts' ? (
+          <Suspense fallback={null}>
+            <ShortcutsDialog onClose={() => setDialog(null)} onTour={startTour} />
+          </Suspense>
+        ) : null}
 
         {coach ? (
-          <CoachMark
-            step={coach.step}
-            index={coach.index}
-            total={coach.total}
-            onNext={() => director.current?.next()}
-            onEnd={() => director.current?.cancel()}
-          />
+          <Suspense fallback={null}>
+            <CoachMark
+              step={coach.step}
+              index={coach.index}
+              total={coach.total}
+              onNext={() => director.current?.next()}
+              onEnd={() => director.current?.cancel()}
+            />
+          </Suspense>
         ) : null}
 
         {lock ? (
@@ -992,6 +1051,52 @@ export default function WindowsShell({ heading }: OsShellProps) {
         <div className={styles.nightLight} hidden={!nightLight} aria-hidden="true" data-night-light="" />
       </div>
     </WinShellProvider>
+  );
+}
+
+/**
+ * Start / Search while its chunk loads (a first open before the idle warm-up): the same panel frame with a real, focused
+ * search field, so every keystroke typed at once is kept (plans/windows/06 E9) — the launcher mounts with the query.
+ */
+function LauncherPlaceholder({
+  mode,
+  query,
+  compact,
+  onQuery,
+}: {
+  readonly mode: LauncherMode;
+  readonly query: string;
+  readonly compact: boolean;
+  readonly onQuery: (query: string) => void;
+}) {
+  useEffect(() => {
+    launcherPlaceholder.shownAt = performance.now();
+  }, []);
+  return (
+    <div
+      className={styles.launcher}
+      role="dialog"
+      aria-label={mode === 'start' ? 'Start' : 'Search'}
+      aria-busy="true"
+      data-launcher={mode}
+      data-state="open"
+      data-acrylic="tint"
+      data-compact={compact || undefined}
+    >
+      <div className={styles.searchBox}>
+        <input
+          type="search"
+          className={styles.searchInput}
+          aria-label="Search"
+          placeholder={mode === 'start' ? 'Search for apps, settings, and documents' : 'Type here to search'}
+          value={query}
+          onChange={(event) => onQuery(event.target.value)}
+          // Opened by the visitor's own request; the field takes their keystrokes (as the launcher's own does).
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus
+        />
+      </div>
+    </div>
   );
 }
 

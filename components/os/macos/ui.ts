@@ -176,6 +176,9 @@ export const setTour = (tour: MacUiState['tour']) => set({ tour });
 export function resetMacUi(): void {
   sequence = 0;
   macUi.setState(initial, true);
+  // The remembered invokers are elements of this mount: an element keeps its ancestors alive, so they go with it
+  // (`PERF-LEAK-01`: nothing detached is kept alive; the shell resets this on mount and on unmount).
+  invokers.clear();
 }
 
 // --- App state the menu bar reflects (checkmarks such as "as List", "Text Version") -------------------------------

@@ -30,6 +30,7 @@ import { ownerOf } from '@/lib/kernel/registry';
 import { currentLocation } from '@/lib/kernel/state';
 import type { Effect } from '@/lib/terminal';
 import { dispatch, subscribeEffects } from '@/stores/kernel-store';
+import { flDismiss, flSearch } from '../fluent.generated';
 import {
   flBranch,
   flCheckmark,
@@ -37,7 +38,6 @@ import {
   flChevronLeft,
   flChevronRight,
   flCopy,
-  flDismiss,
   flDocument,
   flError,
   flFiles,
@@ -45,10 +45,9 @@ import {
   flPanelBottom,
   flPanelLeft,
   flPuzzle,
-  flSearch,
   flSourceControl,
   flWarning,
-} from '../fluent.generated';
+} from '../fluent.apps.generated';
 import { Fl } from '../icons';
 import { useWinShell } from '../shell-context';
 import { TitleBar, useWindowChrome, windowStyles, type WindowBodyProps } from '../window/Window';

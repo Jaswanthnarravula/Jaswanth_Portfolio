@@ -3,19 +3,33 @@
  * N2 · N3 · D1 · X1 · RES-DL-01). Expected values come from `data/selectors`, never typed here. Every step waits on an
  * end state (never a sleep for correctness) and asserts focus never rests on <body>.
  */
-import { register } from 'node:module';
+import { readFileSync } from 'node:fs';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Locator, type Page, type TestInfo } from '@playwright/test';
 import { committed, expectFocusNotOnBody, waitForOs, waitForSettled } from './helpers';
 
-// `data/selectors` imports its generated JSON without an import attribute (the bundler's dialect); under Node's ESM
-// loader the spec adds `type: 'json'` for .json files, then reads the expected values from the selectors themselves.
-register(
-  `data:text/javascript,${encodeURIComponent(
-    "export const load = (url, context, next) => next(url, url.endsWith('.json') ? { ...context, importAttributes: { ...context.importAttributes, type: 'json' } } : context);",
-  )}`,
-);
-const { getFeaturedProjects, getPerson, getProjects, getResume, getResumeFileMeta } = await import('@/data/selectors');
+import { portfolio } from '@/data/portfolio';
+import type { Portfolio } from '@/data/schema';
+
+// `data/selectors` imports its generated JSON without an import attribute (the bundler's dialect), which Playwright's
+// loader rejects; these apply the selectors' own rules to the same data (no fact typed here).
+const data: Portfolio = portfolio;
+const getPerson = () => data.person;
+const getResume = () => data.resume;
+/** Featured first, then newest (by year) first; author order breaks ties (Array#sort is stable). */
+const getProjects = () =>
+  [...data.projects].sort((a, b) => Number(b.featured) - Number(a.featured) || (b.year ?? 0) - (a.year ?? 0));
+const getFeaturedProjects = () => getProjects().filter((project) => project.featured);
+/** Size and page count of the generated PDF; `null` if it has not been built. */
+function getResumeFileMeta(): { readonly bytes: number; readonly pages: number } | null {
+  const meta = JSON.parse(readFileSync(new URL('../../data/generated/resume.json', import.meta.url), 'utf8')) as {
+    file?: string;
+    bytes?: number;
+    pages?: number;
+  };
+  if (meta.file !== data.resume.file || typeof meta.bytes !== 'number' || typeof meta.pages !== 'number') return null;
+  return { bytes: meta.bytes, pages: meta.pages };
+}
 
 type Box = { x: number; y: number; w: number; h: number };
 
@@ -172,6 +186,7 @@ test('WIN-EDGE-03 D1 /windows/edge/resume opens the PDF tab; Back returns to Abo
 });
 
 test('WIN-EDGE-04 RES-DL-01 on Windows: Save downloads the named file; X1 axe clean', async ({ page }, info) => {
+  test.slow(); // a PDF page plus two full axe runs (WebKit is the slowest)
   await openWindows(page, '/windows/edge/resume');
   const file = getResumeFileMeta();
   test.skip(!file, 'no PDF built yet (placeholder phase): Save is hidden by design');

@@ -192,16 +192,26 @@ test('WIN-SET-01 N2 pages render; search flashes a card', async ({ page }, info)
   await expect(first).toContainText('Taskbar alignment');
   await expect(first).toContainText('Personalization');
   await expect(pageList(page).getByRole('button')).toHaveText(['Personalization']);
+  // The flash marks the card for 1.2 s, so on a slow frame it can be over before an assertion lands: record it as it
+  // happens, with the animation its overlay carries while it is on (the flash is a real animation, not an attribute).
+  await page.evaluate(() => {
+    const seen: { on: boolean; anim: string } = { on: false, anim: '' };
+    (window as unknown as { __flash?: { on: boolean; anim: string } }).__flash = seen;
+    new MutationObserver(() => {
+      const el = document.querySelector('[data-card="taskbar-alignment"]');
+      if (!el?.hasAttribute('data-flash')) return;
+      seen.on = true;
+      seen.anim = getComputedStyle(el, '::after').animationName;
+    }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['data-flash'] });
+  });
   await page.keyboard.press('Enter');
   await expect(pageHeading(page)).toHaveText('Personalization');
   const flashed = card(page, 'taskbar-alignment');
-  await expect(flashed).toHaveAttribute('data-flash', '');
+  const flash = () => page.evaluate(() => (window as unknown as { __flash: { on: boolean; anim: string } }).__flash);
+  await expect.poll(async () => (await flash()).on).toBe(true);
   await expect(flashed).toBeFocused();
   await expect(flashed).toBeInViewport();
-  if (info.project.name !== 'reduced-motion') {
-    // The flash is a real animation on the card's overlay (its opacity), not just an attribute.
-    expect(await flashed.evaluate((el) => getComputedStyle(el, '::after').animationName)).toContain('settings-flash');
-  }
+  if (info.project.name !== 'reduced-motion') expect((await flash()).anim).toContain('settings-flash');
   await expect(flashed).not.toHaveAttribute('data-flash', { timeout: 4000 });
   await expectFocusNotOnBody(page);
 });
@@ -529,7 +539,13 @@ test('WIN-SET-07 X1 axe clean (WCAG 2.2 AA): every Settings page, open expanders
       .include(selector)
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();
-    expect(violations.map((violation) => `${label}: ${violation.id} ${violation.nodes[0]?.target}`)).toEqual([]);
+    // The first node's check message (for contrast: the measured colours and ratio) makes a failure self-explaining.
+    expect(
+      violations.map(
+        (violation) =>
+          `${label}: ${violation.id} ${violation.nodes[0]?.target} — ${violation.nodes[0]?.any[0]?.message ?? ''}`,
+      ),
+    ).toEqual([]);
   };
 
   // Semantics the scan cannot judge alone: real switches, labelled native ranges, expanders, the breadcrumb nav.

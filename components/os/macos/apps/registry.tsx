@@ -4,11 +4,13 @@
  * default app and ships with the shell. While a chunk loads, the window shows skeleton rows under its real title (no
  * spinner — plans/macos/apps/finder.md "Loading") and the app's Dock icon bounces (`MAC-DOCK-03`: bounce only while
  * loading). A chunk that fails shows a calm in-window state with Try again and the plain portfolio, plus the
- * "Couldn't open" notification (06-edge-cases E13). Hovering or focusing a Dock icon preloads its chunk, so most
- * launches never bounce at all.
+ * "Couldn't open" notification (06-edge-cases E13). Hovering or focusing a Dock icon preloads its chunk, and after the
+ * desktop paints the Dock's apps are warmed one by one in idle time (owner direction: first opens never wait), so most
+ * launches never bounce at all. Warming is silent: an icon bounces only while a window is actually waiting.
  */
 import { useEffect, useState, type ComponentType } from 'react';
 import type { AppRole } from '@/lib/kernel/ids';
+import { afterFirstPaint } from '@/lib/motion/idle';
 import { macBinding, windowTitle } from '../model';
 import { notify, setLoading } from '../ui';
 import { TitleBar, type WindowBodyProps } from '../window/Window';
@@ -38,16 +40,29 @@ export function onAppFailed(listener: (role: AppRole) => void): () => void {
     failures.delete(listener);
   };
 }
-const pending = new Map<AppRole, Promise<Body>>();
+const pending = new Map<AppRole, { request: Promise<Body>; waiting: boolean }>();
 
-/** Load (once) and cache an app body; the Dock bounces while it is in flight. */
-export function loadApp(role: AppRole, loader: Loader | undefined = LOADERS[role]): Promise<Body> {
+/**
+ * Load (once) and cache an app body. A window waiting for it makes its Dock icon bounce until it lands; a quiet load
+ * (warming, preloading) shows nothing — unless a window starts waiting for it meanwhile.
+ */
+export function loadApp(
+  role: AppRole,
+  loader: Loader | undefined = LOADERS[role],
+  { quiet = false }: { quiet?: boolean } = {},
+): Promise<Body> {
   const ready = loaded.get(role);
   if (ready) return Promise.resolve(ready);
   const inFlight = pending.get(role);
-  if (inFlight) return inFlight;
+  if (inFlight) {
+    if (!quiet && !inFlight.waiting) {
+      inFlight.waiting = true;
+      setLoading(role, true);
+    }
+    return inFlight.request;
+  }
   if (!loader) return Promise.reject(new Error(`macOS has no ${role} app`));
-  setLoading(role, true);
+  if (!quiet) setLoading(role, true);
   const request = loader().then(
     (module) => {
       loaded.set(role, module.default);
@@ -61,14 +76,43 @@ export function loadApp(role: AppRole, loader: Loader | undefined = LOADERS[role
       throw error;
     },
   );
-  pending.set(role, request);
+  pending.set(role, { request, waiting: !quiet });
   return request;
 }
 
 /** Warm a chunk without showing anything (Dock hover / focus, Spotlight's selected result). */
 export function preloadApp(role: AppRole): void {
   if (loaded.has(role) || pending.has(role) || !LOADERS[role]) return;
-  loadApp(role).catch(() => undefined);
+  loadApp(role, LOADERS[role], { quiet: true }).catch(() => undefined);
+}
+
+/**
+ * After the desktop paints, warm the Dock's apps one by one in idle time, so a first open never waits (and the dev
+ * server compiles every app ahead of the visitor). Abortable; skipped under Data Saver; a failure stays silent until a
+ * window actually opens (its own load retries and reports).
+ */
+export function warmApps(roles: readonly AppRole[], signal: AbortSignal): void {
+  const saveData = (globalThis.navigator as (Navigator & { connection?: { saveData?: boolean } }) | undefined)
+    ?.connection?.saveData;
+  if (saveData) return;
+  const next = (index: number) => {
+    const role = roles[index];
+    if (!role || signal.aborted) return;
+    afterFirstPaint(
+      () => {
+        if (signal.aborted) return;
+        if (loaded.has(role) || !LOADERS[role]) {
+          next(index + 1);
+          return;
+        }
+        void loadApp(role, LOADERS[role], { quiet: true })
+          .catch(() => undefined)
+          .then(() => next(index + 1));
+      },
+      { signal, idleTimeout: 2000 },
+    );
+  };
+  next(0);
 }
 
 /** Test seam. */

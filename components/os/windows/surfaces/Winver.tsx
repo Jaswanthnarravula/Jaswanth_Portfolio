@@ -14,12 +14,11 @@ import { contentRev } from '@/data/content-index';
 import { getPerson, getResume } from '@/data/selectors';
 import { analytics } from '@/lib/analytics/loader';
 import { recordEgg } from '@/lib/eggs';
-import { applyFocus, focusIsOnBody } from '@/lib/kernel/focus';
-import { focusKeys } from '@/lib/kernel/types';
-import { dispatch, getKernel } from '@/stores/kernel-store';
+import { dispatch } from '@/stores/kernel-store';
 import { getPrefs } from '@/stores/prefs-store';
 import { flClose } from '../fluent.generated';
 import { Fl } from '../icons';
+import { returnFocus } from './focus-return';
 import styles from './winver.module.css';
 
 export const WINVER_EGG = 'EGG-WINVER-01';
@@ -34,17 +33,13 @@ export function Winver({ onClose }: { readonly onClose: () => void }) {
   const ok = useRef<HTMLButtonElement>(null);
   const dismiss = useEffectEvent(() => onClose());
 
-  // OK is the default button: focused on open (the scope has already noted where focus came from). On close, focus
-  // returns there; when that element is gone (winver was chosen in Search, which closed as the dialog opened), it goes
-  // to the focused window, else the desktop — never <body> (shared/09).
+  // OK is the default button: focused on open. On close, focus returns to where it came from — unless that was in
+  // Search, which closed as the dialog opened: then the focused window, else the desktop — never <body> (shared/09).
   useEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     ok.current?.focus({ preventScroll: true });
     return () => {
-      setTimeout(() => {
-        if (!focusIsOnBody()) return;
-        const focused = getKernel().sessions.windows.focused;
-        applyFocus({ candidates: [...(focused ? [focusKeys.window(focused)] : []), focusKeys.home('windows')] });
-      }, 0);
+      setTimeout(() => returnFocus(opener), 0);
     };
   }, []);
 
@@ -84,7 +79,7 @@ export function Winver({ onClose }: { readonly onClose: () => void }) {
   return (
     <div className={styles.layer} data-winver="" data-dialog-layer="">
       <div ref={backdrop} className={styles.backdrop} aria-hidden="true" />
-      <FocusScope trapped restoreFocus className={styles.scope}>
+      <FocusScope trapped className={styles.scope}>
         <div
           ref={dialog}
           role="dialog"

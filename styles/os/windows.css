@@ -82,6 +82,7 @@
   --win-text: #1b1b1b;
   --win-text-2: #444444;
   --win-text-dim: #5f636a;
+  --win-text-dim-acrylic: #4f535a;
   --win-text-disabled: rgb(0 0 0 / 0.36);
   --win-caption-hover: rgb(0 0 0 / 0.06);
   --win-caption-press: rgb(0 0 0 / 0.04);
@@ -107,6 +108,8 @@
   --win-window-shadow: 0 8px 32px rgb(0 0 0 / 0.28);
   --win-window-shadow-inactive: 0 4px 16px rgb(0 0 0 / 0.16);
   --win-flyout-shadow: 0 8px 16px rgb(0 0 0 / 0.26);
+  /* Modal dialogs (About Windows, Properties, the shortcuts sheet): above panels, menus and toasts. */
+  --win-z-dialog: var(--z-system);
   --win-smoke: rgb(0 0 0 / 0.3);
   --win-night-light: rgb(255 150 60 / 0.16);
   --win-lock-text: #ffffff;
@@ -171,6 +174,7 @@
     --win-text: #ffffff;
     --win-text-2: #dcdcdc;
     --win-text-dim: #c5c5c5;
+    --win-text-dim-acrylic: #c5c5c5;
     --win-text-disabled: rgb(255 255 255 / 0.36);
     --win-caption-hover: rgb(255 255 255 / 0.06);
     --win-caption-press: rgb(255 255 255 / 0.04);
@@ -241,6 +245,7 @@
   --win-text: #ffffff;
   --win-text-2: #dcdcdc;
   --win-text-dim: #c5c5c5;
+  --win-text-dim-acrylic: #c5c5c5;
   --win-text-disabled: rgb(255 255 255 / 0.36);
   --win-caption-hover: rgb(255 255 255 / 0.06);
   --win-caption-press: rgb(255 255 255 / 0.04);
@@ -363,6 +368,11 @@
   --win-accent: #a8b5c2;
   --win-accent-text: #a8b5c2;
 }
+/* A chosen accent's hover tone: the accent moved towards the text colour, i.e. away from the on-accent text — so
+   hover never lowers contrast, in either theme (the default blue keeps its tuned hover above). */
+:root[data-accent]:not([data-accent='blue']) [data-os='windows'] {
+  --win-accent-hover: color-mix(in srgb, var(--win-accent) 88%, var(--win-text));
+}
 
 /* Contrast themes (Settings → Accessibility, plans/windows/05 "Contrast and preferences"): solid surfaces (the glass
    is already solid via data-glass), 2 px borders, stronger secondary text. */
@@ -375,6 +385,7 @@
   --win-card-stroke: currentColor;
   --win-flyout-stroke: currentColor;
   --win-text-dim: var(--win-text);
+  --win-text-dim-acrylic: var(--win-text);
   --win-text-2: var(--win-text);
   --win-caption-glyph-inactive: var(--win-text);
 }

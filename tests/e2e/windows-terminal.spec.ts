@@ -183,7 +183,8 @@ test('WIN-TERM-05 start resume → Edge PDF tab', async ({ page }, info) => {
   await prompt(page).fill('start resume');
   await prompt(page).press('Enter');
   // The owning Windows app opens — Edge on its PDF tab — through the kernel (a real route, not a page link).
-  await expect(page).toHaveURL(/\/windows\/edge\/resume$/);
+  // Edge's chunk is fetched on this first open, which outlasts the 7 s default on a loaded WebKit machine.
+  await expect(page).toHaveURL(/\/windows\/edge\/resume$/, { timeout: 15_000 });
   await settle(page);
   const edge = win(page, 'browser');
   await expect(edge).toBeVisible();

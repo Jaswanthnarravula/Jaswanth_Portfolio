@@ -11,6 +11,26 @@ import { gsap } from 'gsap';
 import { tickerAdded, tickerRemoved } from './debug';
 import { prefersReducedMotion } from './dur';
 
+/** ScrollTrigger's scroller cache (`Observer._scrollers`), which the library exports but does not type. */
+type ScrollerCache = unknown[] & { cache?: number };
+export const scrollerCache = async (): Promise<ScrollerCache> =>
+  ((await import('gsap/Observer')) as unknown as { _scrollers: ScrollerCache })._scrollers;
+
+/**
+ * ScrollTrigger caches every scroller it is given in one module-level array (`Observer._scrollers`, laid out as
+ * `[element, verticalFn, horizontalFn, …]`) and never drops an entry — killing the triggers does not. A window's
+ * scroller is a fresh element each time the app opens, so without this the detached scroller (and the whole Overview
+ * inside it) would be held for the session: ~107 KB per open, which `PERF-LEAK-01` measures. We are the product's only
+ * ScrollTrigger user (`MOTION-SCROLL-01`), so the entry is ours to remove. `ScrollTrigger.scrollerProxy(scroller)` is
+ * the public door to the same array, but it splices 2 slots for a non-viewport scroller and would misalign the rest.
+ */
+export function forgetScroller(cache: ScrollerCache, scroller: HTMLElement): void {
+  const index = cache.indexOf(scroller);
+  if (index < 0 || index % 3 !== 0) return; // an unexpected layout: leave the array alone
+  cache.splice(index, 3);
+  if (typeof cache.cache === 'number') cache.cache++;
+}
+
 export interface ScrollKit {
   readonly gsap: typeof gsap;
   readonly ScrollTrigger: typeof import('gsap/ScrollTrigger').ScrollTrigger;
@@ -33,7 +53,11 @@ export async function attachOverviewScroll(
   { signal }: { signal?: AbortSignal } = {},
 ): Promise<() => void> {
   if (!overviewScrollAllowed()) return () => undefined;
-  const [{ default: Lenis }, { ScrollTrigger }] = await Promise.all([import('lenis'), import('gsap/ScrollTrigger')]);
+  const [{ default: Lenis }, { ScrollTrigger }, cache] = await Promise.all([
+    import('lenis'),
+    import('gsap/ScrollTrigger'),
+    scrollerCache(),
+  ]);
   if (signal?.aborted || !scroller.isConnected) return () => undefined;
   gsap.registerPlugin(ScrollTrigger);
   const content = (scroller.firstElementChild as HTMLElement | null) ?? scroller;
@@ -52,6 +76,7 @@ export async function attachOverviewScroll(
     gsap.ticker.remove(tick);
     tickerRemoved();
     lenis.destroy();
+    forgetScroller(cache, scroller);
   };
   signal?.addEventListener('abort', cleanup, { once: true });
   return cleanup;

@@ -39,7 +39,8 @@ import { commandPromptFor, powershellPromptFor, toEngineInput } from '@/lib/term
 import { useKernel } from '@/stores/kernel-context';
 import { dispatchSoon, getKernel } from '@/stores/kernel-store';
 import { getPrefs } from '@/stores/prefs-store';
-import { flAdd, flChevronDown, flConsole, flDismiss } from '../fluent.generated';
+import { flDismiss } from '../fluent.generated';
+import { flAdd, flChevronDown, flConsole } from '../fluent.apps.generated';
 import { Fl } from '../icons';
 import { subscribeIntents, takeIntent } from '../intents';
 import { useWinShell, type ToastSpec, type WinShellServices } from '../shell-context';

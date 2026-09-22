@@ -32,12 +32,13 @@ const INTERACTIVE =
 
 /** A free spot on a window's title bar (no control, not covered): where a visitor grabs or presses it. */
 async function grip(page: Page, role: string): Promise<{ x: number; y: number }> {
+  await quiet(page);
   const point = await win(page, role).evaluate((section, interactive) => {
     const bar = section.querySelector('[data-drag-region]');
     if (!bar) return null;
     const r = bar.getBoundingClientRect();
     const y = r.top + Math.min(14, r.height / 2);
-    for (let x = r.right - 150; x > r.left + 8; x -= 8) {
+    for (let x = r.right - 2; x > r.left + 8; x -= 4) {
       const hit = document.elementFromPoint(x, y);
       if (hit && section.contains(hit) && hit.closest('[data-drag-region]') && !hit.closest(interactive))
         return { x: Math.round(x), y: Math.round(y) };
@@ -93,7 +94,9 @@ async function toChooser(page: Page) {
   await waitForSettled(page, '[data-chooser-card]');
 }
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page }, info) => {
+  // Desktop geometry is asserted at the storyboard frame's size (plans/windows/01 "Visual target"): 1440 × 900.
+  if (DESKTOP.includes(info.project.name)) await page.setViewportSize({ width: 1440, height: 900 });
   await page.addInitScript(() => {
     window.sessionStorage.setItem('pf.debug.probe', '1');
     window.sessionStorage.setItem('pf.debug.analytics', '1');
@@ -354,14 +357,19 @@ test('WIN-WM-05 · WIN-WM-11 snap by keyboard: the system menu Snap ▸, the sna
   await page.keyboard.press('Alt+Shift+ArrowUp');
   await settle(page);
   await expect(explorer).toHaveAttribute('data-snap', 'tl');
-  // The snap layouts flyout appears on Maximize after 400 ms of focus; Down enters it; a zone snaps.
+  // The snap layouts flyout by keyboard: Down on Maximize opens it on its first zone; arrows walk the zones; Enter snaps.
+  await page.mouse.move(1100, 700); // off the window: a resting pointer never plays with the hover flyout
   await explorer.getByRole('button', { name: /^(Maximize|Restore) File Explorer$/ }).focus();
   await page.keyboard.press('ArrowDown');
   const layouts = page.getByRole('dialog', { name: 'Snap layouts' });
   await expect(layouts).toBeVisible();
-  await layouts.getByRole('button', { name: 'Snap right third' }).first().click();
+  await expect(layouts.getByRole('button', { name: 'Snap left half' })).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect(layouts.getByRole('button', { name: 'Snap right half' })).toBeFocused();
+  await page.keyboard.press('Enter');
   await settle(page);
-  await expect(explorer).toHaveAttribute('data-snap', 'third-r');
+  await expect(explorer).toHaveAttribute('data-snap', 'right');
+  await expect(layouts).toHaveCount(0);
   await expectFocusNotOnBody(page);
 });
 
@@ -373,9 +381,12 @@ test('WIN-WM-07 paired resize: the shared edge of a ½ + ½ pair moves both wind
   await settle(page);
   await activate(page, 'files');
   await page.keyboard.press('Alt+Shift+ArrowLeft');
+  await expect(win(page, 'files')).toHaveAttribute('data-snap', 'left');
   await activate(page, 'github');
   await page.keyboard.press('Alt+Shift+ArrowRight');
-  await settle(page);
+  await expect(win(page, 'github')).toHaveAttribute('data-snap', 'right');
+  await quiet(page);
+  await expect.poll(() => boxOf(win(page, 'github'))).toMatchObject({ x: 720, w: 720 });
   const edge = win(page, 'files').locator('[data-resize="e"]');
   const handle = await boxOf(edge);
   await page.mouse.move(handle.x + 3, 400);
@@ -515,7 +526,7 @@ test('WIN-START-01 · WIN-START-03 · WIN-SEARCH-02 N1 Start above the centred t
   const start = taskbar(page).getByRole('button', { name: 'Start' });
   await start.click();
   const dialog = page.getByRole('dialog', { name: 'Start' });
-  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('combobox', { name: 'Search' })).toBeVisible(); // the real panel, not its placeholder
   await quiet(page);
   const panel = await boxOf(dialog);
   const bar = await boxOf(taskbar(page));
@@ -731,6 +742,8 @@ test('WIN-CASE-03 · KRN-SES-01 P1 reload restores windows, snaps and the focuse
   await tbApp(page, 'GitHub').click();
   await settle(page);
   await page.keyboard.press('Alt+Shift+ArrowRight');
+  // The shortcut commits a frame after the press (dispatchSoon): see the snap land before reloading.
+  await expect(win(page, 'github')).toHaveAttribute('data-snap', 'right');
   await settle(page);
   await page.reload();
   await waitForOs(page, 'windows');
@@ -789,19 +802,25 @@ test('CONT-ACCEPT-01 · CONT-NEVER-01 · WIN-X-02 · WIN-NOTIF-02 C1 continuity 
     .click();
   await expect(page).toHaveURL(/\/macos\/github/);
   await committed(page);
-  // Switch through the chooser to Windows (its first entry this session: the lock screen carries the offer).
-  await page.locator('[data-menubar]').getByRole('menuitem', { name: 'Apple' }).click();
+  // Switch from macOS's own Switch Operating System sheet straight to Windows.
+  await page.locator('header[data-menubar]').getByRole('menuitem', { name: 'Apple' }).click();
   await page.getByRole('menuitem', { name: 'Switch Operating System…' }).click();
-  await expect(page.getByRole('heading', { name: 'Choose how you want to explore' })).toBeVisible();
-  await page.locator('[data-chooser-card="windows"]').click();
+  await page
+    .getByRole('list', { name: 'Operating systems' })
+    .getByRole('button', { name: /^Switch to Windows/ })
+    .click();
   await waitForOs(page, 'windows');
+  // The offer: the lock screen's card on a first chooser entry, else a toast. Never an auto-opened window.
   const lock = page.locator('[data-lock]');
-  await expect(lock).toBeVisible();
-  const card = lock.getByRole('link', { name: /Continue from macOS/ });
-  await expect(card).toBeVisible();
-  await expect(page.locator('[data-window]')).toHaveCount(0); // offered, never auto-opened
-  // Accepting is the visitor's choice: the card opens GitHub at the same project list.
-  await card.click();
+  const toast = page.locator('[data-toast="continuity"]');
+  await expect(lock.or(toast).first()).toBeVisible();
+  await expect(page.locator('[data-window]')).toHaveCount(0);
+  if (await lock.count()) await lock.getByRole('link', { name: /Continue from macOS/ }).click();
+  else {
+    await expect(toast).toContainText('Continue from macOS');
+    await toast.getByRole('button', { name: 'Open' }).click();
+  }
+  // Accepting is the visitor's choice: GitHub opens at the same place.
   await expect(page).toHaveURL(/\/windows\/github/);
   await expect(win(page, 'github')).toBeVisible();
   await expectFocusNotOnBody(page);
@@ -866,7 +885,7 @@ test('WIN-A11Y-01 · A11Y-SEM-01 X2 landmarks in reading order: main, then the t
   await expect(win(page, 'github')).toHaveAttribute('aria-labelledby', /win-title-github/);
 });
 
-test('WIN-A11Y-02 · A11Y-AXE-01 X1 axe clean: home, File Explorer, Start, Search and Task View open', async ({
+test('WIN-A11Y-02 · A11Y-AXE-01 · WIN-START-08 · WIN-SEARCH-06 X1 axe clean: home, File Explorer, Start, Search and Task View open', async ({
   page,
 }, info) => {
   desktopOnly(info);
@@ -877,20 +896,27 @@ test('WIN-A11Y-02 · A11Y-AXE-01 X1 axe clean: home, File Explorer, Start, Searc
     expect(violations.map((violation) => `${label}: ${violation.id} ${violation.nodes[0]?.target}`)).toEqual([]);
   };
   await openWindows(page);
+  await quiet(page);
   await scan('home');
   await tbApp(page, 'File Explorer').click();
   await settle(page);
+  await quiet(page);
   await scan('explorer');
   await taskbar(page).getByRole('button', { name: 'Start' }).click();
-  await expect(page.getByRole('dialog', { name: 'Start' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Start' }).getByRole('combobox', { name: 'Search' })).toBeVisible();
+  await quiet(page);
   await scan('start');
   await page.keyboard.type('git');
-  await expect(page.getByRole('dialog', { name: 'Search' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Search' }).getByRole('combobox', { name: 'Search' })).toBeVisible();
+  await quiet(page);
   await scan('search');
-  await page.keyboard.press('Escape');
-  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape'); // clears the query
+  await page.keyboard.press('Escape'); // closes; focus returns to its invoker
+  await expect(page.getByRole('dialog', { name: /^(Start|Search)$/ })).toHaveCount(0);
+  await expect(taskbar(page).getByRole('button', { name: 'Start' })).toBeFocused();
   await page.keyboard.press('Alt+Shift+O');
   await expect(page.getByRole('dialog', { name: 'Task View' })).toBeVisible();
+  await quiet(page);
   await scan('taskview');
 });
 
@@ -940,17 +966,16 @@ test('WIN-RESP-06 · WIN-WM-06 O1 a viewport resize re-derives snapped windows a
   await tbApp(page, 'File Explorer').click();
   await tbApp(page, 'Outlook').click();
   await settle(page);
-  await win(page, 'files').focus();
+  await activate(page, 'files');
   await page.keyboard.press('Alt+Shift+ArrowLeft');
   await settle(page);
   await page.setViewportSize({ width: 1200, height: 800 });
-  await settle(page);
-  expect(await boxOf(win(page, 'files'))).toEqual({ x: 0, y: 0, w: 600, h: 752 });
+  await expect.poll(() => boxOf(win(page, 'files'))).toEqual({ x: 0, y: 0, w: 600, h: 752 });
   const outlook = await boxOf(win(page, 'mail'));
   expect(outlook.x + 48).toBeLessThanOrEqual(1200);
   await page.setViewportSize({ width: 390, height: 844 }); // across the compact boundary: all maximize
   await settle(page);
-  await expect(win(page, 'files')).toHaveAttribute('data-compact', '');
+  await expect(win(page, 'files')).toHaveAttribute('data-compact', 'true');
   await page.setViewportSize({ width: 1440, height: 900 }); // back: snaps and floats are kept
   await settle(page);
   await expect(win(page, 'files')).toHaveAttribute('data-snap', 'left');

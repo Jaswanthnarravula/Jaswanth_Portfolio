@@ -404,3 +404,223 @@ test('MOTION-RULE-02 no Layout > 1 ms inside a tagged macOS flight (open, minimi
     'layouts > 1 ms during a flight',
   ).toEqual([]);
 });
+
+// --- P5 iOS ---------------------------------------------------------------------------------------------------------------
+
+type IosProbe = {
+  __motion?: { debug(): { tickers: number; tweens: number } };
+  __raf: number;
+  __timers: { kind: 'timeout' | 'interval'; delay: number; at: number; wall: number }[];
+  __liveIntervals: Map<number, number>;
+};
+
+/** Counts rAF requests and timers from the first script on (probe flag on, so `__motion.debug()` exists). */
+async function instrumentIos(page: Page) {
+  await page.addInitScript(() => {
+    window.sessionStorage.setItem('pf.debug.probe', '1');
+    const w = window as unknown as IosProbe;
+    w.__raf = 0;
+    w.__timers = [];
+    w.__liveIntervals = new Map();
+    const raf = window.requestAnimationFrame.bind(window);
+    window.requestAnimationFrame = (callback) => {
+      w.__raf++;
+      return raf(callback);
+    };
+    const timeout = window.setTimeout.bind(window);
+    window.setTimeout = ((handler: TimerHandler, delay?: number, ...args: unknown[]) => {
+      w.__timers.push({ kind: 'timeout', delay: Number(delay) || 0, at: performance.now(), wall: Date.now() });
+      return timeout(handler, delay, ...args);
+    }) as typeof window.setTimeout;
+    const interval = window.setInterval.bind(window);
+    const clear = window.clearInterval.bind(window);
+    window.setInterval = ((handler: TimerHandler, delay?: number, ...args: unknown[]) => {
+      w.__timers.push({ kind: 'interval', delay: Number(delay) || 0, at: performance.now(), wall: Date.now() });
+      const id = interval(handler, delay, ...args);
+      w.__liveIntervals.set(id, Number(delay) || 0);
+      return id;
+    }) as typeof window.setInterval;
+    window.clearInterval = ((id?: unknown) => {
+      if (typeof id === 'number') w.__liveIntervals.delete(id);
+      (clear as (value?: unknown) => void)(id);
+    }) as typeof window.clearInterval;
+  });
+}
+
+/**
+ * iOS at rest: the shell is up, nothing flies, no animation runs, the motion layer is idle. `tickers: false` leaves the
+ * live-ticker count out (for tests that are not about the idle loop).
+ */
+async function iosAtRest(page: Page, { tickers = true }: { tickers?: boolean } = {}) {
+  await expect(page.locator('[data-os-shell="ios"]')).toBeAttached({ timeout: 15_000 });
+  const state = () =>
+    page.evaluate(() => {
+      const flying = document.querySelectorAll(
+        '[data-app-surface][data-state="opening"],[data-app-surface][data-state="closing"]',
+      ).length;
+      const running = document
+        .getAnimations()
+        .filter((animation) => animation.playState === 'running')
+        .map((animation) => {
+          const target = (animation.effect as KeyframeEffect | null)?.target;
+          return `${animation.constructor.name}:${(animation as CSSAnimation).animationName ?? ''} on ${target?.tagName ?? '?'}.${target?.className ?? ''}`;
+        });
+      const motion = (window as unknown as IosProbe).__motion?.debug() ?? { tickers: 0, tweens: 0 };
+      return { flying, running, ...motion };
+    });
+  await expect
+    .poll(
+      async () => {
+        const now = await state();
+        return tickers ? now : { ...now, tickers: 0 };
+      },
+      { timeout: 15_000 },
+    )
+    .toEqual({ flying: 0, running: [], tickers: 0, tweens: 0 });
+}
+
+const rafCount = (page: Page) => page.evaluate(() => (window as unknown as IosProbe).__raf);
+
+test('IOS-ID-03 no animation loop at rest; transform-only writes on the wallpaper and Home layers @perf', async ({
+  page,
+}) => {
+  await instrumentIos(page);
+  await page.goto('/ios');
+  await iosAtRest(page);
+  await page.waitForTimeout(2500); // the idle app warm-up and GSAP's auto-sleep (120 ticks) are behind us
+  await iosAtRest(page);
+  expect(await page.evaluate(() => (window as unknown as IosProbe).__motion?.debug())).toEqual({
+    tickers: 0,
+    tweens: 0,
+  });
+  const rafBefore = await rafCount(page);
+  await page.waitForTimeout(2000);
+  expect((await rafCount(page)) - rafBefore, 'animation frames requested at rest').toBe(0);
+  expect(
+    await page.evaluate(() => document.getAnimations().filter((animation) => animation.playState === 'running').length),
+  ).toBe(0);
+
+  // What follows the pointer and the flights (wallpaper, Home layer, dim veil, Dock layer) writes only
+  // transform / opacity.
+  await page.evaluate(() => {
+    const home = document.querySelector('[data-home-layer]')!;
+    const targets = [
+      document.querySelector('[data-wallpaper]'),
+      home,
+      home.nextElementSibling, // the dim veil
+      document.querySelector('[data-dock]')?.parentElement ?? null,
+    ].filter((el): el is HTMLElement => el instanceof HTMLElement);
+    const seen = new Set<string>();
+    new MutationObserver(() => {
+      for (const el of targets) for (let index = 0; index < el.style.length; index++) seen.add(el.style.item(index));
+    }).observe(document.body, { attributes: true, attributeFilter: ['style'], subtree: true });
+    (window as unknown as { __written: Set<string> }).__written = seen;
+  });
+  const viewport = page.viewportSize()!;
+  for (let step = 0; step <= 8; step++)
+    await page.mouse.move((viewport.width * step) / 8, (viewport.height * (8 - step)) / 8, { steps: 2 });
+  // The wallpaper follows the pointer (±6 px), written on one ticker frame per move.
+  await expect
+    .poll(() => page.evaluate(() => (document.querySelector('[data-wallpaper]') as HTMLElement).style.transform))
+    .toMatch(/^translate3d\((?!0px, 0px)/);
+  await page.getByRole('group', { name: 'Home Screen' }).getByRole('link', { name: 'Safari' }).click();
+  await expect(page.locator('[data-app-surface="browser"]')).toHaveAttribute('data-state', 'foreground');
+  await page.keyboard.press('Alt+Shift+H');
+  await expect(page.locator('[data-app-surface="browser"]')).toHaveAttribute('data-state', 'background');
+  await iosAtRest(page);
+  const written = await page.evaluate(() => [...(window as unknown as { __written: Set<string> }).__written]);
+  expect(written.length, 'the layers were written').toBeGreaterThan(0);
+  expect(written.filter((property) => property !== 'transform' && property !== 'opacity')).toEqual([]);
+
+  // Input stopped: the parallax frame and the flights' ticker stop with it.
+  await page.waitForTimeout(2500);
+  const settled = await rafCount(page);
+  await page.waitForTimeout(2000);
+  expect((await rafCount(page)) - settled, 'frames requested after input stopped').toBe(0);
+});
+
+test('IOS-WIDG-04 no intervals/animations at rest: widgets are static per session @perf', async ({ page }) => {
+  await instrumentIos(page);
+  await page.goto('/ios');
+  await iosAtRest(page);
+  await expect(page.locator('[data-widgets-block]')).toBeVisible();
+  await page.waitForTimeout(2500); // the idle app warm-up is behind us
+  await iosAtRest(page);
+  const start = await page.evaluate(() => ({
+    at: performance.now(),
+    text: (document.querySelector('[data-widgets-block]') as HTMLElement).innerText,
+  }));
+  await page.waitForTimeout(5000);
+  const { timers, intervals, running, text } = await page.evaluate((from) => {
+    const w = window as unknown as IosProbe;
+    return {
+      timers: w.__timers.filter((timer) => timer.at > from),
+      intervals: [...w.__liveIntervals.values()],
+      running: document.getAnimations().filter((animation) => animation.playState === 'running').length,
+      text: (document.querySelector('[data-widgets-block]') as HTMLElement).innerText,
+    };
+  }, start.at);
+  expect(intervals, 'live setInterval timers (delays)').toEqual([]);
+  expect(running, 'running animations at rest').toBe(0);
+  // The status-bar clock re-reads the time once a minute: one timeout to the next minute boundary (+ 50 ms).
+  const minuteClock = (timer: { delay: number; wall: number }) =>
+    Math.abs(timer.delay - (60_000 - (timer.wall % 60_000) + 50)) < 250;
+  expect(
+    timers.filter((timer) => !minuteClock(timer)).map((timer) => `${timer.kind} ${timer.delay} ms`),
+    'timers scheduled at rest',
+  ).toEqual([]);
+  expect(text, 'widget content is static').toBe(start.text);
+});
+
+test('IOS-MOTION-04 no Layout > 1 ms inside a tagged iOS flight (open from an icon, go Home) @perf', async ({
+  page,
+  browser,
+}) => {
+  await page.addInitScript(() => window.sessionStorage.setItem('pf.debug.probe', '1'));
+  await page.goto('/ios');
+  await iosAtRest(page, { tickers: false });
+  await page.waitForTimeout(2500); // the apps' chunks are warm: the flight measures motion, not the network
+  const safari = page.getByRole('group', { name: 'Home Screen' }).getByRole('link', { name: 'Safari' });
+  const app = page.locator('[data-app-surface="browser"]');
+  await browser.startTracing(page, { categories: ['devtools.timeline', 'blink.user_timing'] });
+  await safari.click();
+  await expect(app).toHaveAttribute('data-state', 'foreground');
+  await iosAtRest(page, { tickers: false });
+  await page.locator('[data-home-indicator]').click();
+  await expect(app).toHaveAttribute('data-state', 'background');
+  await iosAtRest(page, { tickers: false });
+  const trace = JSON.parse((await browser.stopTracing()).toString('utf8')) as {
+    traceEvents: { name: string; ph: string; ts: number; dur?: number; cat: string }[];
+  };
+  const events = trace.traceEvents;
+  const marks = events.filter((event) => /^pf-flight-(start|end):/.test(event.name)).sort((a, b) => a.ts - b.ts);
+  const flights: { kind: string; from: number; to: number }[] = [];
+  for (const mark of marks) {
+    const [, edge, kind] = mark.name.match(/^pf-flight-(start|end):(.+)$/)!;
+    if (edge === 'start') flights.push({ kind: kind!, from: mark.ts, to: Number.POSITIVE_INFINITY });
+    else {
+      const open = [...flights].reverse().find((f) => f.kind === kind && f.to === Number.POSITIVE_INFINITY);
+      if (open) open.to = mark.ts;
+    }
+  }
+  const finished = flights.filter((flight) => Number.isFinite(flight.to));
+  const kinds = new Set(finished.map((flight) => flight.kind));
+  const seen = marks.map((mark) => `${mark.name} (${mark.ph})`).join(', ') || 'no pf-flight marks';
+  for (const kind of ['open', 'close'])
+    expect(kinds.has(kind), `a finished ${kind} flight was traced — ${seen}`).toBe(true);
+  const layouts = events.filter((event) => event.name === 'Layout' && event.ph === 'X' && event.dur !== undefined);
+  // The app body is mounted deliberately at 90 % of the open flight (plans/ios/02 step 4) and lays itself out once.
+  // That first layout is the mount's, not the animation's; everything else inside a flight must stay under 1 ms.
+  const mounts = events.filter((event) => /^pf-app-mount:/.test(event.name)).map((event) => event.ts);
+  const slow = layouts.filter(
+    (layout) =>
+      layout.dur! > 1000 &&
+      finished.some((flight) => layout.ts > flight.from && layout.ts < flight.to) &&
+      !mounts.some((mount) => layout.ts >= mount && layout.ts - mount < 120_000),
+  );
+  expect(mounts.length, 'the app body mount is marked (so its layout is attributable)').toBeGreaterThan(0);
+  expect(
+    slow.map((layout) => `${(layout.dur! / 1000).toFixed(2)} ms`),
+    'layouts > 1 ms during a flight',
+  ).toEqual([]);
+});

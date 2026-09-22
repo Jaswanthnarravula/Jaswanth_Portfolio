@@ -134,11 +134,15 @@ describe('WIN-TASK-01 · WIN-TASK-08 the taskbar', () => {
     renderShell();
     await user.click(screen.getByRole('button', { name: /^Quick Settings/ }));
     const quick = await screen.findByRole('dialog', { name: 'Quick Settings' });
-    expect(within(quick).getByRole('button', { name: 'Reduce motion' })).toHaveAttribute('aria-pressed', 'false');
+    // The flyout's content is its own chunk (the shell budget): it lands a moment after the frame.
+    expect(await within(quick).findByRole('button', { name: 'Reduce motion' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
     expect(within(quick).getByRole('slider', { name: 'Volume' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /^Notification Center/ }));
     const center = await screen.findByRole('dialog', { name: 'Notification Center' });
-    expect(within(center).getByRole('grid')).toBeInTheDocument();
+    expect(await within(center).findByRole('grid')).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Quick Settings' })).toBeNull());
   });
 });
@@ -149,8 +153,11 @@ describe('WIN-START-01 · WIN-START-08 · WIN-SEARCH-02 · WIN-SEARCH-06 Start a
     renderShell();
     const start = screen.getByRole('button', { name: 'Start' });
     await user.click(start);
-    const dialog = await screen.findByRole('dialog', { name: 'Start' });
-    expect(within(dialog).getByRole('combobox', { name: 'Search' })).toHaveFocus();
+    // Start's chunk may still be loading: a placeholder panel keeps the keystrokes, then the real one takes over.
+    const field = await screen.findByRole('combobox', { name: 'Search' });
+    const dialog = field.closest<HTMLElement>('[role="dialog"]')!;
+    expect(dialog).toHaveAccessibleName('Start');
+    expect(field).toHaveFocus();
     const pinned = within(dialog).getByRole('list', { name: 'Pinned' });
     // Names as assistive tech reads them (the tile art — e.g. the PDF badge — is hidden).
     const names = [
@@ -248,6 +255,8 @@ describe('WIN-LOCK-01 · WIN-LOCK-03 the lock screen', () => {
     await user.click(signIn);
     await waitFor(() => expect(screen.getByRole('navigation', { name: 'Taskbar' })).toBeInTheDocument());
     expect(getKernel().sessions.windows.lockSeen).toBe(true);
+    // Arrival focus after sign-in is the OS heading, as after any chooser entry (shared/09).
+    await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: /^Windows 11 — / })).toHaveFocus());
   });
 });
 

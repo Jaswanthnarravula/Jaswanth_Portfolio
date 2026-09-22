@@ -60,6 +60,13 @@ export function pushLocation(window: WindowInstance, location: AppLocation): Win
   return { ...window, nav: { entries, index: entries.length - 1 }, scrollTop: 0 };
 }
 
+/** Replace the current entry of a window's stack (forward entries are dropped). Same location → same window. */
+export function replaceLocation(window: WindowInstance, location: AppLocation): WindowInstance {
+  if (sameLocation(currentLocation(window), location)) return window;
+  const entries = [...window.nav.entries.slice(0, window.nav.index), location];
+  return { ...window, nav: { entries, index: entries.length - 1 }, scrollTop: 0 };
+}
+
 /**
  * Move to a location the URL names: an adjacent stack entry is reused (Back/Forward), anything else is pushed.
  * This keeps the in-app stack aligned with browser traversal.

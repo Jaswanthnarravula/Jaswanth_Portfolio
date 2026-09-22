@@ -23,3 +23,4 @@ public/resume
 tests/**/__snapshots__
 .next-*
 components/os/windows/fluent.generated.ts
+components/os/windows/fluent.apps.generated.ts

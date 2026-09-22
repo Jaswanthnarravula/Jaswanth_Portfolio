@@ -63,11 +63,22 @@ export type KernelAction =
   | { readonly type: 'SNAP_WINDOW'; readonly id: WindowId; readonly zone: SnapZone | null }
   /** addition: move the shared edge of ½ + ½ snapped windows (paired resize), as a fraction of the workspace. */
   | { readonly type: 'SET_SNAP_SPLIT'; readonly os: OsId; readonly split: number }
-  | { readonly type: 'NAVIGATE_IN_APP'; readonly id: WindowId; readonly location: AppLocation }
+  | {
+      readonly type: 'NAVIGATE_IN_APP';
+      readonly id: WindowId;
+      readonly location: AppLocation;
+      /**
+       * addition (plans/ios/apps/files "synthesized stack", github "tabs switch roots"): the new place takes the current
+       * entry (history `replace`) instead of pushing — a pop to a synthesized parent, a tab switch.
+       */
+      readonly replace?: boolean;
+    }
   | { readonly type: 'APP_BACK'; readonly id: WindowId }
   | { readonly type: 'APP_FORWARD'; readonly id: WindowId }
   | { readonly type: 'SET_SCROLL'; readonly id: WindowId; readonly top: number }
   | { readonly type: 'SET_DRAFT'; readonly id: WindowId; readonly draft: string }
+  /** addition (plans/ios/02): set (or, with `null`, clear) one key of an app's session state (`WindowInstance.ui`). */
+  | { readonly type: 'SET_APP_UI'; readonly id: WindowId; readonly key: string; readonly value: string | null }
   | { readonly type: 'GO_HOME' }
   | { readonly type: 'SWITCH_OS'; readonly to: OsId | null; readonly via: SwitchVia }
   | {

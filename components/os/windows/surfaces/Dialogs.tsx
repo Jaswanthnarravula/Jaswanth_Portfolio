@@ -17,6 +17,7 @@ import { flDismiss } from '../fluent.generated';
 import { Fl } from '../icons';
 import type { PropertiesSpec } from '../shell-context';
 import styles from '../windows.module.css';
+import { returnFocus } from './focus-return';
 
 function Dialog({
   title,
@@ -32,6 +33,14 @@ function Dialog({
   readonly className?: string;
 }) {
   const id = `win-dialog-${title.replace(/\W+/g, '-').toLowerCase()}`;
+  // Focus returns to the opener, else the focused window or the desktop — never <body> (shared/09). A layout effect
+  // notes the opener before the scope's initial focus moves it inside.
+  useLayoutEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    return () => {
+      setTimeout(() => returnFocus(opener), 0);
+    };
+  }, []);
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
@@ -45,7 +54,7 @@ function Dialog({
   return (
     <div className={styles.dialogLayer}>
       <div role="dialog" aria-modal="true" aria-labelledby={id} className={`${styles.dialog} ${className ?? ''}`}>
-        <FocusScope trapped restoreFocus initialFocus>
+        <FocusScope trapped initialFocus>
           <header className={styles.dialogTitlebar}>
             <h2 id={id} className={styles.dialogTitle}>
               {title}

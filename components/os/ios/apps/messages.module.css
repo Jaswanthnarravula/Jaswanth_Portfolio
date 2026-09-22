@@ -1,0 +1,531 @@
+/* iOS Messages — plans/ios/apps/messages.md. iMessage visuals (iOS 17/18): grey incoming / blue outgoing bubbles,
+   18 pt radius with a tail on the last bubble of a run, centred captions, a material nav bar with the centred
+   avatar + name, quick-reply chips above a look-alike field. Colours come from the --ios-* palette only. */
+
+.app {
+  height: 100%;
+}
+
+/* --- Conversations list ------------------------------------------------------------------------------------ */
+.convos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.convo {
+  display: grid;
+  grid-template-columns: 12px 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 0 10px;
+  width: 100%;
+  min-height: 76px;
+  padding: 0 16px 0 4px;
+  border: 0;
+  background: none;
+  color: var(--ios-label);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.convo:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -3px;
+  border-radius: 10px;
+}
+.convo[data-selected] {
+  border-radius: 10px;
+  background: var(--ios-tint-fill);
+  color: #ffffff;
+}
+.convo[data-selected] .convoPreview,
+.convo[data-selected] .convoTime {
+  color: rgb(255 255 255 / 0.85);
+}
+.unreadDot {
+  justify-self: center;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.unreadDot[data-on] {
+  background: var(--ios-tint);
+}
+.avatar,
+.avatarSmall {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #a5abb8, #858994);
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.avatar {
+  width: 52px;
+  height: 52px;
+  font-size: 21px;
+}
+.convoText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 10px 0 11px;
+  border-bottom: 0.5px solid var(--ios-sep);
+}
+.convoTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.convoName {
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.41px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.convoTime {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  color: var(--ios-label-2);
+  font-size: 15px;
+}
+.convoChevron {
+  color: var(--ios-label-3);
+}
+.convoPreview {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--ios-label-2);
+  font-size: 15px;
+  line-height: 20px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* --- Thread ---------------------------------------------------------------------------------------------- */
+.thread {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--ios-plain);
+  color: var(--ios-label);
+  font-family: var(--font-ui);
+}
+.threadBar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 84px;
+  padding: calc(var(--app-top, var(--sa-t, 0px)) + 4px) 56px 6px;
+  border-bottom: 0.5px solid var(--ios-sep);
+  background: var(--ios-bar);
+}
+.back {
+  position: absolute;
+  bottom: 18px;
+  left: 4px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 22px;
+  background: none;
+  color: var(--ios-tint);
+  cursor: pointer;
+}
+.back:focus-visible {
+  outline: 3px solid var(--ios-tint);
+}
+.contact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.avatarSmall {
+  width: 50px;
+  height: 50px;
+  font-size: 20px;
+}
+.contactName {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0;
+  color: var(--ios-label);
+  font-size: 12px;
+  font-weight: 400;
+}
+.contactName svg {
+  color: var(--ios-label-3);
+}
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-bottom: 16px;
+}
+.scroll:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -3px;
+}
+.column {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 10px 0 14px;
+}
+.service {
+  margin: 4px 0 2px;
+  color: var(--ios-label-2);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+}
+.log {
+  display: block;
+}
+.lines {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0 12px;
+  list-style: none;
+}
+.stamp {
+  margin: 12px 0 8px;
+  color: var(--ios-label-2);
+  font-size: 11px;
+  text-align: center;
+}
+.stamp b {
+  font-weight: 600;
+}
+.line {
+  display: flex;
+  margin-top: 2px;
+}
+.line[data-from='them'] {
+  justify-content: flex-start;
+  padding-left: 4px;
+}
+.line[data-from='me'] {
+  justify-content: flex-end;
+  padding-right: 4px;
+}
+.line[data-from='them'] + .line[data-from='me'],
+.line[data-from='me'] + .line[data-from='them'],
+.delivered + .line {
+  margin-top: 10px;
+}
+.delivered {
+  padding: 2px 16px 0 0;
+  color: var(--ios-label-2);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: end;
+}
+
+/* The bubble: 17 pt text, radius 18, a curled tail on the last bubble of a run (two pseudo-elements). */
+.bubble {
+  position: relative;
+  display: block;
+  max-width: min(75%, 480px);
+  padding: 7px 12px 8px;
+  border-radius: 18px;
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: -0.41px;
+  overflow-wrap: anywhere;
+  transform-origin: bottom left;
+}
+.line[data-from='them'] .bubble {
+  background: var(--ios-bubble-in);
+  color: var(--ios-label);
+}
+.line[data-from='me'] .bubble {
+  background: var(--ios-bubble-out);
+  color: #ffffff;
+  transform-origin: bottom right;
+}
+.line[data-tail] .bubble::before,
+.line[data-tail] .bubble::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  height: 20px;
+}
+.line[data-tail][data-from='them'] .bubble::before {
+  left: -7px;
+  width: 20px;
+  border-bottom-right-radius: 16px 14px;
+  background: var(--ios-bubble-in);
+}
+.line[data-tail][data-from='them'] .bubble::after {
+  left: -26px;
+  width: 26px;
+  border-bottom-right-radius: 10px;
+  background: var(--ios-plain);
+}
+.line[data-tail][data-from='me'] .bubble::before {
+  right: -7px;
+  width: 20px;
+  border-bottom-left-radius: 16px 14px;
+  background: var(--ios-bubble-out);
+}
+.line[data-tail][data-from='me'] .bubble::after {
+  right: -26px;
+  width: 26px;
+  border-bottom-left-radius: 10px;
+  background: var(--ios-plain);
+}
+.selectable {
+  display: block;
+  margin-top: 4px;
+  font-weight: 600;
+  user-select: all;
+  -webkit-user-select: all;
+}
+
+/* Rich link / attachment cards (still bubbles: same radius and tail, grey footer). */
+.card,
+.file {
+  display: flex;
+  text-decoration: none;
+  cursor: pointer;
+}
+.card {
+  flex-direction: column;
+  width: min(260px, 72vw);
+  padding: 0;
+  overflow: visible;
+}
+.cardArt {
+  display: grid;
+  place-items: center;
+  height: 96px;
+  border-radius: 18px 18px 0 0;
+  background: var(--ios-fill-2);
+  color: var(--ios-label-2);
+}
+.cardText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  padding: 8px 12px 9px;
+}
+.cardTitle {
+  overflow: hidden;
+  color: var(--ios-label);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.cardDetail {
+  overflow: hidden;
+  color: var(--ios-label-2);
+  font-size: 13px;
+  line-height: 18px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.file {
+  align-items: center;
+  gap: 4px;
+  width: min(260px, 72vw);
+  padding: 8px 8px 8px 10px;
+}
+.fileIcon {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 48px;
+  color: var(--ios-label-2);
+}
+.fileIcon b {
+  position: absolute;
+  bottom: 9px;
+  padding: 0 3px;
+  border-radius: 3px;
+  background: var(--ios-red);
+  color: #ffffff;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 11px;
+}
+.card:focus-visible,
+.file:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 2px;
+}
+.card:active,
+.file:active {
+  opacity: 0.8;
+}
+
+/* Typing indicator: three dots, an opacity loop (CSS) — decorative, outside the log. */
+.typing {
+  display: inline-flex;
+  gap: 4px;
+  margin: 8px 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: var(--ios-bubble-in);
+}
+.typing span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ios-label-2);
+  animation: typing-dot 1.2s infinite ease-in-out;
+}
+.typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+@keyframes typing-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+/* --- Composer: reply chips above the look-alike field ------------------------------------------------------ */
+.composer {
+  flex: none;
+  padding: 8px 0 max(var(--sa-b, 0px), 8px);
+  border-top: 0.5px solid var(--ios-sep);
+  background: var(--ios-bar);
+}
+.chips {
+  display: flex;
+  gap: 8px;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2px 12px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-padding-inline: 12px;
+}
+.chips::-webkit-scrollbar {
+  display: none;
+}
+.chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--ios-tint);
+  border-radius: 22px;
+  background: var(--ios-plain);
+  color: var(--ios-tint);
+  font: inherit;
+  font-size: 16px;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+.chip[data-variant='plain'] {
+  border-color: var(--ios-sep-opaque);
+  color: var(--ios-label);
+}
+.chip:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 2px;
+}
+.fieldRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 12px;
+  cursor: pointer;
+}
+.plus {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--ios-fill-2);
+  color: var(--ios-label-2);
+}
+.field {
+  flex: 1;
+  min-height: 36px;
+  padding: 7px 14px;
+  border: 1px solid var(--ios-sep-opaque);
+  border-radius: 18px;
+  color: var(--ios-label-3);
+  font-size: 17px;
+  line-height: 20px;
+}
+
+/* --- Full page: list and thread side by side ------------------------------------------------------------- */
+.split {
+  display: grid;
+  grid-template-columns: clamp(300px, 30%, 400px) minmax(0, 1fr);
+  height: 100%;
+  background: var(--ios-plain);
+}
+.sidebar {
+  min-height: 0;
+  padding: calc(var(--app-top, 24px) + 22px) 12px 0;
+  overflow-y: auto;
+  border-right: 0.5px solid var(--ios-sep-opaque);
+  background: var(--ios-plain);
+}
+.sidebarTitle {
+  margin: 0 12px 12px;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 41px;
+  letter-spacing: 0.37px;
+}
+.detail {
+  position: relative;
+  min-width: 0;
+}
+.thread[data-pad] .threadBar {
+  min-height: 92px;
+}
+.thread[data-pad] .chips {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typing span {
+    animation: none;
+  }
+}
+:global(html[data-motion='reduced']) .typing span {
+  animation: none;
+}

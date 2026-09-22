@@ -1,0 +1,526 @@
+/* iOS Notes — plans/ios/apps/notes.md. Notes' own yellow tint over the iOS palette; a warm paper canvas (--ios-paper);
+   title 28 bold, body 17; checklists with static circles; tables with hairlines; 8 pt dot meters. Every size is scaled
+   by the Text Size preference (`--text-scale` on <html>) and follows browser zoom. Dark mode comes from the tokens. */
+
+.notes {
+  /* Notes tints the whole app yellow. Text uses a deep amber that keeps AA on the paper; fills use Notes' yellow. */
+  --ios-tint: #8f5f00;
+  --notes-yellow: #ffcc00;
+  --notes-select: #ffe58f;
+  --notes-select-ink: #1c1c1e;
+  --notes-mark: rgb(255 204 0 / 0.45);
+  --notes-mark-current: #ff9f0a;
+  --ts: var(--text-scale, 1);
+  position: absolute;
+  inset: 0;
+  font-family: var(--font-ui);
+}
+:global(:root[data-theme='dark']) .notes {
+  --ios-tint: #ffd60a;
+  --notes-yellow: #ffd60a;
+  --notes-select: #5c4a00;
+  --notes-select-ink: #ffffff;
+  --notes-mark: rgb(255 214 10 / 0.35);
+  --notes-mark-current: #ff9f0a;
+}
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme='light'])) .notes {
+    --ios-tint: #ffd60a;
+    --notes-yellow: #ffd60a;
+    --notes-select: #5c4a00;
+    --notes-select-ink: #ffffff;
+    --notes-mark: rgb(255 214 10 / 0.35);
+    --notes-mark-current: #ff9f0a;
+  }
+}
+
+/* The note's large title is the note's own title on the paper: 28 bold, not the 34 pt list title. */
+.notes :global([data-screen^='note:'] [data-scroller] > h3) {
+  margin: 8px 20px 6px;
+  font-size: calc(28px * var(--ts));
+  line-height: 1.2;
+  letter-spacing: 0.36px;
+}
+.notes :global([data-screen^='note:'] [data-nav-bar]) {
+  background: transparent;
+}
+.notes :global([data-screen^='note:'] [data-nav-bar][data-scrolled]) {
+  background: var(--ios-paper);
+}
+
+/* --- Lists --------------------------------------------------------------------------------------------------------- */
+.rowTitle {
+  font-size: calc(17px * var(--ts));
+  font-weight: 600;
+}
+.rowLine {
+  display: block;
+  overflow: hidden;
+  font-size: calc(15px * var(--ts));
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rowDate {
+  color: var(--ios-label);
+  opacity: 0.8;
+}
+.pinnedHeader {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  text-transform: none;
+  color: var(--ios-label);
+  font-size: calc(20px * var(--ts));
+  letter-spacing: 0.38px;
+}
+.folderGlyph {
+  color: var(--notes-yellow);
+}
+.current > :global(button) {
+  background: var(--notes-select);
+  color: var(--notes-select-ink);
+}
+.current > :global(button) :global(span) {
+  color: inherit;
+}
+.count {
+  margin: -20px 0 24px;
+  color: var(--ios-label-2);
+  font-size: calc(13px * var(--ts));
+  text-align: center;
+}
+.tagBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 16px 16px;
+}
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 48px 16px;
+  color: var(--ios-label-2);
+  font-size: calc(17px * var(--ts));
+}
+.empty p {
+  margin: 0;
+  font-size: calc(20px * var(--ts));
+  font-weight: 600;
+  color: var(--ios-label);
+}
+
+/* --- Nav bar: Share · ⋯ and the pull-down menu --------------------------------------------------------------------- */
+.more {
+  display: inline-flex;
+  align-items: center;
+}
+.moreAnchor {
+  position: relative;
+  display: inline-flex;
+}
+.moreAnchor > :global([data-menu-anchor]) {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 30;
+}
+.menu {
+  min-width: 250px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 13px;
+  background: var(--ios-cell);
+  box-shadow:
+    0 0 0 0.5px var(--ios-sep),
+    0 12px 40px rgb(0 0 0 / 0.22);
+  transform-origin: top right;
+  animation: menuIn 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.menu :global([data-menu-item]) {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 16px;
+  border: 0;
+  background: none;
+  color: var(--ios-label);
+  font: inherit;
+  font-size: calc(17px * var(--ts));
+  text-align: start;
+  cursor: pointer;
+}
+.menu :global([data-menu-item]) + :global([data-menu-item]) {
+  border-top: 0.5px solid var(--ios-sep);
+}
+.menu :global([data-menu-item]:focus),
+.menu :global([data-menu-item]:hover) {
+  background: var(--ios-fill-2);
+  outline: none;
+}
+.menu :global([data-menu-item]:focus-visible) {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -3px;
+}
+@keyframes menuIn {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+:global(:root[data-motion='reduced']) .menu {
+  animation-duration: 150ms;
+  animation-name: fadeIn;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+/* --- The note: paper canvas ------------------------------------------------------------------------------------------ */
+.note {
+  max-width: 46em;
+  padding: 0 20px 32px;
+  color: var(--ios-label);
+  font-size: calc(17px * var(--ts));
+  line-height: 1.45;
+  letter-spacing: -0.41px;
+}
+.heading {
+  margin: 22px 0 6px;
+  font-size: calc(20px * var(--ts));
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.38px;
+}
+.paragraph {
+  margin: 0 0 12px;
+}
+.bullets {
+  margin: 0 0 12px;
+  padding-left: 1.3em;
+}
+.bullets li {
+  padding-left: 0.2em;
+}
+.bullets li + li {
+  margin-top: 6px;
+}
+.bullets li::marker {
+  color: var(--ios-label);
+}
+
+.checklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.checkItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 2px;
+  min-height: 44px;
+  padding: 6px 0;
+}
+.circle {
+  flex: none;
+  width: calc(22px * var(--ts));
+  height: calc(22px * var(--ts));
+  border: 1.5px solid var(--ios-label-3);
+  border-radius: 50%;
+}
+.skillName {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.meter {
+  display: inline-flex;
+  gap: 4px;
+}
+.meter i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ios-fill);
+}
+.meter i[data-on] {
+  background: var(--notes-yellow);
+}
+:global([data-contrast='more']) .meter i {
+  box-shadow: inset 0 0 0 1px var(--ios-label);
+}
+.meta {
+  color: var(--ios-label-2);
+  font-size: calc(15px * var(--ts));
+  white-space: nowrap;
+}
+.showAll {
+  margin-left: calc(34px * var(--ts));
+  font-size: calc(15px * var(--ts));
+}
+
+.tableWrap {
+  margin: 12px 0 16px;
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: calc(15px * var(--ts));
+  line-height: 1.4;
+}
+.table th,
+.table td {
+  padding: 10px 12px;
+  border: 0.5px solid var(--ios-sep);
+  text-align: start;
+  vertical-align: top;
+}
+.table thead th {
+  background: var(--ios-fill-2);
+  font-weight: 600;
+}
+.table tbody th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.projectLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  color: var(--ios-tint);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.projectLink:focus-visible {
+  border-radius: 4px;
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 2px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.tags :global(button) {
+  color: var(--ios-tint);
+  font-weight: 500;
+}
+
+.viewToggle {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 4px;
+}
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 22px;
+  background: var(--ios-fill-2);
+  color: var(--ios-tint);
+  font: inherit;
+  font-size: calc(15px * var(--ts));
+  font-weight: 600;
+  cursor: pointer;
+}
+.toggle[aria-pressed='true'] {
+  background: var(--notes-yellow);
+  color: #1c1c1e;
+}
+.toggle:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 2px;
+}
+.plain :global(.cv-skill-group) {
+  margin: 0 0 16px;
+}
+.plain :global(.cv-subtitle) {
+  margin: 20px 0 8px;
+  font-size: calc(20px * var(--ts));
+  font-weight: 700;
+}
+.plain :global(.cv-tags) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.plain :global(.cv-tags li) {
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--ios-fill-2);
+  font-size: calc(15px * var(--ts));
+}
+
+/* --- Find in note ------------------------------------------------------------------------------------------------ */
+.findBar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 -20px 8px;
+  padding: 6px 12px 6px 16px;
+  border-bottom: 0.5px solid var(--ios-sep);
+  background: var(--ios-paper);
+}
+.findField {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background: var(--ios-fill);
+  color: var(--ios-label-2);
+}
+.findField:focus-within {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 1px;
+}
+.findField input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: none;
+  color: var(--ios-label);
+  font: inherit;
+  font-size: 17px;
+  outline: none;
+  -webkit-appearance: none;
+}
+.findField input::-webkit-search-cancel-button {
+  display: none;
+}
+.findCount {
+  min-width: 4.5em;
+  color: var(--ios-label-2);
+  font-size: calc(13px * var(--ts));
+  text-align: center;
+  white-space: nowrap;
+}
+.findStep {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 22px;
+  background: none;
+  color: var(--ios-tint);
+  cursor: pointer;
+}
+.findStep:disabled {
+  color: var(--ios-label-3);
+  cursor: default;
+}
+.findStep:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -3px;
+}
+.up {
+  transform: rotate(180deg);
+}
+.mark {
+  border-radius: 3px;
+  background: var(--notes-mark);
+  color: inherit;
+}
+.mark[data-current] {
+  background: var(--notes-mark-current);
+  color: #000000;
+}
+
+/* --- Split views ----------------------------------------------------------------------------------------------------- */
+.split {
+  display: grid;
+  height: 100%;
+  background: var(--ios-grouped);
+}
+.split[data-columns='3'] {
+  grid-template-columns: clamp(220px, 20%, 300px) clamp(300px, 28%, 420px) minmax(0, 1fr);
+}
+.split[data-columns='2'] {
+  grid-template-columns: clamp(260px, 38%, 400px) minmax(0, 1fr);
+}
+.folders,
+.list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding-top: calc(var(--app-top, 24px) + 12px);
+  overflow-y: auto;
+  border-right: 0.5px solid var(--ios-sep-opaque);
+  --ios-margin: 16px;
+}
+.folders {
+  background: var(--ios-grouped);
+}
+.list {
+  background: var(--ios-grouped);
+}
+.columnTitle {
+  margin: 8px 20px 12px;
+  font-size: calc(34px * var(--ts));
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.37px;
+}
+.listSearch {
+  margin: 0 16px 16px;
+}
+.detail {
+  position: relative;
+  min-width: 0;
+  background: var(--ios-paper);
+}
+.detail :global([data-screen]) {
+  box-shadow: none;
+}
+.split[data-columns='2'] .detail {
+  --app-top: 0px;
+}
+.split[data-columns='3'] .note {
+  padding-inline: 40px;
+}
+.split[data-columns='3'] .findBar {
+  margin-inline: -40px;
+  padding-inline: 40px;
+}
+
+/* The unpinned section: its own header, not a second "Notes" region. */
+.others {
+  margin: 0 var(--ios-margin, 16px) 35px;
+}
+.othersGroup {
+  margin: 0;
+}

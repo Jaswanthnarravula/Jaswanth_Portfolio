@@ -206,8 +206,9 @@
   :root:has(.printable) :global(body *) {
     visibility: hidden !important;
   }
-  .printable,
-  .printable * {
+  /* Same prefix as the hide rule, so this one wins on specificity. */
+  :root:has(.printable) .printable,
+  :root:has(.printable) .printable * {
     visibility: visible !important;
   }
   .printable {

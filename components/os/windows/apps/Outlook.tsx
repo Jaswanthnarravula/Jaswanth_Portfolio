@@ -45,6 +45,7 @@ import type { AppLocation } from '@/lib/kernel/types';
 import { dur } from '@/lib/motion/dur';
 import { useKernel } from '@/stores/kernel-context';
 import { dispatchSoon } from '@/stores/kernel-store';
+import { flDismiss, flDownload, flMore, flOpen, flSearch, type Glyph } from '../fluent.generated';
 import {
   flArrowLeft,
   flAttach,
@@ -53,24 +54,18 @@ import {
   flCompose,
   flCopy,
   flDelete,
-  flDismiss,
-  flDownload,
   flDrafts,
   flInbox,
   flInfoFilled,
   flMail,
   flMailFilled,
-  flMore,
   flNavigation,
-  flOpen,
   flPeople,
   flPin,
   flReply,
-  flSearch,
   flSend,
   flSent,
-  type Glyph,
-} from '../fluent.generated';
+} from '../fluent.apps.generated';
 import { Fl, PdfFile } from '../icons';
 import { subscribeIntents, takeIntent } from '../intents';
 import { winBinding, windowTitle } from '../model';

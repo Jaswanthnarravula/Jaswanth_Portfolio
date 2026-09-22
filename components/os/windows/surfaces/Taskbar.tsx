@@ -22,8 +22,8 @@ import { currentLocation } from '@/lib/kernel/state';
 import { focusKeys, type OsSession, type WindowId, type WindowInstance } from '@/lib/kernel/types';
 import { useKernel, usePrefs } from '@/stores/kernel-context';
 import { dispatch, getKernel } from '@/stores/kernel-store';
-import { prefetchApp } from '../apps/AppBody';
 import { flChevronUp, flDismiss, flSearch, flSpeaker, flSpeakerMute, flTaskView, flWifi } from '../fluent.generated';
+import { prefetchApp } from '../apps/AppBody';
 import { Fl, PdfFile } from '../icons';
 import {
   jumpList,
@@ -40,6 +40,7 @@ import {
 } from '../model';
 import { pressPulse } from '../motion';
 import { useWinShell } from '../shell-context';
+import { warmSurface } from './lazy';
 import styles from '../windows.module.css';
 
 /** Hover intent before the thumbnail preview (plans/windows/surfaces/taskbar). */
@@ -122,6 +123,8 @@ export function Taskbar({
             aria-label="Start"
             aria-haspopup="dialog"
             aria-expanded={panel === 'start'}
+            onPointerEnter={() => warmSurface('launcher')}
+            onFocus={() => warmSurface('launcher')}
             onClick={toggle('start')}
           >
             <AssetIcon id="system.windows-logo" size={24} priority className={styles.tbGlyph} />
@@ -137,6 +140,8 @@ export function Taskbar({
             aria-label="Search"
             aria-haspopup="dialog"
             aria-expanded={panel === 'search'}
+            onPointerEnter={() => warmSurface('launcher')}
+            onFocus={() => warmSurface('launcher')}
             onClick={toggle('search')}
           >
             <Fl icon={flSearch} size={22} className={styles.tbGlyph} />
@@ -152,6 +157,8 @@ export function Taskbar({
             aria-label="Task View"
             aria-haspopup="dialog"
             aria-expanded={panel === 'taskview'}
+            onPointerEnter={() => warmSurface('taskView')}
+            onFocus={() => warmSurface('taskView')}
             onClick={toggle('taskview')}
           >
             <Fl icon={flTaskView} size={22} className={styles.tbGlyph} />

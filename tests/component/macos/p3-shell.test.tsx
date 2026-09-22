@@ -10,6 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import MacShell from '@/components/os/macos/Shell';
 import { placeCoach } from '@/components/os/macos/surfaces/Tour';
+import { runMacCommand } from '@/components/os/macos/run-command';
 import { macUi } from '@/components/os/macos/ui';
 import { resizeRect } from '@/components/os/macos/window/Window';
 import { DEFAULT_CAPABILITIES, DEFAULT_PREFS } from '@/lib/kernel/state';
@@ -134,6 +135,30 @@ describe('shell surfaces', () => {
     });
     expect(getPrefs().eggsFound).toContain('EGG-KONAMI-01');
     expect(macUi.getState().center[0]?.title).toBe('Cheat code accepted');
+  });
+});
+
+describe('Apple menu → Lock Screen / Restart (MAC-MENU-05)', () => {
+  it('Lock Screen shows the lock screen; Restart confirms, replays the startup, then locks', async () => {
+    renderShell();
+    act(() => {
+      runMacCommand({ kind: 'lock' });
+    });
+    expect(screen.getByRole('button', { name: 'Enter macOS' })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Enter macOS' }));
+    await act(async () => {
+      flushQueued();
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+    act(() => {
+      runMacCommand({ kind: 'restart' });
+    });
+    const confirm = screen.getByRole('dialog', { name: 'Restart this Mac?' });
+    await userEvent.click(within(confirm).getByRole('button', { name: 'Restart' }));
+    // The replay runs (skippable), then the lock screen.
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Enter macOS' })).toBeInTheDocument(), {
+      timeout: 4000,
+    });
   });
 });
 

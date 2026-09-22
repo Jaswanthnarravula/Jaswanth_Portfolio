@@ -28,8 +28,8 @@ import { useKernel, usePrefs } from '@/stores/kernel-context';
 import { dispatch, dispatchSoon, flushQueued, getKernel, subscribeEffects } from '@/stores/kernel-store';
 import { getPrefs } from '@/stores/prefs-store';
 import { claimPhases, handOffExit } from '@/stores/transition-stage';
-import { macAppBody } from './apps/registry';
-import { chromeVars } from './model';
+import { macAppBody, warmApps } from './apps/registry';
+import { chromeVars, DOCK_ORDER } from './model';
 import { exitBeat } from './motion';
 import { foundEgg, registerMacShellHooks, runMacCommand } from './run-command';
 import { BootReplay } from './surfaces/BootReplay';
@@ -116,6 +116,13 @@ export default function MacShell({ heading }: OsShellProps) {
     const first = state.arrival === 'chooser' && !state.sessions.macos.lockSeen;
     if (first) setLocked(true);
     return () => resetMacUi();
+  }, []);
+
+  // Warm the Dock's apps in idle time once the desktop has painted (a first open never waits for its chunk).
+  useEffect(() => {
+    const lifetime = new AbortController();
+    warmApps(DOCK_ORDER, lifetime.signal);
+    return () => lifetime.abort();
   }, []);
 
   // Arrival after the lock screen: the welcome banner, then (1.2 s later, once) the tour offer — never while another

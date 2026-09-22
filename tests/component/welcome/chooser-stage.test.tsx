@@ -23,7 +23,11 @@ interface FakeFlight {
   retargets: number;
 }
 
-function harness(extra: Partial<Parameters<typeof createChooserStage>[0]> = {}) {
+function harness(
+  extra: Partial<Parameters<typeof createChooserStage>[0]> = {},
+  /** Kernel steps taken before the stage exists (the chooser's render → effect gap). */
+  setup?: (dispatch: (action: KernelAction) => KernelResult, getState: () => KernelState) => void,
+) {
   const deps = makeDeps();
   let state: KernelState = booted('/macos');
   const listeners = new Set<(effect: KernelEffect) => void>();
@@ -41,6 +45,7 @@ function harness(extra: Partial<Parameters<typeof createChooserStage>[0]> = {}) 
   // Settle on the chooser (the kernel's own route to it).
   dispatch({ type: 'SWITCH_OS', to: null, via: 'switch' });
   dispatch({ type: 'PHASE_DONE', target: { kind: 'os', epoch: state.epoch } });
+  setup?.(dispatch, () => state);
 
   const root = document.createElement('div');
   root.innerHTML = ['macos', 'linux', 'windows']
@@ -308,17 +313,31 @@ describe('CHOOSE-EXIT-01 the return flight after a leaving OS’s exit beat', ()
     expect(h.stage.returnFrom('ios', h.state.epoch, 'iOS')).toBe(false);
   });
 
-  it('a chooser mounted under a leaving OS uncovers itself if the OS finished without a return flight', async () => {
-    const h = harness({ returning: true });
-    // macOS reached without this stage (e.g. a deep link), idle and live:
-    h.dispatch({ type: 'SWITCH_OS', to: 'macos', via: 'switch' });
+  /** macOS reached without the chooser (a deep link), live and idle, then Back: macOS is running its exit beat. */
+  const deepLinkThenBack = (dispatch: (action: KernelAction) => KernelResult, getState: () => KernelState) => {
+    dispatch({ type: 'SWITCH_OS', to: 'macos', via: 'switch' });
     for (let step = 0; step < 3; step++)
-      h.dispatch({ type: 'PHASE_DONE', target: { kind: 'os', epoch: h.state.epoch } });
-    expect(h.state).toMatchObject({ activeOs: 'macos', transition: { phase: 'idle' } });
-    h.dispatch({ type: 'ROUTE_CHANGED', url: '/' });
-    const views = h.views.length;
+      dispatch({ type: 'PHASE_DONE', target: { kind: 'os', epoch: getState().epoch } });
+    expect(getState()).toMatchObject({ activeOs: 'macos', transition: { phase: 'idle' } });
+    dispatch({ type: 'ROUTE_CHANGED', url: '/' });
+    expect(getState().transition).toMatchObject({ phase: 'exiting', from: 'macos', to: null });
+  };
+
+  it('a chooser mounted under a leaving OS uncovers itself if the OS finished without a return flight', async () => {
+    const h = harness({ returning: true }, deepLinkThenBack);
+    expect(h.views).toEqual([]); // still covered: macOS is on screen
     h.dispatch({ type: 'PHASE_DONE', target: { kind: 'os', epoch: h.state.epoch } }); // the OS completed it itself
-    expect(h.views.slice(views)).toContainEqual({ covered: false, failed: null });
+    expect(h.views).toContainEqual({ covered: false, failed: null });
+  });
+
+  it('uncovers at once when the OS finished its exit between the chooser’s render and its stage (no hidden foyer)', async () => {
+    // The chooser chunk arrived mid-beat: it rendered `returning`, then the beat ended before the stage subscribed.
+    const h = harness({ returning: true }, (dispatch, getState) => {
+      deepLinkThenBack(dispatch, getState);
+      dispatch({ type: 'PHASE_DONE', target: { kind: 'os', epoch: getState().epoch } });
+      expect(getState()).toMatchObject({ activeOs: null, transition: { phase: 'idle' } });
+    });
+    expect(h.views).toEqual([{ covered: false, failed: null }]);
   });
 });
 

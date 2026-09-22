@@ -1,0 +1,901 @@
+/* iOS controls — values from plans/ios/01-identity.md: SF system stack, Body 17, rows ≥ 44 pt, hairlines inset 16 pt,
+   inset-grouped sections 10 pt radius, nav bar 44 pt, tab bar 49 pt + the home-indicator inset, dim-on-press. */
+
+/* --- Press feedback: dim 80 ms in / 200 ms out, no ripple (IOS-ID-04) -------------------------------------------- */
+.press {
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+.press::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--ios-press, rgb(0 0 0 / 0.2));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease-out;
+}
+.press:active::after {
+  opacity: 1;
+  transition-duration: 80ms;
+}
+:global(:root[data-theme='dark']) .press,
+:global([data-ios-dark]) .press {
+  --ios-press: rgb(255 255 255 / 0.14);
+}
+
+/* --- Grouped lists ---------------------------------------------------------------------------------------------- */
+.group {
+  margin: 0 var(--ios-margin, 16px) 35px;
+}
+.group[data-plain] {
+  margin-inline: 0;
+}
+.groupHeader {
+  margin: 0 0 7px 16px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: -0.08px;
+  text-transform: uppercase;
+  color: var(--ios-label-2);
+}
+.groupList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: 10px;
+  background: var(--ios-cell);
+  overflow: clip;
+}
+.group[data-plain] .groupList {
+  border-radius: 0;
+}
+.groupFooter {
+  margin: 7px 16px 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ios-label-2);
+}
+
+.rowItem {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+.rowItem + .rowItem::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: var(--row-inset, 16px);
+  height: 0.5px;
+  background: var(--ios-sep);
+  pointer-events: none;
+  z-index: 1;
+}
+.rowItem:has(.rowIcon) + .rowItem::before,
+.rowItem:has(.rowIcon) + .rowItem:has(.rowIcon)::before {
+  --row-inset: 60px;
+}
+.row {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 11px 16px;
+  border: 0;
+  background: none;
+  color: var(--ios-label);
+  font: inherit;
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: -0.41px;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+.row[data-static] {
+  cursor: default;
+}
+.row[data-destructive] {
+  color: var(--ios-red);
+}
+.row[data-selected] {
+  background: var(--ios-tint-fill);
+  color: #ffffff;
+}
+.row[data-selected] .rowSubtitle,
+.row[data-selected] .rowDetail,
+.row[data-selected] .rowValue,
+.row[data-selected] .chevron {
+  color: rgb(255 255 255 / 0.86);
+}
+.row:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -3px;
+}
+@media (hover: hover) and (pointer: fine) {
+  a.row:hover,
+  button.row:hover {
+    background: var(--ios-fill-2);
+  }
+  .row[data-selected]:hover {
+    background: var(--ios-tint-fill);
+  }
+}
+.rowIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  border-radius: 7px;
+  color: var(--ios-tint);
+}
+.rowIcon[data-tint] {
+  color: #ffffff;
+}
+.rowText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1px;
+}
+.rowTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rowSubtitle {
+  font-size: 15px;
+  line-height: 20px;
+  letter-spacing: -0.24px;
+  color: var(--ios-label-2);
+}
+.rowDetail {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 20px;
+  letter-spacing: -0.24px;
+  color: var(--ios-label-2);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.rowValue {
+  flex: none;
+  max-width: 50%;
+  overflow: hidden;
+  color: var(--ios-label-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chevron {
+  flex: none;
+  color: var(--ios-label-3);
+}
+.check {
+  flex: none;
+  color: var(--ios-tint);
+}
+.rowControl {
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+.rowMore {
+  position: absolute;
+  top: 50%;
+  right: 34px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
+  border: 0;
+  border-radius: 22px;
+  background: none;
+  color: var(--ios-tint);
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+.rowItem:focus-within .rowMore,
+.rowMore:focus-visible {
+  opacity: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .rowItem:hover .rowMore {
+    opacity: 1;
+  }
+}
+.rowMore:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -3px;
+}
+
+/* --- Switch (51 × 31, thumb spring r 0.25 ζ 0.9 ≈ this curve) ------------------------------------------------------ */
+.switch {
+  position: relative;
+  flex: none;
+  width: 51px;
+  height: 31px;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: var(--ios-fill-2);
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+.switch[data-on] {
+  background: var(--ios-green);
+}
+.switchThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow:
+    0 3px 8px rgb(0 0 0 / 0.15),
+    0 3px 1px rgb(0 0 0 / 0.06);
+  transition: transform 260ms cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+.switch[data-on] .switchThumb {
+  transform: translateX(20px);
+}
+.switch:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 2px;
+}
+:global([data-contrast='more']) .switch {
+  box-shadow: inset 0 0 0 1.5px var(--ios-label);
+}
+
+/* --- Segmented control (thumb r 0.3 ζ 1) --------------------------------------------------------------------------- */
+.segmented {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: repeat(var(--seg-count), minmax(0, 1fr));
+  align-self: flex-start;
+  min-width: min(100%, calc(var(--seg-count) * 96px));
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--ios-segment);
+}
+.segThumb {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: calc((100% - 4px) / var(--seg-count));
+  border-radius: 7px;
+  background: var(--ios-cell);
+  box-shadow:
+    0 3px 8px rgb(0 0 0 / 0.12),
+    0 3px 1px rgb(0 0 0 / 0.04);
+  transform: translateX(calc(var(--seg-index) * 100%));
+  transition: transform 300ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+.segment {
+  position: relative;
+  z-index: 1;
+  min-height: 32px;
+  padding: 3px 14px;
+  border: 0;
+  background: none;
+  color: var(--ios-label);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.08px;
+  cursor: pointer;
+}
+.segment[aria-checked='true'] {
+  font-weight: 600;
+}
+.segment:focus-visible {
+  border-radius: 7px;
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -2px;
+}
+
+/* --- Search field ------------------------------------------------------------------------------------------------ */
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.searchField {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background: var(--ios-fill);
+  color: var(--ios-label-2);
+}
+.searchField input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  color: var(--ios-label);
+  font: inherit;
+  font-size: 17px;
+  letter-spacing: -0.41px;
+  outline: none;
+  -webkit-appearance: none;
+}
+.searchField input::placeholder {
+  color: var(--ios-label-2);
+}
+.searchField input::-webkit-search-cancel-button {
+  display: none;
+}
+.searchField:focus-within {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 1px;
+}
+.searchGlyph {
+  flex: none;
+}
+.searchClear {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ios-cell);
+  cursor: pointer;
+}
+.searchClear::before {
+  content: '';
+  position: absolute;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--ios-label-3);
+}
+.searchClear svg {
+  position: relative;
+}
+
+/* --- Text / bar buttons --------------------------------------------------------------------------------------------- */
+.textButton {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--ios-tint);
+  font: inherit;
+  font-size: 17px;
+  letter-spacing: -0.41px;
+  cursor: pointer;
+}
+.textButtonBold {
+  font-weight: 600;
+}
+.textButton:disabled {
+  color: var(--ios-label-3);
+  cursor: default;
+}
+.textButton:focus-visible,
+.barButton:focus-visible,
+.backButton:focus-visible,
+.sendButton:focus-visible {
+  border-radius: 8px;
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -2px;
+}
+.barButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  color: var(--ios-tint);
+  font: inherit;
+  font-size: 17px;
+  letter-spacing: -0.41px;
+  cursor: pointer;
+}
+.barButton[data-emphasized] {
+  font-weight: 600;
+}
+.barButton:disabled {
+  color: var(--ios-label-3);
+}
+.sendButton {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ios-tint-fill);
+  color: #ffffff;
+  cursor: pointer;
+}
+.sendButton:disabled {
+  background: var(--ios-fill);
+  color: var(--ios-label-3);
+}
+
+/* --- Pills and chips -------------------------------------------------------------------------------------------- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.24px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.pill[data-tone='filled'] {
+  background: var(--ios-tint-fill);
+  color: #ffffff;
+}
+.pill[data-tone='tinted'] {
+  background: var(--ios-tint-soft);
+  color: var(--ios-tint-soft-ink);
+}
+.pill[data-tone='plain'] {
+  background: var(--ios-fill);
+  color: var(--ios-label);
+}
+.pill:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 2px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 3px 12px;
+  border: 0;
+  border-radius: 99px;
+  background: var(--ios-tint-soft);
+  color: var(--ios-tint-soft-ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+}
+button.chip {
+  min-height: 32px;
+  cursor: pointer;
+}
+button.chip[aria-pressed='true'] {
+  background: var(--ios-tint-fill);
+  color: #ffffff;
+}
+button.chip:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 2px;
+}
+
+/* --- Tab bar (49 pt + inset) ------------------------------------------------------------------------------------ */
+.tabBar {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 4;
+  padding-bottom: max(var(--sa-b), 0px);
+  border-top: 0.5px solid var(--ios-sep);
+  background: var(--ios-bar);
+  -webkit-backdrop-filter: var(--ios-bar-blur, blur(20px) saturate(180%));
+  backdrop-filter: var(--ios-bar-blur, blur(20px) saturate(180%));
+}
+.tabBar ul {
+  display: flex;
+  justify-content: space-around;
+  height: 49px;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 640px;
+  list-style: none;
+}
+.tabBar li {
+  display: flex;
+  flex: 1;
+}
+.tab {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  color: var(--ios-label-3);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  text-decoration: none;
+}
+.tab[aria-current='page'] {
+  color: var(--ios-tint);
+}
+.tab:focus-visible {
+  border-radius: 8px;
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -3px;
+}
+
+/* --- Navigation stack --------------------------------------------------------------------------------------------- */
+.stack {
+  position: relative;
+  height: 100%;
+  overflow: clip;
+  isolation: isolate;
+  touch-action: pan-y;
+}
+.stack[data-swiping] {
+  cursor: grabbing;
+  user-select: none;
+}
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--ios-grouped);
+  color: var(--ios-label);
+  font-family: var(--font-ui);
+  box-shadow: -8px 0 24px rgb(0 0 0 / 0.08);
+}
+.screen[data-tone='plain'] {
+  background: var(--ios-plain);
+}
+.screen[data-tone='paper'] {
+  background: var(--ios-paper);
+}
+.screen[data-tone='dark'] {
+  background: #000000;
+  color: #ffffff;
+}
+.screen[hidden] {
+  display: none;
+}
+.navBar {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  flex: none;
+  grid-template-columns: minmax(44px, 1fr) auto minmax(44px, 1fr);
+  align-items: center;
+  height: 44px;
+  margin-top: var(--app-top, 0px);
+  padding: 0 8px;
+  border-bottom: 0.5px solid transparent;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease;
+}
+.navBar[data-scrolled] {
+  border-bottom-color: var(--ios-sep);
+  background: var(--ios-bar);
+}
+.navLeading {
+  display: flex;
+  justify-self: start;
+  align-items: center;
+  min-width: 0;
+}
+.navTrailing {
+  display: flex;
+  justify-self: end;
+  align-items: center;
+  gap: 2px;
+}
+.navTitle {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+.navBar[data-collapsed] .navTitle {
+  opacity: 1;
+}
+.navTitle > span,
+.navTitle > h3,
+.navTitle > h4 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.41px;
+}
+.navTitle > h3:focus,
+.navTitle > h4:focus,
+.largeTitle:focus {
+  outline: none;
+}
+.navTitle > h3:focus-visible,
+.navTitle > h4:focus-visible,
+.largeTitle:focus-visible {
+  border-radius: 6px;
+  outline: 3px solid var(--ios-tint);
+}
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  max-width: 40vw;
+  min-height: 44px;
+  margin-left: -6px;
+  padding: 0 6px 0 0;
+  border: 0;
+  background: none;
+  color: var(--ios-tint);
+  font: inherit;
+  font-size: 17px;
+  letter-spacing: -0.41px;
+  cursor: pointer;
+}
+.backLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.scroller {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-bottom: calc(49px + var(--sa-b) + 16px);
+  -webkit-overflow-scrolling: touch;
+}
+.stack[data-has-tabs] .scroller {
+  padding-bottom: calc(49px + var(--sa-b));
+}
+.largeTitle {
+  margin: 3px 16px 8px;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 41px;
+  letter-spacing: 0.37px;
+  transform-origin: left center;
+}
+.accessory {
+  padding: 0 16px 10px;
+}
+.content {
+  padding-bottom: calc(var(--sa-b) + 34px);
+}
+.toolbar {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 0 8px max(var(--sa-b), var(--home-inset, 0px));
+  border-top: 0.5px solid var(--ios-sep);
+  background: var(--ios-bar);
+}
+
+/* --- Sheets ---------------------------------------------------------------------------------------------------- */
+.sheetLayer {
+  position: absolute;
+  /* The visible viewport, not the layout one: with a keyboard up the sheet's Cancel / Done stay reachable
+     (IOS-RESP-07). `--vvh` / `--vv-top` are written by lib/motion/visual-viewport. */
+  top: var(--vv-top, 0px);
+  right: 0;
+  bottom: auto;
+  left: 0;
+  height: var(--vvh, 100%);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  pointer-events: auto;
+}
+.sheetScrim {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.26);
+}
+.sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(var(--vvh, 100dvh) - max(var(--sa-t), 44px) - 10px);
+  height: calc(var(--vvh, 100dvh) - max(var(--sa-t), 44px) - 10px);
+  border-radius: 10px 10px 0 0;
+  background: var(--ios-cell);
+  color: var(--ios-label);
+  font-family: var(--font-ui);
+  box-shadow: 0 -8px 32px rgb(0 0 0 / 0.18);
+  touch-action: pan-y;
+}
+.sheet[data-detent='medium'] {
+  height: min(52dvh, calc(var(--vvh, 100dvh) - 60px));
+}
+.sheetHeader {
+  position: relative;
+  display: grid;
+  flex: none;
+  grid-template-columns: minmax(64px, 1fr) auto minmax(64px, 1fr);
+  align-items: center;
+  min-height: 56px;
+  padding: 8px 8px 0;
+  cursor: grab;
+  touch-action: none;
+}
+.sheetHeader > :first-of-type:not(.grabber) {
+  justify-self: start;
+}
+.sheetHeader > :last-child {
+  justify-self: end;
+}
+.sheetHeader[data-hidden] {
+  min-height: 44px;
+}
+.grabber {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  width: 36px;
+  height: 5px;
+  margin-left: -18px;
+  border-radius: 3px;
+  background: var(--ios-label-3);
+  opacity: 0.5;
+}
+.sheetTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.41px;
+  text-align: center;
+}
+.sheetSpacer {
+  min-width: 44px;
+}
+.sheetBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+/* Full page: a centred form sheet, max 720 px wide (plans/ios/04 "Sheets"). */
+:global([data-ios-layout='pad']) .sheetLayer {
+  justify-content: center;
+  align-items: center;
+}
+:global([data-ios-layout='pad']) .sheet {
+  width: min(720px, calc(100% - 48px));
+  height: min(760px, calc(var(--vvh, 100dvh) - 96px));
+  border-radius: 14px;
+}
+:global([data-ios-layout='pad']) .sheet[data-detent='medium'] {
+  height: min(520px, calc(var(--vvh, 100dvh) - 96px));
+}
+:global([data-ios-layout='pad']) .sheetLayer[data-cover] .sheet {
+  width: min(1100px, calc(100% - 64px));
+  height: calc(var(--vvh, 100dvh) - 72px);
+}
+
+.actionSheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(100% - 16px, 420px);
+  margin: 0 auto max(8px, var(--sa-b));
+  font-family: var(--font-ui);
+}
+:global([data-ios-layout='pad']) .actionSheet {
+  margin-bottom: auto;
+  margin-top: auto;
+}
+.actionGroup {
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--ios-bar-solid);
+}
+.actionTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 14px 16px;
+  border-bottom: 0.5px solid var(--ios-sep);
+  color: var(--ios-label-2);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+.actionTitle span {
+  font-weight: 400;
+}
+.actionButton {
+  display: block;
+  width: 100%;
+  min-height: 57px;
+  border: 0;
+  border-top: 0.5px solid var(--ios-sep);
+  background: none;
+  color: var(--ios-tint);
+  font: inherit;
+  font-size: 20px;
+  letter-spacing: 0.38px;
+  cursor: pointer;
+}
+.actionButton[data-destructive] {
+  color: var(--ios-red);
+}
+.actionCancel {
+  border: 0;
+  border-radius: 14px;
+  background: var(--ios-cell);
+  font-weight: 600;
+}
+.actionButton:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switchThumb,
+  .segThumb,
+  .navTitle {
+    transition: none;
+  }
+}
+:global([data-motion='reduced']) .switchThumb,
+:global([data-motion='reduced']) .segThumb {
+  transition: none;
+}
+:global([data-glass='solid']) .tabBar,
+:global([data-glass='solid']) .navBar[data-scrolled],
+:global([data-glass='solid']) .toolbar {
+  background: var(--ios-bar-solid);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* The underlay's 10 % dim during a push / pop / edge swipe (opacity only). */
+.dimVeil {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: #000000;
+  opacity: 0;
+  pointer-events: none;
+}

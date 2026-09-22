@@ -55,6 +55,7 @@ import {
   nextFocus,
   pushLocation,
   removeWindow,
+  replaceLocation,
   seekLocation,
   unsnap,
   withWindow,
@@ -915,11 +916,13 @@ function step(draft: Draft, action: KernelAction, deps: KernelDeps): void {
           if (resolved) openApp(draft, window.os, resolved.binding.role, resolved.location, deps);
           return;
         }
-        const next = pushLocation(window, resolved.location);
+        const next = action.replace
+          ? replaceLocation(window, resolved.location)
+          : pushLocation(window, resolved.location);
         const focused = focusWindow(withWindow(session, next), window.id);
         if (next === window && focused === session) return;
         draft.state = captureContinuity(setSession(state, focused), window.os, window.role, resolved.location, deps);
-        draft.routeIntent = 'go';
+        draft.routeIntent = action.replace ? 'canonicalize' : 'go';
       });
       return;
 
@@ -954,6 +957,13 @@ function step(draft: Draft, action: KernelAction, deps: KernelDeps): void {
         const text = action.draft.slice(0, 10_000);
         if (window.draft === text) return;
         draft.state = setSession(state, withWindow(session, { ...window, draft: text }));
+      });
+      return;
+
+    case 'SET_APP_UI':
+      windowAction(draft, action.id, (window, session) => {
+        const next = withAppUi(window, action.key, action.value);
+        if (next !== window) draft.state = setSession(state, withWindow(session, next));
       });
       return;
 
@@ -1109,6 +1119,26 @@ function step(draft: Draft, action: KernelAction, deps: KernelDeps): void {
       return exhaustive;
     }
   }
+}
+
+// --- App session state (addition, plans/ios/02) ------------------------------------------------------------------
+
+/** Caps for `WindowInstance.ui`: a handful of short keys per app (it persists with the session). */
+export const APP_UI_LIMITS = { keys: 24, key: 40, value: 4000 } as const;
+
+function withAppUi(window: WindowInstance, key: string, value: string | null): WindowInstance {
+  if (!key || key.length > APP_UI_LIMITS.key) return window;
+  const current = window.ui ?? {};
+  if (value === null) {
+    if (!(key in current)) return window;
+    const rest = { ...current };
+    delete rest[key];
+    return { ...window, ui: rest };
+  }
+  const text = value.slice(0, APP_UI_LIMITS.value);
+  if (current[key] === text) return window;
+  if (!(key in current) && Object.keys(current).length >= APP_UI_LIMITS.keys) return window;
+  return { ...window, ui: { ...current, [key]: text } };
 }
 
 // --- Derived decisions --------------------------------------------------------------------------------------------

@@ -59,3 +59,43 @@ export const WINDOWS_TOUR: TourScript = {
     { id: 'search', say: 'Search finds anything — Ctrl+K.', pointAt: 'tb-search', waitFor: 5000 },
   ],
 };
+
+/**
+ * plans/ios/07-cross-os-features.md "Guided tour": every icon is an app (Safari opens out of its icon) → go Home (the
+ * app returns into its icon — the iOS signature) → Projects in GitHub → the résumé in the Dock → pull down to search.
+ */
+export const IOS_TOUR: TourScript = {
+  os: 'ios',
+  home: focusKeys.home('ios'),
+  steps: [
+    {
+      id: 'apps',
+      say: 'Every icon is an app — tap one.',
+      pointAt: 'ios-icon-app:browser',
+      action: { type: 'OPEN_APP', os: 'ios', role: 'browser', originId: 'ios-icon-app:browser' },
+      waitFor: 'settled',
+    },
+    {
+      id: 'home',
+      say: 'Swipe up (or tap the bar) to go Home.',
+      pointAt: 'ios-home-indicator',
+      action: { type: 'GO_HOME' },
+      waitFor: 3000,
+    },
+    {
+      id: 'projects',
+      say: 'Projects live in GitHub.',
+      pointAt: 'ios-icon-app:github',
+      action: { type: 'OPEN_APP', os: 'ios', role: 'github', originId: 'ios-icon-app:github' },
+      waitFor: 'settled',
+    },
+    {
+      id: 'resume',
+      say: 'Your résumé is in the Dock.',
+      pointAt: 'ios-icon-dock:files',
+      action: { type: 'GO_HOME' },
+      waitFor: 5000,
+    },
+    { id: 'search', say: 'Pull down to search.', pointAt: 'ios-search-pill', waitFor: 5000 },
+  ],
+};

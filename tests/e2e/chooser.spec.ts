@@ -37,6 +37,39 @@ async function toChooser(page: Page, { withoutHover = false } = {}) {
   await waitForSettled(page, '[data-chooser-card]');
 }
 
+/**
+ * macOS shows its lock screen on the first chooser entry of a session (plans/macos/surfaces/lock-screen.md,
+ * `MAC-LOCK-02`); "Enter macOS" takes focus and Enter unlocks, landing on the OS heading.
+ */
+async function passMacLock(page: Page) {
+  const enter = page.getByRole('button', { name: 'Enter macOS' });
+  await expect(enter).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('[data-lock-screen]')).toHaveCount(0);
+}
+
+/** iOS shows its Lock Screen on the first chooser entry (plans/ios/surfaces/lock-screen.md, `IOS-LOCK-02`): Open iOS. */
+async function passIosLock(page: Page) {
+  const open = page.getByRole('button', { name: 'Open iOS' });
+  await expect(open).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('[data-lock]')).toHaveCount(0);
+}
+
+/**
+ * Windows shows its lock screen on the first chooser entry too (plans/windows/surfaces/lock-screen.md, `WIN-LOCK-02`):
+ * Continue takes focus, Enter reveals the sign-in, whose button takes focus; Enter signs in and lands on the OS heading.
+ */
+async function passWinLock(page: Page) {
+  const proceed = page.getByRole('button', { name: /\(Continue\)$/ });
+  await expect(proceed).toBeFocused();
+  await page.keyboard.press('Enter');
+  const signIn = page.getByRole('button', { name: 'Sign in', exact: true });
+  await expect(signIn).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('[data-lock]')).toHaveCount(0);
+}
+
 test('W1 the cards are real links with viewport-shaped snapshots and no device frame @smoke', async ({ page }) => {
   await toChooser(page);
   const viewport = page.viewportSize()!;
@@ -75,6 +108,7 @@ test('W1 a card flies into its OS; Back returns to the chooser with focus on tha
   await expect(page.locator('#system-status')).toHaveText('Entering Windows 11');
   await expect(page).toHaveURL(/\/windows$/);
   await expect(page.locator('[data-os-shell="windows"]')).toBeAttached();
+  await passWinLock(page);
   await expect(page.getByRole('heading', { level: 1, name: /^Windows 11 — / })).toBeFocused();
   await expect(page.locator('body > [aria-hidden="true"]:not(#page-layer)')).toHaveCount(0); // overlay removed
   await page.goBack();
@@ -135,6 +169,7 @@ test('R1 reduced motion: no flight, the same end state', async ({ page }, info) 
   });
   await card(page, 'macos').click();
   await expect(page.locator('[data-os-shell="macos"]')).toBeAttached();
+  await passMacLock(page);
   await expect(page.getByRole('heading', { level: 1, name: /^macOS — / })).toBeFocused();
   const scales = await page.evaluate(() => (window as unknown as { __scales: number[] }).__scales);
   expect(scales.length).toBeGreaterThan(0);
@@ -154,6 +189,9 @@ test('X1 keyboard only: every card enters its OS, and Back lands on that card', 
   for (const [os, name] of OSES) {
     await card(page, os).focus();
     await page.keyboard.press('Enter');
+    if (os === 'macos') await passMacLock(page);
+    else if (os === 'windows') await passWinLock(page);
+    else if (os === 'ios') await passIosLock(page);
     await expect(page.getByRole('heading', { level: 1, name: new RegExp(`^${name} — `) })).toBeFocused();
     await expect(page).toHaveURL(new RegExp(`/${os}$`));
     await page.goBack();

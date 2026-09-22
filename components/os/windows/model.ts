@@ -47,6 +47,12 @@ export const userFolder = (): string => fileSafe(getPerson().givenName) || 'User
 
 export const userRoot = (): string => `C:\\Users\\${userFolder()}`;
 
+/** When Start / Search's loading placeholder last showed: the launcher then arrives in its place without a second rise. */
+export const launcherPlaceholder = { shownAt: Number.NEGATIVE_INFINITY };
+
+/** The Start / Search panel's element id (the flight origin of what it opens). */
+export const LAUNCHER_ID = 'win-launcher';
+
 /** Pinned taskbar apps, left → right, as the storyboard frame orders them (plans/windows/01-identity "Visual target"). */
 export const TASKBAR_ORDER: readonly AppRole[] = [
   'files',

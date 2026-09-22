@@ -73,7 +73,7 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `ROUTE-CODEC-02` | P0 | verified | `unit/routing/codec.test.ts` › ROUTE-CODEC-02 · `e2e/history.spec.ts` › a bad URL repairs to the nearest valid route · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
 | `ROUTE-GOFN-01` | P0 | verified | `unit/routing/history.test.ts` › ROUTE-GOFN-01 go() decision table · vitest 587/587 (2026-09-21) |  |
 | `ROUTE-EVENT-01` | P2 | verified | `unit/kernel/macos-wm.test.ts` › MAC-WM-11 history rule per window event · `e2e/macos.spec.ts` › MAC-FIND-03 · ROUTE-EVENT-01 · MAC-WM-11 H1: in-app Back equals browser Back; window events follow the history table · green locally 2026-09-22 (preview build) |  |
-| `ROUTE-MOBILE-01` | P5 | planned | | |
+| `ROUTE-MOBILE-01` | P5 | verified | e2e `ios.spec.ts` › H1 Back pops, then goes Home, then leaves iOS · unit `kernel/ios.test.ts` | |
 | `ROUTE-SER-01` | P0 | verified | `unit/routing/history.test.ts` › ROUTE-SER-01 · `e2e/history.spec.ts` › spamming Back/Forward mid-click never duplicates consecutive URLs · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
 | `ROUTE-PORT-01` | P0 | verified | `e2e/history.spec.ts` › history contract … (native) and (next-router) · `component/kernel/route-sync.test.tsx` · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
 | `ROUTE-CONTRACT-01` | P0 | verified | `e2e/history.spec.ts` › history contract: push → back → forward → refresh → back, no full reload (sentinel) · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
@@ -98,14 +98,14 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | ID | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|
 | `MOTION-SPRING-01` | P0 | verified | `unit/kernel/platform.test.ts` › MOTION-SPRING-01 retarget keeps velocity continuity · vitest 587/587 (2026-09-21) |  |
-| `MOTION-FLIGHT-01` | P5 | planned | | |
+| `MOTION-FLIGHT-01` | P5 | verified | e2e `ios.spec.ts` › O1 layout swaps keep the app and its stack; Home returns to the new icon rect | |
 | `MOTION-DRAG-01` | P2 | verified | `component/motion/drag.test.tsx` › MOTION-DRAG-01 drag() · `e2e/macos.spec.ts` › MAC-WM-03 · MOTION-DRAG-01 drag: clamped under the menu bar, ≥ 48 px reachable, one commit, zero window renders · green locally 2026-09-22 (preview build) |  |
 | `MOTION-DIR-01` | P0 | verified | `unit/kernel/platform.test.ts` › MOTION-DIR-01 kill(epoch) stops older timelines only · vitest 587/587 (2026-09-21) |  |
 | `MOTION-RULE-01` | P2 | verified | `e2e/macos.spec.ts` › MOTION-RULE-01 input wins: a press during an open or close acts at once · green locally 2026-09-22 (preview build) |  |
 | `MOTION-RULE-02` | P2 | verified | `e2e/performance.spec.ts` › MOTION-RULE-02 no Layout > 1 ms inside a tagged macOS flight (open, minimize, restore, zoom, close) · green locally 2026-09-22 (preview build) |  |
 | `MOTION-RM-01` | P1 | planned | | |
 | `MOTION-LEAK-01` | P2 | verified | `e2e/macos.spec.ts` › MOTION-LEAK-01 leak loop: nothing ticking at idle, listener count stable · green locally 2026-09-22 (preview build) |  |
-| `MOTION-SCROLL-01` | P3 | planned | | |
+| `MOTION-SCROLL-01` | P3 | verified | `component/motion/overview-scroll.test.tsx` › PERF-LEAK-01 the Overview scroll effects release their scroller · `e2e/macos-p3b.spec.ts` › MAC-SAF-03/06 · MOTION-SCROLL-01 smooth scroll runs on the Overview scroller only where allowed, and is torn down on close · green locally 2026-09-22 (preview build .next-p3; chromium-desktop · reduced-motion · pixel · iphone) |  |
 
 ### 08 Responsive
 | ID | Phase | Status | Evidence | Deviation |
@@ -116,8 +116,8 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `RESP-KB-01` | P7 | planned | | |
 | `RESP-TAP-01` | P2 | verified | `e2e/macos.spec.ts` › RESP-TAP-01 X3 tap targets on the macOS home: 24 px (fine pointer), 44 px (coarse) · green locally 2026-09-22 (preview build) |  |
 | `RESP-ROT-01` | P2 | verified | `e2e/macos.spec.ts` › RESP-ROT-01 O1 a resize mid-drag commits the last valid rect and re-clamps · green locally 2026-09-22 (preview build) |  |
-| `RESP-GEST-01` | P3 | planned | | |
-| `RESP-ZOOM-01` | P3 | planned | | |
+| `RESP-GEST-01` | P3 | built | macOS: every gesture has a menu / keyboard path (context menus by Shift+F10 and ⋯, Move / Size by keyboard, marquee by Ctrl+A, swipe-to-dismiss by Esc / Clear); the cross-OS M1 keyboard-only journey is pending |  |
+| `RESP-ZOOM-01` | P3 | verified | `e2e/macos-p3b.spec.ts` › MAC-RESP-07 · RESP-ZOOM-01 400 % zoom (a 360 × 225 CSS viewport) engages compact mode · green locally 2026-09-22 (preview build .next-p3; chromium-desktop · reduced-motion · pixel · iphone) |  |
 
 ### 09 Accessibility
 | ID | Phase | Status | Evidence | Deviation |
@@ -131,7 +131,7 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `A11Y-FOCUS-01` | P2 | verified | `e2e/macos.spec.ts` › A11Y-FOCUS-01 focus after every window action; never on <body> · `e2e/macos.spec.ts` › MAC-FIND-07 M3 compact Finder drill-down: favourites → folder → document, back chevron up each level · green locally 2026-09-22 (preview build) |  |
 | `A11Y-KEY-01` | P0 | verified | `unit/kernel/platform.test.ts` › A11Y-KEY-01 keymap has no reserved chord · vitest 587/587 (2026-09-21) |  |
 | `A11Y-SKIP-01` | P0 | verified | `e2e/foundation.spec.ts` › first Tab focuses "Skip the OS" on / · /plain · /go/projects · /macos · /linux/… (all non-WebKit-touch projects) · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) | see log |
-| `A11Y-PREF-01` | P3 | planned | | |
+| `A11Y-PREF-01` | P3 | verified | `unit/kernel/macos-p3.test.ts` › A11Y-PREF-01 / MAC-SET-03 new preferences parse with defaults · `e2e/macos-p3.spec.ts` › MAC-SET-01/02 A11Y-PREF-01 Settings: search highlights; Reduce motion applies at once and persists · green locally 2026-09-22 (preview build .next-p3; chromium-desktop · reduced-motion · pixel · iphone) |  |
 | `A11Y-AXE-01` | P2 | verified | `e2e/macos.spec.ts` › A11Y-AXE-01 · VIEW-HEAD-01 X1 axe WCAG 2.2 AA: macOS home and Finder, no heading-order issue in a window · `e2e/macos.spec.ts` › A11Y-AXE-01 X1 axe on the compact window switcher (an open overlay) · green locally 2026-09-22 (preview build) |  |
 | `A11Y-LIVE-01` | P1 | planned | | |
 | `A11Y-LH-01` | P1 | planned | | |
@@ -149,7 +149,7 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `PERF-GL-02` | P1 | planned | | |
 | `PERF-LAZY-01` | P1 | planned | | |
 | `PERF-3D-01` | P0 | verified | `unit/scripts/scripts.test.ts` › PERF-3D-01 no import of @react-three/* or useGLTF in v1 code · vitest 587/587 (2026-09-21) |  |
-| `PERF-LEAK-01` | P2 | verified | `e2e/leak.spec.ts` › PERF-LEAK-01 macOS leak loop: heap < 2 MB growth; DOM and listeners stable · green locally 2026-09-22 (preview build) |  |
+| `PERF-LEAK-01` | P2 | verified | `e2e/leak.spec.ts` › PERF-LEAK-01 macOS leak loop: heap < 2 MB growth; DOM and listeners stable · `component/motion/overview-scroll.test.tsx` › PERF-LEAK-01 the Overview scroll effects release their scroller · re-run 2026-09-22 after the P3 apps landed: heap +1.2 MB of 2, listeners 0, DOM 0, detached elements 0 (preview build .next-p3) | Deviations log 2026-09-22 |
 | `PERF-BLUR-01` | P2 | verified | `e2e/macos.spec.ts` › PERF-BLUR-01 · DS-GLASS-01 X5 at most 3 live backdrop-filter surfaces (menu bar + Dock) · green locally 2026-09-22 (preview build) |  |
 
 ### 11 Assets
@@ -162,7 +162,7 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `ASSET-ORIG-01` | P0 | verified | `unit/assets/assets.test.ts` › ASSET-ORIG-01 parametric original for every app · vitest 587/587 (2026-09-21) |  |
 | `ASSET-INBOX-01` | P0 | verified | `unit/assets/assets.test.ts` › ASSET-INBOX-01 assets-inbox ingestion · vitest 587/587 (2026-09-21) | see log |
 | `ASSET-AUDIO-01` | P1 | planned | | |
-| `ASSET-LEGAL-01` | P3 | planned | | |
+| `ASSET-LEGAL-01` | P3 | built | `component/macos/p3-apps.test.tsx` › MAC-SET-04: Privacy states what is counted; General shows About facts, eggs n / N and the legal notice · reachable on macOS (System Settings → General) and Windows; iOS, Android, Linux and /plain follow in their phases |  |
 | `ASSET-MARK-01` | P0 | verified | `unit/assets/assets.test.ts` › ASSET-MARK-01 no third-party marks in site branding · vitest 587/587 (2026-09-21) |  |
 | `ASSET-BUDGET-01` | P0 | verified | `unit/assets/assets.test.ts` › ASSET-BUDGET-01 size budgets · vitest 587/587 (2026-09-21) |  |
 
@@ -198,7 +198,7 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `RES-IDIOM-01` | P7 | planned | | |
 | `RES-OPEN-01` | P2 | verified | `e2e/macos.spec.ts` › RES-OPEN-01 the résumé opens in Preview through the kernel from the desktop, the menu bar and the Dock stack · green locally 2026-09-22 (preview build) |  |
 | `RES-DL-01` | P2 | verified | `e2e/macos.spec.ts` › RES-DL-01 Download saves Jaswanth-Resume.pdf and records resume_downloaded · green locally 2026-09-22 (preview build) |  |
-| `RES-COMPACT-01` | P4 | planned | | |
+| `RES-COMPACT-01` | P4 | verified | `e2e/windows.spec.ts` › RES-COMPACT-01 · WIN-X-01 Q1 the résumé is one click from the taskbar, the desktop, Start and Search · chromium-desktop, reduced-motion, iphone (390 px), pixel · green 2026-09-22 (preview build) |  |
 | `RES-NOJS-01` | P0 | verified | `e2e/no-js.spec.ts` › /go/resume offers the PDF (open + download) and the pages · Playwright PR matrix 156 passed / 13 documented skips (2026-09-21) |  |
 
 ### 15 System search
@@ -206,22 +206,22 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 |---|---|---|---|---|
 | `SRCH-INDEX-01` | P0 | verified | `unit/data/data.test.ts` › SRCH-INDEX-01 (every ref + binding; ≤ 10 KB gz per OS) · vitest 587/587 (2026-09-21) |  |
 | `SRCH-MATCH-01` | P0 | verified | `unit/data/data.test.ts` › SRCH-MATCH-01 ranking fixtures (exact > prefix > typo) · vitest 587/587 (2026-09-21) |  |
-| `SRCH-ZERO-01` | P3 | planned | | |
-| `SRCH-ACT-01` | P3 | planned | | |
+| `SRCH-ZERO-01` | P3 | verified | `component/macos/p3-surfaces.test.tsx` › MAC-SPOT-01: opens on the zero state — Résumé, Projects, Contact first — in a labelled group · green locally 2026-09-22 (vitest) |  |
+| `SRCH-ACT-01` | P3 | verified | `e2e/macos-p3.spec.ts` › MAC-SPOT-01/02/03/06 S1 Spotlight: three invocations, zero state, a result opens with one history entry · green locally 2026-09-22 (preview build .next-p3; chromium-desktop · reduced-motion · pixel · iphone) |  |
 | `SRCH-PARITY-01` | P7 | planned | | |
-| `SRCH-TERM-01` | P3 | planned | | |
-| `SRCH-A11Y-01` | P3 | planned | | |
-| `SRCH-LAZY-01` | P3 | planned | | |
+| `SRCH-TERM-01` | P3 | verified | `e2e/macos-p3.spec.ts` › MAC-SPOT-04 · SRCH-TERM-01 a command result opens Terminal with the command inserted, never run · green locally 2026-09-22 (preview build .next-p3; chromium-desktop · reduced-motion · pixel · iphone) |  |
+| `SRCH-A11Y-01` | P3 | verified | `component/macos/p3-surfaces.test.tsx` › MAC-SPOT-06: typing groups results with a Top Hit; the active option is the activedescendant · green locally 2026-09-22 (vitest) |  |
+| `SRCH-LAZY-01` | P3 | built | the index loads on first open (lib/search/load.ts, dynamic import); the "search chunk absent from first load" perf check is not yet in `e2e/performance.spec.ts` |  |
 
 ### 16 Cross-OS continuity
 | ID | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|
 | `CONT-CAP-01` | P0 | verified | `unit/kernel/continuity-analytics.test.ts` › CONT-CAP-01 · vitest 587/587 (2026-09-21) |  |
 | `CONT-OFFER-01` | P0 | verified | `unit/kernel/continuity-analytics.test.ts` › CONT-OFFER-01 offer decision table · vitest 587/587 (2026-09-21) |  |
-| `CONT-ACCEPT-01` | P4 | planned | | |
-| `CONT-NEVER-01` | P4 | planned | | |
+| `CONT-ACCEPT-01` | P4 | verified | `e2e/windows.spec.ts` › CONT-ACCEPT-01 · CONT-NEVER-01 · WIN-X-02 · WIN-NOTIF-02 C1 continuity from macOS: a toast offers, never opens by itself (accepting opens GitHub at the same place) · chromium-desktop, reduced-motion · green 2026-09-22 (preview build) — Windows as target; the macOS Handoff slot (`MAC-DOCK-08`) is the macOS owner's |  |
+| `CONT-NEVER-01` | P4 | verified | `e2e/windows.spec.ts` › CONT-ACCEPT-01 · CONT-NEVER-01 … C1 (no window before the visitor accepts) · chromium-desktop, reduced-motion · `component/windows/continuity.test.tsx` › CONT-A11Y-01 · CONT-NEVER-01 · green 2026-09-22 (preview build) |  |
 | `CONT-IDIOM-01` | P7 | planned | | |
-| `CONT-A11Y-01` | P4 | planned | | |
+| `CONT-A11Y-01` | P4 | verified | `component/windows/continuity.test.tsx` › CONT-A11Y-01 · CONT-NEVER-01 the continuity offer on Windows › lands once in the pre-existing polite status region, keeps focus where it was, and opens nothing · green 2026-09-22 (preview build) |  |
 | `CONT-MEM-01` | P0 | verified | `unit/kernel/persistence.test.ts` › CONT-MEM-01 continuity absent from the persisted payload · vitest 587/587 (2026-09-21) |  |
 
 ### 17 GitHub live data
@@ -231,8 +231,8 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `GH-SAFE-01` | P0 | verified | `unit/scripts/scripts.test.ts` › GH-SAFE-01 failure keeps the snapshot and exits 0 · vitest 587/587 (2026-09-21) |  |
 | `GH-TOKEN-01` | P0 | verified | `unit/scripts/scripts.test.ts` › GH-TOKEN-01 (source) + GH-TOKEN-01 (bundle grep) · post-build audit: 17 client assets carry no token · vitest 587/587 (2026-09-21) |  |
 | `GH-MERGE-01` | P0 | verified | `unit/data/data.test.ts` › GH-MERGE-01 unmatched repos excluded · vitest 587/587 (2026-09-21) |  |
-| `GH-UI-01` | P3 | planned | | |
-| `GH-OFF-01` | P3 | planned | | |
+| `GH-UI-01` | P3 | built | heatmap with a text summary and a table alternative (apps/GitHub.tsx); the committed snapshot has no contribution data, so the heatmap is not exercised |  |
+| `GH-OFF-01` | P3 | built | `component/macos/p3-apps2.test.tsx` › MAC-GH-01/04: profile, pinned cards from data, stack filters narrow the list · renders from résumé projects with the empty snapshot; the named e2e is pending |  |
 
 ### 18 Analytics
 | ID | Phase | Status | Evidence | Deviation |
@@ -244,7 +244,7 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `ANL-PRIV-01` | P1 | planned | | |
 | `ANL-LINT-01` | P0 | verified | `tooling/boundaries.test.ts` › rejects forbidden import in components/shell/test.ts (@vercel/analytics) · vitest 587/587 (2026-09-21) |  |
 | `ANL-CWV-01` | P1 | planned | | |
-| `ANL-NOTICE-01` | P3 | planned | | |
+| `ANL-NOTICE-01` | P3 | built | `component/macos/p3-apps.test.tsx` › MAC-SET-04: Privacy states what is counted; General shows About facts, eggs n / N and the legal notice · reachable on macOS (System Settings → Privacy) and Windows; iOS, Android, Linux and /plain follow in their phases |  |
 
 ### 19 Social cards and SEO
 | ID | Phase | Status | Evidence | Deviation |
@@ -260,13 +260,13 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 ### 20 Guided tour
 | ID | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|
-| `TOUR-OFFER-01` | P3 | planned | | |
-| `TOUR-NEVER-01` | P3 | planned | | |
-| `TOUR-REAL-01` | P3 | planned | | |
-| `TOUR-CANCEL-01` | P3 | planned | | |
+| `TOUR-OFFER-01` | P3 | built | `unit/macos/menus-notifications.test.ts` › once-per-session banners (welcome, tour offer) are not repeated · the offer banner after the first unlock (never on a deep link, which never locks); the T1 chip e2e is pending |  |
+| `TOUR-NEVER-01` | P3 | verified | `unit/macos/tour-eggs.test.ts` › TOUR-NEVER-01 nothing happens until start() · green locally 2026-09-22 (vitest) |  |
+| `TOUR-REAL-01` | P3 | verified | `unit/macos/tour-eggs.test.ts` › TOUR-REAL-01 the macOS script drives real kernel actions · `e2e/macos-p3.spec.ts` › MAC-X-03 T1 the tour runs real app openings; any input ends it and leaves the app open · green locally 2026-09-22 (preview build .next-p3; chromium-desktop · reduced-motion · pixel · iphone) |  |
+| `TOUR-CANCEL-01` | P3 | verified | `unit/macos/tour-eggs.test.ts` › TOUR-CANCEL-01 any input cancels at once; what it opened stays open (no undo dispatch) · `e2e/macos-p3.spec.ts` › MAC-X-03 T1 the tour runs real app openings; any input ends it and leaves the app open · green locally 2026-09-22 (preview build .next-p3; chromium-desktop · reduced-motion · pixel · iphone) |  |
 | `TOUR-LNX-01` | P7 | planned | | |
-| `TOUR-A11Y-01` | P3 | planned | | |
-| `TOUR-LAZY-01` | P3 | planned | | |
+| `TOUR-A11Y-01` | P3 | verified | `unit/macos/tour-eggs.test.ts` › TOUR-A11Y-01 reduced motion: captions announced, Next only · green locally 2026-09-22 (vitest) |  |
+| `TOUR-LAZY-01` | P3 | built | the tour director and host load on start only (dynamic import); the "tour chunk absent from first load" perf check is pending |  |
 | `TOUR-RESTART-01` | P7 | planned | | |
 
 ### 21 Easter eggs
@@ -277,14 +277,14 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `EGG-VIM-01` | P7 | planned | | |
 | `EGG-RMRF-01` | P7 | planned | | |
 | `EGG-COW-01` | P7 | planned | | |
-| `EGG-ABOUT-01` | P3 | planned | | |
-| `EGG-WINVER-01` | P4 | planned | | |
-| `EGG-KONAMI-01` | P3 | planned | | |
-| `EGG-SHAKE-01` | P5 | planned | | |
+| `EGG-ABOUT-01` | P3 | verified | `component/macos/p3-surfaces.test.tsx` › MAC-SET-06 / EGG-ABOUT-01: About This Mac lists Jaswanth as the hardware and counts the egg once · green locally 2026-09-22 (vitest) |  |
+| `EGG-WINVER-01` | P4 | verified | `e2e/windows-settings.spec.ts` › WIN-SET-06 EGG-WINVER-01 winver: data-driven About dialog; the found counter increments once · chromium-desktop, reduced-motion, iphone, pixel · `component/windows/terminal.test.tsx` › EGG-WINVER-01 winver opens About Windows and runs nothing · green 2026-09-22 (preview build) |  |
+| `EGG-KONAMI-01` | P3 | verified | `unit/macos/tour-eggs.test.ts` › EGG-KONAMI-01 ↑↑↓↓←→←→BA, with restarts · `component/macos/p3-shell.test.tsx` › EGG-KONAMI-01: the Konami code on the desktop counts the egg once and shows the banner · green locally 2026-09-22 (vitest) |  |
+| `EGG-SHAKE-01` | P5 | verified | e2e `ios.spec.ts` › X-04 the Konami code and the empty-Home long press each count once | |
 | `EGG-MATRIX-01` | P7 | planned | | |
-| `EGG-LAZY-01` | P3 | planned | | |
+| `EGG-LAZY-01` | P3 | built | egg effects load on trigger (dynamic imports); the "egg chunks absent from first load" perf check is pending |  |
 | `EGG-SAFE-01` | P7 | planned | | |
-| `EGG-COUNT-01` | P3 | planned | | |
+| `EGG-COUNT-01` | P3 | verified | `unit/macos/tour-eggs.test.ts` › EGG-COUNT-01 an egg counts once; n / N per OS · `e2e/macos-p3b.spec.ts` › MAC-X-04 · EGG-COUNT-01 terminal eggs and About This Mac count once each in Settings → General · green locally 2026-09-22 (preview build .next-p3; chromium-desktop · reduced-motion · pixel · iphone) |  |
 
 ## Definition of done — shared contracts
 - [ ] Every ID above is `verified` with evidence, or `BLOCKED` with owner sign-off.
@@ -320,3 +320,21 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | 2026-09-21 | DS-FONT-01 | `/` also declares and preloads the storyboard's IBM Plex Sans (46 KB, OFL, self-hosted); every other route stays Inter-only; Bricolage Grotesque still loads only when the chooser mounts. `e2e/performance.spec.ts` asserts it | The welcome screens are the owner's storyboard frames, set in Plex; `swap` keeps the `<h1>` the LCP element (perf project green) and session CLS ≤ 0.1 | Owner, 2026-09-21 ("exactly same as this html page") |
 | 2026-09-21 | ASSET-BUDGET-01 · ASSET-INBOX-01 | Avatars ≤ 16 KB (was 8 KB), so each encodes at WebP q90; the derived green avatar is the storyboard's `hue-rotate(-62deg) saturate(1.15)` of the blue one as one sRGB matrix (`cssHueSaturate`, was `modulate(hue -82, sat 1.35)`) | At 8 KB the fur and eyes went soft against the frame; the old modulate gave a pale green where the frame's is vivid. The five avatars load during the intro, never before the first paint | Owner, 2026-09-21 ("exactly same as this html page") |
 | 2026-09-22 | PERF-INP-01 | On macOS, INP is read in Playwright straight from the Event Timing API (the slowest interaction ≥ 16 ms, reported with its target) instead of `web-vitals` `onINP`; `web-vitals` still reports CLS. The test also asserts that at least 5 of its 9 clicks were observed | `web-vitals` reports INP only when the page is hidden, so its live value stayed 0 and the check passed without measuring anything; Event Timing is the data `web-vitals` itself reads (with < 50 interactions, INP is the slowest one) | Owner authorization 2026-09-21 (plans/README); for review at the P2 gate |
+| 2026-09-22 | KRN-* · WIN-WM-04…07 | Kernel additions for Windows Snap: `WindowInstance.snap {zone, split}` (the pre-snap rect is kept), actions `SNAP_WINDOW` and `SET_SNAP_SPLIT`, snap zones / thirds / quarters and `snapTargetAt` in `lib/kernel/geometry`, the snap tag persisted and re-derived on every viewport change | Snap is window-manager state that must survive reload and size-class changes (`WIN-WM-06`, `WIN-RESP-06`); the shared/04 catalogue had no place for it (IMPLEMENTATION.md issue 3) | Owner authorization 2026-09-21 (plans/README); for review at the P4 gate |
+| 2026-09-22 | KRN-* · WIN-WM-01 · WIN-EDGE-03 | Registry additions: an app binding may name a `home` section (Edge: `/windows/edge` is About), window policies may be `centered` with a `cascadePx`, or open at a `defaultFraction` of the page (File Explorer, the storyboard frame) | Edge owns About and the résumé under one route family; Windows centres windows (macOS cascades) | Owner authorization 2026-09-21 (plans/README); for review at the P4 gate |
+| 2026-09-22 | KRN-PERSIST-01 · A11Y-PREF-01 | Preferences gain `taskbarAlign`, `accent`, `textScale` (100–130 % in 5 % steps), `contrast` and `notifications`, each parsed with a safe default; `lib/kernel/prefs-dom.ts` applies preferences to `<html>` at once with the same rules as the pre-paint tier script | Windows Settings controls apply instantly and persist (`WIN-SET-02/03`) | Owner authorization 2026-09-21 (plans/README); for review at the P4 gate |
+| 2026-09-22 | ROUTE-HIST-01 · WIN-RESP-04 | History controller `transient(onBack)`: a compact sheet (Start, Search, flyouts) pushes one duplicate entry; Back pops it and closes the sheet without reaching the kernel; closing the sheet another way drops the entry before the next navigation | Back closes transient sheets first on phones (`WIN-RESP-04`); the only write outside `go`/`canonicalize`, owned by the controller and covered by `unit/kernel/windows-platform.test.ts` | Owner authorization 2026-09-21 (plans/README); for review at the P4 gate |
+| 2026-09-22 | KRN-FOCUS-01 | `OPEN_APP` for the app already in front at the same place still returns the identical state and no route intent, but now sets `focusTarget` to its window | A search result or link chosen from a closing panel left focus on `<body>`, and the app never heard the request (VS Code could not bring `skills.json` forward); the macOS owner confirmed the Dock behaviour | Owner authorization 2026-09-21 (plans/README); for review at the P4 gate |
+| 2026-09-22 | A11Y-PRIM-02 · A11Y-PRIM-03 | Menu primitive: `submenu` entries (Right / Enter / 150 ms hover open, Left / Esc close back to the item) and a labelled command row (`commands`); Combobox: `beforeList`, `onActiveChange`, `onInputKeyDown`, `inputId` | Windows context menus (`WIN-CTX-01/05`), the system menu Snap ▸ and the Start → Search morph; tests in `component/primitives/menu-submenu.test.tsx` | Owner authorization 2026-09-21 (plans/README); for review at the P4 gate |
+| 2026-09-22 | TERM-* · WIN-TERM-02 | TerminalView: when `inputTransform` rewrites a line (Windows only), history records what was typed; `accessoryExtra` adds host keys to the accessory row (Windows adds `\`) | ↑ must recall `dir`, not the engine's `ls`; the Windows row needs the backslash (plans/windows/apps/windows-terminal "compact") | Owner authorization 2026-09-21 (plans/README); for review at the P4 gate |
+| 2026-09-22 | TEST-E2E-01 | Windows e2e runs on a preview production build served from its own dist folder and port (`NEXT_DIST_DIR=.next-p4`, `TEST_BASE_URL`), each spec with its own `--output` folder (`test-results-*`, git-ignored) | Several sessions build and test at once on this machine; a shared `.next` / `test-results/` let runs overwrite each other | Owner authorization 2026-09-21 (plans/README); for review at the P4 gate |
+| 2026-09-22 | KRN-* · MAC-WM-07 · MAC-WM-12 · MAC-TERM-05 | Kernel additions for macOS: actions `QUIT_APP`, `HIDE_OTHERS`, `SHOW_ALL`; `TERMINAL_CLEAR` takes `history?: true` (`history -c` clears the saved list, `clear` only the screen); preferences gain `wallpaper` (auto · light · dark) and `dock {magnification, size}`, each parsed with a safe default; `OsRegistryEntry.insets` receives the Dock size, and macOS compact landscape insets the workspace on the left for the Dock rail | Close keeps an app running while Quit ends it (the Dock dot); Hide Others / Show All are single reducer steps (no animation storm); Settings writes these prefs at once; the rail must never cover a window | For review at the P3 gate |
+| 2026-09-22 | RESP-DOM-01 | On macOS the compact menu bar collapses to `Apple · AppName ▾` (the app's menus become submenus) — the one DOM difference between postures; the P2 e2e compares everything except `header[data-menubar]` | The collapsed bar is a different menubar model (fewer top-level items), so it cannot be CSS-only; every other surface keeps the same DOM | For review at the P3 gate |
+| 2026-09-22 | KRN-* (P5) | `WindowInstance.ui` (string map, capped 24 keys × 4000 chars, validated on load) + action `SET_APP_UI`; `NAVIGATE_IN_APP { replace }` (history replace) | iOS apps keep session UI state (read mail, tabs, per-tab scroll) across eviction and reload (IOS-FLIGHT-05, IOS-MSG-05); popping to a synthesized parent must replace, so the next Back goes Home (IOS-FILES-05) | Pending owner review at the P5 gate |
+| 2026-09-22 | MOTION-DRAG-01 | `drag({ lazyCapture })`: pointer capture only once the threshold is crossed | A pull on the Home pages may start on an icon; capture at press retargets the click | Pending owner review at the P5 gate |
+| 2026-09-22 | CONT-* · IOS-SPOT-04 | `lib/terminal/handoff.ts`: an insert-only command offer to Linux (`offerCommand` / `takeOfferedCommand`) | A Spotlight command result offers Linux without executing anything (hints insert, never execute) | Pending owner review at the P5 gate |
+| 2026-09-22 | CHOOSE-* · IOS-BOOT-01 | The chooser boots iOS (`BOOTABLE` includes `ios`; `BootFrame` renders the iOS logo boot) | P5 makes iOS enterable from the chooser | Pending owner review at the P5 gate |
+| 2026-09-22 | TOUR-REAL-01 | `IOS_TOUR` (5 steps) added to `lib/tour/scripts.ts` | The iOS tour script (IOS-X-03) | Pending owner review at the P5 gate |
+| 2026-09-22 | MOTION-RULE-02 · IOS-MOTION-04 | iOS surface flights write `pf-flight-start/end:open` and `…:close` performance marks | So the Layout-in-flight perf test can find iOS flights, as on macOS and Windows | Pending owner review at the P5 gate |
+| 2026-09-22 | MOTION-SCROLL-01 · PERF-LEAK-01 | `attachOverviewScroll` removes its own entry from ScrollTrigger's module-level scroller cache (`Observer._scrollers`, an internal export the library does not type) when the window closes | ScrollTrigger keeps every scroller element it is given and never drops it, so each Safari open held a detached Overview page: ~107 KB per open, 1.9 MB per 20 opens in the leak loop. `ScrollTrigger.scrollerProxy(scroller)` reaches the same array but splices 2 of the 3 slots per entry and would misalign it. We are the product's only ScrollTrigger user, so the entry is ours to remove; a component test pins the three-slot layout against the pinned version | For review at the P3 gate |
+| 2026-09-22 | PERF-LEAK-01 | The leak loop warms three passes before its baseline, drains queued animation frames before each measurement, releases the CDP handles its detached-element count creates, and now asserts the plan's "zero detached elements growth" | Measuring from a cold baseline counted V8's first-pass compiled code as a leak (~1.2 MB over eight app chunks, tapering to ~0.05 MB by pass four); a queued frame callback holds what it captured; `Runtime.queryObjects` hands back an array the inspector keeps alive, which pinned every element from the first measurement (a flat 132 "detached"). A total DOM node count cannot see a detached tree that is still referenced, which is what the plan asks for | For review at the P3 gate |

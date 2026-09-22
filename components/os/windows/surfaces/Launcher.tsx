@@ -12,7 +12,7 @@
  * Opening anything is one kernel action + one `go()`; the window flies from the tile (or the panel) rect. Start writes
  * no history; in compact mode it is a full-height modal sheet that Back closes (transient entry — the Shell owns it).
  */
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { Combobox, type ComboboxGroup } from '@/components/primitives/Combobox';
 import { FocusScope } from '@/components/primitives/FocusScope';
 import { RovingGroup } from '@/components/primitives/RovingGroup';
@@ -25,32 +25,35 @@ import type { AppRole } from '@/lib/kernel/ids';
 import { OS_REGISTRY } from '@/lib/kernel/registry';
 import type { SearchEntry, SearchResult } from '@/lib/search/types';
 import { dispatchSoon } from '@/stores/kernel-store';
-import { prefetchApp } from '../apps/AppBody';
+import { flInfo, flLink, flOpen, flRefresh, flSearch, flSwap } from '../fluent.generated';
 import {
   flApps,
   flChevronLeft,
   flChevronRight,
   flConsole,
-  flInfo,
-  flLink,
   flLock,
-  flOpen,
   flPerson,
   flPower,
-  flRefresh,
-  flSearch,
   flSettings,
-  flSwap,
   flMoon,
-} from '../fluent.generated';
+} from '../fluent.apps.generated';
+import { prefetchApp } from '../apps/AppBody';
 import { Fl, PdfFile } from '../icons';
 import { requestIntent } from '../intents';
-import { allApps, initialsOf, startPinned, startRecommended, winBinding, type StartTile } from '../model';
+import {
+  allApps,
+  initialsOf,
+  LAUNCHER_ID,
+  launcherPlaceholder,
+  startPinned,
+  startRecommended,
+  winBinding,
+  type StartTile,
+} from '../model';
 import { useWinShell } from '../shell-context';
 import styles from '../windows.module.css';
 
 export type LauncherMode = 'start' | 'search';
-export const LAUNCHER_ID = 'win-launcher';
 
 type Chip = 'all' | 'apps' | 'projects' | 'experience' | 'skills' | 'actions';
 const CHIPS: readonly { id: Chip; label: string }[] = [
@@ -206,6 +209,10 @@ export function Launcher({
   const [active, setActive] = useState<string | null>(null);
   const [view, setView] = useState<'pinned' | 'all' | 'letters'>('pinned');
   const panel = useRef<HTMLDivElement>(null);
+  // Arriving in place of the loading placeholder (its chunk was not warm yet): no second entrance, before first paint.
+  useLayoutEffect(() => {
+    if (performance.now() - launcherPlaceholder.shownAt < 2000 && panel.current) panel.current.dataset.swap = '';
+  }, []);
   const preview = useRef<HTMLDivElement>(null);
   const pinnedHeading = useRef<HTMLHeadingElement>(null);
 

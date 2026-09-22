@@ -49,6 +49,17 @@ import { ACCENT_IDS, type AccentId, type OsAppBinding, type UserPreferences } fr
 import { useKernel, usePrefs } from '@/stores/kernel-context';
 import { dispatch, dispatchSoon } from '@/stores/kernel-store';
 import {
+  flDesktop,
+  flInfo,
+  flOpen,
+  flPaint,
+  flSearch,
+  flSpeaker,
+  flSpeakerMute,
+  flSwap,
+  type Glyph,
+} from '../fluent.generated';
+import {
   flAccessibility,
   flAlert,
   flApps,
@@ -61,32 +72,23 @@ import {
   flContrast,
   flCopy,
   flDarkTheme,
-  flDesktop,
   flDocument,
   flDocumentText,
   flDrop,
   flEye,
   flFlash,
   flHome,
-  flInfo,
   flKeyboard,
   flLaptop,
   flLock,
   flNavigation,
-  flOpen,
-  flPaint,
   flPanelBottom,
-  flSearch,
   flShield,
   flSparkle,
-  flSpeaker,
-  flSpeakerMute,
-  flSwap,
   flTextSize,
   flTour,
   flWindow,
-  type Glyph,
-} from '../fluent.generated';
+} from '../fluent.apps.generated';
 import { Fl } from '../icons';
 import { subscribeIntents, takeIntent, type SettingsPage, type WinIntent } from '../intents';
 import { initialsOf } from '../model';

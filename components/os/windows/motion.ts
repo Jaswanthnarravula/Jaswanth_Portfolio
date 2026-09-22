@@ -63,7 +63,14 @@ export const WIN_MOTION = {
 const s = (ms: number) => ms / 1000;
 const reducedS = s(REDUCED_CROSSFADE_MS);
 
-exposeMotionDebug(() => gsap.globalTimeline.getChildren(true, true, false).filter((tween) => tween.isActive()).length);
+// A tween reads `isActive() === false` until its first tick — on a slow frame long enough for a check to call the page
+// settled while a fade is about to start at opacity 0 — so any unfinished, unpaused top-level tween or timeline counts.
+exposeMotionDebug(() => {
+  const root = gsap.globalTimeline;
+  const active = root.getChildren(true, true, false).filter((tween) => tween.isActive()).length;
+  const pending = root.getChildren(false, true, true).some((child) => !child.paused() && child.progress() < 1);
+  return active || (pending ? 1 : 0);
+});
 
 export interface Box {
   readonly x: number;

@@ -1,6 +1,6 @@
 /**
- * H1 (on the real macOS shell; the OS-switch case starts in the Windows preview stub) — ROUTE-CONTRACT-01 · ROUTE-PORT-01 (native and next-router adapters) · ARCH-SHELL-01 ·
- * ROUTE-GO-01 · ROUTE-DEEP-01 (D1 on the stub) · ROUTE-CODEC-02 (client repair) · ROUTE-TITLE-01 (titles unique) ·
+ * H1 (on the real macOS shell; the OS-switch case starts in Windows and switches through its Settings) — ROUTE-CONTRACT-01 · ROUTE-PORT-01 (native and next-router adapters) · ARCH-SHELL-01 ·
+ * ROUTE-GO-01 · ROUTE-DEEP-01 (D1 on macOS) · ROUTE-CODEC-02 (client repair) · ROUTE-TITLE-01 (titles unique) ·
  * ROUTE-SER-01 (traversal spam never duplicates consecutive URLs).
  */
 import { expect, test } from '@playwright/test';
@@ -12,6 +12,15 @@ const dockApp = (page: Page, name: string) =>
   page
     .getByRole('navigation', { name: 'Dock' })
     .getByRole('link', { name: new RegExp(`^${name}(, (open|minimized))?$`) });
+
+/** A Windows app opened as a visitor does: its pinned taskbar link, or on phones the Start sheet. */
+async function openWindowsApp(page: Page, name: string) {
+  const taskbar = page.getByRole('navigation', { name: 'Taskbar' });
+  const pinned = taskbar.getByRole('link', { name: new RegExp(`^${name}(, .*)?$`) });
+  if (await pinned.isVisible()) return pinned.click();
+  await taskbar.getByRole('button', { name: 'Start' }).click();
+  await page.getByRole('dialog', { name: 'Start' }).getByRole('link', { name, exact: true }).click();
+}
 
 for (const adapter of ['native', 'next-router'] as const) {
   test(`history contract: push → back → forward → refresh → back, no full reload (${adapter}) @smoke`, async ({
@@ -60,23 +69,28 @@ for (const adapter of ['native', 'next-router'] as const) {
 }
 
 test('the shell instance survives app open, OS switch and Back/Forward @smoke', async ({ page }) => {
-  // The preview stub still carries an OS switcher (macOS gains its own Switch OS entry points in P3).
+  // Windows switches OS in place from Settings › Switch operating system (WIN-SET-05): the same document throughout.
   await page.goto('/windows');
   await waitForOs(page, 'windows');
   await plantSentinel(page);
   const instance = await shellInstance(page);
-  await page.getByRole('navigation', { name: 'Apps' }).getByRole('link', { name: 'File Explorer' }).click();
+  await openWindowsApp(page, 'File Explorer');
   await expect(page).toHaveURL(/\/windows\/explorer$/);
-  await page
-    .getByRole('navigation', { name: 'Switch operating system' })
-    .getByRole('button', { name: 'macOS' })
+  await openWindowsApp(page, 'Settings');
+  await expect(page).toHaveURL(/\/windows\/settings$/);
+  const settings = page.locator('[data-window="windows:settings"]');
+  await settings
+    .getByRole('navigation', { name: 'Settings' })
+    .getByRole('button', { name: 'Switch operating system', exact: true })
     .click();
+  await settings.getByRole('link', { name: 'Switch to macOS' }).click();
   await expect(page).toHaveURL(/\/macos$/);
   await waitForOs(page, 'macos');
   await page.goBack();
-  await expect(page).toHaveURL(/\/windows\/explorer$/);
+  await expect(page).toHaveURL(/\/windows\/settings$/);
   await waitForOs(page, 'windows');
-  await expect(page.getByRole('region', { name: 'File Explorer' })).toBeVisible(); // parked session restored
+  await expect(page.locator('[data-window="windows:files"]')).toBeAttached(); // parked session restored
+  await expect(settings).toBeAttached();
   await page.goForward();
   await waitForOs(page, 'macos');
   expect(await sentinel(page)).toBe('alive');

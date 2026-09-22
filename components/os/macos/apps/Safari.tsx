@@ -134,7 +134,7 @@ export default function Safari({ window: win, titleId, compact }: WindowBodyProp
 
   const choose = (next: Tab) => {
     setTab(next);
-    scroller.current?.scrollTo({ top: 0 });
+    if (scroller.current) scroller.current.scrollTop = 0;
   };
 
   const copyLink = async () => {

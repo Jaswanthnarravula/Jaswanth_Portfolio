@@ -7,7 +7,7 @@
 .layer {
   position: fixed;
   inset: 0;
-  z-index: var(--win-z-dialog, 1000);
+  z-index: var(--win-z-dialog);
   display: grid;
   place-items: center;
   padding: 16px 16px calc(16px + var(--tb-h, 48px) + var(--sa-b, 0px));
@@ -136,7 +136,7 @@
   font: inherit;
 }
 .ok:hover {
-  background: color-mix(in srgb, var(--win-accent) 90%, var(--win-on-accent));
+  background: var(--win-accent-hover); /* the Windows accent hover tone: contrast never drops on hover */
 }
 .ok:focus-visible {
   outline: 2px solid var(--win-text);

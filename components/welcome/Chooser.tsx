@@ -32,6 +32,7 @@ import { registerReturnStage } from '@/stores/transition-stage';
 import { chooserFontsReady } from './chooser-fonts';
 import { createChooserStage, type ChooserStage, type StageView } from './chooser-stage';
 import { WindowsBoot } from '@/components/os/windows/surfaces/Boot';
+import { IosBoot } from '@/components/os/ios/surfaces/Boot';
 import styles from './chooser.module.css';
 
 type Orientation = 'landscape' | 'portrait';
@@ -44,7 +45,7 @@ const deviceSeed = () =>
   typeof screen === 'undefined' ? 0 : Math.max(screen.width, screen.height) + Math.min(screen.width, screen.height);
 
 /** OSes whose boot screen exists (each OS brings its own with its phase; plans/{os}/surfaces/boot.md). */
-const BOOTABLE: readonly OsId[] = ['macos', 'windows'];
+const BOOTABLE: readonly OsId[] = ['macos', 'windows', 'ios'];
 
 /** The chooser mounted underneath an OS that is leaving (its exit beat plays first; then the return flight). */
 const returningFrom = (state: KernelState) =>
@@ -56,9 +57,18 @@ const enterable = (os: OsId) => VISIBLE_OSES.includes(os);
 /**
  * The boot screen that covers the snapshot while a slow chunk loads (plans/04 step 4, `CHOOSE-ENTER-02`), in each OS's
  * own look: macOS (plans/macos/surfaces/boot.md) — black, the startup mark, a thin bar the stage fills with real
- * milestones; Windows (plans/windows/surfaces/boot.md) — the logo over an indeterminate ring of orbiting dots, no bar.
+ * milestones; Windows (plans/windows/surfaces/boot.md) — the logo over an indeterminate ring of orbiting dots, no bar;
+ * iOS (plans/ios/surfaces/boot.md) — the logo alone.
  */
 function BootFrame({ os }: { readonly os: OsId }) {
+  // iOS (plans/ios/surfaces/boot.md): the logo only, no bar.
+  if (os === 'ios')
+    return createPortal(
+      <div className={styles.boot} data-boot={os} aria-hidden="true">
+        <IosBoot />
+      </div>,
+      document.body,
+    );
   if (os === 'windows')
     return createPortal(
       <div className={styles.boot} data-boot={os} aria-hidden="true">

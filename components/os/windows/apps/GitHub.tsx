@@ -51,25 +51,22 @@ import type { WindowId } from '@/lib/kernel/types';
 import { dur, prefersReducedMotion } from '@/lib/motion/dur';
 import { useKernel } from '@/stores/kernel-context';
 import { dispatchSoon, getKernel } from '@/stores/kernel-store';
+import { flDismiss, flOpen, flSearch, flSort } from '../fluent.generated';
 import {
   flArrowLeft,
   flBookOpen,
   flCheckmark,
   flChevronDown,
   flChevronRight,
-  flDismiss,
   flFork,
   flHome,
   flHomeFilled,
   flInfoFilled,
   flLibrary,
   flNavigation,
-  flOpen,
-  flSearch,
-  flSort,
   flStar,
   flWarning,
-} from '../fluent.generated';
+} from '../fluent.apps.generated';
 import { Fl } from '../icons';
 import { initialsOf, winBinding } from '../model';
 import { drillIn, WIN_CURVES, WIN_MOTION } from '../motion';

@@ -1,0 +1,624 @@
+/* iOS Safari — plans/ios/apps/safari.md. iOS 17/18 mobile Safari: a floating address capsule over a material toolbar
+   at the bottom (phone portrait), a compact top bar (phone landscape), a top toolbar with a centred address field and
+   a sidebar (pad / full page). The bar collapses with transform + opacity only (250 ms, 0.32 0.72 0 1). Colours come
+   from the --ios-* palette only. One backdrop-filter surface (the bar). */
+
+.safari {
+  --saf-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --saf-top: var(--app-top, var(--sa-t, 0px));
+  --saf-bottom: calc(8px + 48px + 4px + 44px + var(--sa-b, 0px));
+  --saf-topbar: calc(var(--saf-top) + 52px);
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  height: 100%;
+  overflow: hidden;
+  background: var(--ios-plain);
+  color: var(--ios-label);
+  font-family: var(--font-ui);
+}
+.safari[data-sidebar] {
+  grid-template-columns: clamp(260px, 26%, 340px) minmax(0, 1fr);
+}
+.main {
+  position: relative;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* --- The page (native scroll, under the status bar) ------------------------------------------------------- */
+.page {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-top: var(--saf-top);
+  padding-bottom: calc(var(--saf-bottom) + 24px);
+  /* The bar never covers focused content (plans/ios/apps/safari.md "Accessibility"). */
+  scroll-padding-top: calc(var(--saf-top) + 12px);
+  scroll-padding-bottom: calc(var(--saf-bottom) + 12px);
+  -webkit-overflow-scrolling: touch;
+}
+.safari[data-bar-at='top'] .page,
+.safari[data-bar-at='pad'] .page {
+  padding-top: var(--saf-topbar);
+  padding-bottom: calc(var(--sa-b, 0px) + 32px);
+  scroll-padding-top: calc(var(--saf-topbar) + 12px);
+  scroll-padding-bottom: calc(var(--sa-b, 0px) + 12px);
+}
+.statusScrim {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  height: var(--saf-top);
+  background: var(--ios-bar);
+  pointer-events: none;
+}
+.column {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 18px 20px 8px;
+}
+
+/* --- Mobile composition of the shared Overview (single column, large type) ------------------------------------ */
+.site {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  font-size: 17px;
+  line-height: 1.5;
+}
+.site :global(.cv) {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.site :global(.cv-header) {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.site :global(.cv-title) {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 41px;
+  letter-spacing: 0.37px;
+}
+.site :global(.cv-lede) {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: -0.26px;
+}
+.site :global(.cv-meta) {
+  margin: 0;
+  color: var(--ios-label-2);
+  font-size: 15px;
+}
+.site :global(.cv-prose) {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.site :global(.cv-prose p) {
+  margin: 0;
+}
+.site :global(.cv-open-to) {
+  align-self: flex-start;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: var(--ios-tint-soft);
+  color: var(--ios-tint-soft-ink);
+  font-size: 15px;
+  font-weight: 600;
+}
+.site :global(.cv-subtitle),
+.cta h4,
+.plainSection > h4 {
+  margin: 0 0 12px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: 0.35px;
+}
+.site :global(.cv-list) {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.site :global(.cv-list-item) {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--ios-grouped);
+  font-size: 15px;
+}
+.site :global(.cv-link),
+.site a {
+  color: var(--ios-tint);
+  font-weight: 600;
+  text-decoration: none;
+}
+.site :global(.cv-link) {
+  font-size: 17px;
+}
+.site a:focus-visible {
+  border-radius: 6px;
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 2px;
+}
+.site :global(.cv-muted) {
+  color: var(--ios-label-2);
+}
+.cta {
+  padding: 20px;
+  border-radius: 18px;
+  background: var(--ios-grouped);
+}
+.ctaActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+}
+.site .ctaPrimary,
+.site .ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 22px;
+  font-size: 17px;
+}
+.site .ctaPrimary {
+  background: var(--ios-tint-fill);
+  color: #ffffff;
+}
+.site .ctaSecondary {
+  background: var(--ios-tint-soft);
+  color: var(--ios-tint-soft-ink);
+}
+.plainTitle {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 41px;
+}
+.plainNote {
+  margin: 6px 0 0;
+  color: var(--ios-label-2);
+  font-size: 15px;
+}
+.plainSection :global(h4),
+.plainSection :global(h5) {
+  font-size: 17px;
+}
+.plainSection :global(ul) {
+  padding-left: 20px;
+}
+
+/* Section reveals: a state added once by an IntersectionObserver (fade + 12 pt rise, 300 ms). */
+.site [data-reveal='pending'] {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.site [data-reveal='shown'] {
+  transition:
+    opacity 300ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.site [data-reveal='pending']:focus-within {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- Bottom bar (phone portrait) ------------------------------------------------------------------------ */
+.bottomBar {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  padding: 8px 10px var(--sa-b, 0px);
+  border-top: 0.5px solid var(--ios-sep);
+  background: var(--ios-bar);
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+  transition: transform 250ms var(--saf-ease);
+}
+.capsuleRow {
+  padding: 0 2px;
+}
+.capsule {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 48px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--ios-cell);
+  box-shadow:
+    0 0 0 0.5px var(--ios-sep),
+    0 3px 12px rgb(0 0 0 / 0.1);
+  touch-action: pan-y;
+}
+.capsule:focus-within {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 1px;
+}
+.progress {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2.5px;
+  background: var(--ios-tint);
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+}
+.capsuleButton {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--ios-label);
+  cursor: pointer;
+}
+.capsuleButton:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -3px;
+}
+.address {
+  flex: 1;
+  min-width: 0;
+}
+.address input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ios-label);
+  font: inherit;
+  font-size: 17px;
+  letter-spacing: -0.41px;
+  text-align: center;
+  text-overflow: ellipsis;
+  cursor: default;
+  caret-color: transparent;
+}
+.address input:focus {
+  outline: none;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  margin-top: 4px;
+  padding: 0 4px;
+}
+.barButton {
+  display: grid;
+  flex: none;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--ios-tint);
+  cursor: pointer;
+}
+.barButton:disabled {
+  color: var(--ios-label-3);
+  opacity: 0.55;
+  cursor: default;
+}
+.barButton[aria-pressed='true'] {
+  background: var(--ios-fill-2);
+}
+.barButton:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -3px;
+}
+
+/* The slim collapsed address (tap restores the bar). */
+.mini {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  height: max(44px, calc(26px + var(--sa-b, 0px)));
+  padding: 6px 0 0;
+  border: 0;
+  background: var(--ios-bar-solid);
+  color: var(--ios-label);
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: -0.08px;
+  opacity: 0;
+  transform: translateY(6px) scale(0.9);
+  transition:
+    opacity 250ms var(--saf-ease),
+    transform 250ms var(--saf-ease);
+  cursor: pointer;
+}
+.mini[data-at='top'] {
+  top: 0;
+  bottom: auto;
+  align-items: flex-end;
+  height: calc(var(--saf-top) + 30px);
+  padding: 0 0 8px;
+}
+.mini:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -3px;
+}
+.safari:not([data-collapsed]) .mini {
+  pointer-events: none;
+}
+
+/* --- Top bar: phone landscape (compact) and pad (centred address + sidebar) ---------------------------------- */
+.topBar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  height: var(--saf-topbar);
+  padding: var(--saf-top) max(8px, var(--sa-r, 0px)) 0 max(8px, var(--sa-l, 0px));
+  border-bottom: 0.5px solid var(--ios-sep);
+  background: var(--ios-bar);
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+  transition: transform 250ms var(--saf-ease);
+}
+.toolGroup {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.topCapsule {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+.topCapsule .capsule {
+  width: 100%;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--ios-fill);
+  box-shadow: none;
+}
+.topCapsule .capsuleButton {
+  height: 36px;
+}
+.topCapsule .address input {
+  min-height: 36px;
+}
+.topBar[data-at='pad'] .topCapsule .capsule {
+  max-width: 560px;
+}
+
+/* --- Pad sidebar (bookmarks + tabs) ---------------------------------------------------------------------- */
+.sidebar {
+  min-height: 0;
+  padding-top: calc(var(--app-top, 24px) + 16px);
+  overflow-y: auto;
+  border-right: 0.5px solid var(--ios-sep-opaque);
+  background: var(--ios-grouped);
+  --ios-margin: 16px;
+}
+.sidebarTitle {
+  margin: 0 20px 14px;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 41px;
+  letter-spacing: 0.37px;
+}
+
+/* --- Tab overview -------------------------------------------------------------------------------------- */
+.overview {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--saf-top);
+  background: var(--ios-grouped);
+}
+.cards {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.cards ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px 18px;
+  list-style: none;
+}
+.safari[data-bar-at='pad'] .cards ul {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ios-label);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transform-origin: center;
+}
+.cardThumb {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  aspect-ratio: 3 / 4;
+  padding: 14px 12px;
+  overflow: hidden;
+  border: 3px solid transparent;
+  border-radius: 14px;
+  background: var(--ios-plain);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.12);
+}
+.card[aria-current='page'] .cardThumb {
+  border-color: var(--ios-tint);
+}
+.card:focus-visible .cardThumb {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 3px;
+}
+.thumbTitle {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 18px;
+}
+.thumbText {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--ios-label-2);
+  font-size: 11px;
+  line-height: 14px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+.thumbLines {
+  flex: 1;
+  background: repeating-linear-gradient(180deg, var(--ios-fill) 0 6px, transparent 6px 14px);
+  opacity: 0.8;
+}
+.cardLabel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.overviewBar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  min-height: calc(50px + var(--sa-b, 0px));
+  padding: 0 12px var(--sa-b, 0px);
+  border-top: 0.5px solid var(--ios-sep);
+  background: var(--ios-bar);
+}
+.overviewCount {
+  grid-column: 2;
+  font-size: 17px;
+  font-weight: 600;
+}
+.done {
+  justify-self: end;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--ios-tint);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.done:focus-visible {
+  outline: 3px solid var(--ios-tint);
+}
+
+/* --- Share sheet ---------------------------------------------------------------------------------------- */
+.shareHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 20px 20px;
+}
+.shareIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 11px;
+  background: var(--ios-fill);
+  color: var(--ios-label-2);
+}
+.shareText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.shareTitle {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.shareHost {
+  color: var(--ios-label-2);
+  font-size: 13px;
+}
+.manual {
+  margin: 0 20px 20px;
+  font-size: 15px;
+}
+.manual label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.manual input {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--ios-sep-opaque);
+  border-radius: 10px;
+  background: var(--ios-plain);
+  color: var(--ios-label);
+  font: inherit;
+  font-size: 17px;
+}
+
+/* --- Reduced motion: no reveals, the bar switches without travel ------------------------------------------- */
+:global(html[data-motion='reduced']) .site [data-reveal] {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+:global(html[data-motion='reduced']) .bottomBar,
+:global(html[data-motion='reduced']) .topBar,
+:global(html[data-motion='reduced']) .mini {
+  transition: none;
+}

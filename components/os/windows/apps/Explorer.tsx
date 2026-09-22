@@ -53,28 +53,12 @@ import { currentLocation, sameLocation } from '@/lib/kernel/state';
 import type { AppLocation, WindowId } from '@/lib/kernel/types';
 import { dispatchSoon, subscribeEffects } from '@/stores/kernel-store';
 import {
-  flAdd,
-  flArrowLeft,
-  flArrowRight,
-  flArrowUp,
-  flChevronDown,
-  flChevronRight,
   flChevronUp,
-  flCopy,
-  flCut,
   flDismiss,
-  flError,
-  flHome,
-  flHomeFilled,
   flInfo,
-  flInfoFilled,
   flLink,
-  flList,
   flMore,
   flOpen,
-  flPanelRight,
-  flPaste,
-  flPin,
   flSearch,
   flShare,
   flSort,
@@ -82,6 +66,24 @@ import {
   flWindowNew,
   type Glyph,
 } from '../fluent.generated';
+import {
+  flAdd,
+  flArrowLeft,
+  flArrowRight,
+  flArrowUp,
+  flChevronDown,
+  flChevronRight,
+  flCopy,
+  flCut,
+  flError,
+  flHome,
+  flHomeFilled,
+  flInfoFilled,
+  flList,
+  flPanelRight,
+  flPaste,
+  flPin,
+} from '../fluent.apps.generated';
 import { DocFile, Fl, PdfFile, ShortcutArrow } from '../icons';
 import { explorerPlace, FOLDER_TITLES, type ExplorerFolder } from '../model';
 import { drillIn } from '../motion';

@@ -388,7 +388,12 @@ export const MacWindow = memo(function MacWindow({
       },
       onDouble: (event) => {
         // A drag's pointer capture retargets the following dblclick to the window itself: hit-test the point.
-        const target = (document.elementFromPoint(event.clientX, event.clientY) ?? event.target) as Element;
+        // (jsdom has no `elementFromPoint`; there the event's own target is already the right one.)
+        const hit =
+          typeof document.elementFromPoint === 'function'
+            ? document.elementFromPoint(event.clientX, event.clientY)
+            : null;
+        const target = (hit ?? event.target) as Element;
         if (compact || !target.closest('[data-drag-region]') || target.closest(INTERACTIVE)) return;
         dispatchSoon({ type: 'TOGGLE_MAXIMIZE', id });
       },

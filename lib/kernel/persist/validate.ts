@@ -106,7 +106,17 @@ export function parseWindow(value: Json): WindowInstance | null {
     ...(typeof value.draft === 'string' ? { draft: value.draft.slice(0, 10_000) } : {}),
     invoker: typeof value.invoker === 'string' ? value.invoker : null,
     ...parseSnap(value.snap),
+    ...parseUi(value.ui),
   };
+}
+
+/** Persisted app session state (addition, plans/ios/02): string values under short keys; anything else is dropped. */
+function parseUi(value: Json): { ui?: Readonly<Record<string, string>> } {
+  if (!isRecord(value)) return {};
+  const ui: Record<string, string> = {};
+  for (const [key, entry] of Object.entries(value).slice(0, 24))
+    if (key.length > 0 && key.length <= 40 && typeof entry === 'string') ui[key] = entry.slice(0, 4000);
+  return Object.keys(ui).length > 0 ? { ui } : {};
 }
 
 /** A persisted Snap tag (Windows): a known zone, and a finite split for ½ + ½ pairs. Anything else floats. */

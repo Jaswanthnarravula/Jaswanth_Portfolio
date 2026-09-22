@@ -1,0 +1,333 @@
+/* iOS Settings — plans/ios/apps/settings.md: inset-grouped lists (10 pt radius) on the grouped background, 29 pt tinted
+   glyph tiles, a profile cell on top, rows ≥ 44 pt, native sliders, Appearance preview tiles. Colours are the --ios-*
+   tokens (dark mode comes from them). */
+
+.settings {
+  position: absolute;
+  inset: 0;
+  font-family: var(--font-ui);
+  --ts: var(--text-scale, 1);
+}
+/* Phone landscape: one column with wider margins. */
+.settings[data-landscape] {
+  --ios-margin: max(48px, env(safe-area-inset-left));
+}
+.settings[data-landscape] :global([data-scroller] > h3) {
+  margin-inline: max(48px, env(safe-area-inset-left));
+}
+
+/* --- Profile cell ("Apple ID" style) ---------------------------------------------------------------------------- */
+.profile {
+  gap: 14px;
+  min-height: 78px;
+  padding-block: 10px;
+}
+.avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #a5abb8, #858994);
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.profileText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+.profileName {
+  font-size: calc(22px * var(--ts));
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.35px;
+}
+.profileHeadline {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--ios-label-2);
+  font-size: calc(13px * var(--ts));
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.chevron {
+  flex: none;
+  color: var(--ios-label-3);
+}
+
+/* Selected row in the split view's list (iPadOS: filled tint, white text). */
+.current > :global(button),
+.current > :global(a) {
+  background: var(--ios-tint-fill);
+  color: #ffffff;
+}
+.current > :global(button) :global(span),
+.current > :global(button) :global(svg) {
+  color: inherit;
+}
+.current .avatar {
+  color: #ffffff;
+}
+
+/* --- Search result highlight: 600 ms fade, instant under reduced motion ------------------------------------------- */
+.flash {
+  position: relative;
+}
+.flash::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: var(--ios-fill);
+  opacity: 0;
+  pointer-events: none;
+  animation: flash 600ms ease-out;
+}
+@keyframes flash {
+  0%,
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+:global(:root[data-motion='reduced']) .flash::after {
+  animation-timing-function: step-end;
+}
+
+/* --- Sliders --------------------------------------------------------------------------------------------------- */
+.sliderRow {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+.sliderHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sliderValue {
+  color: var(--ios-label-2);
+}
+.sliderLine {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  color: var(--ios-label-2);
+}
+.sliderEnd {
+  display: grid;
+  flex: none;
+  place-items: center;
+  min-width: 22px;
+}
+.smallA {
+  font-size: 13px;
+}
+.bigA {
+  font-size: 22px;
+}
+.slider {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  margin: 0;
+  accent-color: var(--ios-tint);
+  background: transparent;
+  cursor: pointer;
+}
+.slider:focus-visible {
+  border-radius: 8px;
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 2px;
+}
+
+/* --- Appearance tiles ------------------------------------------------------------------------------------------- */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 18px 12px 14px;
+  border-radius: 10px;
+  background: var(--ios-cell);
+}
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.tileArt {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(76px, 100%);
+  aspect-ratio: 9 / 19;
+  padding-top: 18%;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 0.5px rgb(0 0 0 / 0.25),
+    0 2px 6px rgb(0 0 0 / 0.12);
+  background: linear-gradient(160deg, #cfd8ff, #f6d3e2);
+  color: #000000;
+}
+.tileArt[data-mode='dark'] {
+  background: linear-gradient(160deg, #1d2240, #3a1f3a);
+  color: #ffffff;
+}
+.tileArt[data-mode='system'] {
+  background: linear-gradient(90deg, #cfd8ff 0 50%, #1d2240 50% 100%);
+}
+.tileTime {
+  font-size: 13px;
+  font-weight: 600;
+}
+.tileIcons {
+  display: grid;
+  grid-template-columns: repeat(2, 14px);
+  gap: 6px;
+  margin-top: 14px;
+}
+.tileIcons i {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 0.85);
+}
+.tileArt[data-mode='dark'] .tileIcons i {
+  background: rgb(255 255 255 / 0.3);
+}
+.tileArt[data-mode='system'] .tileTime {
+  color: #ffffff;
+  mix-blend-mode: difference;
+}
+.tileLabel {
+  color: var(--ios-label);
+  font-size: calc(15px * var(--ts));
+}
+.radio {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  border: 1.5px solid var(--ios-label-3);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.radio:checked {
+  border-color: var(--ios-tint-fill);
+  background: var(--ios-tint-fill);
+}
+.radio:checked::after {
+  content: '';
+  width: 10px;
+  height: 6px;
+  margin-top: -3px;
+  border-bottom: 2.2px solid #ffffff;
+  border-left: 2.2px solid #ffffff;
+  transform: rotate(-45deg);
+}
+.radio:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 2px;
+}
+
+/* --- Misc ------------------------------------------------------------------------------------------------------ */
+.action {
+  color: var(--ios-tint);
+}
+.note {
+  margin: -20px var(--ios-margin, 16px) 28px;
+  padding: 0 16px;
+  color: var(--ios-label-2);
+  font-size: 13px;
+  line-height: 18px;
+}
+.noResults {
+  margin: 32px 16px;
+  color: var(--ios-label-2);
+  font-size: 17px;
+  text-align: center;
+}
+.prose {
+  margin: 0 var(--ios-margin, 16px) 35px;
+  padding: 16px;
+  border-radius: 10px;
+  background: var(--ios-cell);
+  color: var(--ios-label);
+  font-size: calc(15px * var(--ts));
+  line-height: 1.5;
+}
+.prose :global(h4),
+.prose :global(h5) {
+  margin: 0 0 8px;
+  font-size: calc(17px * var(--ts));
+  font-weight: 600;
+}
+.prose :global(p),
+.prose :global(ul) {
+  margin: 0 0 10px;
+}
+.prose :global(a) {
+  color: var(--ios-tint);
+}
+.prose :global(summary) {
+  min-height: 44px;
+  color: var(--ios-tint);
+  line-height: 44px;
+  cursor: pointer;
+}
+
+/* --- Full page: split view -------------------------------------------------------------------------------------- */
+.split {
+  display: grid;
+  grid-template-columns: clamp(300px, 32%, 420px) minmax(0, 1fr);
+  height: 100%;
+  background: var(--ios-grouped);
+}
+.sidebar {
+  min-height: 0;
+  padding-top: calc(var(--app-top, 24px) + 12px);
+  overflow-y: auto;
+  border-right: 0.5px solid var(--ios-sep-opaque);
+  background: var(--ios-grouped);
+  --ios-margin: 20px;
+}
+.sidebarTitle {
+  margin: 8px 20px 12px;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 41px;
+  letter-spacing: 0.37px;
+}
+.sidebarSearch {
+  margin: 0 20px 20px;
+}
+.detail {
+  position: relative;
+  min-width: 0;
+}
+.detail :global([data-screen]) {
+  box-shadow: none;
+}
+.detail :global([data-scroller]) {
+  --ios-margin: max(20px, calc((100% - 720px) / 2));
+}

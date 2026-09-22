@@ -1,0 +1,556 @@
+/* iOS Files — plans/ios/apps/files.md. Inset-grouped lists and a 3-up icon grid on #f2f2f7; the document page and the
+   Quick Look sheet on white paper; the full page is a sidebar + content split (iPadOS Files). Colours: --ios-* only,
+   except the drawn file artwork and tag dots (data colours). */
+
+.app {
+  position: relative;
+  height: 100%;
+}
+.stackHost {
+  height: 100%;
+}
+.split .stackHost {
+  display: grid;
+  grid-template-columns: clamp(280px, 26%, 360px) minmax(0, 1fr);
+  background: var(--ios-plain);
+}
+.split {
+  position: relative;
+  height: 100%;
+}
+
+/* --- Artwork -------------------------------------------------------------------------------------------------- */
+.art {
+  display: block;
+  flex: none;
+}
+.tagDot {
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: 7px;
+  border-radius: 50%;
+}
+
+/* --- ⋯ menu (Icons / List · Sort) ------------------------------------------------------------------------------- */
+.menuAnchor {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+.moreGlyph {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1.6px solid currentColor;
+  border-radius: 50%;
+}
+.menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 4px;
+  z-index: 30;
+  min-width: 250px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 13px;
+  background: var(--ios-bar-solid);
+  box-shadow:
+    0 0 0 0.5px var(--ios-sep),
+    0 10px 40px rgb(0 0 0 / 0.22);
+  font-family: var(--font-ui);
+  transform-origin: top right;
+}
+.menu :global([data-menu-item]) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 16px 11px 40px;
+  border: 0;
+  background: none;
+  color: var(--ios-label);
+  font: inherit;
+  font-size: 17px;
+  letter-spacing: -0.41px;
+  text-align: start;
+  cursor: pointer;
+}
+.menu :global([data-menu-item]) + :global([data-menu-item]),
+.menu :global([role='none']) + :global([role='none']) :global([data-menu-item]) {
+  border-top: 0.5px solid var(--ios-sep);
+}
+.menu :global([data-menu-item]:focus-visible),
+.menu :global([data-menu-item]:hover) {
+  outline: none;
+  background: var(--ios-fill-2);
+}
+.menu :global([aria-checked='true'])::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4.5 12.5l5 5 10-11' fill='none' stroke='black' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+.menu :global([data-menu-separator]) {
+  height: 8px;
+  background: var(--ios-sep);
+  opacity: 0.35;
+}
+
+/* --- Folder bodies ------------------------------------------------------------------------------------------------ */
+.empty {
+  display: grid;
+  place-items: center;
+  min-height: 40vh;
+  margin: 0;
+  color: var(--ios-label-2);
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+}
+.count {
+  margin: -18px 0 20px;
+  color: var(--ios-label-2);
+  font-size: 13px;
+  text-align: center;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px 8px;
+  margin: 8px 16px 36px;
+  padding: 0;
+  list-style: none;
+}
+:global([data-ios-layout='pad']) .grid {
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: 28px 16px;
+  margin: 12px 32px 40px;
+}
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-height: 44px;
+  padding: 4px 2px;
+  border-radius: 12px;
+  color: var(--ios-label);
+  text-align: center;
+  text-decoration: none;
+}
+.tile:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tile:hover {
+    background: var(--ios-fill-2);
+  }
+}
+.tileArt {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 4px;
+}
+.tileName {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 17px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.tileMeta {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--ios-label-2);
+  font-size: 12px;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Document page (a role / a school) --------------------------------------------------------------------------- */
+.document {
+  padding: 8px 16px 24px;
+}
+:global([data-ios-layout='pad']) .document {
+  padding: 16px 40px 32px;
+}
+.paper {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 24px 32px;
+  border-radius: 4px;
+  background: var(--ios-cell);
+  color: var(--ios-label);
+  box-shadow:
+    0 0 0 0.5px var(--ios-sep),
+    0 2px 10px rgb(0 0 0 / 0.08);
+  font-family: var(--font-ui);
+  font-size: 17px;
+  line-height: 1.5;
+}
+.paper :global(.cv-eyebrow),
+.paper :global(.cv-meta) {
+  color: var(--ios-label-2);
+  font-size: 15px;
+}
+.paper :global(.cv-title),
+.paper :global(.cv-doc-name) {
+  margin: 4px 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.paper :global(.cv-lede) {
+  margin: 12px 0;
+}
+.paper :global(.cv-bullets) {
+  margin: 0 0 16px;
+  padding-left: 20px;
+}
+.paper :global(.cv-bullets li + li) {
+  margin-top: 6px;
+}
+.paper :global(.cv-tags) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.paper :global(.cv-tags li) {
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: var(--ios-fill-2);
+  color: var(--ios-label-2);
+  font-size: 13px;
+}
+.paper :global(a) {
+  color: var(--ios-tint);
+}
+
+/* --- Full page: sidebar + content (iPadOS Files) ------------------------------------------------------------------ */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding-top: calc(var(--app-top, 24px) + 22px);
+  overflow-y: auto;
+  border-right: 0.5px solid var(--ios-sep-opaque);
+  background: var(--ios-grouped);
+  --ios-margin: 16px;
+}
+.sidebarTitle {
+  margin: 0 20px 14px;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 41px;
+  letter-spacing: 0.37px;
+}
+.sidebarSearch {
+  margin: 0 16px 18px;
+}
+.sidebarGroup {
+  margin-bottom: 22px;
+}
+.detail {
+  position: relative;
+  min-width: 0;
+  --app-top: 24px;
+}
+.detail [data-screen] {
+  background: var(--ios-plain);
+  box-shadow: none;
+}
+
+/* --- Quick Look --------------------------------------------------------------------------------------------------- */
+.qlLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+.qlLayer[aria-hidden='true'] {
+  pointer-events: none;
+}
+.qlScrim {
+  position: absolute;
+  inset: 0;
+  display: none;
+  background: rgb(0 0 0 / 0.3);
+}
+.ql {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--ios-grouped);
+  color: var(--ios-label);
+  font-family: var(--font-ui);
+  transform-origin: center;
+}
+.qlLayer[data-layout='pad'] {
+  align-items: center;
+}
+.qlLayer[data-layout='pad'] .qlScrim {
+  display: block;
+}
+.qlLayer[data-layout='pad'] .ql {
+  flex: none;
+  width: min(1000px, calc(100% - 64px));
+  height: calc(var(--vvh, 100dvh) - 72px);
+  overflow: hidden;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 0.3);
+}
+.qlBar {
+  display: grid;
+  flex: none;
+  grid-template-columns: minmax(64px, 1fr) auto minmax(64px, 1fr);
+  align-items: center;
+  min-height: 44px;
+  padding: var(--app-top, 0px) 8px 0;
+  border-bottom: 0.5px solid var(--ios-sep);
+  background: var(--ios-bar);
+  transition: opacity 200ms linear;
+}
+.qlLayer[data-layout='pad'] .qlBar {
+  padding-top: 6px;
+}
+.qlDone {
+  justify-self: start;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  color: var(--ios-tint);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.qlTitle {
+  margin: 0;
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.41px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.qlIcon {
+  display: grid;
+  justify-self: end;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: none;
+  color: var(--ios-tint);
+  cursor: pointer;
+}
+.qlDone:focus-visible,
+.qlIcon:focus-visible,
+.qlAction:focus-visible,
+.qlThumbs button:focus-visible {
+  border-radius: 8px;
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -2px;
+}
+.qlPage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  padding: 16px 12px 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+/* At the top of the page a downward pan belongs to the swipe-to-dismiss (the page still scrolls up). */
+.qlPage[data-at-top] {
+  touch-action: pan-x pan-up;
+}
+.qlPage:focus-visible {
+  outline: 3px solid var(--ios-tint);
+  outline-offset: -3px;
+}
+.qlText .paper {
+  max-width: 820px;
+  padding: 36px 32px;
+}
+.qlTextHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+/* A keyboard user tabbing into the hidden text version sees it. */
+.qlTextHidden:focus-within {
+  position: static;
+  width: auto;
+  height: auto;
+  clip-path: none;
+  white-space: normal;
+}
+.paper :global(.cv-doc-headline) {
+  margin: 2px 0 8px;
+  color: var(--ios-label-2);
+}
+.paper :global(.cv-doc-contact) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+.paper :global(.cv-doc-section) {
+  margin: 20px 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 0.5px solid var(--ios-sep);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--ios-label-2);
+}
+.paper :global(.cv-doc-row) {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin: 8px 0 4px;
+}
+.paper :global(.cv-doc-row span) {
+  color: var(--ios-label-2);
+  font-size: 15px;
+}
+.paper :global(.cv-doc-entry ul) {
+  margin: 4px 0 8px;
+  padding-left: 20px;
+}
+.qlPdf {
+  width: min(100%, 820px);
+  margin: 0 auto;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 0.5px var(--ios-sep),
+    0 2px 12px rgb(0 0 0 / 0.1);
+}
+.qlObject {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.qlFallback {
+  margin: 0;
+  padding: 24px;
+  color: #3a3a3c;
+  font-size: 15px;
+}
+.qlBottom {
+  flex: none;
+  border-top: 0.5px solid var(--ios-sep);
+  background: var(--ios-bar);
+  transition: opacity 200ms linear;
+}
+.ql[data-bars-hidden] .qlBar,
+.ql[data-bars-hidden] .qlBottom {
+  opacity: 0;
+}
+.ql[data-bars-hidden] .qlBar:focus-within,
+.ql[data-bars-hidden] .qlBottom:focus-within {
+  opacity: 1;
+}
+.qlThumbs ol {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 16px 2px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  list-style: none;
+  scrollbar-width: none;
+}
+.qlThumbs li {
+  scroll-snap-align: center;
+}
+.qlThumbs button {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 2px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.qlThumb {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 30px;
+  padding: 6px 4px;
+  border-radius: 2px;
+  background: #ffffff;
+  box-shadow: 0 0 0 0.5px var(--ios-sep-opaque);
+}
+.qlThumb i {
+  height: 2px;
+  border-radius: 1px;
+  background: #c7c7cc;
+}
+.qlThumb i:nth-child(2n) {
+  width: 70%;
+}
+.qlThumbs button[aria-current='true'] .qlThumb {
+  box-shadow: 0 0 0 2px var(--ios-tint);
+}
+.qlToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 0 8px max(var(--sa-b, 0px), var(--home-inset, 0px));
+}
+.qlAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  color: var(--ios-tint);
+  font: inherit;
+  font-size: 17px;
+  cursor: pointer;
+}
+.qlAction[aria-pressed='true'] {
+  font-weight: 600;
+}
+.qlMeta {
+  color: var(--ios-label-2);
+  font-size: 13px;
+}

@@ -21,62 +21,62 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 ### `02-shell-engine.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `LNX-SH-01` | Tokenizer: quotes, escapes, comments, operators, spans | P3 | planned | | |
-| `LNX-SH-02` | Expansion: tilde, variables, `$?`, globs, history expansion | P3 | planned | | |
-| `LNX-SH-03` | Parser: lists, pipelines, redirects (read-only FS), aliases | P3 | planned | | |
-| `LNX-SH-04` | Pure execution with pipes, exit codes and returned effects | P3 | planned | | |
-| `LNX-SH-05` | Exact error strings + suggestions | P3 | planned | | |
-| `LNX-SH-06` | History with draft preservation, Ctrl+R, `history -c` | P3 | planned | | |
-| `LNX-SH-07` | Completion (commands, paths, args, flags; double-Tab listing; PASS_THROUGH on empty) | P3 | planned | | |
-| `LNX-SH-08` | Line-editing keys; Ctrl+C respects selection; paste trimming | P3 | planned | | |
-| `LNX-SH-09` | Flavor adapters (bash / zsh / PowerShell voice) without logic forks | P3 | planned | | |
-| `LNX-SH-10` | Totality + caps (8 stages, 2000 lines), no throw | P3 | planned | | |
+| `LNX-SH-01` | Tokenizer: quotes, escapes, comments, operators, spans | P3 | verified | `unit/terminal/language.test.ts` › LNX-SH-01 tokenizer: quotes, escapes, comments, operators, spans · green locally 2026-09-22 (vitest) |  |
+| `LNX-SH-02` | Expansion: tilde, variables, `$?`, globs, history expansion | P3 | verified | `unit/terminal/language.test.ts` › LNX-SH-02 expansion: tilde, variables, $?, globs, history expansion · green locally 2026-09-22 (vitest) |  |
+| `LNX-SH-03` | Parser: lists, pipelines, redirects (read-only FS), aliases | P3 | verified | `unit/terminal/language.test.ts` › LNX-SH-03 parser: lists, pipelines, redirects (read-only FS), aliases · green locally 2026-09-22 (vitest) |  |
+| `LNX-SH-04` | Pure execution with pipes, exit codes and returned effects | P3 | verified | `unit/terminal/language.test.ts` › LNX-SH-04 pure execution: pipes, exit codes, returned effects · green locally 2026-09-22 (vitest) |  |
+| `LNX-SH-05` | Exact error strings + suggestions | P3 | verified | `unit/terminal/shell.test.ts` › LNX-SH-05 exact error strings + suggestions · green locally 2026-09-22 (vitest) |  |
+| `LNX-SH-06` | History with draft preservation, Ctrl+R, `history -c` | P3 | verified | `unit/terminal/shell.test.ts` › LNX-SH-06 history: draft preserved, Ctrl+R, history -c · green locally 2026-09-22 (vitest) |  |
+| `LNX-SH-07` | Completion (commands, paths, args, flags; double-Tab listing; PASS_THROUGH on empty) | P3 | verified | `unit/terminal/shell.test.ts` › LNX-SH-07 completion · green locally 2026-09-22 (vitest) |  |
+| `LNX-SH-08` | Line-editing keys; Ctrl+C respects selection; paste trimming | P3 | verified | `unit/terminal/shell.test.ts` › LNX-SH-08 line editing: Ctrl+A/E/U/K/W, Ctrl+C respects selection, paste trimming · green locally 2026-09-22 (vitest) |  |
+| `LNX-SH-09` | Flavor adapters (bash / zsh / PowerShell voice) without logic forks | P3 | verified | `unit/terminal/hosts.test.ts` › LNX-SH-09 every voice phrases every shell-level message · `unit/terminal/shell.test.ts` › LNX-SH-09 flavor voices: same AST and effects, only strings differ · green locally 2026-09-22 (vitest) |  |
+| `LNX-SH-10` | Totality + caps (8 stages, 2000 lines), no throw | P3 | verified | `unit/terminal/shell.test.ts` › LNX-SH-10 totality and caps · green locally 2026-09-22 (vitest) |  |
 
 ### `03-filesystem.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `LNX-FS-01` | Tree generated from selectors (no hand-typed content) | P3 | planned | | |
-| `LNX-FS-02` | Path resolution incl. `.`, `..`, `~`, `-`, slashes, case sensitivity | P3 | planned | | |
-| `LNX-FS-03` | Truthful metadata (size, mtime, mode, owner) | P3 | planned | | |
-| `LNX-FS-04` | Width-aware file text via `renderText` | P3 | planned | | |
-| `LNX-FS-05` | `.bashrc` is the real alias source; `/usr/bin` mirrors the command table | P3 | planned | | |
-| `LNX-FS-06` | cwd ↔ URL mapping; unique extension-less sibling names | P3 | planned | | |
-| `LNX-FS-07` | Permission-denied and read-only behaviours | P3 | planned | | |
+| `LNX-FS-01` | Tree generated from selectors (no hand-typed content) | P3 | verified | `unit/terminal/vfs.test.ts` › LNX-FS-01 tree generated from selectors (no hand-typed content) · green locally 2026-09-22 (vitest) |  |
+| `LNX-FS-02` | Path resolution incl. `.`, `..`, `~`, `-`, slashes, case sensitivity | P3 | verified | `unit/terminal/vfs.test.ts` › LNX-FS-02 path resolution · green locally 2026-09-22 (vitest) |  |
+| `LNX-FS-03` | Truthful metadata (size, mtime, mode, owner) | P3 | verified | `unit/terminal/vfs.test.ts` › LNX-FS-03 truthful metadata · green locally 2026-09-22 (vitest) |  |
+| `LNX-FS-04` | Width-aware file text via `renderText` | P3 | verified | `unit/terminal/vfs.test.ts` › LNX-FS-04 width-aware file text · green locally 2026-09-22 (vitest) |  |
+| `LNX-FS-05` | `.bashrc` is the real alias source; `/usr/bin` mirrors the command table | P3 | verified | `unit/terminal/vfs.test.ts` › LNX-FS-05 .bashrc is the alias source; /usr/bin mirrors the command table · green locally 2026-09-22 (vitest) |  |
+| `LNX-FS-06` | cwd ↔ URL mapping; unique extension-less sibling names | P3 | verified | `unit/terminal/vfs.test.ts` › LNX-FS-06 cwd ↔ URL mapping; unique extension-less sibling names · green locally 2026-09-22 (vitest) |  |
+| `LNX-FS-07` | Permission-denied and read-only behaviours | P3 | verified | `unit/terminal/vfs.test.ts` › LNX-FS-07 permission-denied and read-only behaviours · green locally 2026-09-22 (vitest) |  |
 
 ### `04-commands.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `LNX-CMD-help` | help (generated from the registry) | P3 | planned | | |
-| `LNX-CMD-man` | man pages generated from the registry | P3 | planned | | |
-| `LNX-CMD-pwd` | pwd | P3 | planned | | |
-| `LNX-CMD-cd` | cd incl. `-`, `~`, errors | P3 | planned | | |
-| `LNX-CMD-ls` | ls with flags, columns, colours, insertable entries | P3 | planned | | |
-| `LNX-CMD-tree` | tree | P3 | planned | | |
-| `LNX-CMD-cat` | cat incl. binary notice | P3 | planned | | |
-| `LNX-CMD-head` | head | P3 | planned | | |
-| `LNX-CMD-tail` | tail | P3 | planned | | |
-| `LNX-CMD-less` | pager effect | P3 | planned | | |
-| `LNX-CMD-grep` | grep incl. `-r`, exit 1 on no match | P3 | planned | | |
-| `LNX-CMD-find` | find | P3 | planned | | |
-| `LNX-CMD-wc` | wc | P3 | planned | | |
-| `LNX-CMD-sort` | sort | P3 | planned | | |
-| `LNX-CMD-uniq` | uniq | P3 | planned | | |
-| `LNX-CMD-echo` | echo | P3 | planned | | |
-| `LNX-CMD-open` | open → effects per target kind | P3 | planned | | |
-| `LNX-CMD-history` | history | P3 | planned | | |
-| `LNX-CMD-clear` | clear | P3 | planned | | |
-| `LNX-CMD-which` | which | P3 | planned | | |
-| `LNX-CMD-type` | type | P3 | planned | | |
-| `LNX-CMD-alias` | alias listing from `.bashrc` | P3 | planned | | |
-| `LNX-CMD-whoami` | whoami | P3 | planned | | |
-| `LNX-CMD-about` | about | P3 | planned | | |
-| `LNX-CMD-projects` | projects table | P3 | planned | | |
-| `LNX-CMD-skills` | skills bars + filter | P3 | planned | | |
-| `LNX-CMD-experience` | experience | P3 | planned | | |
-| `LNX-CMD-education` | education | P3 | planned | | |
-| `LNX-CMD-contact` | contact with real links | P3 | planned | | |
-| `LNX-CMD-resume` | resume / --download | P3 | planned | | |
-| `LNX-CMD-mail` | mail → mailto effect | P3 | planned | | |
+| `LNX-CMD-help` | help (generated from the registry) | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-help — generated from the registry: every visible command exactly once · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-man` | man pages generated from the registry | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-man — a page for every command, opened in the pager (printed when piped) · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-pwd` | pwd | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-pwd · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-cd` | cd incl. `-`, `~`, errors | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-cd — incl. -, ~ and cd into a file → Not a directory · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-ls` | ls with flags, columns, colours, insertable entries | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-ls — column fitting at 80/40; -la fields; entries insertable · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-tree` | tree | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-tree · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-cat` | cat incl. binary notice | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-cat — incl. the binary notice and cat dir → Is a directory · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-head` | head | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-head / LNX-CMD-tail — stdin and file · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-tail` | tail | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-head / LNX-CMD-tail — stdin and file · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-less` | pager effect | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-less — pager effect (q quits in the host); prints when not the last stage · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-grep` | grep incl. `-r`, exit 1 on no match | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-grep — highlights and exit codes, -r walks the VFS · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-find` | find | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-find — -name / -type · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-wc` | wc | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-wc — counts · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-sort` | sort | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-sort / LNX-CMD-uniq · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-uniq` | uniq | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-sort / LNX-CMD-uniq · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-echo` | echo | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-echo — expansion applied · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-open` | open → effects per target kind | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-open — an effect per target kind · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-history` | history | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-history / LNX-CMD-clear · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-clear` | clear | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-history / LNX-CMD-clear · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-which` | which | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-which / LNX-CMD-type — path, alias, builtin · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-type` | type | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-which / LNX-CMD-type — path, alias, builtin · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-alias` | alias listing from `.bashrc` | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-alias — listing from .bashrc; defining is refused (read-only) · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-whoami` | whoami | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-whoami / LNX-CMD-about · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-about` | about | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-whoami / LNX-CMD-about · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-projects` | projects table | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-projects — table from data, featured first, footer insertables · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-skills` | skills bars + filter | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-skills — groups (bars only for published levels) + filter · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-experience` | experience | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-experience / LNX-CMD-education · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-education` | education | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-experience / LNX-CMD-education · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-contact` | contact with real links | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-contact — real links · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-resume` | resume / --download | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-resume — open / --download effects · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-mail` | mail → mailto effect | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-mail — the mailto effect (same builder as the GUI apps) · green locally 2026-09-22 (vitest) |  |
 | `LNX-CMD-settings` | settings list/set → pref effects | P7 | planned | | |
 | `LNX-CMD-theme` | theme shorthand | P7 | planned | | |
 | `LNX-CMD-motion` | motion shorthand | P7 | planned | | |
@@ -93,8 +93,8 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | `LNX-CMD-uptime` | uptime = career length | P7 | planned | | |
 | `LNX-CMD-id` | id | P7 | planned | | |
 | `LNX-CMD-finger` | finger + .plan | P7 | planned | | |
-| `LNX-CMD-aliases` | alias set behaves as listed | P3 | planned | | |
-| `LNX-CMD-registry` | One registry generates help, man, which, /usr/bin, completion, search entries | P3 | planned | | |
+| `LNX-CMD-aliases` | alias set behaves as listed | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-aliases — each alias resolves as listed · green locally 2026-09-22 (vitest) |  |
+| `LNX-CMD-registry` | One registry generates help, man, which, /usr/bin, completion, search entries | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-registry — one table generates help, man, which, /usr/bin, completion and search entries · green locally 2026-09-22 (vitest) |  |
 
 ### `05-hints.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
