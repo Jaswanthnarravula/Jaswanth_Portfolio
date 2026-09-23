@@ -294,3 +294,59 @@ five OSes are `released: true` since commit cfd53de, so ARCH-REL-01 fails and a 
 and Linux, which nobody has built — flipping those flags is the owner's call at a gate. Not yet evidenced: Lighthouse,
 real devices with the keyboard up, the screen-reader script (P8), and visual baselines (`IOS-ID-06` attaches light and
 dark screenshots but sets none). No commits have been made (the owner commits).
+
+### P5 follow-up — the look and the navigation (2026-09-22)
+
+The owner reviewed the running OS and asked for UI and navigation work. Every surface and app was then inspected on the
+real build (desktop 1440 × 900 and iPhone), side by side with `plans/visual-targets/ios-home.png`, and the gaps were
+fixed:
+
+- **Wallpaper and Dock.** The wallpaper ran a pink band across the whole bottom edge, so the Dock's glass sampled it and
+  read as a pink slab. The warm colour is now a corner glow over a purple field, as in the frame, and the Dock plate is
+  one material on both layouts (the full-page Dock had its own `saturate(160%)`).
+- **Widgets.** Facts longer than the frame's sample text spilled outside the rounded cards ("Sugar Land, Texas" hung
+  below the tile). Widgets clip, the small tiles clamp to three lines and their detail lines truncate, so the two small
+  widgets stay square and equal.
+- **Phone Home Screen.** A browser viewport is shorter than the device, so an icon plus its label (79 px) did not fit a
+  grid row (73 px) and every label slid under the next row's icons. The icon art now sizes to its row.
+- **Navigation bar.** On a pushed screen the centred title was laid over the back label ("‹ Repositor…" under
+  "Enterprise SSO Identity Provider"). The bar buttons take what they need, the title takes the rest, and both
+  truncate — the title never covers the back label.
+- **The iPad split view.** GitHub listed the repositories in the sidebar *and* repeated the same list in the detail. The
+  detail now opens on a repository, as iPadOS split views do.
+- **App Switcher.** Cards showed the launch placeholder (a big app icon) instead of the running app, because the flight
+  writes the placeholder's opacity inline and a parked card never reaches full openness. A parked card shows the app.
+- **Control Center.** The Sound tile's "More" button sat on top of the tile's own label; it is a corner chevron now.
+- Plus a duplicate React key in the shared asset credits list (one artwork credited by two OSes).
+
+Evidence: iOS Playwright specs (`ios`, `ios-surfaces`, `ios-journeys`) plus `chooser` on eleven projects — 635 passed,
+the remaining reruns green serially (the parallel failures were artifact collisions between sessions sharing
+`test-results`, plus one stale preview server); `asset-original` green on a rebuilt original-assets bundle; Vitest iOS
+set 243/243. One test was updated, not weakened: the H1 Back journey used to click a repository row inside the detail
+screen, which on the full page now lives in the sidebar.
+
+### P5 follow-up — the feel (2026-09-23)
+
+The owner's second review: "iOS navigations are way too slow and not smooth as other OS like Windows and macOS… should
+give a premium smooth and fast feel". Measured on the preview build (in-page, from the pointer event to the last
+transform the flight writes), an open took **464 ms** and a return Home **578–614 ms**, both running at about **30 fps**,
+against a macOS window at ~300 ms and 60 fps. Three causes, all fixed:
+
+1. **The flight repainted the whole live app every frame.** The surface is a full page clipped into the flying rect, so
+   each frame re-rasterised the app's content. `surfaceMotion` now leaves the body laid out but unpainted until the
+   flight is 72 % open — behind the launch layer there is nothing to see anyway — and a finger-driven or parked surface
+   (the App Switcher card) keeps showing the real app. Frame pacing went from ~33 ms to ~16.7 ms in the A/B.
+2. **The springs were tuned for the spec's table, not for the feel.** Open r 0.42 → 0.26 ζ 0.92, close 0.50 → 0.28,
+   Home settle 0.45 → 0.28, sheets 0.38 → 0.32, banner 0.45 → 0.38, nav push 350 → 300 ms, banner-out and the Safari bar
+   250 → 200 ms. The spring physics are unchanged — they simply land in about a third of a second. `plans/ios/03-motion.md`
+   carries the new table, with the reason, and the ledger has the deviation.
+3. **The spring chased zero.** Rest was declared at 0.0015 of the distance; sub-pixel is at rest, so it is 0.004 now,
+   which removes an invisible tail of roughly 80 ms.
+
+While measuring, one real bug surfaced: a **cold app lost its flight origin**. The kernel's effect could clear the
+pending launch before the app's surface registered its motion handle, so the app flew from its icon instead of the rect
+that was tapped — a banner opened from the Dock icon rather than from the banner. The origin is now held until a flight
+consumes it (`pendingLaunch`).
+
+Result, same measurement: **open 16 ms to the first frame and 307 ms to land; Home 24 ms and 314 ms** — quicker than the
+macOS window on this machine, at 60 fps.

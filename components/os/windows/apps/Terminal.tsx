@@ -167,6 +167,8 @@ export function effectOutcomes(
     }
     case 'tour':
       return [{ kind: 'tour' }];
+    case 'plain':
+      return [];
     case 'egg': {
       const found = recordEgg(context.prefs.eggsFound, effect.id);
       return found

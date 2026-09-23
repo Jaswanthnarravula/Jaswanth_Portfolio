@@ -93,7 +93,9 @@ export function AppSurface({
       id,
       launch: () => launch.current,
       onOpenness: (open) => {
-        if (open > 0.9) markReady();
+        // Halfway: the launch layer has faded, and the body lays itself out while `surfaceMotion` still keeps it
+        // unpainted — so the mount costs one layout, never a repaint per frame, and it is there when the flight lands.
+        if (open > 0.5) markReady();
       },
     });
     register(role, { element: el, motion });
@@ -128,7 +130,7 @@ export function AppSurface({
     setFailed(false);
     setAttempt((value) => value + 1);
   }, []);
-  // At rest in front, or as a live switcher card, the body is there.
+  // At rest in front, or as a live switcher card.
   const bodyReady = ready || state === 'foreground' || state === 'switcher';
   const visible = state !== 'background';
   const headingId = `ios-app-${role}`;

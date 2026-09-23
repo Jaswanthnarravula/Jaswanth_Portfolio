@@ -12,22 +12,22 @@ type Box = readonly [x: number, y: number, width: number, height: number];
 
 /** plans/visual-targets/storyboard.html `#chooser` at 1440 × 900 (x, y, width, height in CSS px). */
 const FRAME = {
-  heading: [346.5, 264.2, 746.9, 63.8],
+  heading: [323.5, 234.7, 793, 68],
   cards: [
-    [57.6, 368.9, 245.3, 266.9],
-    [327.5, 368.9, 245.3, 266.9],
-    [597.3, 368.9, 245.3, 266.9],
-    [867.2, 368.9, 245.3, 266.9],
-    [1137.1, 368.9, 245.3, 266.9],
+    [80.5, 333.4, 248.4, 396.3],
+    [338.1, 333.4, 248.5, 396.3],
+    [595.8, 333.4, 248.5, 396.3],
+    [853.4, 333.4, 248.5, 396.3],
+    [1111, 333.4, 248.4, 396.3],
   ],
   snaps: [
-    [79, 394.4, 202.5, 126.5],
-    [348.9, 394.4, 202.5, 126.5],
-    [618.8, 394.4, 202.5, 126.5],
-    [888.6, 394.4, 202.5, 126.5],
-    [1158.5, 394.4, 202.5, 126.5],
+    [96.8, 354.9, 215.8, 272.3],
+    [354.5, 354.9, 215.8, 272.3],
+    [612.1, 354.9, 215.8, 272.3],
+    [869.7, 354.9, 215.8, 272.3],
+    [1127.4, 354.9, 215.8, 272.3],
   ],
-  badge: [376.7, 357.1, 146.8, 28.7],
+  badge: [378.6, 320.5, 167.5, 28.7],
 } as const satisfies Record<string, Box | readonly Box[]>;
 
 const box = (page: Page, selector: string) =>
@@ -89,9 +89,9 @@ test.describe('storyboard frame', () => {
         ],
       };
     });
-    expect(look.field).toContain('rgb(185, 204, 255)'); // #b9ccff at 10 % 10 %
-    expect(look.field).toContain('rgb(255, 208, 228)'); // #ffd0e4 at 95 % 90 %
-    expect(look.base).toBe('rgb(238, 242, 251)'); // #eef2fb
+    expect(look.field).toContain('rgb(192, 203, 254)'); // #c0cbfe at 10 % 10 %
+    expect(look.field).toContain('rgb(250, 210, 233)'); // #fad2e9 at 95 % 90 %
+    expect(look.base).toBe('rgb(240, 244, 253)'); // #f0f4fd
     expect(look.headingFace).toMatch(/^"?Bricolage Grotesque"?,/);
     expect(look.headingColor).toBe('rgb(27, 35, 71)'); // #1b2347
     expect(look.cardFace).toMatch(/^"?IBM Plex Sans"?,/);

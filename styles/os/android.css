@@ -6,11 +6,12 @@
 
 [data-os='android'] {
   color-scheme: light;
-  --md-primary: oklch(0.47 0.13 258);
+  --md-primary: oklch(0.43 0.08 165);
   --md-on-primary: oklch(1 0 0);
-  --md-primary-container: oklch(0.9 0.05 258);
-  --md-on-primary-container: oklch(0.25 0.09 258);
-  --md-secondary-container: oklch(0.91 0.03 258);
+  --md-primary-container: oklch(0.9 0.06 165);
+  --md-on-primary-container: oklch(0.24 0.06 165);
+  --md-secondary-container: oklch(0.9 0.035 165);
+  --md-tertiary-container: oklch(0.91 0.05 35);
   --md-surface: oklch(0.985 0.004 258);
   --md-surface-container-lowest: oklch(1 0 0);
   --md-surface-container-low: oklch(0.965 0.008 258);
@@ -51,6 +52,11 @@
   --font-size-body: 14px;
   --font-size-title: 22px;
   --font-size-large: 36px;
+  --text-scale: 1;
+  --md-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --md-ease-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --md-ease-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --md-ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --elevation-1: none;
   --elevation-2: 0 1px 2px oklch(0 0 0 / 0.3), 0 2px 6px 2px oklch(0 0 0 / 0.15);
   --elevation-3: 0 4px 8px 3px oklch(0 0 0 / 0.15), 0 1px 3px oklch(0 0 0 / 0.3);
@@ -66,12 +72,30 @@
   --state-focus: 0.1;
   --state-pressed: 0.1;
   --state-dragged: 0.16;
-  --wallpaper-android:
-    radial-gradient(circle at 78% 22%, oklch(0.78 0.09 258) 0 22%, transparent 22.3%),
-    radial-gradient(circle at 18% 70%, oklch(0.84 0.07 200) 0 30%, transparent 30.3%),
-    radial-gradient(circle at 70% 88%, oklch(0.72 0.1 280) 0 18%, transparent 18.3%),
-    linear-gradient(160deg, oklch(0.9 0.04 245) 0%, oklch(0.82 0.06 262) 100%);
-  --wallpaper-android-worst: oklch(0.9 0.04 245);
+  --wallpaper-android: linear-gradient(118deg, #104c40 0%, #2c7a65 52%, #91d6ae 100%);
+  --wallpaper-android-worst: #91d6ae;
+}
+
+[data-os='android'][data-palette='blue'] {
+  --md-primary: oklch(0.48 0.14 250);
+  --md-primary-container: oklch(0.9 0.06 250);
+  --md-on-primary-container: oklch(0.24 0.09 250);
+  --md-secondary-container: oklch(0.91 0.035 250);
+  --wallpaper-android: linear-gradient(118deg, #153d68 0%, #3277ac 52%, #9ed7f5 100%);
+}
+[data-os='android'][data-palette='violet'] {
+  --md-primary: oklch(0.48 0.15 300);
+  --md-primary-container: oklch(0.9 0.06 300);
+  --md-on-primary-container: oklch(0.24 0.09 300);
+  --md-secondary-container: oklch(0.91 0.035 300);
+  --wallpaper-android: linear-gradient(118deg, #45236c 0%, #8154a5 52%, #d8b5ed 100%);
+}
+[data-os='android'][data-palette='coral'] {
+  --md-primary: oklch(0.48 0.14 25);
+  --md-primary-container: oklch(0.9 0.06 25);
+  --md-on-primary-container: oklch(0.24 0.09 25);
+  --md-secondary-container: oklch(0.91 0.035 25);
+  --wallpaper-android: linear-gradient(118deg, #702d3a 0%, #bd665e 52%, #f5b5a0 100%);
 }
 
 @media (prefers-color-scheme: dark) {

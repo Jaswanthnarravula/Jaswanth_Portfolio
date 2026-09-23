@@ -25,6 +25,7 @@ import {
   useState,
   type ClipboardEvent,
   type KeyboardEvent,
+  type ReactNode,
 } from 'react';
 import type { OsId } from '@/lib/kernel/ids';
 import type { Completion, Effect, Execution, Flavor, Line, ShellState, Terminal, VfsPath } from '@/lib/terminal';
@@ -41,6 +42,7 @@ export interface TerminalSessionSnapshot {
   readonly cwd: readonly string[];
   readonly history: readonly string[];
   readonly scrollback: readonly string[];
+  readonly draft?: string;
 }
 
 export interface TerminalViewHandle {
@@ -49,6 +51,9 @@ export interface TerminalViewHandle {
   focus(): void;
   /** Clear the scrollback (a menu's "Clear to Start" — the same as Ctrl+L). */
   clear(): void;
+  /** Append host-owned status text without fabricating a command echo. */
+  print(lines: readonly Line[], announceAs?: string): void;
+  navigate(cwd: VfsPath, announce?: boolean): void;
 }
 
 export interface TerminalViewProps {
@@ -57,8 +62,17 @@ export interface TerminalViewProps {
   readonly session: TerminalSessionSnapshot | null;
   /** The prompt string for a cwd (defaults to the engine's own voice). */
   readonly promptFor?: (cwd: VfsPath) => string;
+  /** Optional visual-only prompt; the accessible input still carries the cwd and echoes use promptFor. */
+  readonly visualPrompt?: (cwd: VfsPath, lastExit: number) => ReactNode;
   /** Shown at once, before the engine chunk arrives (e.g. "Last login: …"). */
   readonly firstLine?: string;
+  readonly initialLines?: readonly Line[];
+  readonly hintSlot?: ReactNode;
+  /** Optional host-owned loading/recovery copy. Supplying recoveryHref opts into the retry surface. */
+  readonly loadingLabel?: string;
+  readonly recoveryHref?: string;
+  /** Kernel focus key for the native prompt (Linux's routed terminal tile). */
+  readonly focusKey?: string;
   /** Rewrite a submitted line before the engine sees it (e.g. Windows `\` paths). The echo shows what was typed. */
   readonly inputTransform?: (line: string) => string;
   /** Every effect the view does not handle itself (it handles clear, pager and history-clear). */
@@ -67,6 +81,10 @@ export interface TerminalViewProps {
   readonly onRecord?: (command: string, output: readonly string[]) => void;
   readonly onClear?: () => void;
   readonly onSize?: (size: { cols: number; rows: number }) => void;
+  readonly onRun?: (command: string, result: Execution) => void;
+  readonly onDraftChange?: (draft: string) => void;
+  /** Direct visitor text entry (typing or paste), distinct from host-owned insertions. */
+  readonly onUserInput?: () => void;
   /** The window holding it is focused (caret solid) or not (hollow). */
   readonly active?: boolean;
   /** Focus the prompt on mount (fine pointers only — callers decide). */
@@ -151,12 +169,21 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
     os,
     session,
     promptFor,
+    visualPrompt,
     firstLine,
+    initialLines,
+    hintSlot,
+    loadingLabel,
+    recoveryHref,
+    focusKey,
     inputTransform,
     onEffect,
     onRecord,
     onClear,
     onSize,
+    onRun,
+    onDraftChange,
+    onUserInput,
     active = true,
     focusOnMount: focusOnMountProp,
     autoFocus = false,
@@ -187,18 +214,24 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
   const escaped = useRef(false);
   /** The cwd a command was typed at (its echo shows that prompt, even if the command changes directory). */
   const submittedAt = useRef<VfsPath>(shell.current.cwd);
+  const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState(session?.draft?.slice(0, INPUT_CAP) ?? '');
   const [cwd, setCwd] = useState<VfsPath>(shell.current.cwd);
   const [lastExit, setLastExit] = useState(0);
   const [ready, setReady] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [pager, setPager] = useState<Extract<Effect, { k: 'pager' }> | null>(null);
   const [search, setSearch] = useState<{ query: string; index: number; match: string | null; draft: string } | null>(
     null,
   );
   const [chip, setChip] = useState(false);
+  const [typing, setTyping] = useState(false);
   /** The accessory row: the prompt is focused with a coarse pointer and no hardware key has been pressed since. */
   const [keys, setKeys] = useState(false);
+
+  useEffect(() => callbacks.current.onDraftChange?.(value), [value]);
 
   const promptOf = useCallback(
     (at: VfsPath) => promptFor?.(at) ?? engine.current?.prompt(at) ?? `${tildePath(at)} $ `,
@@ -206,9 +239,9 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
   );
 
   // Latest callbacks, read from event handlers (the view never re-subscribes).
-  const callbacks = useRef({ onEffect, onRecord, onClear, onSize, inputTransform });
+  const callbacks = useRef({ onEffect, onRecord, onClear, onSize, onRun, onDraftChange, onUserInput, inputTransform });
   useLayoutEffect(() => {
-    callbacks.current = { onEffect, onRecord, onClear, onSize, inputTransform };
+    callbacks.current = { onEffect, onRecord, onClear, onSize, onRun, onDraftChange, onUserInput, inputTransform };
   });
 
   const finishReveal = () => {
@@ -224,15 +257,35 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
     setChip(false);
   };
 
-  const insertText = useCallback((text: string) => {
-    const next = text.slice(0, INPUT_CAP);
-    setValue(next);
-    setSearch(null);
-    const node = input.current;
-    if (!node) return;
-    node.focus({ preventScroll: true });
-    queueMicrotask(() => node.setSelectionRange(next.length, next.length));
+  const markTyping = useCallback(() => {
+    setTyping(true);
+    if (typingTimer.current) clearTimeout(typingTimer.current);
+    typingTimer.current = setTimeout(() => {
+      typingTimer.current = null;
+      setTyping(false);
+    }, 700);
   }, []);
+
+  useEffect(
+    () => () => {
+      if (typingTimer.current) clearTimeout(typingTimer.current);
+    },
+    [],
+  );
+
+  const insertText = useCallback(
+    (text: string) => {
+      const next = text.slice(0, INPUT_CAP);
+      setValue(next);
+      setSearch(null);
+      markTyping();
+      const node = input.current;
+      if (!node) return;
+      node.focus({ preventScroll: true });
+      queueMicrotask(() => node.setSelectionRange(next.length, next.length));
+    },
+    [markTyping],
+  );
 
   /** Append a block, reveal it, announce it, keep the view pinned (or show the chip). */
   const emit = useCallback(
@@ -279,6 +332,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
       else if (lines.length) emit(null, lines, command);
       const texts = [`${echo.prompt}${command}`, ...lines.map((line) => line.t)];
       callbacks.current.onRecord?.(command, cleared ? lines.map((line) => line.t) : texts);
+      callbacks.current.onRun?.(command, result);
     },
     [clearScrollback, emit, promptOf],
   );
@@ -312,24 +366,31 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
   // Load the engine (a lazy chunk): the static first line shows at once; queued commands run when it lands.
   useEffect(() => {
     let alive = true;
+    setLoadFailed(false);
     loadEngine(flavor, os).then(
       (terminal) => {
         if (!alive) return;
         engine.current = terminal;
+        setLoadFailed(false);
         setReady(true);
         for (const raw of queue.current.splice(0)) run(raw);
       },
       () => {
-        if (alive)
-          emit(null, [{ t: 'The terminal could not load — try again, or read the plain portfolio.', cls: 'err' }], '');
+        if (!alive) return;
+        setLoadFailed(true);
+        emit(
+          null,
+          [{ t: '[FAILED] Command interpreter did not start. Nothing was lost.', cls: 'warn' }],
+          'Terminal unavailable. Retry or read the plain portfolio.',
+        );
       },
     );
     return () => {
       alive = false;
     };
-    // The engine is loaded once per view.
+    // The engine is loaded once per attempt; retry increments loadAttempt.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadAttempt]);
 
   // Restore the session's scrollback, or print the first line.
   useEffect(() => {
@@ -342,7 +403,8 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
         onInsert: insertText,
       });
       toBottom();
-    } else if (firstLine) appendBlock(node, { echo: null, lines: [{ t: firstLine }], onInsert: insertText });
+    } else if (initialLines?.length) appendBlock(node, { echo: null, lines: initialLines, onInsert: insertText });
+    else if (firstLine) appendBlock(node, { echo: null, lines: [{ t: firstLine }], onInsert: insertText });
     if (focusOnMountProp ?? autoFocus) input.current?.focus({ preventScroll: true });
     // Mount only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -439,8 +501,16 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
       insert: insertText,
       focus: () => input.current?.focus({ preventScroll: true }),
       clear: clearScrollback,
+      print: (lines, announceAs = '') => emit(null, lines, announceAs),
+      navigate: (next, announce = true) => {
+        if (next.length === shell.current.cwd.length && next.every((part, index) => part === shell.current.cwd[index]))
+          return;
+        shell.current = { ...shell.current, oldpwd: shell.current.cwd, cwd: next };
+        setCwd(next);
+        if (announce) emit(null, [{ t: `cd ${tildePath(next)}`, cls: 'dim' }], '');
+      },
     }),
-    [insertText, clearScrollback],
+    [insertText, clearScrollback, emit],
   );
 
   const complete = (field: HTMLInputElement, listing: boolean): Completion | null => {
@@ -566,6 +636,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
     const trimmed = trimPaste(text);
     if (!trimmed.trimmed) return;
     event.preventDefault();
+    callbacks.current.onUserInput?.();
     const field = event.currentTarget;
     const start = field.selectionStart ?? field.value.length;
     const end = field.selectionEnd ?? field.value.length;
@@ -591,6 +662,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
     if (!field) return;
     finishReveal();
     if (key.text) {
+      callbacks.current.onUserInput?.();
       const start = field.selectionStart ?? field.value.length;
       const end = field.selectionEnd ?? field.value.length;
       const next = `${field.value.slice(0, start)}${key.text}${field.value.slice(end)}`.slice(0, INPUT_CAP);
@@ -626,7 +698,9 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
       className={`${styles.terminal} ${className ?? ''}`}
       data-terminal=""
       data-active={active || undefined}
+      data-typing={typing || undefined}
       data-ready={ready || undefined}
+      data-load-state={loadFailed ? 'failed' : ready ? 'ready' : 'loading'}
     >
       <div
         ref={scroller}
@@ -643,6 +717,29 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
         }}
       >
         <div ref={list} className={styles.list} data-scrollback="" />
+        {!ready && loadingLabel ? (
+          <div className={styles.loadState} role="status" aria-live="polite">
+            {loadFailed ? (
+              <>
+                <span>[FAILED] Command interpreter unavailable.</span>{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    engine.current = null;
+                    setReady(false);
+                    setLoadAttempt((attempt) => attempt + 1);
+                  }}
+                >
+                  Retry
+                </button>{' '}
+                {recoveryHref ? <a href={recoveryHref}>Read plain portfolio</a> : null}
+              </>
+            ) : (
+              loadingLabel
+            )}
+          </div>
+        ) : null}
+        {hintSlot ? <div data-hint-slot="">{hintSlot}</div> : null}
         <form
           className={styles.promptLine}
           onSubmit={(event) => {
@@ -660,7 +757,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
           }}
         >
           <span className={styles.prompt} aria-hidden="true" data-exit={lastExit || undefined}>
-            {search ? `(reverse-i-search)'${search.query}': ` : promptOf(cwd)}
+            {search ? `(reverse-i-search)'${search.query}': ` : (visualPrompt?.(cwd, lastExit) ?? promptOf(cwd))}
           </span>
           <span className={styles.field}>
             <input
@@ -675,9 +772,11 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
               spellCheck={false}
               maxLength={INPUT_CAP}
               aria-label={search ? 'Reverse search through history' : label}
+              data-focus-key={focusKey}
               value={search ? search.query : value}
               onChange={(event) => {
                 const next = event.target.value;
+                callbacks.current.onUserInput?.();
                 if (search) {
                   const hit = reverseSearch(shell.current.history, next);
                   setSearch({
@@ -686,7 +785,10 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
                     index: hit?.index ?? shell.current.history.length,
                     match: hit?.match ?? null,
                   });
-                } else setValue(next);
+                } else {
+                  setValue(next);
+                  markTyping();
+                }
               }}
               onKeyDown={onKeyDown}
               onFocus={() => {

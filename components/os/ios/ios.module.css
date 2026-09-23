@@ -12,6 +12,8 @@
   --app-top: var(--status-h);
   --dock-bottom: calc(max(var(--sa-b), 14px) + 8px);
   --material-thin-ios: rgb(255 255 255 / 0.28);
+  --material-dock-ios: rgb(255 255 255 / 0.52);
+  --blur-dock: blur(28px) saturate(115%);
   --blur-thin: blur(20px) saturate(180%);
   position: absolute;
   inset: 0;
@@ -23,6 +25,10 @@
   -webkit-user-select: none;
   user-select: none;
   touch-action: manipulation;
+}
+.ios[data-ios-dark] {
+  /* In dark the Dock is a dark plate, as the Home Screen inverts (IOS-ID-06). */
+  --material-dock-ios: rgb(28 24 42 / 0.5);
 }
 .ios[data-ios-layout='pad'] {
   --status-h: calc(var(--u) * 1.8);
@@ -619,6 +625,28 @@
   justify-content: flex-end;
 }
 
+/* A short phone (a browser viewport is shorter than the device) must still fit icon + label in one grid row: the art
+   shrinks to the row instead of the label sliding under the next row. */
+.homeScreen[data-layout='phone'] .iconCell {
+  height: 100%;
+}
+.homeScreen[data-layout='phone'] .icon {
+  height: 100%;
+  justify-content: flex-start;
+}
+.homeScreen[data-layout='phone'] .artWrap {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: calc(100% - 21px);
+  aspect-ratio: 1;
+  height: var(--icon, 60px);
+  width: auto !important;
+}
+.homeScreen[data-layout='phone'] .art {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 /* --- Search pill ↔ page dots (iOS 16+) ------------------------------------------------------------------------------ */
 .searchDock {
   position: absolute;
@@ -718,6 +746,12 @@
   backdrop-filter: none;
 }
 
+/* A card in the App Switcher shows the app itself, never its launch placeholder (the flight writes that opacity
+   inline, so the parked state has to win). */
+.surface[data-state='switcher'] .launch {
+  opacity: 0 !important;
+}
+
 /* --- Dock (phone plate, trailing edge in landscape, floating on the full page) ------------------------------------ */
 .dock {
   position: absolute;
@@ -726,9 +760,11 @@
   left: max(var(--sa-l), 12px);
   height: 92px;
   border-radius: 30px;
-  background: var(--material-thin-ios);
-  -webkit-backdrop-filter: var(--blur-thin);
-  backdrop-filter: var(--blur-thin);
+  /* Light plate over the wallpaper: enough white that a saturated wallpaper does not tint the whole Dock. */
+  background: var(--material-dock-ios);
+  box-shadow: inset 0 0 0 0.5px rgb(255 255 255 / 0.4);
+  -webkit-backdrop-filter: var(--blur-dock);
+  backdrop-filter: var(--blur-dock);
 }
 .dockList {
   display: flex;
@@ -766,8 +802,9 @@
   padding: calc(var(--u) * 0.9) calc(var(--u) * 1.1);
   border: 1px solid rgb(255 255 255 / 0.35);
   border-radius: calc(var(--u) * 1.9);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  backdrop-filter: blur(14px) saturate(160%);
+  /* The same plate as the phone Dock: a high saturation here turned a pink wallpaper into a pink slab. */
+  -webkit-backdrop-filter: var(--blur-dock);
+  backdrop-filter: var(--blur-dock);
 }
 .dock[data-layout='pad'] .dockList {
   gap: var(--u);
@@ -833,6 +870,8 @@
 .widgetsBlock .widget {
   height: auto;
   border-radius: 1.5em;
+  /* A widget is a fixed tile: long facts clamp inside it, they never spill past the rounded corner. */
+  overflow: hidden;
 }
 .widgetsBlock .widgetMain {
   height: auto;
@@ -886,7 +925,16 @@
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
+}
+.widgetsBlock .widget[data-size='small'] .widgetLine,
+.widgetsBlock .widget[data-size='small'] .widgetMuted {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.widgetsBlock .widget[data-size='small'] .widgetMain {
+  justify-content: flex-start;
 }
 .widgetsBlock .widget[data-size='small'] .widgetMain {
   padding: 1em;
@@ -1405,11 +1453,13 @@
 }
 .ccMore {
   position: absolute;
+  top: 4px;
   right: 4px;
-  bottom: 4px;
-  min-width: 44px;
-  min-height: 24px;
-  padding: 0 6px;
+  display: grid;
+  place-items: center;
+  min-width: 26px;
+  min-height: 26px;
+  padding: 0;
   border: 0;
   border-radius: 12px;
   background: rgb(255 255 255 / 0.18);

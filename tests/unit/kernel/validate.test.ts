@@ -98,7 +98,7 @@ describe('persisted window parsing', () => {
           windows: { 'macos:files': window() },
           zOrder: ['macos:files', 'macos:browser', 'macos:files', 7],
           focused: 'macos:browser',
-          terminal: { cwd: ['home'], history: [], scrollback: [] },
+          terminal: { cwd: ['home'], history: [], scrollback: [], draft: 'keep this' },
           parkedAt: 3,
           contentRev: 'r',
           bootSeen: true,
@@ -119,6 +119,7 @@ describe('persisted window parsing', () => {
       parkedAt: 3,
       bootSeen: true,
       lockSeen: false,
+      terminal: { draft: 'keep this' },
     });
     expect(parsed?.sessions.windows).toBeUndefined();
     expect(parsed?.sessions.ios).toBeUndefined();

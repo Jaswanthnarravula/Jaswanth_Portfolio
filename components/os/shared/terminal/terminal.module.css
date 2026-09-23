@@ -50,6 +50,29 @@
 .list [data-prompt] {
   color: var(--term-prompt, var(--term-fg, #e6e6e6));
 }
+.loadState {
+  min-height: 1.35em;
+  color: var(--term-dim, #9da5b4);
+}
+.loadState button,
+.loadState a {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--term-link, var(--term-dir, #6cb6ff));
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+@media (any-pointer: coarse) {
+  .loadState button,
+  .loadState a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
 
 .terminal [data-cls='dir'] {
   color: var(--term-dir, #6cb6ff);
@@ -168,6 +191,9 @@
   opacity: 1;
   animation: blink 1060ms steps(1) infinite;
 }
+.terminal[data-typing] .input:focus ~ .caret {
+  animation: none;
+}
 .terminal:not([data-active]) .input:focus ~ .caret {
   animation: none;
   background: transparent;
@@ -267,6 +293,10 @@
 @media (forced-colors: active) {
   .caret {
     background: Highlight;
+  }
+  .loadState button,
+  .loadState a {
+    color: LinkText;
   }
 }
 

@@ -1,9 +1,7 @@
 /*
- * OS chooser — plans/04-os-chooser.md "Visual target": the owner's storyboard frame (plans/visual-targets/chooser.png,
- * source CSS plans/visual-targets/storyboard.html `.choose`). Every value below is the frame's own, in its unit: the
- * frame is drawn at 1 em = 1.42 % of a 16:10 screen, so `--u` scales the whole foyer with the viewport exactly as the
- * frame does (and by height when the screen is wider than 16:10). No live backdrop blur: over this smooth field the
- * frame's 10 px card blur renders as its tint (shared/06 cap). The cards are opaque snapshots with no device outline.
+ * OS chooser — plans/04-os-chooser.md "Visual target". The fluid unit remains 1 em = 1.42 % of a 16:10 screen; the
+ * desktop override below carries the approved tall-card reference while compact layouts keep the original responsive
+ * arrangement. No live backdrop blur: the cards use a translucent tint over the smooth field.
  */
 
 .root {
@@ -147,7 +145,7 @@
   font-weight: 600;
 }
 
-/* `.snap`: the OS's full page in miniature — viewport-shaped (16:10 on the frame's screen), 0.6 em radius. */
+/* `.snap`: the OS's full page in miniature; desktop adopts the approved tall crop below. */
 .shot {
   position: relative;
   display: block;
@@ -450,6 +448,65 @@
   transform: scaleX(0);
   transform-origin: 0 50%;
 }
+
+/*
+ * Approved desktop selector frame (1656 x 950 reference). The frame sits inside a quiet page gutter, while the
+ * content keeps the original fluid unit so typography scales cleanly on neighbouring desktop sizes.
+ */
+@media (min-width: 1200px) and (min-height: 700px) {
+  .root {
+    inset: clamp(15px, 1.58vh, 20px) clamp(32px, 3.38vw, 64px) clamp(13px, 1.37vh, 18px);
+    border: 1px solid rgb(189 198 214 / 0.68);
+    border-radius: clamp(20px, 1.45vw, 25px);
+    background:
+      radial-gradient(60% 70% at 10% 10%, #c0cbfe 0, transparent 68%),
+      radial-gradient(60% 70% at 95% 90%, #fad2e9 0, transparent 68%), #f0f4fd;
+    box-shadow:
+      0 28px 48px rgb(46 59 79 / 0.2),
+      0 0 0 100vmax #e8ecf4;
+  }
+
+  .inner::before {
+    height: calc(40px + 1em);
+  }
+
+  .main {
+    gap: 1.6em;
+    padding: 2em 2.3%;
+  }
+
+  .cards {
+    gap: 0.45em;
+  }
+
+  .card {
+    gap: 0.7em;
+    padding: 1em 0.75em 0.8em;
+    border-radius: 1.15em;
+  }
+
+  .heading {
+    position: relative;
+    top: 2px;
+    font-size: 2.56em;
+  }
+
+  .shot {
+    aspect-ratio: 0.79245;
+    margin-bottom: 0;
+  }
+
+  .badge {
+    top: -0.87em;
+    padding-inline: 1.45em;
+  }
+
+  /* The supplied frame intentionally ends at the cards; keep the utility links available on compact layouts. */
+  .footer {
+    display: none;
+  }
+}
+
 @media (max-width: 699.98px) {
   .bootMark :global([data-asset]) {
     width: 52px !important;

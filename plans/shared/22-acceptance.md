@@ -113,7 +113,7 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `RESP-CLASS-01` | P0 | verified | `unit/kernel/platform.test.ts` › RESP-CLASS-01 size classes + posture · vitest 587/587 (2026-09-21) |  |
 | `RESP-DOM-01` | P2 | verified | `e2e/macos.spec.ts` › RESP-DOM-01 the same DOM at 390 and 1440 px (CSS decides the posture) · green locally 2026-09-22 (preview build) |  |
 | `RESP-VP-01` | P1 | planned | | |
-| `RESP-KB-01` | P7 | planned | | |
+| `RESP-KB-01` | P7 | verified | e2e/linux.spec.ts visualViewport, rotation and touch-accessory cases green 2026-09-23 | |
 | `RESP-TAP-01` | P2 | verified | `e2e/macos.spec.ts` › RESP-TAP-01 X3 tap targets on the macOS home: 24 px (fine pointer), 44 px (coarse) · green locally 2026-09-22 (preview build) |  |
 | `RESP-ROT-01` | P2 | verified | `e2e/macos.spec.ts` › RESP-ROT-01 O1 a resize mid-drag commits the last valid rect and re-clamps · green locally 2026-09-22 (preview build) |  |
 | `RESP-GEST-01` | P3 | built | macOS: every gesture has a menu / keyboard path (context menus by Shift+F10 and ⋯, Move / Size by keyboard, marquee by Ctrl+A, swipe-to-dismiss by Esc / Clear); the cross-OS M1 keyboard-only journey is pending |  |
@@ -193,9 +193,9 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 ### 14 Résumé fast path
 | ID | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|
-| `RES-REACH-01` | P7 | planned | | |
+| `RES-REACH-01` | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts Q1 green 2026-09-23 | |
 | `RES-PRE-01` | P1 | planned | | |
-| `RES-IDIOM-01` | P7 | planned | | |
+| `RES-IDIOM-01` | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts Q1 green 2026-09-23 | |
 | `RES-OPEN-01` | P2 | verified | `e2e/macos.spec.ts` › RES-OPEN-01 the résumé opens in Preview through the kernel from the desktop, the menu bar and the Dock stack · green locally 2026-09-22 (preview build) |  |
 | `RES-DL-01` | P2 | verified | `e2e/macos.spec.ts` › RES-DL-01 Download saves Jaswanth-Resume.pdf and records resume_downloaded · green locally 2026-09-22 (preview build) |  |
 | `RES-COMPACT-01` | P4 | verified | `e2e/windows.spec.ts` › RES-COMPACT-01 · WIN-X-01 Q1 the résumé is one click from the taskbar, the desktop, Start and Search · chromium-desktop, reduced-motion, iphone (390 px), pixel · green 2026-09-22 (preview build) |  |
@@ -208,7 +208,7 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `SRCH-MATCH-01` | P0 | verified | `unit/data/data.test.ts` › SRCH-MATCH-01 ranking fixtures (exact > prefix > typo) · vitest 587/587 (2026-09-21) |  |
 | `SRCH-ZERO-01` | P3 | verified | `component/macos/p3-surfaces.test.tsx` › MAC-SPOT-01: opens on the zero state — Résumé, Projects, Contact first — in a labelled group · green locally 2026-09-22 (vitest) |  |
 | `SRCH-ACT-01` | P3 | verified | `e2e/macos-p3.spec.ts` › MAC-SPOT-01/02/03/06 S1 Spotlight: three invocations, zero state, a result opens with one history entry · green locally 2026-09-22 (preview build .next-p3; chromium-desktop · reduced-motion · pixel · iphone) |  |
-| `SRCH-PARITY-01` | P7 | planned | | |
+| `SRCH-PARITY-01` | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts native search/find/grep parity green 2026-09-23 | |
 | `SRCH-TERM-01` | P3 | verified | `e2e/macos-p3.spec.ts` › MAC-SPOT-04 · SRCH-TERM-01 a command result opens Terminal with the command inserted, never run · green locally 2026-09-22 (preview build .next-p3; chromium-desktop · reduced-motion · pixel · iphone) |  |
 | `SRCH-A11Y-01` | P3 | verified | `component/macos/p3-surfaces.test.tsx` › MAC-SPOT-06: typing groups results with a Top Hit; the active option is the activedescendant · green locally 2026-09-22 (vitest) |  |
 | `SRCH-LAZY-01` | P3 | built | the index loads on first open (lib/search/load.ts, dynamic import); the "search chunk absent from first load" perf check is not yet in `e2e/performance.spec.ts` |  |
@@ -220,7 +220,7 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `CONT-OFFER-01` | P0 | verified | `unit/kernel/continuity-analytics.test.ts` › CONT-OFFER-01 offer decision table · vitest 587/587 (2026-09-21) |  |
 | `CONT-ACCEPT-01` | P4 | verified | `e2e/windows.spec.ts` › CONT-ACCEPT-01 · CONT-NEVER-01 · WIN-X-02 · WIN-NOTIF-02 C1 continuity from macOS: a toast offers, never opens by itself (accepting opens GitHub at the same place) · chromium-desktop, reduced-motion · green 2026-09-22 (preview build) — Windows as target; the macOS Handoff slot (`MAC-DOCK-08`) is the macOS owner's |  |
 | `CONT-NEVER-01` | P4 | verified | `e2e/windows.spec.ts` › CONT-ACCEPT-01 · CONT-NEVER-01 … C1 (no window before the visitor accepts) · chromium-desktop, reduced-motion · `component/windows/continuity.test.tsx` › CONT-A11Y-01 · CONT-NEVER-01 · green 2026-09-22 (preview build) |  |
-| `CONT-IDIOM-01` | P7 | planned | | |
+| `CONT-IDIOM-01` | P7 | verified | component/linux/shell.test.tsx one-time terminal-native continuity notice green 2026-09-23 | |
 | `CONT-A11Y-01` | P4 | verified | `component/windows/continuity.test.tsx` › CONT-A11Y-01 · CONT-NEVER-01 the continuity offer on Windows › lands once in the pre-existing polite status region, keeps focus where it was, and opens nothing · green 2026-09-22 (preview build) |  |
 | `CONT-MEM-01` | P0 | verified | `unit/kernel/persistence.test.ts` › CONT-MEM-01 continuity absent from the persisted payload · vitest 587/587 (2026-09-21) |  |
 
@@ -264,26 +264,26 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `TOUR-NEVER-01` | P3 | verified | `unit/macos/tour-eggs.test.ts` › TOUR-NEVER-01 nothing happens until start() · green locally 2026-09-22 (vitest) |  |
 | `TOUR-REAL-01` | P3 | verified | `unit/macos/tour-eggs.test.ts` › TOUR-REAL-01 the macOS script drives real kernel actions · `e2e/macos-p3.spec.ts` › MAC-X-03 T1 the tour runs real app openings; any input ends it and leaves the app open · green locally 2026-09-22 (preview build .next-p3; chromium-desktop · reduced-motion · pixel · iphone) |  |
 | `TOUR-CANCEL-01` | P3 | verified | `unit/macos/tour-eggs.test.ts` › TOUR-CANCEL-01 any input cancels at once; what it opened stays open (no undo dispatch) · `e2e/macos-p3.spec.ts` › MAC-X-03 T1 the tour runs real app openings; any input ends it and leaves the app open · green locally 2026-09-22 (preview build .next-p3; chromium-desktop · reduced-motion · pixel · iphone) |  |
-| `TOUR-LNX-01` | P7 | planned | | |
+| `TOUR-LNX-01` | P7 | verified | component/linux/shell.test.tsx suggest-and-wait Linux tour case green 2026-09-23 | |
 | `TOUR-A11Y-01` | P3 | verified | `unit/macos/tour-eggs.test.ts` › TOUR-A11Y-01 reduced motion: captions announced, Next only · green locally 2026-09-22 (vitest) |  |
 | `TOUR-LAZY-01` | P3 | built | the tour director and host load on start only (dynamic import); the "tour chunk absent from first load" perf check is pending |  |
-| `TOUR-RESTART-01` | P7 | planned | | |
+| `TOUR-RESTART-01` | P7 | verified | component/linux/shell.test.tsx tour restart/free-typing lifecycle case green 2026-09-23 | |
 
 ### 21 Easter eggs
 | ID | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|
-| `EGG-SUDO-01` | P7 | planned | | |
-| `EGG-NEO-01` | P7 | planned | | |
-| `EGG-VIM-01` | P7 | planned | | |
-| `EGG-RMRF-01` | P7 | planned | | |
-| `EGG-COW-01` | P7 | planned | | |
+| `EGG-SUDO-01` | P7 | verified | unit/terminal/commands.test.ts easter-egg command cases green 2026-09-23 | |
+| `EGG-NEO-01` | P7 | verified | unit/terminal/commands.test.ts easter-egg command cases green 2026-09-23 | |
+| `EGG-VIM-01` | P7 | verified | unit/terminal/commands.test.ts easter-egg command cases green 2026-09-23 | |
+| `EGG-RMRF-01` | P7 | verified | unit/terminal/commands.test.ts easter-egg command cases green 2026-09-23 | |
+| `EGG-COW-01` | P7 | verified | unit/terminal/commands.test.ts easter-egg command cases green 2026-09-23 | |
 | `EGG-ABOUT-01` | P3 | verified | `component/macos/p3-surfaces.test.tsx` › MAC-SET-06 / EGG-ABOUT-01: About This Mac lists Jaswanth as the hardware and counts the egg once · green locally 2026-09-22 (vitest) |  |
 | `EGG-WINVER-01` | P4 | verified | `e2e/windows-settings.spec.ts` › WIN-SET-06 EGG-WINVER-01 winver: data-driven About dialog; the found counter increments once · chromium-desktop, reduced-motion, iphone, pixel · `component/windows/terminal.test.tsx` › EGG-WINVER-01 winver opens About Windows and runs nothing · green 2026-09-22 (preview build) |  |
 | `EGG-KONAMI-01` | P3 | verified | `unit/macos/tour-eggs.test.ts` › EGG-KONAMI-01 ↑↑↓↓←→←→BA, with restarts · `component/macos/p3-shell.test.tsx` › EGG-KONAMI-01: the Konami code on the desktop counts the egg once and shows the banner · green locally 2026-09-22 (vitest) |  |
 | `EGG-SHAKE-01` | P5 | verified | e2e `ios.spec.ts` › X-04 the Konami code and the empty-Home long press each count once | |
-| `EGG-MATRIX-01` | P7 | planned | | |
+| `EGG-MATRIX-01` | P7 | verified | unit/terminal/commands.test.ts Linux Matrix egg case green 2026-09-23 | |
 | `EGG-LAZY-01` | P3 | built | egg effects load on trigger (dynamic imports); the "egg chunks absent from first load" perf check is pending |  |
-| `EGG-SAFE-01` | P7 | planned | | |
+| `EGG-SAFE-01` | P7 | verified | unit/terminal/commands.test.ts safe non-destructive egg cases green 2026-09-23 | |
 | `EGG-COUNT-01` | P3 | verified | `unit/macos/tour-eggs.test.ts` › EGG-COUNT-01 an egg counts once; n / N per OS · `e2e/macos-p3b.spec.ts` › MAC-X-04 · EGG-COUNT-01 terminal eggs and About This Mac count once each in Settings → General · green locally 2026-09-22 (preview build .next-p3; chromium-desktop · reduced-motion · pixel · iphone) |  |
 
 ## Definition of done — shared contracts

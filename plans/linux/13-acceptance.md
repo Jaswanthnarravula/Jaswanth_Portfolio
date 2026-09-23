@@ -11,12 +11,12 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 ### `01-identity.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `LNX-ID-01` | Prompt shape, colours, `~` abbreviation, middle-collapse, red `$` after failure | P7 | planned | | |
-| `LNX-ID-02` | Mono type metrics: measured cols/rows, 16 px on coarse pointers, pre-wrap | P7 | planned | | |
-| `LNX-ID-03` | Colour roles, light/dark, all ≥ 4.5:1 | P7 | planned | | |
-| `LNX-ID-04` | Caret: block, blink 1060 ms steps(1), solid while typing, hollow when unfocused | P7 | planned | | |
-| `LNX-ID-05` | Status bar with workspace tags, résumé link, help, clock, exit | P7 | planned | | |
-| `LNX-ID-06` | Tiled frames with focus border; no chrome buttons | P7 | planned | | |
+| `LNX-ID-01` | Prompt shape, colours, `~` abbreviation, middle-collapse, red `$` after failure | P7 | verified | unit/linux/model.test.ts + component/linux/shell.test.tsx green 2026-09-23 | |
+| `LNX-ID-02` | Mono type metrics: measured cols/rows, 16 px on coarse pointers, pre-wrap | P7 | verified | unit/linux/model.test.ts + component/linux/shell.test.tsx green 2026-09-23 | |
+| `LNX-ID-03` | Colour roles, light/dark, all ≥ 4.5:1 | P7 | verified | e2e/linux.spec.ts light + dark browser axe runs green 2026-09-23 | |
+| `LNX-ID-04` | Caret: block, blink 1060 ms steps(1), solid while typing, hollow when unfocused | P7 | verified | component/terminal/terminal-view.test.tsx + terminal.module.css contract green 2026-09-23 | |
+| `LNX-ID-05` | Status bar with workspace tags, résumé link, help, clock, exit | P7 | verified | unit/linux/model.test.ts + component/linux/shell.test.tsx green 2026-09-23 | |
+| `LNX-ID-06` | Tiled frames with focus border; no chrome buttons | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green 2026-09-23 | |
 
 ### `02-shell-engine.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
@@ -77,110 +77,110 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | `LNX-CMD-contact` | contact with real links | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-contact — real links · green locally 2026-09-22 (vitest) |  |
 | `LNX-CMD-resume` | resume / --download | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-resume — open / --download effects · green locally 2026-09-22 (vitest) |  |
 | `LNX-CMD-mail` | mail → mailto effect | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-mail — the mailto effect (same builder as the GUI apps) · green locally 2026-09-22 (vitest) |  |
-| `LNX-CMD-settings` | settings list/set → pref effects | P7 | planned | | |
-| `LNX-CMD-theme` | theme shorthand | P7 | planned | | |
-| `LNX-CMD-motion` | motion shorthand | P7 | planned | | |
-| `LNX-CMD-sound` | sound shorthand | P7 | planned | | |
-| `LNX-CMD-hints` | hints on/off | P7 | planned | | |
-| `LNX-CMD-search` | search over the shared index; never auto-opens | P7 | planned | | |
-| `LNX-CMD-switch` | switch / exit / logout | P7 | planned | | |
-| `LNX-CMD-tour` | tour | P7 | planned | | |
-| `LNX-CMD-legal` | legal notice in pager | P7 | planned | | |
-| `LNX-CMD-plain` | plain | P7 | planned | | |
-| `LNX-CMD-date` | date | P7 | planned | | |
-| `LNX-CMD-uname` | uname | P7 | planned | | |
-| `LNX-CMD-hostname` | hostname | P7 | planned | | |
-| `LNX-CMD-uptime` | uptime = career length | P7 | planned | | |
-| `LNX-CMD-id` | id | P7 | planned | | |
-| `LNX-CMD-finger` | finger + .plan | P7 | planned | | |
+| `LNX-CMD-settings` | settings list/set → pref effects | P7 | verified | unit/linux/commands.test.ts green 2026-09-23 | |
+| `LNX-CMD-theme` | theme shorthand | P7 | verified | unit/linux/commands.test.ts green 2026-09-23 | |
+| `LNX-CMD-motion` | motion shorthand | P7 | verified | unit/linux/commands.test.ts green 2026-09-23 | |
+| `LNX-CMD-sound` | sound shorthand | P7 | verified | unit/linux/commands.test.ts green 2026-09-23 | |
+| `LNX-CMD-hints` | hints on/off | P7 | verified | unit/linux/commands.test.ts green 2026-09-23 | |
+| `LNX-CMD-search` | search over the shared index; never auto-opens | P7 | verified | unit/linux/commands.test.ts green 2026-09-23 | |
+| `LNX-CMD-switch` | switch / exit / logout | P7 | verified | unit/linux/commands.test.ts green 2026-09-23 | |
+| `LNX-CMD-tour` | tour | P7 | verified | unit/linux/commands.test.ts green 2026-09-23 | |
+| `LNX-CMD-legal` | legal notice in pager | P7 | verified | unit/linux/commands.test.ts green 2026-09-23 | |
+| `LNX-CMD-plain` | plain | P7 | verified | unit/linux/commands.test.ts + component/linux/shell.test.tsx + e2e/linux.spec.ts green 2026-09-23 | |
+| `LNX-CMD-date` | date | P7 | verified | unit/linux/commands.test.ts green 2026-09-23 | |
+| `LNX-CMD-uname` | uname | P7 | verified | unit/linux/commands.test.ts green 2026-09-23 | |
+| `LNX-CMD-hostname` | hostname | P7 | verified | unit/linux/commands.test.ts green 2026-09-23 | |
+| `LNX-CMD-uptime` | uptime = career length | P7 | verified | unit/linux/commands.test.ts green 2026-09-23 | |
+| `LNX-CMD-id` | id | P7 | verified | unit/linux/commands.test.ts green 2026-09-23 | |
+| `LNX-CMD-finger` | finger + .plan | P7 | verified | unit/linux/commands.test.ts green 2026-09-23 | |
 | `LNX-CMD-aliases` | alias set behaves as listed | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-aliases — each alias resolves as listed · green locally 2026-09-22 (vitest) |  |
 | `LNX-CMD-registry` | One registry generates help, man, which, /usr/bin, completion, search entries | P3 | verified | `unit/terminal/commands.test.ts` › LNX-CMD-registry — one table generates help, man, which, /usr/bin, completion and search entries · green locally 2026-09-22 (vitest) |  |
 
 ### `05-hints.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `LNX-HINT-01` | Trigger conditions + rate limits + auto-off after 2 dismissals | P7 | planned | | |
-| `LNX-HINT-02` | Nudge copy and the `Need a hint?` disclosure in the fixed hint slot | P7 | planned | | |
-| `LNX-HINT-03` | Contextual `nextHint(state)` table | P7 | planned | | |
-| `LNX-HINT-04` | **Paste into Terminal inserts and never executes** | P7 | planned | | |
-| `LNX-HINT-05` | Draft protection (confirm before replacing non-empty input) | P7 | planned | | |
-| `LNX-HINT-06` | `hints on/off/status`; off inside Terminal apps of other OSes | P7 | planned | | |
-| `LNX-HINT-07` | Status-region semantics; focus rules | P7 | planned | | |
+| `LNX-HINT-01` | Trigger conditions + rate limits + auto-off after 2 dismissals | P7 | verified | component/linux/shell.test.tsx rate-limit + two-dismissal cases green 2026-09-23 | |
+| `LNX-HINT-02` | Nudge copy and the `Need a hint?` disclosure in the fixed hint slot | P7 | verified | component/linux/shell.test.tsx green 2026-09-23 | |
+| `LNX-HINT-03` | Contextual `nextHint(state)` table | P7 | verified | unit/linux/model.test.ts + component/linux/shell.test.tsx green 2026-09-23 | |
+| `LNX-HINT-04` | **Paste into Terminal inserts and never executes** | P7 | verified | component/linux/shell.test.tsx green 2026-09-23 | |
+| `LNX-HINT-05` | Draft protection (confirm before replacing non-empty input) | P7 | verified | component/linux/shell.test.tsx confirm-path case green 2026-09-23 | |
+| `LNX-HINT-06` | `hints on/off/status`; off inside Terminal apps of other OSes | P7 | verified | unit/linux/commands.test.ts + component/linux/shell.test.tsx green 2026-09-23 | |
+| `LNX-HINT-07` | Status-region semantics; focus rules | P7 | verified | component/linux/shell.test.tsx green 2026-09-23 | |
 
 ### `06-rich-views.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `LNX-VIEW-01` | Viewer tile (split, overlay, pager modes) with title strip and text buttons | P7 | planned | | |
-| `LNX-VIEW-02` | Continuity: command + result line printed before the transition; focus to viewer; prompt on close | P7 | planned | | |
-| `LNX-VIEW-03` | Terminal-skinned content views (mono, rules, chips) from shared views | P7 | planned | | |
-| `LNX-VIEW-04` | Viewer keys (q/Esc, j/k, g/G, d, l, n/p) gated by focus + single-key pref | P7 | planned | | |
-| `LNX-VIEW-05` | URL: push on open, back-collapse on close, seeded scrollback on cold deep link | P7 | planned | | |
-| `LNX-VIEW-06` | Transform-only split with a single re-wrap at rest | P7 | planned | | |
-| `LNX-VIEW-07` | Adjustable divider with keyboard alternative | P7 | planned | | |
+| `LNX-VIEW-01` | Viewer tile (split, overlay, pager modes) with title strip and text buttons | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
+| `LNX-VIEW-02` | Continuity: command + result line printed before the transition; focus to viewer; prompt on close | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
+| `LNX-VIEW-03` | Terminal-skinned content views (mono, rules, chips) from shared views | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts browser axe green 2026-09-23 | |
+| `LNX-VIEW-04` | Viewer keys (q/Esc, j/k, g/G, d, l, n/p) gated by focus + single-key pref | P7 | verified | component/linux/shell.test.tsx preference gate + e2e/linux.spec.ts keys green 2026-09-23 | |
+| `LNX-VIEW-05` | URL: push on open, back-collapse on close, seeded scrollback on cold deep link | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
+| `LNX-VIEW-06` | Transform-only split with a single re-wrap at rest | P7 | verified | component/linux/shell.test.tsx split/resize + e2e/linux.spec.ts rewrap counter green 2026-09-23 | |
+| `LNX-VIEW-07` | Adjustable divider with keyboard alternative | P7 | verified | e2e/linux.spec.ts drag + Alt+Shift+Arrow green 2026-09-23 | |
 
 ### `07-output-animation.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `LNX-OUT-01` | Block/line DOM model, fragment append, 500-line cap by whole blocks | P7 | planned | | |
-| `LNX-OUT-02` | Reveal timeline: 90 ms/line, 12 ms stagger, ≤ 240 ms, ≤ 24 lines, skip > 200 | P7 | planned | | |
-| `LNX-OUT-03` | **Input completes the reveal instantly; typing never blocked** | P7 | planned | | |
-| `LNX-OUT-04` | Bottom pinning, `↓ new output` chip, no yanking when scrolled up | P7 | planned | | |
-| `LNX-OUT-05` | Zero React renders per line; compositor-only properties | P7 | planned | | |
-| `LNX-OUT-06` | Synchronous announcer text + long-output summaries | P7 | planned | | |
-| `LNX-OUT-07` | Timeline cleanup (no leaks) | P7 | planned | | |
+| `LNX-OUT-01` | Block/line DOM model, fragment append, 500-line cap by whole blocks | P7 | verified | component/linux/output.test.tsx fragment-append and whole-block trim cases green 2026-09-23 | |
+| `LNX-OUT-02` | Reveal timeline: 90 ms/line, 12 ms stagger, ≤ 240 ms, ≤ 24 lines, skip > 200 | P7 | verified | unit/linux/output.test.ts timing-boundary cases green 2026-09-23 | |
+| `LNX-OUT-03` | **Input completes the reveal instantly; typing never blocked** | P7 | verified | component/terminal/terminal-view.test.tsx input-during-reveal case green 2026-09-23 | |
+| `LNX-OUT-04` | Bottom pinning, `↓ new output` chip, no yanking when scrolled up | P7 | verified | e2e/linux.spec.ts OUT-04 scroll-pinning case green 2026-09-23 | |
+| `LNX-OUT-05` | Zero React renders per line; compositor-only properties | P7 | verified | component/terminal/terminal-view.test.tsx React Profiler long-output case green 2026-09-23 | |
+| `LNX-OUT-06` | Synchronous announcer text + long-output summaries | P7 | verified | unit/linux/output.test.ts + component/terminal/terminal-view.test.tsx announcer cases green 2026-09-23 | |
+| `LNX-OUT-07` | Timeline cleanup (no leaks) | P7 | verified | component/linux/output.test.tsx 200-reveal cleanup loop green 2026-09-23 | |
 
 ### `08-boot-and-motd.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `LNX-BOOT-01` | Kernel-log boot from real facts, ≤ 600 ms, doubles as loading, any key skips | P7 | planned | | |
-| `LNX-BOOT-02` | Login block with `Last login … from {previousOs}`; no password prompt | P7 | planned | | |
-| `LNX-BOOT-03` | MOTD from data with **insertable** entries (never executed) + continuity line | P7 | planned | | |
-| `LNX-BOOT-04` | Appearance rules: boot/login first chooser entry only; MOTD per fresh session; none on deep link/re-entry | P7 | planned | | |
-| `LNX-BOOT-05` | Autofocus on fine pointers only; "tap here to type" on coarse | P7 | planned | | |
-| `LNX-BOOT-06` | Slow/failure states without alarming output | P7 | planned | | |
-| `LNX-BOOT-07` | Reduced motion skips boot/login; announcer summaries | P7 | planned | | |
+| `LNX-BOOT-01` | Kernel-log boot from real facts, ≤ 600 ms, doubles as loading, any key skips | P7 | verified | component/linux/shell.test.tsx boot facts, duration and any-key skip cases green 2026-09-23 | |
+| `LNX-BOOT-02` | Login block with `Last login … from {previousOs}`; no password prompt | P7 | verified | component/linux/shell.test.tsx previous-OS login and no-password case green 2026-09-23 | |
+| `LNX-BOOT-03` | MOTD from data with **insertable** entries (never executed) + continuity line | P7 | verified | unit/linux/model.test.ts + component/linux/shell.test.tsx green 2026-09-23 | |
+| `LNX-BOOT-04` | Appearance rules: boot/login first chooser entry only; MOTD per fresh session; none on deep link/re-entry | P7 | verified | component/linux/shell.test.tsx first-entry, re-entry and deep-link cases green 2026-09-23 | |
+| `LNX-BOOT-05` | Autofocus on fine pointers only; "tap here to type" on coarse | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
+| `LNX-BOOT-06` | Slow/failure states without alarming output | P7 | verified | component/terminal/terminal-view.test.tsx calm loading failure and retry case green 2026-09-23 | |
+| `LNX-BOOT-07` | Reduced motion skips boot/login; announcer summaries | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
 
 ### `09-cross-os-features.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `LNX-X-01` | Résumé fast path: status-bar link, `resume`, MOTD entry, viewer download | P7 | planned | | |
-| `LNX-X-02` | `search` output with insertable entries; native `find`/`grep` parity | P7 | planned | | |
-| `LNX-X-03` | Continuity via MOTD line / one-time notice | P7 | planned | | |
-| `LNX-X-04` | Suggest-and-wait tour; graceful exit on free typing | P7 | planned | | |
-| `LNX-X-05` | Eggs registered as hidden commands; found counter in `settings list` | P7 | planned | | |
-| `LNX-X-06` | `exit`/`switch` behaviours + logout exit beat | P7 | planned | | |
+| `LNX-X-01` | Résumé fast path: status-bar link, `resume`, MOTD entry, viewer download | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
+| `LNX-X-02` | `search` output with insertable entries; native `find`/`grep` parity | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
+| `LNX-X-03` | Continuity via MOTD line / one-time notice | P7 | verified | component/linux/shell.test.tsx one-time continuity notice case green 2026-09-23 | |
+| `LNX-X-04` | Suggest-and-wait tour; graceful exit on free typing | P7 | verified | component/linux/shell.test.tsx real tour and free-typing exit case green 2026-09-23 | |
+| `LNX-X-05` | Eggs registered as hidden commands; found counter in `settings list` | P7 | verified | unit/terminal/commands.test.ts + component/linux/shell.test.tsx settings counter case green 2026-09-23 | |
+| `LNX-X-06` | `exit`/`switch` behaviours + logout exit beat | P7 | verified | e2e/linux.spec.ts X-06 layered exit and switch cases green 2026-09-23 | |
 
 ### `10-responsive.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `LNX-RESP-01` | Layouts per size class incl. 120-col cap, overlay and pager viewer modes | P7 | planned | | |
-| `LNX-RESP-02` | Touch prompt: form/input attributes, 16 px, `input`-event reading, no focus on scrollback tap | P7 | planned | | |
-| `LNX-RESP-03` | `visualViewport`-driven layout keeps the prompt above the keyboard | P7 | planned | | |
-| `LNX-RESP-04` | Accessory key row (keeps focus, completion/history/cancel), hidden with hardware keyboards | P7 | planned | | |
-| `LNX-RESP-05` | Tappable entries insert by node kind; never execute | P7 | planned | | |
-| `LNX-RESP-06` | Narrow-width output formats (stacked tables, column fitting) | P7 | planned | | |
-| `LNX-RESP-07` | Rotation preserves draft, caret, viewer content; safe areas | P7 | planned | | |
+| `LNX-RESP-01` | Layouts per size class incl. 120-col cap, overlay and pager viewer modes | P7 | verified | unit/linux/model.test.ts + component/linux/shell.test.tsx green 2026-09-23 | |
+| `LNX-RESP-02` | Touch prompt: form/input attributes, 16 px, `input`-event reading, no focus on scrollback tap | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
+| `LNX-RESP-03` | `visualViewport`-driven layout keeps the prompt above the keyboard | P7 | verified | e2e/linux.spec.ts visualViewport prompt-position case green 2026-09-23 | |
+| `LNX-RESP-04` | Accessory key row (keeps focus, completion/history/cancel), hidden with hardware keyboards | P7 | verified | e2e/linux.spec.ts touch accessory completion/history/cancel case green 2026-09-23 | |
+| `LNX-RESP-05` | Tappable entries insert by node kind; never execute | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
+| `LNX-RESP-06` | Narrow-width output formats (stacked tables, column fitting) | P7 | verified | unit/terminal/golden.test.ts 40-column fixtures + component/linux/shell.test.tsx narrow layout green 2026-09-23 | |
+| `LNX-RESP-07` | Rotation preserves draft, caret, viewer content; safe areas | P7 | verified | e2e/linux.spec.ts rotation draft/viewer preservation and safe-area case green 2026-09-23 | |
 
 ### `11-accessibility.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `LNX-A11Y-01` | Landmark/DOM structure: scrollback region, hint slot, labelled prompt, separate log announcer | P7 | planned | | |
-| `LNX-A11Y-02` | Synchronous final-text announcements; > 10-line summaries; own echo not announced | P7 | planned | | |
-| `LNX-A11Y-03` | **Tab is never a trap** (pass-through on empty; Esc-then-Tab always exits) | P7 | planned | | |
-| `LNX-A11Y-04` | Ctrl+C respects selection; no hijacked browser chords | P7 | planned | | |
-| `LNX-A11Y-05` | Focus rules (autofocus by pointer type, viewer, hints, scrollback typing redirect) | P7 | planned | | |
-| `LNX-A11Y-06` | Contrast, zoom/200 % text, forced-colors, non-colour cues | P7 | planned | | |
-| `LNX-A11Y-07` | Insertable entries as named buttons | P7 | planned | | |
+| `LNX-A11Y-01` | Landmark/DOM structure: scrollback region, hint slot, labelled prompt, separate log announcer | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
+| `LNX-A11Y-02` | Synchronous final-text announcements; > 10-line summaries; own echo not announced | P7 | verified | unit/linux/output.test.ts + component/terminal/terminal-view.test.tsx announcement cases green 2026-09-23 | |
+| `LNX-A11Y-03` | **Tab is never a trap** (pass-through on empty; Esc-then-Tab always exits) | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
+| `LNX-A11Y-04` | Ctrl+C respects selection; no hijacked browser chords | P7 | verified | component/terminal/terminal-view.test.tsx selection and browser-chord cases green 2026-09-23 | |
+| `LNX-A11Y-05` | Focus rules (autofocus by pointer type, viewer, hints, scrollback typing redirect) | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
+| `LNX-A11Y-06` | Contrast, zoom/200 % text, forced-colors, non-colour cues | P7 | verified | e2e/linux.spec.ts light/dark axe, 200% text and forced-colors cases green 2026-09-23 | |
+| `LNX-A11Y-07` | Insertable entries as named buttons | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
 | `LNX-A11Y-08` | Screen-reader script recorded for release (NVDA + VoiceOver on the terminal) | P8 | planned | | |
 
 ### `12-edge-cases.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `LNX-CASE-01` | E1–E8 (invalid input, errors, read-only FS, caps, paste) | P7 | planned | | |
-| `LNX-CASE-02` | E9–E11 (Enter repeat, typing during reveal, cd spam rate degrade) | P7 | planned | | |
-| `LNX-CASE-03` | E12–E17 (Back/Forward follows cwd without re-executing, refresh, deep links, layered exit) | P7 | planned | | |
-| `LNX-CASE-04` | E18–E23 (resize, keyboard, OS switch/return, storage, hidden tab) | P7 | planned | | |
-| `LNX-CASE-05` | E24–E26 (announcer queueing, selection respect, fuzzing) | P7 | planned | | |
+| `LNX-CASE-01` | E1–E8 (invalid input, errors, read-only FS, caps, paste) | P7 | verified | unit/terminal/shell.test.ts + e2e/linux.spec.ts invalid/read-only/cap/paste cases green 2026-09-23 | |
+| `LNX-CASE-02` | E9–E11 (Enter repeat, typing during reveal, cd spam rate degrade) | P7 | verified | component/terminal/terminal-view.test.tsx reveal/rate cases + unit/terminal/history.test.ts green 2026-09-23 | |
+| `LNX-CASE-03` | E12–E17 (Back/Forward follows cwd without re-executing, refresh, deep links, layered exit) | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
+| `LNX-CASE-04` | E18–E23 (resize, keyboard, OS switch/return, storage, hidden tab) | P7 | verified | unit/kernel flows/validation + component/linux/shell.test.tsx + e2e/linux.spec.ts switch/rotation/storage/hidden-tab cases green 2026-09-23 | |
+| `LNX-CASE-05` | E24–E26 (announcer queueing, selection respect, fuzzing) | P7 | verified | unit/terminal/shell.test.ts 10,000-case fuzz + component announcer/selection cases green 2026-09-23 | |
 
 **Total feature IDs: 126**
 

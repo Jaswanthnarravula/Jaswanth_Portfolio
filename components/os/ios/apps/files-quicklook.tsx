@@ -326,7 +326,7 @@ export function QuickLook({
       <div ref={scrim} className={styles.qlScrim} aria-hidden="true" onClick={() => open && onDone()} />
       <div ref={panel} className={styles.ql} role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className={styles.qlBar} data-ql-bar="">
-          <button ref={done} type="button" className={styles.qlDone} onClick={onDone}>
+          <button ref={done} type="button" className={styles.qlDone} data-modal-dismiss="" onClick={onDone}>
             Done
           </button>
           <h3 id={titleId} className={styles.qlTitle}>

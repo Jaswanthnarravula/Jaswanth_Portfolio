@@ -6,10 +6,9 @@ that environment** rather than navigating to a page. Requirements: R12, R13, R36
 `chooser`; transition machine: `shared/04-os-kernel.md` (`KRN-SWITCH-*`).
 
 ## Portfolio mapping
-None directly. Each card previews that OS's **full-page home** with the visitor's real app set — a static AVIF
-snapshot (≤ 25 KB) in the **same aspect ratio as the visitor's viewport** (a landscape snapshot on laptops/desktops, a
-portrait one on phones), with **no device outline** around it (north-star B17). Because the card is literally a small
-version of the page, the enter transition is a clean uniform scale from card to full screen.
+None directly. Each card previews that OS's **full-page home** with the visitor's real app set. The approved desktop
+frame uses a tall `0.79245` showcase crop; compact layouts retain orientation-aware snapshots. There is **no device
+outline** around the preview (north-star B17), and the preview remains the shared element for entry.
 
 ## Anatomy
 ```
@@ -29,19 +28,19 @@ version of the page, the enter transition is a clean uniform scale from card to 
   expanded → macOS; nothing else. Exactly one badge.
 - Only **released** OSes are rendered (`ARCH-REL-01`); the grid reflows for fewer than five.
 
-## Visual target (owner storyboard — `plans/visual-targets/chooser.png`, full screen `frames/chooser.png`)
+## Visual target (approved tall-card selector reference)
 Rules: `shared/06-design-system.md` → Owner visual targets. Same unit as the welcome screens (1 em = 1.42 % of a
-16:10 screen); values are the frame's (`.choose`, `.card`, `.snap`, `.badge`).
+16:10 screen); desktop values are measured from the approved 1656 × 950 reference.
 
 | Element | Exactly as the frame |
 |---|---|
-| Field | `radial-gradient(60% 70% at 10% 10%, #b9ccff 0, transparent 60%), radial-gradient(60% 70% at 95% 90%, #ffd0e4 0, transparent 60%), #eef2fb` |
-| Column | Heading and cards centred as one column, `2em` apart, `4%` side padding |
-| Heading | Bricolage Grotesque 700, `2.4em`, `#1b2347` |
-| Cards | Five equal columns, gap `1.2em`; each `rgb(255 255 255 / .55)` with a 1 px `rgb(255 255 255 / .9)` rim, radius `1.4em`, padding `1.2em 1em`, IBM Plex Sans; name `1.25em` weight 600, character `.88em` `#4a5576`. The frame's 10 px card blur renders as its tint over this smooth field (≤ 3 blur cap) |
-| Snapshot | Viewport-shaped (16:10 on the frame's screen), radius `.6em`, shadow `0 .3em .8em rgb(20 30 70 / .25)`; until an OS home is built, the frame's miniature of it (`scripts/snapshot-miniatures.mjs`) |
-| Badge | "Suits your device", `#2447d6` pill centred on the card's top edge (`top: -.8em`), `.78em` white |
-| Footer | The one addition to the frame: "Résumé" · "Skip the OS" under the foyer, `#4a5576` — résumé reach is required on every surface (`RES-PRE-01`) |
+| Field | Inset rounded panel over `#e8ecf4`; `radial-gradient(60% 70% at 10% 10%, #c0cbfe 0, transparent 68%), radial-gradient(60% 70% at 95% 90%, #fad2e9 0, transparent 68%), #f0f4fd` |
+| Column | Heading and cards centred as one column, `1.6em` apart, `2.3%` side padding |
+| Heading | Bricolage Grotesque 700, `2.56em`, `#1b2347` |
+| Cards | Five equal columns, gap `.45em`; each `rgb(255 255 255 / .55)` with a 1 px `rgb(255 255 255 / .9)` rim, radius `1.15em`, padding `1em .75em .8em`, IBM Plex Sans; name `1.25em` weight 600, character `.88em` `#4a5576` |
+| Snapshot | Tall `0.79245` showcase window on desktop, radius `.6em`, shadow `0 .3em .8em rgb(20 30 70 / .25)`; compact layouts retain orientation-aware crops |
+| Badge | "Suits your device", `#2447d6` pill centred on the card's top edge (`top: -.87em`), `.78em` white |
+| Footer | Hidden on the approved desktop frame; the compact layouts retain "Résumé" · "Skip the OS" under the foyer |
 
 ## Behaviour & states
 | State | Behaviour |
@@ -98,7 +97,7 @@ chooser and cancels the push via back-collapse. Single released OS → the choos
 ## Feature IDs + acceptance tests
 | ID | Feature | Acceptance test |
 |---|---|---|
-| `CHOOSE-CARD-01` | Five link cards with identity, character line and a viewport-shaped full-page snapshot (no device outline) | `e2e: W1 cards are links to /{os}; snapshot aspect = viewport aspect; no frame element; W2 works without JS` |
+| `CHOOSE-CARD-01` | Five link cards with identity, character line and a tall desktop showcase snapshot (no device outline) | `e2e: W1 cards are links to /{os}; desktop snapshot aspect = 0.79245; no frame element; W2 works without JS` |
 | `CHOOSE-BADGE-01` | Device-suited badge from size + input only, never the profile | `unit: badge decision table; identical for all PersonaIds` |
 | `CHOOSE-REL-01` | Only released OSes shown | `unit: chooser renders the released set` |
 | `CHOOSE-PREF-01` | Prefetch on hover/focus and idle | `perf: chunk requested on card focus, not before` |

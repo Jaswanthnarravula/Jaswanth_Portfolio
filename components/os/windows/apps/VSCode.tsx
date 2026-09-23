@@ -186,6 +186,8 @@ export default function VSCode({ window, focused, compact }: WindowBodyProps) {
       case 'tour':
         shell.startTour();
         return;
+      case 'plain':
+        return;
       default:
     }
   };

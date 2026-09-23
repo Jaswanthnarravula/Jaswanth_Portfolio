@@ -41,10 +41,13 @@
   --material-chrome: oklch(0.98 0.002 286 / 0.78);
   --material-blur: blur(20px) saturate(180%);
   --hairline: oklch(0.3 0.01 286 / 0.2);
+  /* The frame's wallpaper: purple field, a warm glow in the right corners — not a band of pink across the bottom,
+     which tinted the whole Dock (plans/visual-targets/ios-home.png). */
   --wallpaper-ios:
     radial-gradient(60% 90% at 12% 8%, #8e6bd8 0, transparent 60%),
-    radial-gradient(55% 80% at 92% 18%, #ff9f7a 0, transparent 55%),
-    linear-gradient(160deg, #2a1d63 0, #6c3aa3 45%, #e27a86 85%, #ffb07a 100%);
+    radial-gradient(52% 55% at 100% 100%, #ffb07a 0, transparent 62%),
+    radial-gradient(58% 62% at 96% 24%, #e27a86 0, transparent 58%),
+    linear-gradient(160deg, #2a1d63 0, #5f3198 52%, #7e42a6 100%);
   --wallpaper-ios-worst: #ffb07a;
   /* iOS system palette (plans/ios/01 "Accent", grouped backgrounds). Blue text/fills use #0068da (AA 5.3:1) — the
      frame's #0a7aff is 4.0:1 on white (deviation logged in plans/ios/08). */
@@ -98,8 +101,9 @@
     --hairline: oklch(0.7 0.01 286 / 0.26);
     --wallpaper-ios:
       radial-gradient(60% 90% at 12% 8%, #4a3480 0, transparent 60%),
-      radial-gradient(55% 80% at 92% 18%, #7a3f36 0, transparent 55%),
-      linear-gradient(160deg, #120b2e 0, #331a55 45%, #6a3048 85%, #7a4a34 100%);
+      radial-gradient(52% 55% at 100% 100%, #7a4a34 0, transparent 62%),
+      radial-gradient(58% 62% at 96% 24%, #6a3048 0, transparent 58%),
+      linear-gradient(160deg, #120b2e 0, #2c1749 52%, #3d1f5e 100%);
     --wallpaper-ios-worst: #7a4a34;
     --ios-grouped: #000000;
     --ios-cell: #1c1c1e;
@@ -147,8 +151,9 @@
   --hairline: oklch(0.7 0.01 286 / 0.26);
   --wallpaper-ios:
     radial-gradient(60% 90% at 12% 8%, #4a3480 0, transparent 60%),
-    radial-gradient(55% 80% at 92% 18%, #7a3f36 0, transparent 55%),
-    linear-gradient(160deg, #120b2e 0, #331a55 45%, #6a3048 85%, #7a4a34 100%);
+    radial-gradient(52% 55% at 100% 100%, #7a4a34 0, transparent 62%),
+    radial-gradient(58% 62% at 96% 24%, #6a3048 0, transparent 58%),
+    linear-gradient(160deg, #120b2e 0, #2c1749 52%, #3d1f5e 100%);
   --wallpaper-ios-worst: #7a4a34;
   --ios-grouped: #000000;
   --ios-cell: #1c1c1e;

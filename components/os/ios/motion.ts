@@ -22,14 +22,14 @@ import { solveSpring, spring, type Spring, type SpringConfig } from '@/lib/motio
 // --- Tokens (plans/ios/03 "Spring table" + "Curve-based timings") -------------------------------------------------------
 
 export const IOS_SPRINGS = {
-  open: { response: 0.42, damping: 0.86 },
-  close: { response: 0.5, damping: 0.8 },
-  homeSettle: { response: 0.45, damping: 0.85 },
-  folderOpen: { response: 0.42, damping: 0.86 },
-  folderClose: { response: 0.5, damping: 0.8 },
-  sheet: { response: 0.38, damping: 1 },
+  open: { response: 0.26, damping: 0.92 },
+  close: { response: 0.28, damping: 0.9 },
+  homeSettle: { response: 0.28, damping: 0.9 },
+  folderOpen: { response: 0.26, damping: 0.92 },
+  folderClose: { response: 0.28, damping: 0.9 },
+  sheet: { response: 0.32, damping: 1 },
   reveal: { response: 0.38, damping: 0.9 },
-  banner: { response: 0.45, damping: 0.78 },
+  banner: { response: 0.38, damping: 0.78 },
   quickMenu: { response: 0.35, damping: 0.75 },
   press: { response: 0.18, damping: 1 },
   switchThumb: { response: 0.25, damping: 0.9 },
@@ -37,7 +37,7 @@ export const IOS_SPRINGS = {
   arrival: { response: 0.5, damping: 0.9 },
   unlock: { response: 0.45, damping: 0.9 },
   bubble: { response: 0.35, damping: 0.8 },
-  controlModules: { response: 0.38, damping: 0.85 },
+  controlModules: { response: 0.32, damping: 0.85 },
 } as const satisfies Record<string, SpringConfig>;
 
 export const IOS_EASE = {
@@ -47,16 +47,16 @@ export const IOS_EASE = {
 } as const;
 
 export const IOS_TIMING = {
-  navMs: 350,
+  navMs: 300,
   navParallax: -0.3,
   navDim: 0.1,
   pressInMs: 80,
   pressOutMs: 200,
-  bannerOutMs: 250,
+  bannerOutMs: 200,
   statusCrossfadeMs: 200,
   arrivalStaggerMs: 12,
   arrivalFrom: 1.15,
-  safariBarMs: 250,
+  safariBarMs: 200,
   scaleDipMs: 180,
   exitCloseMs: 200,
   exitIconsMs: 300,
@@ -270,6 +270,9 @@ export interface SurfaceMotionOptions {
  * rect: a reversal (back to where the last flight started) reuses the same spring so velocity is exact; any other
  * retarget starts from the current rect with the current progress velocity (`IOS-MOTION-03`).
  */
+/** Openness at which the app body starts painting (the launch layer has faded by 0.5). */
+const REVEAL_AT = 0.72;
+
 export function surfaceMotion(element: HTMLElement, options: SurfaceMotionOptions): SurfaceMotion {
   const now = options.now ?? (() => performance.now());
   let from: Visual = fullVisual();
@@ -282,6 +285,16 @@ export function surfaceMotion(element: HTMLElement, options: SurfaceMotionOption
   let fade: Animation | null = null;
   /** The width the current flight rests at (an icon, a widget, a banner): 0 openness is there, not at icon size. */
   let restWidth = 0;
+
+  /** The app body, found once: it stays unpainted while the surface is small (see `REVEAL_AT`). */
+  let body: HTMLElement | null = null;
+  let revealed: boolean | null = null;
+  const reveal = (show: boolean) => {
+    if (revealed === show) return;
+    revealed = show;
+    body ??= element.querySelector?.<HTMLElement>('[data-app-content]') ?? null;
+    if (body) body.style.visibility = show ? '' : 'hidden';
+  };
 
   const draw = (visual: Visual) => {
     shown = visual;
@@ -302,10 +315,15 @@ export function surfaceMotion(element: HTMLElement, options: SurfaceMotionOption
       element.style.clipPath = frame.clipPath;
     }
     element.style.opacity = visual.o >= 0.999 ? '' : String(visual.o);
-    const open =
+    const openNow =
       restWidth > 0 && restWidth < page.w
         ? Math.min(1, Math.max(0, (visual.w - restWidth) / (page.w - restWidth)))
         : openness(visual, page);
+    const open = openNow;
+    // Painting a full page of live app content through a clip that moves every frame costs ~33 ms a frame; behind the
+    // launch layer there is nothing to see anyway, so during a spring flight the body paints only near the landing.
+    // A parked card (the App Switcher) and a finger-driven surface are not flights: they keep the real app on screen.
+    reveal(progress === null || open >= REVEAL_AT);
     const launch = options.launch?.();
     if (launch) launch.style.opacity = String(launchOpacity(open));
     setOpenness(options.id, visual.o < 0.01 ? 0 : open);
@@ -344,7 +362,8 @@ export function surfaceMotion(element: HTMLElement, options: SurfaceMotionOption
     if (!progress) return;
     const t = now();
     const { value } = progress.sample(t);
-    if (progress.atRest(t, 0.0015)) {
+    // Sub-pixel is at rest: chasing the last thousandth only adds an invisible tail.
+    if (progress.atRest(t, 0.004)) {
       progress = null;
       stopTicker();
       draw(to);
@@ -455,6 +474,7 @@ export function surfaceMotion(element: HTMLElement, options: SurfaceMotionOption
     current: () => shown,
     moving: () => progress !== null || fade !== null,
     dispose() {
+      reveal(true);
       stopFade();
       progress = null;
       stopTicker();

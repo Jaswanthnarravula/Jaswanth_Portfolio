@@ -89,6 +89,7 @@ import {
   registerHome,
   visualOf,
   wallpaperParallax,
+  type MotionEnd,
   type Visual,
 } from './motion';
 import { IosShellProvider, type BannerSpec, type IosServices, type PreviewSpec } from './shell-context';
@@ -259,12 +260,17 @@ export default function IosShell({ heading }: OsShellProps) {
 
   // --- Surfaces, launches and origins ------------------------------------------------------------------------------------
   const handles = useRef(new Map<IosRole, SurfaceHandle>());
+  const [registeredSurfaces, surfaceRegistered] = useReducer((revision: number) => revision + 1, 0);
   const dismissSwitcher = useRef<() => void>(() => undefined);
   /** Cards drive their live surfaces only while the switcher is up (a closing switcher never retargets a flight). */
   const switcherLive = useRef(false);
   const register = useCallback((role: IosRole, handle: SurfaceHandle | null) => {
-    if (handle) handles.current.set(role, handle);
-    else handles.current.delete(role);
+    if (handle) {
+      handles.current.set(role, handle);
+      // A newly mounted surface can register after the shell's layout effect. Wake the launch orchestrator so an
+      // immediate icon click cannot update the route while leaving its not-yet-registered surface at `opening`.
+      surfaceRegistered();
+    } else handles.current.delete(role);
   }, []);
   const [launch, setLaunch] = useState<Launch | null>(null);
   const launchSeq = useRef(0);
@@ -287,6 +293,17 @@ export default function IosShell({ heading }: OsShellProps) {
     [],
   );
   const [flyingItem, setFlyingItem] = useState<string | null>(null);
+
+  const settleOpen = useCallback(
+    (role: IosRole, end: MotionEnd) => {
+      if (end !== 'rest' || foregroundRef.current !== role) return;
+      setPhase(role, 'foreground');
+      const id = `ios:${role}` as WindowId;
+      if (getKernel().sessions.ios.windows[id]?.phase.s === 'opening')
+        dispatch({ type: 'PHASE_DONE', target: { kind: 'window', id } });
+    },
+    [setPhase],
+  );
 
   const mountedRoles = useMemo(() => {
     const ids = mountedApps(zOrder, focused);
@@ -376,7 +393,9 @@ export default function IosShell({ heading }: OsShellProps) {
         return;
       }
       const phase = phases[role];
-      if (phase !== 'closing' && phase !== 'opening' && phase !== 'switcher') {
+      // Development Strict Mode deliberately disposes and recreates a newly mounted surface. If that interrupts the
+      // first flight, the replacement handle is at rest and must be seeded from the same origin before it is retried.
+      if (!handle.motion.moving() || (phase !== 'closing' && phase !== 'opening' && phase !== 'switcher')) {
         const from =
           origin ??
           (() => {
@@ -386,14 +405,9 @@ export default function IosShell({ heading }: OsShellProps) {
         handle.motion.set(from);
       }
       setPhase(role, 'opening');
-      void handle.motion.toward(fullVisual(), IOS_SPRINGS.open).then((end) => {
-        if (end !== 'rest' || foregroundRef.current !== role) return;
-        setPhase(role, 'foreground');
-        if (getKernel().sessions.ios.windows[id]?.phase.s === 'opening')
-          dispatch({ type: 'PHASE_DONE', target: { kind: 'window', id } });
-      });
+      void handle.motion.toward(fullVisual(), IOS_SPRINGS.open).then((end) => settleOpen(role, end));
     },
-    [phases, setPhase, targetElement],
+    [phases, setPhase, settleOpen, targetElement],
   );
 
   const closeSurface = useCallback(
@@ -426,27 +440,42 @@ export default function IosShell({ heading }: OsShellProps) {
   // returns into its icon and the new one grows out of its origin — both at once, velocities kept (plans/ios/06 E2).
   const previousForeground = useRef<IosRole | null>(kernelRole);
   const handledLaunch = useRef(0);
+  /** The origin a launch flies from, held until a flight consumes it: the kernel's effect can clear `launch` before a
+   *  cold surface has registered its motion handle, and the rect would fall back to the app's icon. */
+  const pendingLaunch = useRef<Launch | null>(null);
   const firstRun = useRef(true);
   useLayoutEffect(() => {
     const previous = previousForeground.current;
-    const seq = launch?.seq ?? handledLaunch.current;
+    const pending = launch ?? (pendingLaunch.current?.role === foreground ? pendingLaunch.current : null);
+    const seq = pending?.seq ?? handledLaunch.current;
     const cold = firstRun.current;
     firstRun.current = false;
+    // AppSurface registers its motion handle in a layout effect. Depending on mount order, this shell effect can run
+    // first; wait for the registration revision instead of recording a launch that no motion instance received.
+    if (foreground && !handles.current.has(foreground)) return;
     if (cold && foreground) {
       // A cold deep link / restore: the app is simply there — no flight on first paint (E12).
       openSurface(foreground, null, true);
       previousForeground.current = foreground;
       return;
     }
-    if (previous === foreground && seq === handledLaunch.current) return;
+    if (previous === foreground && seq === handledLaunch.current) {
+      const handle = foreground ? handles.current.get(foreground) : null;
+      // The same launch is already handled only while its current motion instance is moving or has landed. A freshly
+      // registered replacement handle (Strict Mode remount) needs the flight replayed from the captured origin.
+      if (!foreground || phases[foreground] !== 'opening' || handle?.motion.moving()) return;
+    }
     previousForeground.current = foreground;
     handledLaunch.current = seq;
     if (overlayKind === 'switcher') return; // the switcher runs its own flights
     // Measure-then-commit: the flights read the DOM (icon rects, the pager) and record their phase before paint.
     if (previous && previous !== foreground) void closeSurface(previous);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (foreground) openSurface(foreground, launch?.role === foreground ? launch.origin : null, false);
-  }, [foreground, launch, openSurface, closeSurface, overlayKind]);
+    if (foreground) {
+      const origin = pending?.role === foreground ? pending.origin : null;
+      if (pendingLaunch.current === pending) pendingLaunch.current = null;
+      openSurface(foreground, origin, false);
+    }
+  }, [foreground, launch, openSurface, closeSurface, overlayKind, phases, registeredSurfaces]);
 
   // Rotation / resize mid-flight: flights retarget to re-measured rects (plans/ios/06 E4).
   useEffect(() => {
@@ -454,11 +483,12 @@ export default function IosShell({ heading }: OsShellProps) {
       const handle = handles.current.get(role);
       if (!handle) continue;
       if (phase === 'foreground') handle.motion.set(fullVisual());
-      else if (phase === 'opening') void handle.motion.toward(fullVisual(), IOS_SPRINGS.open);
+      else if (phase === 'opening')
+        void handle.motion.toward(fullVisual(), IOS_SPRINGS.open).then((end) => settleOpen(role, end));
     }
     // Viewport changes only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewport.w, viewport.h]);
+  }, [viewport.w, viewport.h, settleOpen]);
 
   // --- Home follower, parallax, keyboard-aware viewport ------------------------------------------------------------------
   useLayoutEffect(
@@ -556,15 +586,18 @@ export default function IosShell({ heading }: OsShellProps) {
       closeTransients();
       if (role === foregroundRef.current && !launch) {
         // Already in front: it navigates in place (one history entry for a new place).
-        dispatchSoon({ type: 'OPEN_APP', os: 'ios', role, location, originId: origin.element?.id ?? null });
+        dispatch({ type: 'OPEN_APP', os: 'ios', role, location, originId: origin.element?.id ?? null });
         return;
       }
       if (origin.key) setOrigins((all) => ({ ...all, [role]: origin.key! }));
       const seq = ++launchSeq.current;
+      pendingLaunch.current = { role, origin: visual, seq };
       setLaunch({ role, origin: visual, seq });
       // A launch the kernel never takes (an OS switch meanwhile) is dropped.
       setTimeout(() => setLaunch((current) => (current?.seq === seq ? null : current)), 1500);
-      dispatchSoon({ type: 'OPEN_APP', os: 'ios', role, location, originId: origin.element?.id ?? null });
+      // Commit the foreground app and route together in this click task. The flight remains compositor-driven, but
+      // the UI can no longer get stranded at a changed URL while a deferred OPEN_APP waits for another paint.
+      dispatch({ type: 'OPEN_APP', os: 'ios', role, location, originId: origin.element?.id ?? null });
     },
     [closeTransients, launch],
   );
@@ -1078,6 +1111,11 @@ export default function IosShell({ heading }: OsShellProps) {
     }
     if (!foregroundRef.current) return false;
     const surface = handles.current.get(foregroundRef.current)?.element;
+    const modal = surface?.querySelector<HTMLElement>('[aria-modal="true"] [data-modal-dismiss]');
+    if (modal) {
+      modal.click();
+      return true;
+    }
     const backButton = surface?.querySelector<HTMLElement>('[data-screen]:not([hidden]):not([inert]) [data-back]');
     if (backButton) {
       backButton.click();
@@ -1300,9 +1338,7 @@ export default function IosShell({ heading }: OsShellProps) {
     const handle = handles.current.get(role);
     if (handle && role === kernelRole) {
       setPhase(role, 'opening');
-      void handle.motion.toward(fullVisual(), IOS_SPRINGS.open).then((end) => {
-        if (end === 'rest') setPhase(role, 'foreground');
-      });
+      void handle.motion.toward(fullVisual(), IOS_SPRINGS.open).then((end) => settleOpen(role, end));
       handle.element.querySelector<HTMLElement>('h2')?.focus({ preventScroll: true });
       return;
     }
@@ -1315,11 +1351,9 @@ export default function IosShell({ heading }: OsShellProps) {
       setLaunch({ role, origin: null, seq: ++launchSeq.current });
       previousForeground.current = role;
       handledLaunch.current = launchSeq.current;
-      void handle.motion.toward(fullVisual(), IOS_SPRINGS.open).then((end) => {
-        if (end === 'rest' && foregroundRef.current === role) setPhase(role, 'foreground');
-      });
+      void handle.motion.toward(fullVisual(), IOS_SPRINGS.open).then((end) => settleOpen(role, end));
       handle.element.querySelector<HTMLElement>('h2')?.focus({ preventScroll: true });
-      dispatchSoon({ type: 'OPEN_APP', os: 'ios', role, originId: null });
+      dispatch({ type: 'OPEN_APP', os: 'ios', role, originId: null });
     } else launchApp(role, undefined, { element: slot });
   };
   const switcherClose = (role: IosRole) => {

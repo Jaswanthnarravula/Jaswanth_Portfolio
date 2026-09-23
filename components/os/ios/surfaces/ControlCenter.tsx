@@ -229,7 +229,8 @@ export function ControlCenter(props: ControlCenterProps) {
               aria-controls="ios-cc-sound-more"
               onClick={() => setExpanded((value) => !value)}
             >
-              More<span className="sr-only"> sound controls</span>
+              <Glyph name="chevron-down" size={14} strokeWidth={2.4} />
+              <span className="sr-only">More sound controls</span>
             </button>
             {expanded ? (
               <div id="ios-cc-sound-more" className={styles.ccExpanded}>

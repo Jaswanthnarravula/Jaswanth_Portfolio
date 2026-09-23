@@ -1,9 +1,9 @@
 'use client';
 /**
  * OS chooser — plans/04-os-chooser.md. Lives in the persistent shell layer (lazy chunk), so Back from any OS lands on
- * it without re-rendering the page. The foyer is the owner's storyboard frame (`plans/visual-targets/chooser.png`):
- * a light field, the heading, and five glass cards — each a viewport-shaped snapshot of that OS's full-page home (no
- * device outline), its name and one line of character.
+ * it without re-rendering the page. The foyer follows the approved tall-card selector reference: an inset light field,
+ * the heading, and five glass cards — each with a detailed snapshot of that OS's full-page home (no device outline),
+ * its name and one line of character.
  *   - Cards are real links to `/{os}` (`CHOOSE-CARD-01`); only released OSes appear (`CHOOSE-REL-01`).
  *   - One "Suits your device" badge from size class + input only — never the profile (`CHOOSE-BADGE-01`).
  *   - Hover/focus prefetches that OS's chunk; idle prefetches the last or badged OS (`CHOOSE-PREF-01`).
@@ -36,9 +36,21 @@ import { IosBoot } from '@/components/os/ios/surfaces/Boot';
 import styles from './chooser.module.css';
 
 type Orientation = 'landscape' | 'portrait';
-const SNAPSHOTS = snapshots as Partial<
-  Record<OsId, Record<Orientation, { avif: string; webp: string; width: number; height: number }>>
->;
+type Snapshot = { avif?: string; webp: string; width: number; height: number };
+const SNAPSHOTS = snapshots as Partial<Record<OsId, Record<Orientation, Snapshot>>>;
+
+/**
+ * The desktop foyer uses the tall, detailed miniatures from the approved selector reference. The source files keep a
+ * landscape canvas around the visible crop so the shared-element transition and orientation contract remain intact;
+ * `object-fit: cover` exposes the exact centre artwork in the tall card window.
+ */
+const REFERENCE_SNAPSHOTS: Readonly<Record<OsId, Snapshot>> = {
+  ios: { webp: '/assets/chooser/ios-hd.webp', width: 2032, height: 1272 },
+  macos: { webp: '/assets/chooser/macos-hd.webp', width: 2044, height: 1272 },
+  windows: { webp: '/assets/chooser/windows-hd.webp', width: 2036, height: 1272 },
+  android: { webp: '/assets/chooser/android-hd.webp', width: 2032, height: 1272 },
+  linux: { webp: '/assets/chooser/linux-hd.webp', width: 2044, height: 1272 },
+};
 
 /** A per-device number, stable across visits, used only to alternate the phone badge fairly (never the UA). */
 const deviceSeed = () =>
@@ -262,7 +274,7 @@ export default function Chooser({ oses = VISIBLE_OSES }: { oses?: readonly OsId[
             <nav aria-label="Operating systems" className={styles.nav}>
               <ul className={styles.cards} data-count={oses.length}>
                 {oses.map((os) => {
-                  const shot = SNAPSHOTS[os]?.[orientation];
+                  const shot = orientation === 'landscape' ? REFERENCE_SNAPSHOTS[os] : SNAPSHOTS[os]?.[orientation];
                   const suits = badge === os;
                   const failed = view.failed === os;
                   const released = enterable(os);
@@ -289,7 +301,7 @@ export default function Chooser({ oses = VISIBLE_OSES }: { oses?: readonly OsId[
                           {shot ? (
                             // AVIF, or WebP where AVIF cannot decode (older Safari); decorative either way.
                             <picture>
-                              <source type="image/avif" srcSet={shot.avif} />
+                              {shot.avif ? <source type="image/avif" srcSet={shot.avif} /> : null}
                               <img src={shot.webp} alt="" width={shot.width} height={shot.height} decoding="async" />
                             </picture>
                           ) : null}

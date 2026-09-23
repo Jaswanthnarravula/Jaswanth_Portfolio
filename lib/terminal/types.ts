@@ -57,6 +57,8 @@ export type Effect =
   /** `title` / `variant` are additions: the pager names what it shows; `vim` is the egg's fake buffer. */
   | { readonly k: 'pager'; readonly lines: readonly Line[]; readonly title?: string; readonly variant?: 'vim' }
   | { readonly k: 'tour' }
+  /** Navigate to the reader-mode portfolio. Kept explicit so commands stay pure. */
+  | { readonly k: 'plain' }
   | { readonly k: 'egg'; readonly id: string }
   /** addition: `resume --download`. */
   | { readonly k: 'download' }

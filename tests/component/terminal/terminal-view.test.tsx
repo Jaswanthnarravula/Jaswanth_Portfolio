@@ -8,7 +8,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { createRef } from 'react';
+import { createRef, Profiler } from 'react';
 import { TerminalView, type TerminalViewHandle } from '@/components/os/shared/terminal/TerminalView';
 import { createTerminal, type Terminal } from '@/lib/terminal';
 import { terminalDataFrom } from '@/lib/terminal/data';
@@ -67,6 +67,25 @@ describe('MAC-TERM-06 terminal accessibility contract', () => {
     await waitFor(() => expect(container.textContent).toContain('/home/jaswanth'));
   });
 
+  it('LNX-BOOT-06 exposes a calm retry and plain-reader recovery when the engine fails', async () => {
+    let attempts = 0;
+    const flaky = vi.fn(() => (attempts++ === 0 ? Promise.reject(new Error('offline')) : engine()));
+    const { container } = setup({
+      os: 'linux',
+      flavor: 'bash',
+      loadEngine: flaky,
+      loadingLabel: '[ .... ] Starting command interpreter…',
+      recoveryHref: '/plain',
+    });
+    expect(screen.getByRole('status')).toHaveTextContent('Starting command interpreter');
+    await screen.findByText('[FAILED] Command interpreter unavailable.');
+    expect(screen.getByRole('link', { name: 'Read plain portfolio' })).toHaveAttribute('href', '/plain');
+    await userEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    await ready(container);
+    expect(flaky).toHaveBeenCalledTimes(2);
+    expect(container.querySelector('[data-terminal]')).toHaveAttribute('data-load-state', 'ready');
+  });
+
   it('the announcer receives the final output text synchronously (not the echo); long output is summarised', async () => {
     const { input, log, container } = setup();
     await ready(container);
@@ -76,6 +95,18 @@ describe('MAC-TERM-06 terminal accessibility contract', () => {
     expect(log.textContent).toBe('Error: cat: nope: No such file or directory');
     await userEvent.type(input, 'help{Enter}');
     expect(log.textContent).toMatch(/^help: \d+ lines\. Explore$/);
+  });
+
+  it('LNX-OUT-03 input finishes an active reveal and the solid-typing state never blocks characters', async () => {
+    const { input, container } = setup();
+    await ready(container);
+    await userEvent.type(input, 'help{Enter}');
+    const output = [...container.querySelectorAll<HTMLElement>('[data-scrollback] [data-line]')];
+    fireEvent.keyDown(input, { key: 'x' });
+    fireEvent.change(input, { target: { value: 'x' } });
+    expect(input).toHaveValue('x');
+    expect(container.querySelector('[data-terminal]')).toHaveAttribute('data-typing', 'true');
+    expect(output.every((line) => line.style.opacity === '' && line.style.transform === '')).toBe(true);
   });
 
   it('Tab passes through on an empty prompt; completes a token; Esc then Tab always leaves', async () => {
@@ -178,6 +209,27 @@ describe('LNX-SH-06 history at the prompt', () => {
 });
 
 describe('effects, inserts and persistence', () => {
+  it('LNX-OUT-05 output length does not multiply React commits', async () => {
+    const commits: string[] = [];
+    const view = render(
+      <Profiler id="terminal" onRender={(_, phase) => commits.push(phase)}>
+        <TerminalView flavor="bash" os="linux" session={null} onEffect={vi.fn()} loadEngine={engine} />
+      </Profiler>,
+    );
+    await ready(view.container);
+    const input = screen.getByRole<HTMLInputElement>('textbox', { name: /^Command/ });
+    fireEvent.change(input, { target: { value: 'help' } });
+    commits.length = 0;
+    fireEvent.submit(input.closest('form')!);
+    const longCommits = commits.length;
+    expect(view.container.querySelectorAll('[data-scrollback] [data-line]').length).toBeGreaterThan(10);
+    fireEvent.change(input, { target: { value: 'whoami' } });
+    commits.length = 0;
+    fireEvent.submit(input.closest('form')!);
+    expect(longCommits).toBeLessThanOrEqual(commits.length + 1);
+    expect(longCommits).toBeLessThan(4);
+  });
+
   it('effects reach the host (open resume, cd); persistence records echo + output', async () => {
     const { input, container, onEffect, onRecord } = setup();
     await ready(container);

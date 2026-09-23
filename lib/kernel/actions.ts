@@ -92,6 +92,7 @@ export type KernelAction =
   | { readonly type: 'SELECT_PERSONA'; readonly id: PersonaId }
   | { readonly type: 'SET_PREF'; readonly patch: Partial<Omit<UserPreferences, 'v'>> }
   | { readonly type: 'TERMINAL_SET_CWD'; readonly os: OsId; readonly cwd: readonly string[] }
+  | { readonly type: 'TERMINAL_SET_DRAFT'; readonly os: OsId; readonly draft: string }
   | {
       readonly type: 'TERMINAL_RECORD';
       readonly os: OsId;

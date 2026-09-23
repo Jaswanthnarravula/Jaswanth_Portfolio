@@ -3,12 +3,12 @@
 Single place to see where the project stands. Update this file in the same change that updates a ledger.
 Source of truth for each row is the ledger named in the first column.
 
-**Current phase:** P5 iOS built and verified on automated evidence — 140 of 140 P5 rows verified; paused for the
-owner's P5 gate review (details below).
+**Current phase:** P7 Linux implementation and automated acceptance gate complete: all 89 P7 rows are verified.
+The release-wide P8 manual/polish gate remains open (details below).
 **Previous:** P3 macOS (+ terminal engine core) built — 162 verified · 39 built · 1 BLOCKED; paused for the owner's
 P3 gate review (details below). P0 and P2 gates passed on automated evidence; owner reviews pending. P4 Windows 11 built
 (120 of 152 P4 rows verified; details below), paused for the owner's P4 review.
-**Last updated:** 2026-09-22
+**Last updated:** 2026-09-23
 
 ## Feature IDs by ledger and phase
 
@@ -33,10 +33,10 @@ P3 gate review (details below). P0 and P2 gates passed on automated evidence; ow
 | P3 macOS (+ engine core) | 202 | 0 | 39 | 162 | 1 | ☐ (awaiting review) | pending review |
 | P4 Windows 11 | 152 | 2 | 30 | 120 | 0 | ☐ (automated evidence recorded; see below) | pending review |
 | P5 iOS | 140 | 0 | 0 | 140 | 0 | ☐ (automated evidence recorded; see below) | pending review |
-| P6 Android | 132 | 132 | 0 | 0 | 0 | ☐ | |
-| P7 Linux | 89 | 89 | 0 | 0 | 0 | ☐ | |
+| P6 Android | 132 | 0 | 81 | 51 | 0 | ☐ (focused automated evidence recorded; see below) | pending review |
+| P7 Linux | 89 | 0 | 0 | 89 | 0 | ☑ 2026-09-23 (automated evidence) | pending review |
 | P8 Polish | 11 | 11 | 0 | 0 | 0 | ☐ | |
-| **Total** | **930** | **277** | **78** | **574** | **1** | | |
+| **Total** | **930** | **56** | **159** | **714** | **1** | | |
 
 ### P0 gate evidence (2026-09-21, local runs on production builds)
 | Gate item (`05-roadmap.md`) | Result |
@@ -163,9 +163,45 @@ iOS ledger: 137 verified · 1 P8 row planned (`IOS-A11Y-06`, the recorded screen
 | Vitest | iOS evidence set (`tests/unit/ios`, `tests/component/ios`, `tests/unit/kernel/ios.test.ts`) 212/212; full run 1605 passed, 3 failed — the 2 ARCH-REL-01 rows (every OS `released: true` since commit cfd53de, unchanged by P5) and `MAC-WM-10`, which is order-flaky in `tests/component/macos/shell.test.tsx` with and without P5's shared changes (verified by stashing them) |
 | Playwright iOS (`ios`, `ios-surfaces`, `ios-journeys`) + chooser | Final run on both rebuilt preview builds across chromium-desktop, iphone, pixel, reduced-motion, asset-original, firefox-desktop, ipad-portrait, ipad-landscape, webkit-desktop, iphone-landscape and forced-colors: **645 passed, 0 failed** (202 skipped by design — landscape-, pad-, motion- or build-specific). The suite found 16 product defects, all fixed and re-verified (listed in `IMPLEMENTATION.md`) |
 | Playwright perf (`perf`) | `IOS-ID-03`, `IOS-WIDG-04`, `IOS-MOTION-04` green: nothing animates at rest, no timers beyond the status-bar minute tick, and no Layout > 1 ms inside a tagged flight apart from the app body's own mount at 90 % (marked `pf-app-mount:*`) |
+| Speed (preview build, measured in-page from the pointer event) | After the owner's "premium smooth and fast" review: app open 16 ms to the first frame and 307 ms to land, Home 24 ms / 314 ms, at 60 fps (before: 50 ms / 464 ms and 52 ms / ~600 ms at ~30 fps; a macOS window lands in ~300 ms on the same machine) |
 | Budgets (JS fetched by the load event, encoded) | /ios 163.3 KB, /ios/github 139.8 KB, measured the same way /macos reads 163.3 KB — awaits the `PERF-BUDGET-01` re-base |
 | Both asset modes | official (:3510) and `ASSET_MODE=original` (:3511) built and served; `IOS-ID-02` compares every icon box across the two builds |
 | Not run | Lighthouse, real devices (iPhone / iPad with the keyboard up), screen readers (P8), visual baselines — `IOS-ID-06` attaches light and dark screenshots but sets no pixel baseline |
+
+### P6 evidence (2026-09-22, local focused run and isolated production build `.next-mobile-final`)
+
+The Android portfolio is implemented as a full-page Material-style launcher and taskbar, a lock screen, app drawer,
+combined notification/quick-settings shade, Recents, shortcuts, heads-up/snackbar surfaces, two navigation modes and
+six dynamically loaded apps (Chrome, Files, GitHub, Gmail, Keep and Settings). The focused evidence verifies 51 rows;
+the remaining 81 are marked `built` until their named cross-browser/nightly/manual cases are recorded.
+
+| Check | Result |
+|---|---|
+| Typecheck · lint · format | TypeScript clean; full ESLint has 0 errors (one unrelated existing chooser warning); Android files pass Prettier |
+| Vitest | `tests/unit/android/model.test.ts` 16/16; `tests/component/android/shell.test.tsx` 5/5 |
+| Playwright Android | `tests/e2e/android.spec.ts`: Chromium desktop **8 passed, 0 failed**; Pixel phone checks green — full-page launcher, drawer/Back, lifecycle/Recents, shade/prefs, all six app routes, Gmail attachment → Files, phone posture, gesture target sizes and axe |
+| Mobile launch regression | `tests/e2e/mobile-launch.spec.ts`: **18/18** across Chromium desktop, Pixel and reduced motion (3 repetitions each); Android and iOS app clicks update route + foreground surface atomically with no document reload |
+| Accessibility | axe reports zero serious or critical violations on Android Home; keyboard Back restores focus to the launcher search control |
+| Visual target | Manual render comparison at 1440 × 900 for Home and Gmail, plus 390 × 844 Home; full page with no device frame, sage tonal palette, wide Gmail rail/list/detail |
+| Static production build | `.next-mobile-final`: 150/150 static pages generated successfully |
+| Plan audit | 148 documents · 930 IDs · 930 ledger rows; P6 is 51 verified / 81 built / 0 planned |
+| Not yet recorded | Asset-original, Firefox/WebKit/iPad/landscape/forced-colours matrices, Lighthouse/perf/leak, real Android keyboard, TalkBack/NVDA and pixel baselines |
+
+### P7 evidence (2026-09-23, local production build and focused Linux matrix)
+
+The Linux portfolio is implemented as a responsive terminal workspace over the shared shell/VFS: authentic prompt and
+status bar, boot/login/MOTD, hints and tour, complete P7 command registry, split/overlay/pager rich views, continuity,
+touch accessory keys, visual-viewport handling, focus restoration, reduced-motion and forced-colours support.
+
+| Check | Result |
+|---|---|
+| Typecheck · focused lint | Clean |
+| Vitest | Linux/terminal/kernel evidence set: **313/313** across 15 files, including output lifecycle, focus return, persistence, 10,000-command fuzzing and axe audits |
+| Playwright Linux | Chromium desktop, iPhone, Pixel and reduced motion: **36 passed, 12 intentional posture skips**; Firefox + iPad portrait + iPad landscape smoke: **4 passed, 2 touch-only skips**; forced colours: **10 passed, 2 touch/viewport skips** |
+| Static production build | 150/150 static pages; build audit found no dynamic routes and no token in 110 client assets |
+| Plan audit | 148 documents · 930 IDs · 930 ledger rows; P7 is **89 verified / 0 built / 0 planned** |
+| Product defects found by the matrix | Fixed cwd-independent project opening, routed focus restoration, light/dark viewer contrast, forced-colours tokens, split rewrap timing, tour cancellation, and OS-switch draft restoration |
+| P8 release-only work | Visual/Lighthouse/perf release audits; real-device keyboard checks; recorded NVDA/VoiceOver script; uninstructed reviewer sessions |
 
 ## Released operating systems (`OS_REGISTRY[os].released`)
 

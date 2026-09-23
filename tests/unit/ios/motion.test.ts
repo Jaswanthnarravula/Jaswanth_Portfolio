@@ -23,11 +23,11 @@ import { SPRINGS } from '@/lib/motion/spring';
 
 describe('IOS-MOTION-01 iOS motion tokens match plans/ios/03-motion.md', () => {
   it('springs (response, damping)', () => {
-    expect(IOS_SPRINGS.open).toEqual({ response: 0.42, damping: 0.86 });
-    expect(IOS_SPRINGS.close).toEqual({ response: 0.5, damping: 0.8 });
-    expect(IOS_SPRINGS.homeSettle).toEqual({ response: 0.45, damping: 0.85 });
-    expect(IOS_SPRINGS.sheet).toEqual({ response: 0.38, damping: 1 });
-    expect(IOS_SPRINGS.banner).toEqual({ response: 0.45, damping: 0.78 });
+    expect(IOS_SPRINGS.open).toEqual({ response: 0.26, damping: 0.92 });
+    expect(IOS_SPRINGS.close).toEqual({ response: 0.28, damping: 0.9 });
+    expect(IOS_SPRINGS.homeSettle).toEqual({ response: 0.28, damping: 0.9 });
+    expect(IOS_SPRINGS.sheet).toEqual({ response: 0.32, damping: 1 });
+    expect(IOS_SPRINGS.banner).toEqual({ response: 0.38, damping: 0.78 });
     expect(IOS_SPRINGS.quickMenu).toEqual({ response: 0.35, damping: 0.75 });
     expect(IOS_SPRINGS.press).toEqual({ response: 0.18, damping: 1 });
     expect(IOS_SPRINGS.switchThumb).toEqual({ response: 0.25, damping: 0.9 });
@@ -40,16 +40,16 @@ describe('IOS-MOTION-01 iOS motion tokens match plans/ios/03-motion.md', () => {
   it('curves and durations', () => {
     expect(IOS_EASE.nav).toBe('cubic-bezier(0.32, 0.72, 0, 1)');
     expect(IOS_TIMING).toMatchObject({
-      navMs: 350,
+      navMs: 300,
       navParallax: -0.3,
       navDim: 0.1,
       pressInMs: 80,
       pressOutMs: 200,
-      bannerOutMs: 250,
+      bannerOutMs: 200,
       statusCrossfadeMs: 200,
       arrivalStaggerMs: 12,
       arrivalFrom: 1.15,
-      safariBarMs: 250,
+      safariBarMs: 200,
       scaleDipMs: 180,
       homeScale: 0.92,
       wallpaperRest: 1.06,

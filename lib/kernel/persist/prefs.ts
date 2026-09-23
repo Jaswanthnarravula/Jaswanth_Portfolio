@@ -57,6 +57,9 @@ export function parsePrefs(value: Json, now = Date.now()): UserPreferences {
     notifications: bool(input.notifications, DEFAULT_PREFS.notifications),
     wallpaper: oneOf(input.wallpaper, ['auto', 'light', 'dark'], DEFAULT_PREFS.wallpaper),
     dock: parseDock(input.dock),
+    androidPalette: oneOf(input.androidPalette, ['sage', 'blue', 'violet', 'coral'], DEFAULT_PREFS.androidPalette),
+    androidThemedIcons: bool(input.androidThemedIcons, DEFAULT_PREFS.androidThemedIcons),
+    androidNavigation: oneOf(input.androidNavigation, ['auto', 'gesture', 'buttons'], DEFAULT_PREFS.androidNavigation),
   };
 }
 

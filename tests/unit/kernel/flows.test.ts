@@ -253,6 +253,14 @@ describe('terminal sessions and continuity capture', () => {
     expect(state.sessions.linux.terminal?.scrollback).toEqual([]);
     expect(reduce(state, { type: 'TERMINAL_CLEAR', os: 'linux' }, deps).state).toBe(state);
   });
+  it('terminal drafts survive session parking and are capped', () => {
+    const state = booted('/linux');
+    const drafted = reduce(state, { type: 'TERMINAL_SET_DRAFT', os: 'linux', draft: 'x'.repeat(1200) }, deps).state;
+    expect(drafted.sessions.linux.terminal?.draft).toHaveLength(1000);
+    expect(reduce(drafted, { type: 'TERMINAL_SET_DRAFT', os: 'linux', draft: 'x'.repeat(1000) }, deps).state).toBe(
+      drafted,
+    );
+  });
   it('explicit capture validates the ref; boot/lock marks are idempotent', () => {
     const state = booted('/macos');
     expect(

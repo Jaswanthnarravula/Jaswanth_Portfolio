@@ -223,6 +223,10 @@ describe('LNX-CMD-* golden output (80 / 40 columns)', () => {
     expect(sh('open projects/rocket.md').effects).toEqual([
       { k: 'open', ref: { section: 'projects', slug: 'rocket' } },
     ]);
+    expect(sh('open projects/rocket').effects).toEqual([{ k: 'open', ref: { section: 'projects', slug: 'rocket' } }]);
+    expect(sh(['cd projects', 'open projects/rocket']).effects).toEqual([
+      { k: 'open', ref: { section: 'projects', slug: 'rocket' } },
+    ]);
     expect(sh('open experience/acme.md').effects).toEqual([
       { k: 'open', ref: { section: 'experience', slug: 'acme' } },
     ]);

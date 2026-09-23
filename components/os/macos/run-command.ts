@@ -266,6 +266,8 @@ export function runTerminalEffect(effect: Effect): void {
     case 'tour':
       hooks?.startTour();
       return;
+    case 'plain':
+      return;
     case 'pref':
       // The engine names a preference and a value; only known keys are applied (never an arbitrary patch).
       applyTerminalPref(effect.key, effect.value);

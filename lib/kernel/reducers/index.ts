@@ -1073,6 +1073,15 @@ function step(draft: Draft, action: KernelAction, deps: KernelDeps): void {
       return;
     }
 
+    case 'TERMINAL_SET_DRAFT': {
+      const session = state.sessions[action.os];
+      const terminal = session.terminal ?? { cwd: ['home', 'jaswanth'], history: [], scrollback: [] };
+      const text = action.draft.slice(0, 1000);
+      if ((terminal.draft ?? '') === text) return;
+      draft.state = setSession(state, { ...session, terminal: { ...terminal, draft: text } });
+      return;
+    }
+
     case 'TERMINAL_RECORD': {
       const session = state.sessions[action.os];
       const terminal = session.terminal ?? { cwd: ['home', 'jaswanth'], history: [], scrollback: [] };

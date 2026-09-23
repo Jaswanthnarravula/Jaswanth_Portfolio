@@ -244,7 +244,10 @@ test('IOS-GH-06 X1 axe clean on GitHub: nav + aria-current, radiogroup segments'
   await expect(nav.locator('[aria-current="page"]').filter({ hasText: /^(Home|Projects|Profile)$/ })).toHaveCount(1);
   await scan('repositories');
 
-  await gh.locator('[data-screen]:not([hidden]) a[data-push-key^="project:"]').first().click();
+  await gh
+    .locator('[data-screen]:not([hidden]) a[data-push-key^="project:"], nav a[data-push-key^="project:"]')
+    .first()
+    .click();
   await expect(page).toHaveURL(/\/ios\/github\/[a-z0-9-]+$/);
   await settle(page);
   const segments = gh.getByRole('radiogroup', { name: 'Project sections' });

@@ -135,6 +135,7 @@ export function parseTerminal(value: Json): TerminalSession | null {
     cwd: strings(value.cwd, 64),
     history: strings(value.history, 200),
     scrollback: strings(value.scrollback, 500),
+    ...(typeof value.draft === 'string' ? { draft: value.draft.slice(0, 1000) } : {}),
   };
 }
 

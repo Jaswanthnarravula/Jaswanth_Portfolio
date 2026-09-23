@@ -18,7 +18,7 @@ import {
   type Cell,
 } from '../format';
 import type { Command, Ctx, Line, Result, Span, VfsNode, VfsPath } from '../types';
-import { absolutePath, isPrivate, stem, USER } from '../vfs';
+import { absolutePath, HOME, isPrivate, stem, USER } from '../vfs';
 import { classOf, fail, inputOf, insertFor, ok, parseArgs, readFile, text, usage } from './args';
 
 const reasonText = (reason: 'ENOENT' | 'ENOTDIR' | 'EACCES') =>
@@ -590,7 +590,34 @@ export const open: Command = (args, ctx) => {
   if (target === undefined) return usage('open', 'missing operand — try: open resume');
   if (target === 'resume' || target === 'resume.pdf' || target === 'cv')
     return ok([dim('Opening resume.pdf…')], [{ k: 'open', ref: 'resume' }]);
-  const resolved = ctx.vfs.resolve(ctx.cwd, target);
+  let resolved = ctx.vfs.resolve(ctx.cwd, target);
+  // Portfolio routes and every insertable project/role/school result use the
+  // human-facing extensionless form. The VFS keeps real filenames, so resolve
+  // that canonical shorthand before reporting ENOENT. LNX-FS-06 guarantees
+  // sibling stems are unique.
+  if (!resolved.ok && !target.split('/').at(-1)?.includes('.')) {
+    for (const extension of ['.md', '.txt', '.pdf']) {
+      const candidate = ctx.vfs.resolve(ctx.cwd, `${target}${extension}`);
+      if (candidate.ok) {
+        resolved = candidate;
+        break;
+      }
+    }
+  }
+  // Search and the guided tour print portfolio-root paths (`projects/x`)
+  // that remain valid from any cwd, like a small shell PATH for content.
+  if (!resolved.ok && /^(projects|experience|education)\//.test(target)) {
+    resolved = ctx.vfs.resolve(HOME, target);
+    if (!resolved.ok && !target.split('/').at(-1)?.includes('.')) {
+      for (const extension of ['.md', '.txt', '.pdf']) {
+        const candidate = ctx.vfs.resolve(HOME, `${target}${extension}`);
+        if (candidate.ok) {
+          resolved = candidate;
+          break;
+        }
+      }
+    }
+  }
   if (!resolved.ok) return fail([err(`open: ${target}: ${reasonText(resolved.reason)}`)]);
   const node = resolved.node;
   if (node.kind === 'dir') {

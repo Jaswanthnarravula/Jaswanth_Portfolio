@@ -168,6 +168,8 @@ export interface TerminalSession {
   readonly history: readonly string[];
   /** Capped at 500 lines. */
   readonly scrollback: readonly string[];
+  /** Unsubmitted prompt text; restored when returning to the terminal. */
+  readonly draft?: string;
 }
 
 export interface OsSession {
@@ -316,9 +318,17 @@ export interface UserPreferences {
   readonly wallpaper: 'auto' | 'light' | 'dark';
   /** addition (plans/macos/apps/system-settings "Desktop & Dock"): Dock magnification and size. */
   readonly dock: { readonly magnification: boolean; readonly size: DockSize };
+  /** Android-only Material You wallpaper seed. */
+  readonly androidPalette: AndroidPalette;
+  /** Android launcher icons may use monochrome, palette-backed tiles. */
+  readonly androidThemedIcons: boolean;
+  /** `auto` follows pointer posture: gestures on touch, three buttons on fine pointers. */
+  readonly androidNavigation: AndroidNavigation;
 }
 
 export type DockSize = 'small' | 'medium' | 'large';
+export type AndroidPalette = 'sage' | 'blue' | 'violet' | 'coral';
+export type AndroidNavigation = 'auto' | 'gesture' | 'buttons';
 
 /** addition: the accent palette offered by Personalization settings (plans/windows/apps/settings). */
 export const ACCENT_IDS = ['blue', 'navy', 'teal', 'green', 'purple', 'plum', 'red', 'orange', 'graphite'] as const;

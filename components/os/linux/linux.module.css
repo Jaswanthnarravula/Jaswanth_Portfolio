@@ -1,0 +1,545 @@
+.shell {
+  --linux-bg: #0c1016;
+  --linux-fg: #d9dee8;
+  --linux-dim: #77849a;
+  --linux-rule: #2a3240;
+  --linux-green: #7ee6a5;
+  --linux-blue: #6fb6ff;
+  --linux-cyan: #7fdcdc;
+  --linux-yellow: #f0d37a;
+  --linux-magenta: #e59be0;
+  position: fixed;
+  inset: var(--vv-top, 0) 0 auto;
+  height: var(--vvh, 100dvh);
+  overflow: hidden;
+  background: var(--linux-bg);
+  color: var(--linux-fg);
+  font: calc(14px * var(--text-scale, 1)) / 1.35
+    var(--font-mono-linux, ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace);
+  font-variant-numeric: tabular-nums;
+}
+:global(:root[data-theme='light']) .shell {
+  --linux-bg: #faf9f6;
+  --linux-fg: #343438;
+  --linux-dim: #6a6a72;
+  --linux-rule: #c5c5ca;
+  --linux-green: #168344;
+  --linux-blue: #155da3;
+  --linux-cyan: #087578;
+  --linux-yellow: #806200;
+  --linux-magenta: #9a347f;
+}
+.skip {
+  position: absolute;
+  z-index: 50;
+  top: 4px;
+  left: 4px;
+  transform: translateY(-150%);
+  padding: 8px;
+  background: var(--linux-fg);
+  color: var(--linux-bg);
+}
+.skip:focus {
+  transform: none;
+}
+.statusBar {
+  height: 24px;
+  padding-inline: var(--sa-l) var(--sa-r);
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--linux-rule);
+  color: var(--linux-dim);
+  font-size: 12px;
+}
+.statusBar nav {
+  display: flex;
+  align-items: stretch;
+}
+.statusBar a,
+.statusBar button {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: none;
+}
+.statusBar [aria-current] {
+  background: var(--linux-green);
+  color: var(--linux-bg);
+}
+.statusBar a {
+  color: var(--linux-blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.statusBar button:focus-visible,
+.statusBar a:focus-visible {
+  outline: 2px solid var(--linux-green);
+  outline-offset: -2px;
+}
+.statusBar time {
+  display: grid;
+  place-items: center;
+  padding: 0 8px;
+}
+.workspace {
+  position: relative;
+  height: calc(100% - 24px);
+  padding: 12px;
+}
+.terminalTile,
+.viewer {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  border: 1px solid var(--linux-rule);
+  background: var(--linux-bg);
+  overflow: hidden;
+}
+.terminalTile {
+  left: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+}
+.shell[data-viewer-open] .terminalTile {
+  right: auto;
+  width: calc(var(--split) - 18px);
+}
+.shell[data-viewer-open][data-splitting] .terminalTile {
+  right: 12px;
+  width: auto;
+  animation: terminal-split 200ms ease-out both;
+}
+.terminalTile[data-focused],
+.viewer:focus-within {
+  border-color: var(--linux-green);
+}
+.tileTitle {
+  height: 28px;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--linux-rule);
+  color: var(--linux-dim);
+  font-size: 12px;
+}
+.tileTitle h2 {
+  margin: 0;
+  overflow: hidden;
+  color: inherit;
+  font: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tileTitle nav {
+  display: flex;
+  gap: 10px;
+}
+.tileTitle button,
+.tileTitle a {
+  padding: 2px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: none;
+}
+.tileTitle button:hover,
+.tileTitle button:focus-visible,
+.tileTitle a:focus-visible {
+  color: var(--linux-fg);
+  text-decoration: underline;
+}
+.terminalTile > [data-terminal] {
+  flex: 1;
+  min-height: 0;
+  --term-bg: var(--linux-bg);
+  --term-fg: var(--linux-fg);
+  --term-dim: var(--linux-dim);
+  --term-dir: var(--linux-blue);
+  --term-exe: var(--linux-cyan);
+  --term-link: var(--linux-cyan);
+  --term-head: var(--linux-yellow);
+  --term-pdf: var(--linux-magenta);
+  --term-err: #ff7f87;
+  --term-ok: var(--linux-green);
+  --term-prompt: var(--linux-fg);
+  --term-prompt-error: #ff7f87;
+  --term-caret: var(--linux-fg);
+  --term-selection: rgb(217 222 232 / 25%);
+  --term-font: var(--font-mono-linux, ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace);
+  --term-size: 14px;
+  --term-pad: 12px;
+}
+.promptUser {
+  color: var(--linux-green);
+}
+.promptPath {
+  color: var(--linux-blue);
+}
+.promptFail {
+  color: #ff7f87;
+}
+.viewer {
+  left: calc(var(--split) + 6px);
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  animation: viewer-in 200ms ease-out both;
+}
+.viewerBody {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+  outline: none;
+}
+.viewerFooter {
+  padding: 5px 10px;
+  border-top: 1px dashed var(--linux-rule);
+  color: var(--linux-dim);
+}
+.viewerFooter button {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+.viewer :global(.cv) {
+  --text-primary: var(--linux-fg);
+  --text-secondary: #b4bece;
+  --text-tertiary: #9aa6b8;
+  --accent: var(--linux-cyan);
+  --accent-strong: var(--linux-blue);
+  --text-on-accent: var(--linux-bg);
+  --border-subtle: var(--linux-rule);
+  --border-strong: var(--linux-dim);
+  color: var(--linux-fg);
+  font: inherit;
+}
+.viewer :global(.cv-title),
+.viewer :global(.cv-subtitle),
+.viewer :global(.cv-card-title) {
+  color: var(--linux-yellow);
+}
+.viewer :global(.cv-header),
+.viewer :global(.cv-section),
+.viewer :global(.cv-card),
+.viewer :global(.cv-timeline-item) {
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--linux-rule);
+}
+.viewer :global(.cv-tags) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+  list-style: none;
+}
+.viewer :global(.cv-tag) {
+  color: var(--linux-magenta);
+}
+.viewer :global(a) {
+  color: var(--linux-cyan);
+  text-decoration: underline;
+}
+.viewer :global(img) {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--linux-rule);
+}
+.viewer :global(.cv-paper) {
+  --text-primary: var(--linux-fg);
+  --text-secondary: #b4bece;
+  --text-tertiary: #9aa6b8;
+  --accent: var(--linux-blue);
+  --border-subtle: var(--linux-rule);
+  --border-strong: var(--linux-dim);
+  padding: 12px;
+  background: var(--linux-bg);
+  color: var(--linux-fg);
+}
+.viewer :global(.cv-actions) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.viewer :global(.cv-button) {
+  padding: 5px 8px;
+  border: 1px solid var(--linux-rule);
+}
+.viewer :global(.cv-button-primary) {
+  border-color: var(--linux-blue);
+  background: var(--linux-blue);
+  color: var(--linux-bg);
+}
+:global(:root[data-theme='light']) .viewer :global(.cv),
+:global(:root[data-theme='light']) .viewer :global(.cv-paper) {
+  --text-secondary: #54545c;
+  --text-tertiary: #65656d;
+}
+.divider {
+  position: absolute;
+  z-index: 4;
+  top: 12px;
+  bottom: 12px;
+  left: calc(var(--split) - 6px);
+  width: 24px;
+  transform: translateX(-50%);
+  border: 0;
+  background: transparent;
+  cursor: col-resize;
+  touch-action: none;
+}
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--linux-rule);
+}
+.divider:focus-visible::after {
+  width: 3px;
+  background: var(--linux-green);
+}
+.hintNotice,
+.hintCard {
+  margin: 0 12px 8px;
+  padding: 7px 8px;
+  border: 1px solid var(--linux-rule);
+  color: var(--linux-dim);
+  font-size: 13px;
+}
+.hintStatus:empty {
+  display: none;
+}
+.hintNotice {
+  padding-block: 2px;
+  border-color: transparent;
+}
+.hintNotice button,
+.hintCard button {
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--linux-cyan);
+  font: inherit;
+  text-decoration: underline;
+}
+.hintCard p {
+  margin: 0 0 4px;
+}
+.hintCard code {
+  padding: 2px 5px;
+  background: #1a212c;
+  color: var(--linux-fg);
+  font: inherit;
+}
+.tapType {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: var(--linux-dim);
+  font: inherit;
+  text-decoration: underline;
+}
+.matrix {
+  position: absolute;
+  z-index: 6;
+  inset: 29px 0 0;
+  margin: 0;
+  padding: 18px;
+  overflow: hidden;
+  background: rgb(12 16 22 / 94%);
+  color: var(--linux-green);
+  font: inherit;
+  line-height: 2.4;
+  letter-spacing: 0.25em;
+  white-space: pre-wrap;
+  pointer-events: none;
+  animation: matrix-rain 500ms steps(4) infinite;
+}
+@keyframes matrix-rain {
+  50% {
+    transform: translateY(12px);
+    opacity: 0.7;
+  }
+}
+.help {
+  position: absolute;
+  z-index: 20;
+  top: 30px;
+  right: 8px;
+  width: min(360px, calc(100% - 16px));
+  padding: 12px;
+  border: 1px solid var(--linux-green);
+  background: var(--linux-bg);
+  color: var(--linux-fg);
+}
+.help p {
+  color: var(--linux-dim);
+}
+.help button {
+  min-height: 32px;
+  margin-right: 12px;
+  border: 0;
+  background: none;
+  color: var(--linux-cyan);
+  font: inherit;
+  text-decoration: underline;
+}
+.boot {
+  position: absolute;
+  z-index: 40;
+  inset: 0;
+  padding: 12px;
+  background: #05070a;
+  color: var(--linux-dim);
+  outline: none;
+  white-space: pre-wrap;
+  border: 0;
+  border-radius: 0;
+  font: inherit;
+  text-align: left;
+}
+.boot div:last-child {
+  color: var(--linux-green);
+}
+@keyframes viewer-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes terminal-split {
+  from {
+    clip-path: inset(0 0 0 0);
+  }
+  to {
+    clip-path: inset(0 calc(100% - var(--split)) 0 0);
+  }
+}
+@media (max-width: 1099.98px) {
+  .workspace {
+    padding: 0;
+  }
+  .terminalTile,
+  .viewer {
+    inset: 0;
+    border-width: 0;
+  }
+  .shell[data-viewer-open] .terminalTile {
+    width: 100%;
+    visibility: hidden;
+  }
+  .viewer {
+    left: 0;
+    animation: none;
+  }
+  .divider {
+    display: none;
+  }
+  .tileTitle {
+    height: 32px;
+    min-height: 32px;
+  }
+  .terminalTile > [data-terminal] {
+    --term-pad: 8px;
+  }
+}
+@media (max-width: 699.98px), (max-height: 499.98px) {
+  .statusBar {
+    height: 44px;
+  }
+  .statusBar time {
+    display: none;
+  }
+  .statusBar nav:first-child {
+    max-width: 90px;
+    overflow: hidden;
+  }
+  .workspace {
+    height: calc(100% - 44px);
+  }
+  .tileTitle {
+    height: 36px;
+    min-height: 36px;
+  }
+  .viewerBody {
+    padding: 10px;
+  }
+  .shell {
+    font-size: 16px;
+  }
+  .terminalTile > [data-terminal] {
+    --term-size: 16px;
+  }
+  .hintNotice button,
+  .hintCard button {
+    min-height: 44px;
+  }
+}
+@media (orientation: landscape) and (max-height: 499.98px) {
+  .shell:focus-within .tileTitle {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .viewer {
+    animation: none;
+  }
+  .shell[data-viewer-open][data-splitting] .terminalTile {
+    animation: none;
+  }
+  .matrix {
+    animation: none;
+  }
+}
+@media (forced-colors: active) {
+  .shell {
+    --linux-bg: Canvas;
+    --linux-fg: CanvasText;
+    --linux-dim: GrayText;
+    --linux-rule: CanvasText;
+    --linux-green: CanvasText;
+    --linux-blue: LinkText;
+    --linux-cyan: LinkText;
+    --linux-yellow: CanvasText;
+    --linux-magenta: CanvasText;
+    --linux-red: CanvasText;
+    forced-color-adjust: none;
+  }
+  .viewer :global(.cv),
+  .viewer :global(.cv-paper) {
+    --text-primary: CanvasText;
+    --text-secondary: CanvasText;
+    --text-tertiary: GrayText;
+    --accent: LinkText;
+    --accent-strong: LinkText;
+    --text-on-accent: Canvas;
+    --border-subtle: CanvasText;
+    --border-strong: CanvasText;
+  }
+  .terminalTile[data-focused],
+  .viewer:focus-within {
+    border: 2px solid Highlight;
+  }
+}

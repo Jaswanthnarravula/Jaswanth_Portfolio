@@ -49,8 +49,9 @@ export function LegalNotice({ data, headingLevel = 2 }: ViewProps<LegalData>) {
         <details className="cv-details">
           <summary>Asset credits ({data.credits.length})</summary>
           <ul className="cv-credits">
-            {data.credits.map((credit) => (
-              <li key={`${credit.label}-${credit.sourceUrl}`}>
+            {/* One artwork can be credited twice (two OSes use it), so the index keeps the keys unique. */}
+            {data.credits.map((credit, index) => (
+              <li key={`${credit.label}-${credit.sourceUrl}-${index}`}>
                 <span>{credit.label}</span> — {credit.owner}
                 {credit.derived ? ' (colour variant pending the original file)' : ''} ·{' '}
                 <a href={credit.sourceUrl} target="_blank" rel="noopener noreferrer">

@@ -162,9 +162,15 @@ export const fortune: Command = (_args, ctx) => {
   );
 };
 
-/** The falling-glyph animation belongs to the Linux terminal tile (P7); every host shows this calm static line. */
-export const cmatrix: Command = () =>
+/** Linux animates the returned egg effect inside its tile; embedded terminals keep a calm static response. */
+export const cmatrix: Command = (_args, ctx) =>
   ok(
-    [dim('Wake up, Neo… (the rain is off here — nothing flashes in this terminal)')],
+    [
+      dim(
+        ctx.os === 'linux'
+          ? 'cmatrix: press any key to stop'
+          : 'Wake up, Neo… (the rain is off here — nothing flashes in this terminal)',
+      ),
+    ],
     [{ k: 'egg', id: EGG_IDS.matrix }],
   );

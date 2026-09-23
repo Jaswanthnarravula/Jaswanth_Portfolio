@@ -711,7 +711,9 @@ test('IOS-NOTIF-05 X1 with Center open: dialog semantics, axe clean, banners nev
 test('IOS-QA-02 long-press a project row → preview + actions', async ({ page }) => {
   await openIos(page, '/ios/github');
   const gh = surface(page, 'github');
-  const row = gh.locator('[data-screen]:not([hidden]) a[data-push-key^="project:"]').first();
+  const row = gh
+    .locator('[data-screen]:not([hidden]) a[data-push-key^="project:"], nav a[data-push-key^="project:"]')
+    .first();
   await expect(row).toBeVisible();
   const slug = (await row.getAttribute('data-push-key'))!.slice('project:'.length);
   const url = page.url();

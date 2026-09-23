@@ -49,6 +49,9 @@ export const DEFAULT_PREFS: UserPreferences = {
   notifications: true,
   wallpaper: 'auto',
   dock: { magnification: true, size: 'medium' },
+  androidPalette: 'sage',
+  androidThemedIcons: false,
+  androidNavigation: 'auto',
 };
 
 export function emptySession(os: OsId, sizeClass: SizeClass, contentRev: string): OsSession {

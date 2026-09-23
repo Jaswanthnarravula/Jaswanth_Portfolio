@@ -247,7 +247,7 @@ describe('LNX-SH-09 flavor voices: same AST and effects, only strings differ', (
 });
 
 describe('LNX-SH-10 totality and caps', () => {
-  it('fuzz: 5 000 random inputs never throw (strict mode — the safety net is never reached)', () => {
+  it('LNX-CASE-05 fuzz: 10 000 random inputs never throw (strict mode — the safety net is never reached)', () => {
     let seed = 42;
     const random = () => {
       seed = (seed * 1_103_515_245 + 12_345) & 0x7fffffff;
@@ -301,7 +301,7 @@ describe('LNX-SH-10 totality and caps', () => {
       'rm -rf /',
     ];
     let state = initialShellState();
-    for (let i = 0; i < 5000; i++) {
+    for (let i = 0; i < 10_000; i++) {
       let input = '';
       const length = Math.floor(random() * 12);
       for (let j = 0; j < length; j++) input += alphabet[Math.floor(random() * alphabet.length)];

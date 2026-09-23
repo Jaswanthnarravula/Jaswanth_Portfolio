@@ -591,7 +591,8 @@ button.chip:focus-visible {
   z-index: 3;
   display: grid;
   flex: none;
-  grid-template-columns: minmax(44px, 1fr) auto minmax(44px, 1fr);
+  /* The bar buttons take what they need; the title gets the rest and truncates — it never covers the back label. */
+  grid-template-columns: minmax(44px, auto) minmax(0, 1fr) minmax(44px, auto);
   align-items: center;
   height: 44px;
   margin-top: var(--app-top, 0px);
@@ -610,6 +611,7 @@ button.chip:focus-visible {
   justify-self: start;
   align-items: center;
   min-width: 0;
+  overflow: hidden;
 }
 .navTrailing {
   display: flex;
@@ -634,6 +636,9 @@ button.chip:focus-visible {
 .navTitle > h3,
 .navTitle > h4 {
   margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-size: 17px;
   font-weight: 600;
   letter-spacing: -0.41px;
@@ -653,7 +658,7 @@ button.chip:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 0;
-  max-width: 40vw;
+  max-width: min(40vw, 100%);
   min-height: 44px;
   margin-left: -6px;
   padding: 0 6px 0 0;

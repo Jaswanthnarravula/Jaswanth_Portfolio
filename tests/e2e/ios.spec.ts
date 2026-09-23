@@ -355,7 +355,9 @@ test('IOS-FLIGHT-06 · IOS-GH-02 the pushed project: back chevron named after Re
   phoneOnly(info);
   await openIos(page, '/ios/github');
   const gh = surface(page, 'github');
-  const row = gh.locator('[data-screen]:not([hidden]) a[data-push-key^="project:"]').first();
+  const row = gh
+    .locator('[data-screen]:not([hidden]) a[data-push-key^="project:"], nav a[data-push-key^="project:"]')
+    .first();
   await row.click();
   await expect(page).toHaveURL(/\/ios\/github\/[a-z0-9-]+$/);
   await settle(page);
@@ -413,7 +415,10 @@ test('IOS-FLIGHT-08 · IOS-CASE-03 E13 · ROUTE-MOBILE-01 H1 Back pops, then goe
     .click();
   await expect(page).toHaveURL(/\/ios\/github$/);
   await settle(page);
-  await surface(page, 'github').locator('[data-screen]:not([hidden]) a[data-push-key^="project:"]').first().click();
+  await surface(page, 'github')
+    .locator('[data-screen]:not([hidden]) a[data-push-key^="project:"], nav a[data-push-key^="project:"]')
+    .first()
+    .click();
   await expect(page).toHaveURL(/\/ios\/github\/[a-z0-9-]+$/);
   await page.goBack();
   await expect(page).toHaveURL(/\/ios\/github$/);

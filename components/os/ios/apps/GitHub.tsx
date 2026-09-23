@@ -423,12 +423,24 @@ export default function GitHub({ id, layout, headingId }: IosAppProps) {
 
   // --- Full page: the frame's split view ----------------------------------------------------------------------------
   if (layout === 'pad') {
+    // The sidebar is the list, so the detail never repeats it: it previews the first repository until one is chosen
+    // (iPadOS split views open on an item, they do not show the same list twice).
+    const preview = tab === 'projects' && !current ? visible[0] : undefined;
+    const emptyDetail: NavScreen = {
+      key: 'pad:none',
+      title: 'Repositories',
+      large: true,
+      tone: 'grouped',
+      render: () => <Row kind="static" title="No repositories" subtitle="Clear the search to see all." />,
+    };
     const detailScreens: NavScreen[] =
-      tab === 'projects' && current
-        ? [detail(current)]
-        : tab === 'projects'
-          ? [{ ...rootScreen('projects'), key: 'pad:repos' }]
-          : [rootScreen(tab)];
+      tab === 'projects'
+        ? current
+          ? [detail(current)]
+          : preview
+            ? [detail(preview)]
+            : [emptyDetail]
+        : [rootScreen(tab)];
     if (tab !== 'projects' && current) detailScreens.push(detail(current));
     return (
       <div className={styles.split} aria-labelledby={headingId}>

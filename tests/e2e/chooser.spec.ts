@@ -70,7 +70,7 @@ async function passWinLock(page: Page) {
   await expect(page.locator('[data-lock]')).toHaveCount(0);
 }
 
-test('W1 the cards are real links with viewport-shaped snapshots and no device frame @smoke', async ({ page }) => {
+test('W1 the cards are real links with approved snapshot crops and no device frame @smoke', async ({ page }) => {
   await toChooser(page);
   const viewport = page.viewportSize()!;
   const orientationAspect = viewport.width >= viewport.height ? 'landscape' : 'portrait';
@@ -95,8 +95,9 @@ test('W1 the cards are real links with viewport-shaped snapshots and no device f
     expect(shot.loaded, 'the snapshot decodes').toBe(true);
     expect(shot.shape, 'the snapshot matches the viewport orientation').toBe(orientationAspect);
     expect(shot.fit).toBe('cover');
-    // The card is the page in the visitor's viewport shape (phones crop to the card: plans/04 "Responsive").
-    if (viewport.width >= 600) expect(shot.box).toBeCloseTo(viewport.width / viewport.height, 1);
+    // The approved desktop frame uses tall 0.79245 showcase windows; compact layouts retain viewport-shaped crops.
+    if (viewport.width >= 1200 && viewport.height >= 700) expect(shot.box).toBeCloseTo(0.79245, 2);
+    else if (viewport.width >= 600) expect(shot.box).toBeCloseTo(viewport.width / viewport.height, 1);
   }
   // Exactly one badge where the rule names a device; none on a tablet or a medium-width window.
   await expect(page.getByText('Suits your device')).toHaveCount(await expectedBadges(page));
