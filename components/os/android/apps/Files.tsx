@@ -1,7 +1,15 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { ContentFor, formatPeriod, formatUpdated } from '@/components/content';
-import { getEducation, getExperience, getProjects, getResume, getResumeFileMeta } from '@/data/selectors';
+import { ContentFor, formatPeriod, formatUpdated, ResumeDocument, ResumePages } from '@/components/content';
+import {
+  getEducation,
+  getExperience,
+  getProjects,
+  getResume,
+  getResumeFileMeta,
+  getResumePages,
+  getResumeText,
+} from '@/data/selectors';
 import type { ContentRef } from '@/data/schema';
 import { currentLocation } from '@/lib/kernel/state';
 import { useKernel } from '@/stores/kernel-context';
@@ -85,12 +93,18 @@ export default function Files({ id, headingId }: AndroidAppProps) {
             }
           />
           <main className={styles.pdfArea}>
+            {/* The words for assistive tech: the actions, then the PDF's own text. */}
             <div className="sr-only">
-              <ContentFor target={ref} headingLevel={3} />
+              <ContentFor target={ref} headingLevel={3} resumePages={false} />
+              <ResumeDocument data={getResumeText()} headingLevel={4} />
             </div>
-            <div className={styles.pdfPaper} aria-hidden="true">
-              <ContentFor target={ref} resumePages headingLevel={3} />
-            </div>
+            {/* The page itself: the published PDF (the owner's Resume.pdf), rendered at build time. */}
+            <ResumePages
+              pages={getResumePages()}
+              sizes="(max-width: 852px) 100vw, 800px"
+              className={styles.pdfPages}
+              pageClassName={styles.pdfPaper}
+            />
             <span className={styles.pageChip}>1 / {meta?.pages ?? 1}</span>
             <a
               className={styles.extendedFab}

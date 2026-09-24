@@ -22,11 +22,11 @@ import { solveSpring, spring, type Spring, type SpringConfig } from '@/lib/motio
 // --- Tokens (plans/ios/03 "Spring table" + "Curve-based timings") -------------------------------------------------------
 
 export const IOS_SPRINGS = {
-  open: { response: 0.26, damping: 0.92 },
-  close: { response: 0.28, damping: 0.9 },
-  homeSettle: { response: 0.28, damping: 0.9 },
-  folderOpen: { response: 0.26, damping: 0.92 },
-  folderClose: { response: 0.28, damping: 0.9 },
+  open: { response: 0.22, damping: 0.92 },
+  close: { response: 0.24, damping: 0.9 },
+  homeSettle: { response: 0.24, damping: 0.9 },
+  folderOpen: { response: 0.22, damping: 0.92 },
+  folderClose: { response: 0.24, damping: 0.9 },
   sheet: { response: 0.32, damping: 1 },
   reveal: { response: 0.38, damping: 0.9 },
   banner: { response: 0.38, damping: 0.78 },
@@ -159,11 +159,69 @@ const homeTargets: HomeTargets = { home: [], dim: null, wallpaper: null };
 const opennessBySurface = new Map<string, number>();
 let parallax = { x: 0, y: 0 };
 
+/**
+ * Layers for what follows a flight (shared/07 rule 5: `will-change` set at flight start, removed at rest). Without them
+ * every frame of a flight repainted the gradient wallpaper, the whole Home Screen and the dim veil at their new scale —
+ * measured 46–72 ms a frame on the preview build; as layers the frame is composited (~17 ms).
+ */
+let homePromoted = false;
+/** Surfaces flying on a spring or following a finger right now (a parked or resting surface is not moving). */
+const movingSurfaces = new Set<string>();
+/** The wallpaper is also a layer while the pointer parallax moves it (cleared once the pointer rests). */
+let parallaxLive = false;
+function promoteHome() {
+  const flying = movingSurfaces.size > 0;
+  const { home, dim, wallpaper } = homeTargets;
+  if (flying !== homePromoted) {
+    homePromoted = flying;
+    for (const el of home) if (el) el.style.willChange = flying ? 'transform' : '';
+    if (dim) dim.style.willChange = flying ? 'opacity' : '';
+  }
+  if (wallpaper) {
+    const want = flying || parallaxLive ? 'transform' : '';
+    if (wallpaper.style.willChange !== want) wallpaper.style.willChange = want;
+  }
+}
+
+function setMoving(id: string, moving: boolean) {
+  if (movingSurfaces.has(id) === moving) return;
+  if (moving) movingSurfaces.add(id);
+  else movingSurfaces.delete(id);
+  promoteHome();
+}
+
+/**
+ * A press on a launcher is where its flight starts: the layers are made while the finger is still down, so the
+ * flight's first frame is composited instead of spent creating them (it came ~35 ms after the click, not ~16 ms).
+ * The flight takes the layers over; a press that launches nothing drops them.
+ */
+const PRESS = 'press';
+let pressTimer: ReturnType<typeof setTimeout> | null = null;
+function endPress() {
+  if (pressTimer) clearTimeout(pressTimer);
+  pressTimer = null;
+  setMoving(PRESS, false);
+}
+function onLauncherPress(event: PointerEvent) {
+  if (event.button !== 0 || prefersReducedMotion()) return;
+  if (!(event.target instanceof Element) || !event.target.closest('a[href]')) return;
+  setMoving(PRESS, true);
+  if (pressTimer) clearTimeout(pressTimer);
+  pressTimer = setTimeout(endPress, 600);
+}
+
 /** The shell registers what follows the flights (the Home layer, its dim veil, the wallpaper). */
 export function registerHome(targets: HomeTargets): () => void {
   Object.assign(homeTargets, targets);
+  for (const el of targets.home) el?.addEventListener('pointerdown', onLauncherPress, { passive: true });
   writeHome();
   return () => {
+    for (const el of targets.home) el?.removeEventListener('pointerdown', onLauncherPress);
+    if (pressTimer) clearTimeout(pressTimer);
+    pressTimer = null;
+    movingSurfaces.clear();
+    parallaxLive = false;
+    promoteHome();
     homeTargets.home = [];
     homeTargets.dim = null;
     homeTargets.wallpaper = null;
@@ -201,6 +259,13 @@ export const clearOpenness = (id: string): void => setOpenness(id, 0);
  */
 export function wallpaperParallax(root: HTMLElement): () => void {
   let pending: { x: number; y: number } | null = null;
+  // A moving wallpaper is a layer; once the pointer rests it is painted flat again.
+  let resting: ReturnType<typeof setTimeout> | null = null;
+  const rest = () => {
+    resting = null;
+    parallaxLive = false;
+    promoteHome();
+  };
   const tick = () => {
     gsap.ticker.remove(tick);
     tickerRemoved();
@@ -216,6 +281,12 @@ export function wallpaperParallax(root: HTMLElement): () => void {
     const nx = event.clientX / window.innerWidth - 0.5;
     const ny = event.clientY / window.innerHeight - 0.5;
     const next = { x: -nx * 2 * IOS_TIMING.parallaxPx, y: -ny * 2 * IOS_TIMING.parallaxPx };
+    if (!parallaxLive) {
+      parallaxLive = true;
+      promoteHome();
+    }
+    if (resting) clearTimeout(resting);
+    resting = setTimeout(rest, 300);
     // The state first: `ticker.add` wakes a sleeping ticker and can tick synchronously, and a tick with nothing
     // pending removes itself — the parallax would never run again.
     const idle = !pending;
@@ -232,6 +303,8 @@ export function wallpaperParallax(root: HTMLElement): () => void {
       gsap.ticker.remove(tick);
       tickerRemoved();
     }
+    if (resting) clearTimeout(resting);
+    rest();
     pending = null;
     parallax = { x: 0, y: 0 };
   };
@@ -332,12 +405,24 @@ export function surfaceMotion(element: HTMLElement, options: SurfaceMotionOption
     if (probeEnabled()) element.dataset.visual = [visual.x, visual.y, visual.w, visual.h].map(Math.round).join(',');
   };
 
+  // While the surface moves, it, its launch layer (fading by openness) and what follows it are layers: every frame
+  // is then composited, never repainted. At rest they are painted flat again (shared/07 rule 5).
+  let layered = false;
+  const layers = (on: boolean) => {
+    if (layered === on) return;
+    layered = on;
+    element.style.willChange = on ? 'transform, clip-path, opacity' : '';
+    const launch = options.launch?.();
+    if (launch) launch.style.willChange = on ? 'opacity' : '';
+    setMoving(options.id, on);
+    // The flight took over the press's layers.
+    if (on) endPress();
+  };
   const stopTicker = () => {
     if (!ticking) return;
     ticking = false;
     gsap.ticker.remove(tick);
     tickerRemoved();
-    element.style.willChange = '';
   };
   // A superseded crossfade is not an interruption of the new motion: WAAPI queues `cancel` events, so a handler left
   // attached would settle the promise that replaced it.
@@ -367,6 +452,7 @@ export function surfaceMotion(element: HTMLElement, options: SurfaceMotionOption
       progress = null;
       stopTicker();
       draw(to);
+      layers(false);
       settle('rest');
       return;
     }
@@ -374,9 +460,9 @@ export function surfaceMotion(element: HTMLElement, options: SurfaceMotionOption
   }
 
   const startTicker = () => {
+    layers(true);
     if (ticking) return;
     ticking = true;
-    element.style.willChange = 'transform, clip-path, opacity';
     tickerAdded();
     gsap.ticker.add(tick);
   };
@@ -393,6 +479,7 @@ export function surfaceMotion(element: HTMLElement, options: SurfaceMotionOption
       from = visual;
       to = visual;
       draw(visual);
+      layers(false);
       settle('interrupted');
     },
     toward(target, springConfig, opts = {}) {
@@ -409,6 +496,7 @@ export function surfaceMotion(element: HTMLElement, options: SurfaceMotionOption
         // A crossfade instead of travel: opening fades the app in at the full page; closing fades it out where it is.
         progress = null;
         stopTicker();
+        layers(false);
         lastDrive = null;
         const opening = target.w >= pageBox().w - 1;
         const startOpacity = opening ? (shown.w >= pageBox().w - 1 ? Math.min(shown.o, target.o) : 0) : shown.o;
@@ -468,6 +556,7 @@ export function surfaceMotion(element: HTMLElement, options: SurfaceMotionOption
       lastDrive = { t, visual };
       from = visual;
       to = visual;
+      layers(true);
       draw(visual);
       settle('interrupted');
     },
@@ -478,6 +567,7 @@ export function surfaceMotion(element: HTMLElement, options: SurfaceMotionOption
       stopFade();
       progress = null;
       stopTicker();
+      layers(false);
       setOpenness(options.id, 0);
       settle('interrupted');
     },

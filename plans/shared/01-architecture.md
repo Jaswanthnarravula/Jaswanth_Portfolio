@@ -90,7 +90,10 @@ Exact pins. Runtime additions allowed in v1: `@vercel/analytics`, `@vercel/speed
 `vitest`, `@vitest/coverage-v8`, `jsdom`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom`,
 `@playwright/test`, `@axe-core/playwright`, `@lhci/cli`, `web-vitals`, `opentype.js` (build script only).
 Anything else requires updating this file and the budgets in `shared/10-performance.md` first.
-Build scripts may use `sharp`, which `next` already installs (asset ingest only; never shipped). The approved list is
+Build scripts may use `sharp`, which `next` already installs (asset ingest and résumé pages; never shipped).
+Dev addition (2026-09-23, owner request "every preview shows Resume.pdf"): `pdfjs-dist` + `@napi-rs/canvas` —
+`scripts/resume-pages.mjs` only, which renders the owner's PDF into page images and extracts its text at build time
+(shared/03 `VIEW-RESUME-01`). Never imported by app code; zero browser bytes. The approved list is
 enforced by `tests/tooling/scaffold.test.ts`; a post-build audit (`scripts/check-build.mjs`) fails any dynamic route
 or a client asset that carries the GitHub token.
 

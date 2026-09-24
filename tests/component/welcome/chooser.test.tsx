@@ -1,16 +1,14 @@
 /**
  * CHOOSE-REL-01 (the chooser renders the released set — exactly the OSes it is given, nothing else) ·
- * CHOOSE-BADGE-01 (one badge, identical for every PersonaId) · CHOOSE-CARD-01 (cards are links named
- * "{OS} — {character}", the badge part of the name; snapshots are decorative).
+ * CHOOSE-BADGE-01 (recommendation badge removed) · CHOOSE-CARD-01 (cards are links named
+ * "{OS} — {character}"; snapshots are decorative).
  */
 import { render, screen, within } from '@testing-library/react';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import Chooser from '@/components/welcome/Chooser';
-import { PERSONA_IDS } from '@/lib/kernel/ids';
 import { OS_IDS } from '@/lib/kernel/ids';
 import { DEFAULT_CAPABILITIES } from '@/lib/kernel/state';
 import { dispatch } from '@/stores/kernel-store';
-import { prefsStore } from '@/stores/prefs-store';
 
 beforeAll(() => {
   dispatch({
@@ -51,27 +49,13 @@ describe('CHOOSE-REL-01 only released OSes are shown', () => {
   });
 });
 
-describe('CHOOSE-CARD-01 / CHOOSE-BADGE-01 names and the badge', () => {
-  it('each card is named "{OS} — {character}"; the badge joins the name (label in name); snapshots are decorative', () => {
+describe('CHOOSE-CARD-01 / CHOOSE-BADGE-01 neutral card names', () => {
+  it('each card is named "{OS} — {character}", has no recommendation badge, and snapshots are decorative', () => {
     render(<Chooser oses={['ios', 'macos', 'windows']} />);
     expect(screen.getByRole('link', { name: 'iOS — Tap through apps' })).toHaveAttribute('href', '/ios');
-    expect(screen.getByRole('link', { name: 'macOS — A desktop of windows, suits your device' })).toHaveAttribute(
-      'href',
-      '/macos',
-    );
+    expect(screen.getByRole('link', { name: 'macOS — A desktop of windows' })).toHaveAttribute('href', '/macos');
     for (const card of cards())
       for (const img of within(card).queryAllByRole('img', { hidden: true })) expect(img).toHaveAttribute('alt', '');
-    expect(screen.getAllByText('Suits your device')).toHaveLength(1);
-  });
-
-  it('the badge is identical for all five profiles', () => {
-    const badged: (string | undefined)[] = [];
-    for (const persona of PERSONA_IDS) {
-      prefsStore.getState().patch({ persona });
-      const { unmount } = render(<Chooser />);
-      badged.push(cards().find((card) => card.textContent?.includes('Suits your device'))?.dataset.chooserCard);
-      unmount();
-    }
-    expect(new Set(badged)).toEqual(new Set(['macos']));
+    expect(screen.queryByText('Suits your device')).not.toBeInTheDocument();
   });
 });

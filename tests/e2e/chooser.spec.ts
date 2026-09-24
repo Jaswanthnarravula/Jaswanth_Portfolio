@@ -5,7 +5,7 @@
  *   motion: no flight, same end state) · CHOOSE-A11Y-01 (names, status announcement, keyboard-only entry into each OS).
  */
 import { expect, test, type Page } from '@playwright/test';
-import { expectedBadges, skipIntro, waitForSettled } from './helpers';
+import { skipIntro, waitForSettled } from './helpers';
 
 const OSES = [
   ['ios', 'iOS'],
@@ -95,12 +95,9 @@ test('W1 the cards are real links with approved snapshot crops and no device fra
     expect(shot.loaded, 'the snapshot decodes').toBe(true);
     expect(shot.shape, 'the snapshot matches the viewport orientation').toBe(orientationAspect);
     expect(shot.fit).toBe('cover');
-    // The approved desktop frame uses tall 0.79245 showcase windows; compact layouts retain viewport-shaped crops.
-    if (viewport.width >= 1200 && viewport.height >= 700) expect(shot.box).toBeCloseTo(0.79245, 2);
-    else if (viewport.width >= 600) expect(shot.box).toBeCloseTo(viewport.width / viewport.height, 1);
+    expect(shot.box, 'the preview is square').toBeCloseTo(1, 2);
   }
-  // Exactly one badge where the rule names a device; none on a tablet or a medium-width window.
-  await expect(page.getByText('Suits your device')).toHaveCount(await expectedBadges(page));
+  await expect(page.getByText('Suits your device')).toHaveCount(0);
 });
 
 test('W1 a card flies into its OS; Back returns to the chooser with focus on that card', async ({ page }) => {
@@ -118,7 +115,7 @@ test('W1 a card flies into its OS; Back returns to the chooser with focus on tha
 });
 
 test('Esc mid-flight returns to the chooser with focus on the card', async ({ page }) => {
-  await toChooser(page, { withoutHover: true }); // Linux is never badged or remembered: nothing prefetched it
+  await toChooser(page, { withoutHover: true }); // Linux is not remembered and was not hovered: nothing prefetched it
   // Hold new chunk responses so the transition is still in flight when Esc lands, even with a 150 ms reduced flight.
   await page.route('**/_next/static/chunks/**', async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -137,7 +134,7 @@ test('offline click shows Retry on the card; it recovers when back online', asyn
   test.skip(info.project.name === 'firefox-desktop', 'Firefox emulation does not fire the online event');
   // The chooser (and the kernel) are loaded; then the network drops before Linux's chunk was ever requested.
   // (A chooser chunk that cannot load is covered by the ChooserSlot component test.)
-  await toChooser(page, { withoutHover: true }); // Linux is never badged or remembered: nothing prefetched it
+  await toChooser(page, { withoutHover: true }); // Linux is not remembered and was not hovered: nothing prefetched it
   await context.setOffline(true);
   await card(page, 'linux').click();
   const alert = page.getByRole('alert').filter({ hasText: 'Couldn’t load Linux' });

@@ -54,9 +54,12 @@ export type ContentRef =
 ```
 
 ### Résumé ingestion
-1. Owner drops `content/resume.pdf` (or `.docx` / `.md`).
+1. Owner drops `Resume.pdf` at the repository root (owner decision 2026-09-23: "open, preview and download show
+   this file" everywhere).
 2. Content is extracted into `data/portfolio.ts` by hand-review (no automated parsing at build time).
-3. The PDF is copied to `public/resume/` and referenced by `portfolio.resume.file`.
+3. `npm run build:resume` (also in `prebuild`) copies the PDF as-is to `public/resume/`, referenced by
+   `portfolio.resume.file`, and renders its pages to images + extracts its text (`scripts/resume-pages.mjs`) — what
+   every viewer shows (shared/03 `VIEW-RESUME-01`).
 4. Every `placeholder: true` is removed; the guard then passes.
 
 ### Placeholder guard (`DATA-GUARD-01`)
@@ -88,4 +91,5 @@ export type ContentRef =
 | `DATA-RESUME-01` | Résumé file wired | `e2e: resume PDF returns 200 with correct content-type` |
 
 ## Open questions
-None — real content arrives via `content/resume.pdf`; work proceeds against typed placeholders until then.
+None — the owner's `Resume.pdf` is published (2026-09-23); the remaining `placeholder: true` facts are listed in
+`plans/STATUS.md`.

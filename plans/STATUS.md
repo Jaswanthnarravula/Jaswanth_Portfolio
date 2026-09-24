@@ -5,7 +5,7 @@ Source of truth for each row is the ledger named in the first column.
 
 **Current phase:** P7 Linux implementation and automated acceptance gate complete: all 89 P7 rows are verified.
 The release-wide P8 manual/polish gate remains open (details below).
-**Previous:** P3 macOS (+ terminal engine core) built — 162 verified · 39 built · 1 BLOCKED; paused for the owner's
+**Previous:** P3 macOS (+ terminal engine core) built — 163 verified · 38 built · 1 BLOCKED; paused for the owner's
 P3 gate review (details below). P0 and P2 gates passed on automated evidence; owner reviews pending. P4 Windows 11 built
 (120 of 152 P4 rows verified; details below), paused for the owner's P4 review.
 **Last updated:** 2026-09-23
@@ -30,13 +30,13 @@ P3 gate review (details below). P0 and P2 gates passed on automated evidence; ow
 | P0 Foundation | 103 | 0 | 1 | 102 | 0 | ☑ 2026-09-21 | pending review |
 | P1 Welcome | 51 | 43 | 8 | 0 | 0 | ☐ | |
 | P2 Vertical slice | 50 | 0 | 0 | 50 | 0 | ☑ 2026-09-22 (automated evidence) | pending review |
-| P3 macOS (+ engine core) | 202 | 0 | 39 | 162 | 1 | ☐ (awaiting review) | pending review |
+| P3 macOS (+ engine core) | 202 | 0 | 38 | 163 | 1 | ☐ (awaiting review) | pending review |
 | P4 Windows 11 | 152 | 2 | 30 | 120 | 0 | ☐ (automated evidence recorded; see below) | pending review |
 | P5 iOS | 140 | 0 | 0 | 140 | 0 | ☐ (automated evidence recorded; see below) | pending review |
 | P6 Android | 132 | 0 | 81 | 51 | 0 | ☐ (focused automated evidence recorded; see below) | pending review |
 | P7 Linux | 89 | 0 | 0 | 89 | 0 | ☑ 2026-09-23 (automated evidence) | pending review |
 | P8 Polish | 11 | 11 | 0 | 0 | 0 | ☐ | |
-| **Total** | **930** | **56** | **159** | **714** | **1** | | |
+| **Total** | **930** | **56** | **158** | **715** | **1** | | |
 
 ### P0 gate evidence (2026-09-21, local runs on production builds)
 | Gate item (`05-roadmap.md`) | Result |
@@ -231,7 +231,7 @@ touch accessory keys, visual-viewport handling, focus restoration, reduced-motio
 
 | Input | Default until provided | How to provide |
 |---|---|---|
-| Résumé | PDF generated from `data/portfolio.ts`; facts published nowhere (experience start dates, the IBM role and dates) stay `placeholder: true`, so the guard blocks a production deploy until supplied | Drop `content/resume.pdf` (published automatically) and fill the placeholders in `data/portfolio.ts` |
+| Résumé | **Provided 2026-09-23:** the owner's `Resume.pdf` (repository root) is what every Open, preview and Download serves — published byte for byte, shown as its page images + its own text in every OS viewer. `data/portfolio.ts` still marks facts `placeholder: true` (experience start dates, the IBM role and dates), so the guard blocks a production deploy until they are filled | Replace `Resume.pdf` and run `npm run build:resume` (also runs in `prebuild`); fill the remaining placeholders in `data/portfolio.ts` from the PDF |
 | Official icons / Netflix sound + avatars | 37 official files ingested; the green profile avatar is a hue-shifted copy of the blue one until the real file arrives; original artwork renders in `ASSET_MODE=original` | Drop files in `assets-inbox/`, then `npm run assets:ingest` |
 | GitHub username (+ optional token) | `Jaswanthnarravula`; committed snapshot (2 public repos) is used if a build-time fetch fails | Optional `GITHUB_TOKEN` in Vercel |
 | Vercel plan | Page views + Speed Insights | Custom events switch on automatically if supported |

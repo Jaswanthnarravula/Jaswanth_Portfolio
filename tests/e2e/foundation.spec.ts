@@ -106,7 +106,8 @@ test('the résumé PDF is served with the right type and caching', async ({ requ
   expect(response.status()).toBe(200);
   expect(response.headers()['content-type']).toContain('application/pdf');
   const body = await response.body();
-  expect(body.subarray(0, 8).toString('latin1')).toBe('%PDF-1.4');
+  // Any PDF version: the owner's Resume.pdf is published as-is (resume.spec.ts checks it byte for byte).
+  expect(body.subarray(0, 5).toString('latin1')).toBe('%PDF-');
 });
 
 test('every /go route in the sitemap points at its own Open Graph PNG', async ({ request }) => {

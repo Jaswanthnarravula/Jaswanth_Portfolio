@@ -51,16 +51,6 @@ export async function waitForSettled(page: Page, selector: string): Promise<void
   }, selector);
 }
 
-/** The chooser's "Suits your device" rule (plans/04): coarse + compact → a phone OS; fine + expanded/large → macOS. */
-export const expectedBadges = (page: Page) =>
-  page.evaluate(() => {
-    const w = innerWidth;
-    const h = innerHeight;
-    const compact = w < 700 || h < 500;
-    const coarse = matchMedia('(pointer: coarse)').matches;
-    return (coarse && compact) || (!coarse && !compact && w >= 1100) ? 1 : 0;
-  });
-
 /**
  * Setup step: skip the intro if it is still playing. On a slow browser the 3.5 s intro can end on its own before a
  * click lands, and the button is then hidden (nothing left to skip), so this dispatches the click without waiting for

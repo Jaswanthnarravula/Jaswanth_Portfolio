@@ -139,7 +139,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | `AND-FILES-01` | Browse (recents, category cards, storage) + Starred via bottom nav | P6 | verified | Android unit/component/e2e evidence set (2026-09-22) | |
 | `AND-FILES-02` | Folder list/grid with sort + item menus; forward navigation + URLs | P6 | built | P6 implementation audit; named acceptance evidence pending | |
 | `AND-FILES-03` | Document reader view | P6 | built | P6 implementation audit; named acceptance evidence pending | |
-| `AND-FILES-04` | **PDF viewer**: pages, indicator chip, extended FAB Download, Text version | P6 | verified | Android unit/component/e2e evidence set (2026-09-22) | |
+| `AND-FILES-04` | **PDF viewer**: pages, indicator chip, extended FAB Download, Text version | P6 | verified | Android unit/component/e2e evidence set (2026-09-22) · the page is the published PDF: `e2e/resume.spec.ts` › android: the résumé viewer shows the published PDF's page · pixel, iphone, chromium-desktop green 2026-09-23 (preview build .next-resume) | shared/22 Deviations log 2026-09-23 |
 | `AND-FILES-05` | Synthesized stack on deep open; Back → Browse → launcher | P6 | built | P6 implementation audit; named acceptance evidence pending | |
 | `AND-FILES-06` | Star with Undo snackbar; Info bottom sheet | P6 | built | P6 implementation audit; named acceptance evidence pending | |
 | `AND-FILES-07` | Pad rail + list-detail; semantics | P6 | built | P6 implementation audit; named acceptance evidence pending | |

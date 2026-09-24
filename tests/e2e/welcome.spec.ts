@@ -234,10 +234,7 @@ test.describe('intro and profiles', () => {
         trace: (window as unknown as { __trace: string[] }).__trace,
         url: location.pathname,
         cards: [...document.querySelectorAll('[data-chooser-card]')].map((a) => a.getAttribute('href')),
-        badge:
-          [...document.querySelectorAll('[data-chooser-card]')]
-            .find((card) => card.textContent?.includes('Suits your device'))
-            ?.getAttribute('href') ?? null,
+        recommendationBadge: document.body.textContent?.includes('Suits your device') ?? false,
       }));
       traces.push(JSON.stringify(state));
       // Preferences reach storage through the debounced safe writer, a moment after the pick.

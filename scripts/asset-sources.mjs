@@ -36,7 +36,7 @@ const appStore = (id) => `https://apps.apple.com/app/id${id}`;
 const play = (pkg) => `https://play.google.com/store/apps/details?id=${pkg}`;
 const commons = (file) => `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(file)}`;
 
-/** @typedef {{ id: string, file: string, kind: 'app-icon'|'system-icon'|'avatar'|'audio', sizes?: number[], transform?: string, monochrome?: boolean, derivedFrom?: string, owner: string, terms: string, sourceUrl: string, retrieved: string, label: string }} AssetSource */
+/** @typedef {{ id: string, file: string, kind: 'app-icon'|'system-icon'|'avatar'|'audio'|'wallpaper', sizes?: number[], transform?: string, monochrome?: boolean, derivedFrom?: string, owner: string, terms: string, sourceUrl: string, retrieved: string, label: string }} AssetSource */
 
 /** @type {AssetSource[]} */
 export const ASSET_SOURCES = [
@@ -444,6 +444,19 @@ export const ASSET_SOURCES = [
     sourceUrl: 'https://github.com/Sandhit06/Netflix-Portfolio',
     retrieved: RETRIEVED,
     label: 'Green profile avatar',
+  },
+
+  // iOS Home and Lock Screen wallpaper: the iPhone 16 (Ultramarine) — the owner's choice (plans/ios/01 "Wallpaper").
+  {
+    id: 'wallpaper.ios',
+    file: 'wallpapers/ios-iphone16-ultramarine.jpg',
+    kind: 'wallpaper',
+    owner: 'Apple Inc.',
+    terms:
+      'Artwork of Apple Inc. (the iPhone 16 Ultramarine wallpaper); used referentially to recreate the iPhone Home Screen. No affiliation.',
+    sourceUrl: 'https://www.iclarified.com/94911/download-the-official-iphone-16-wallpaper-here',
+    retrieved: '2026-09-23',
+    label: 'iPhone 16 wallpaper (Ultramarine)',
   },
 
   // Intro sound (fetched on idle, decoded on the Hello tap)

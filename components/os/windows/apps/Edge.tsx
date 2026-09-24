@@ -15,8 +15,9 @@
  *     (`WIN-EDGE-05`); every effect is an enhancement — the page is complete without it;
  *   · Résumé.pdf = Edge's PDF viewer (`WIN-EDGE-04`): page `1 / N`, zoom − / + / fit (a transform on the sheet), rotate
  *     (disabled), Print, **Save** (a real `<a download>` + `resume_downloaded` + the "Download complete" toast); the text
- *     version (ResumeView + the ResumeDocument paper) is first in DOM, then the PDF `<object>` with a link fallback; no
- *     PDF yet (placeholder phase) → the text version only, Save hidden.
+ *     version (ResumeView + the PDF's own text on paper) is first in DOM, then the published PDF's pages as images
+ *     (an inline `<object>` is blocked by the CSP — shared/03 VIEW-RESUME-01), an Open link if they could not be
+ *     rendered; no PDF yet (placeholder phase) → the text version only, Save hidden.
  * medium: no sidebar strip. compact (`WIN-EDGE-06`): tabs become a scrolling row under a compact title, the PDF toolbar
  * is Save · ⋯, native scroll only. Print hides every piece of OS chrome (edge.module.css).
  */
@@ -35,6 +36,7 @@ import {
   goHref,
   ResumeDocument,
   resumeFileLabel,
+  ResumePages,
   ResumeView,
   SkillsMatrix,
 } from '@/components/content';
@@ -45,16 +47,14 @@ import { AssetIcon } from '@/components/ui/AssetIcon';
 import { SECTION_TITLES } from '@/data/content-index';
 import type { ContentRef } from '@/data/schema';
 import {
-  getContact,
-  getCredentials,
   getCurrentRole,
-  getEducation,
-  getExperience,
   getFeaturedProjects,
   getPerson,
   getProjects,
   getResume,
   getResumeFileMeta,
+  getResumePages,
+  getResumeText,
   getSkills,
 } from '@/data/selectors';
 import { analytics } from '@/lib/analytics/loader';
@@ -667,7 +667,7 @@ function PlainVersion() {
   );
 }
 
-/** Edge's built-in PDF viewer for Résumé.pdf: the text version first in DOM, then the PDF itself. */
+/** Edge's built-in PDF viewer for Résumé.pdf: the text version first in DOM, then the PDF's pages. */
 function PdfViewer({ compact, print }: { readonly compact: boolean; readonly print: () => void }) {
   const shell = useWinShell();
   const resume = getResume();
@@ -751,18 +751,7 @@ function PdfViewer({ compact, print }: { readonly compact: boolean; readonly pri
 
   const paper = (
     <div className={`cv-paper ${styles.paper}`}>
-      <ResumeDocument
-        data={{
-          person: getPerson(),
-          contact: getContact(),
-          experience: getExperience(),
-          projects: getProjects(),
-          education: getEducation(),
-          credentials: getCredentials(),
-          skills: getSkills(),
-        }}
-        headingLevel={3}
-      />
+      <ResumeDocument data={getResumeText()} headingLevel={3} />
     </div>
   );
 
@@ -874,21 +863,20 @@ function PdfViewer({ compact, print }: { readonly compact: boolean; readonly pri
         {file ? (
           <div ref={sizer} className={styles.sizer}>
             <div ref={sheet} className={styles.sheet}>
-              <object
-                className={styles.pdf}
-                data={resume.file}
-                type="application/pdf"
-                title="Résumé (PDF)"
-                style={{ height: pages * PAGE_H + (pages - 1) * PAGE_GAP }}
+              <ResumePages
+                pages={getResumePages()}
+                sizes={`${Math.round(PAGE_W * scale)}px`}
+                className={styles.pages}
+                pageClassName={styles.pdf}
               >
+                {/* The pages could not be rendered at build time: the PDF itself, one click away. */}
                 <span className={styles.fallback}>
                   <PdfFile size={40} />
-                  <span>This browser can&rsquo;t show the PDF inside the page.</span>
                   <a href={resume.file} type="application/pdf">
                     Open Résumé.pdf ({resumeFileLabel(file)})
                   </a>
                 </span>
-              </object>
+              </ResumePages>
             </div>
           </div>
         ) : null}

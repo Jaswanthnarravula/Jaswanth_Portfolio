@@ -199,13 +199,21 @@ test('WIN-EDGE-04 RES-DL-01 on Windows: Save downloads the named file; X1 axe cl
   await expect.poll(() => analyticsEvents(page)).toContainEqual({ name: 'resume_downloaded', os: 'windows' });
   await expect(page.getByText('Download complete').first()).toBeVisible();
 
-  // The text version is first in DOM, the PDF after it; the page indicator reads "1 / N".
+  // The text version is first in DOM, the PDF's pages (images) after it; the page indicator reads "1 / N".
   const order = await edge(page).evaluate((el) => {
     const text = el.querySelector('[aria-label="Résumé — text version"]');
-    const pdf = el.querySelector('object[type="application/pdf"]');
+    const pdf = el.querySelector('[data-resume-pages] img');
     return !!text && !!pdf && !!(text.compareDocumentPosition(pdf) & Node.DOCUMENT_POSITION_FOLLOWING);
   });
   expect(order).toBe(true);
+  await expect
+    .poll(() =>
+      edge(page)
+        .locator('[data-resume-pages] img')
+        .first()
+        .evaluate((img: HTMLImageElement) => img.naturalWidth),
+    )
+    .toBeGreaterThan(0);
   if (!COMPACT.includes(info.project.name)) {
     await expect(tools.getByText(`Page 1 of ${file!.pages}`)).toBeAttached();
     await expect(tools.getByRole('button', { name: 'Rotate' })).toBeDisabled();

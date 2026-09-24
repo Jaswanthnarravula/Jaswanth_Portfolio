@@ -1,5 +1,5 @@
 /**
- * P1 welcome logic — NFLX-PROF-01 (five data-driven profiles) · CHOOSE-BADGE-01 (badge decision table) ·
+ * P1 welcome logic — NFLX-PROF-01 (five data-driven profiles) · CHOOSE-BADGE-01 (neutral chooser cards) ·
  * NFLX-MARK-01 (no "Netflix" in UI strings or metadata) · HELLO-RETURN-01 / NFLX-RETURN-01 (pre-paint hint) ·
  * PERF-GL-02 (Tier 2 decision table: coarse pointers and weak GPUs never get WebGL) · the kernel bridge, stage claims
  * and the chooser visibility selector that the journeys rely on.
@@ -16,7 +16,7 @@ import { beginHandoff, takeHandoff } from '@/lib/motion/handoff';
 import { metadataForRoute, SITE_DESCRIPTION } from '@/lib/seo/metadata';
 import { SITE_TITLE } from '@/lib/kernel/route/title';
 import { evaluateTier2, type Tier2Environment } from '@/lib/webgl/tier2';
-import { CHOOSER_HEADING, OS_CHARACTER, suitedOs } from '@/lib/welcome/chooser';
+import { CHOOSER_HEADING, OS_CHARACTER } from '@/lib/welcome/chooser';
 import { PROFILES } from '@/lib/welcome/profiles';
 import snapshots from '@/lib/welcome/snapshots.generated.json';
 import wordmark from '@/lib/welcome/wordmark.generated.json';
@@ -70,35 +70,6 @@ describe('NFLX-PROF-01 five profiles, data-driven', () => {
     for (const p of PROFILES) expect(p.avatar).toBe(`avatar.${p.id}`);
     // Data only: no behaviour, destination or content per profile.
     for (const p of PROFILES) expect(Object.keys(p).sort()).toEqual(['avatar', 'id', 'name']);
-  });
-});
-
-describe('CHOOSE-BADGE-01 device-suited badge from size + input only', () => {
-  const all = ['ios', 'macos', 'windows', 'android', 'linux'] as const;
-  it.each([
-    ['coarse', 'compact', 0, 'ios'],
-    ['coarse', 'compact', 1, 'android'],
-    ['coarse', 'compact', 2, 'ios'],
-    ['fine', 'expanded', 0, 'macos'],
-    ['fine', 'large', 7, 'macos'],
-    ['coarse', 'medium', 0, null], // a tablet: no badge
-    ['coarse', 'expanded', 0, null], // a large tablet: no badge
-    ['fine', 'medium', 0, null], // a medium-width desktop window: nothing else
-    ['fine', 'compact', 0, null], // a narrow desktop window: no badge
-    ['none', 'expanded', 0, null],
-  ] as const)('%s pointer, %s, seed %i → %s', (pointer, sizeClass, seed, expected) => {
-    expect(suitedOs({ pointer, sizeClass, seed, visible: all })).toBe(expected);
-  });
-  it('only a visible (released) OS can carry it, and a phone falls back to the other phone OS', () => {
-    expect(suitedOs({ pointer: 'fine', sizeClass: 'large', seed: 0, visible: ['linux'] })).toBeNull();
-    expect(suitedOs({ pointer: 'coarse', sizeClass: 'compact', seed: 0, visible: ['android'] })).toBe('android');
-    expect(suitedOs({ pointer: 'coarse', sizeClass: 'compact', seed: 0, visible: [] })).toBeNull();
-  });
-  it('is identical for all PersonaIds: the rule has no profile input at all', () => {
-    const input = { pointer: 'fine', sizeClass: 'expanded', seed: 3, visible: all } as const;
-    const results = PERSONA_IDS.map((persona) => suitedOs({ ...input, persona } as typeof input));
-    expect(new Set(results)).toEqual(new Set(['macos']));
-    expect(suitedOs.length).toBe(1);
   });
 });
 

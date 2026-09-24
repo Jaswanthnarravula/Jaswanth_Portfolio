@@ -1,0 +1,2 @@
+# Never convert line endings inside a PDF: CRLF rewriting breaks its byte offsets (and the résumé freshness check).
+*.pdf binary

@@ -329,7 +329,7 @@ export const portfolio = {
   resume: {
     file: '/resume/jaswanth-narravula-resume.pdf',
     downloadName: 'Jaswanth-Resume.pdf',
-    updated: '2026-09-21',
+    updated: '2026-09-23',
   },
   provenance: {
     sources: [

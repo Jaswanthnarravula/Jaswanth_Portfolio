@@ -32,7 +32,8 @@ smell test).
 ### Behaviour
 - **Open** → the OS's viewer app via the kernel (`OPEN_APP{role: sectionOwner.resume}`) — normal window/app rules.
 - **Download** → `<a download>` to `portfolio.resume.file`; filename `Jaswanth-Resume.pdf`; emits `resume_downloaded`.
-- `ResumeView` (content view) renders the PDF inline where supported, page images + Download on mobile Safari.
+- Every viewer shows the published PDF (the owner's `Resume.pdf`) as page images + its own text, in every browser
+  (shared/03 `VIEW-RESUME-01`); Open and Download are always that one file.
 - The fast path is visible in **compact mode** too (it may collapse to an icon, never disappear).
 - It is a real link (`href`), so it works without JS and by middle-click.
 

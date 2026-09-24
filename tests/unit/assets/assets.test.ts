@@ -47,6 +47,14 @@ describe('ASSET-MAN-01 typed manifest + resolver', () => {
   it('icons are decorative (alt="")', () => {
     for (const entry of ASSET_MANIFEST) expect(entry.alt).toBe('');
   });
+  it('the iOS wallpaper: the iPhone 16 artwork in official mode, the CSS gradient in original mode', () => {
+    const official = resolveAsset('wallpaper.ios', 'official');
+    expect(official.render).toBe('image');
+    if (official.render === 'image')
+      expect(official.src).toMatch(/^\/assets\/official\/wallpaper\.ios\.[0-9a-f]{10}\.avif$/);
+    const original = resolveAsset('wallpaper.ios', 'original');
+    expect(original.render === 'original' && original.source).toEqual({ css: 'var(--wallpaper-ios)' });
+  });
   it('unknown ids throw (typos are caught)', () => {
     expect(() => resolveAsset('app.macos.nope')).toThrow();
   });
@@ -124,6 +132,17 @@ describe('ASSET-INBOX-01 assets-inbox ingestion', () => {
         .toBuffer(),
     );
     writeFileSync(join(inbox, 'icons/fake.png'), 'not an image');
+    // A phone-sized wallpaper (smooth artwork, as real wallpapers are) and one too small for a phone screen.
+    const gradient = (width: number, height: number) =>
+      sharp(
+        Buffer.from(
+          `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><defs><linearGradient id="g" x2="0" y2="1"><stop offset="0" stop-color="#2a3aa8"/><stop offset="1" stop-color="#b9b3ff"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/></svg>`,
+        ),
+      )
+        .jpeg({ quality: 92 })
+        .toBuffer();
+    writeFileSync(join(inbox, 'icons/wall.jpg'), await gradient(1290, 2796));
+    writeFileSync(join(inbox, 'icons/wall-small.jpg'), await gradient(600, 1300));
     writeFileSync(
       join(inbox, 'icons/mark.svg'),
       '<?xml version="1.0"?><!-- c --><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10"/></svg>',
@@ -143,9 +162,16 @@ describe('ASSET-INBOX-01 assets-inbox ingestion', () => {
         { id: 'app.test.fake', file: 'icons/fake.png', kind: 'app-icon', sizes: [64], label: 'Fake', ...common },
         { id: 'app.test.mark', file: 'icons/mark.svg', kind: 'system-icon', label: 'Mark', ...common },
         { id: 'app.test.missing', file: 'icons/missing.png', kind: 'app-icon', label: 'Missing', ...common },
+        { id: 'wallpaper.test', file: 'icons/wall.jpg', kind: 'wallpaper', label: 'Wall', ...common },
+        { id: 'wallpaper.small', file: 'icons/wall-small.jpg', kind: 'wallpaper', label: 'Small', ...common },
       ],
     });
-    expect(Object.keys(entries).sort()).toEqual(['app.test.good', 'app.test.mark']);
+    expect(Object.keys(entries).sort()).toEqual(['app.test.good', 'app.test.mark', 'wallpaper.test']);
+    // A wallpaper is one AVIF at its own size, within its budget.
+    expect(entries['wallpaper.test'].src).toMatch(/^\/assets\/official\/wallpaper\.test\.[0-9a-f]{10}\.avif$/);
+    expect([entries['wallpaper.test'].width, entries['wallpaper.test'].height]).toEqual([1290, 2796]);
+    expect(entries['wallpaper.test'].bytes[0]).toBeLessThanOrEqual(BUDGETS.wallpaper);
+    expect(warnings.join('\n')).toMatch(/wallpaper\.small: too small/);
     expect(entries['app.test.good'].srcSet).toMatch(
       /app\.test\.good\.64\.[0-9a-f]{10}\.webp 64w, .*\.128\.[0-9a-f]{10}\.webp 128w/,
     );
@@ -156,7 +182,7 @@ describe('ASSET-INBOX-01 assets-inbox ingestion', () => {
     expect(warnings.join('\n')).toMatch(/app\.test\.missing: missing/);
     expect(JSON.parse(readFileSync(manifestPath, 'utf8')).entries['app.test.good']).toBeDefined();
     expect(
-      readdirSync(join(dir, 'public/assets/official')).every((name) => /\.[0-9a-f]{10}\.(webp|svg)$/.test(name)),
+      readdirSync(join(dir, 'public/assets/official')).every((name) => /\.[0-9a-f]{10}\.(webp|svg|avif)$/.test(name)),
     ).toBe(true);
   }, 30_000);
 });

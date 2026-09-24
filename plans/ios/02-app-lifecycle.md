@@ -21,7 +21,9 @@ singleton app instances (`shared/04`).
    radius from the squircle (22.37 %) to 0. Icon → content crossfade over progress 0.15–0.5. The grid icon itself is
    `visibility: hidden` during the flight.
 3. Spring **r 0.42 ζ 0.86**. Home Screen simultaneously scales to 0.92 and dims; wallpaper 1.06 → 1.12.
-4. The real app mounts at progress > 0.9 or at rest (warm apps are already mounted → instant).
+4. The real app starts rendering on the flight's first frame as a background (time-sliced) update; it is laid out
+   but not painted until 72 % openness, when the launch layer has gone (warm apps are already mounted → instant).
+   See `03-motion.md` "Layers during a flight".
 5. Focus: app heading → then Home Screen becomes `inert` → then the animation proceeds (`shared/09`).
 6. History: **push** `/ios/{slug}…` (mobile rule — Back returns Home).
 

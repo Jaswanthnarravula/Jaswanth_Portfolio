@@ -23,9 +23,11 @@ import { SPRINGS } from '@/lib/motion/spring';
 
 describe('IOS-MOTION-01 iOS motion tokens match plans/ios/03-motion.md', () => {
   it('springs (response, damping)', () => {
-    expect(IOS_SPRINGS.open).toEqual({ response: 0.26, damping: 0.92 });
-    expect(IOS_SPRINGS.close).toEqual({ response: 0.28, damping: 0.9 });
-    expect(IOS_SPRINGS.homeSettle).toEqual({ response: 0.28, damping: 0.9 });
+    expect(IOS_SPRINGS.open).toEqual({ response: 0.22, damping: 0.92 });
+    expect(IOS_SPRINGS.close).toEqual({ response: 0.24, damping: 0.9 });
+    expect(IOS_SPRINGS.homeSettle).toEqual({ response: 0.24, damping: 0.9 });
+    expect(IOS_SPRINGS.folderOpen).toEqual({ response: 0.22, damping: 0.92 });
+    expect(IOS_SPRINGS.folderClose).toEqual({ response: 0.24, damping: 0.9 });
     expect(IOS_SPRINGS.sheet).toEqual({ response: 0.32, damping: 1 });
     expect(IOS_SPRINGS.banner).toEqual({ response: 0.38, damping: 0.78 });
     expect(IOS_SPRINGS.quickMenu).toEqual({ response: 0.35, damping: 0.75 });

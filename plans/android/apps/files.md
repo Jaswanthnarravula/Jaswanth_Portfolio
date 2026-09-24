@@ -51,7 +51,7 @@ separate button; PDF viewer puts the **text version first in DOM**; Download sta
 in both extended and collapsed states; Info sheet = modal `dialog`.
 
 ## Edge cases
-PDF can't render inline → page images + text version. Missing PDF → text version only; FAB hidden. Removed slug →
+The page is always the PDF's page images + text version (shared/03 `VIEW-RESUME-01`). Missing PDF → text version only; FAB hidden. Removed slug →
 parent folder + snackbar.
 
 ## Feature IDs + acceptance tests

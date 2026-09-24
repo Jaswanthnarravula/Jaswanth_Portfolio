@@ -1,47 +1,11 @@
 /**
- * The chooser is the owner's storyboard frame (plans/04-os-chooser.md "Visual target", `CHOOSE-CARD-01`;
- * shared/06 "Owner visual targets"; north-star smell test 8). The boxes below were measured from
- * plans/visual-targets/storyboard.html `#chooser` drawn at exactly 1440 × 900; the live foyer must land on them.
+ * The chooser follows the owner's compact square-card refinement (plans/04-os-chooser.md "Visual target",
+ * `CHOOSE-CARD-01`; shared/06 "Owner visual targets"; north-star smell test 8).
  * The storyboard faces (DS-FONT-01): IBM Plex Sans from Hello's first paint, Bricolage Grotesque only once the
  * chooser mounts.
  */
 import { expect, test, type Page } from '@playwright/test';
 import { skipIntro, waitForSettled } from './helpers';
-
-type Box = readonly [x: number, y: number, width: number, height: number];
-
-/** plans/visual-targets/storyboard.html `#chooser` at 1440 × 900 (x, y, width, height in CSS px). */
-const FRAME = {
-  heading: [323.5, 234.7, 793, 68],
-  cards: [
-    [80.5, 333.4, 248.4, 396.3],
-    [338.1, 333.4, 248.5, 396.3],
-    [595.8, 333.4, 248.5, 396.3],
-    [853.4, 333.4, 248.5, 396.3],
-    [1111, 333.4, 248.4, 396.3],
-  ],
-  snaps: [
-    [96.8, 354.9, 215.8, 272.3],
-    [354.5, 354.9, 215.8, 272.3],
-    [612.1, 354.9, 215.8, 272.3],
-    [869.7, 354.9, 215.8, 272.3],
-    [1127.4, 354.9, 215.8, 272.3],
-  ],
-  badge: [378.6, 320.5, 167.5, 28.7],
-} as const satisfies Record<string, Box | readonly Box[]>;
-
-const box = (page: Page, selector: string) =>
-  page.locator(selector).evaluateAll((els) =>
-    els.map((el) => {
-      const r = el.getBoundingClientRect();
-      return [r.x, r.y, r.width, r.height] as const;
-    }),
-  );
-const expectBox = (actual: readonly number[], expected: Box, what: string, tolerance = 1.5) => {
-  actual.forEach((value, i) =>
-    expect(Math.abs(value - expected[i]!), `${what} [${i}] ${value} vs ${expected[i]}`).toBeLessThanOrEqual(tolerance),
-  );
-};
 
 async function toChooser(page: Page) {
   await page.goto('/');
@@ -60,22 +24,21 @@ test.describe('storyboard frame', () => {
     test.skip(info.project.name !== 'chromium-desktop', 'the frame is measured at 1440 × 900, fine pointer');
   });
 
-  test('W1 the foyer lands on the frame: heading, cards, snapshots and badge @smoke', async ({ page }) => {
+  test('W1 the foyer uses compact cards, smaller copy, square previews and no recommendation badge @smoke', async ({
+    page,
+  }) => {
     await toChooser(page);
-    const [heading] = await box(page, 'h1[data-chooser-fade="header"]');
-    expectBox(heading!, FRAME.heading, 'heading', 3);
-    const cards = await box(page, '[data-chooser-card]');
-    const snaps = await box(page, '[data-chooser-card] [data-shot]');
-    expect(cards).toHaveLength(5);
-    cards.forEach((card, i) => expectBox(card, FRAME.cards[i]!, `card ${i}`));
-    snaps.forEach((snap, i) => expectBox(snap, FRAME.snaps[i]!, `snapshot ${i}`));
-    const [badge] = await box(page, '[data-chooser-card="macos"] > span:first-child');
-    expectBox(badge!, FRAME.badge, 'badge');
-
     const look = await page.evaluate(() => {
       const heading = document.querySelector('h1[data-chooser-fade="header"]')!;
       const card = document.querySelector('[data-chooser-card]')!;
+      const nav = card.closest('nav')!;
+      const cards = [...document.querySelectorAll<HTMLElement>('[data-chooser-card]')];
+      const shots = [...document.querySelectorAll<HTMLElement>('[data-shot]')];
       const root = card.closest<HTMLElement>('[style*="--viewport-aspect"]')!;
+      const rootBox = root.getBoundingClientRect();
+      const headingBox = heading.getBoundingClientRect();
+      const navBox = nav.getBoundingClientRect();
+      const cardBoxes = cards.map((item) => item.getBoundingClientRect());
       return {
         field: getComputedStyle(root).backgroundImage,
         base: getComputedStyle(root).backgroundColor,
@@ -83,6 +46,20 @@ test.describe('storyboard frame', () => {
         headingColor: getComputedStyle(heading).color,
         cardFace: getComputedStyle(card).fontFamily,
         cardFill: getComputedStyle(card).backgroundColor,
+        headingSize: Number.parseFloat(getComputedStyle(heading).fontSize),
+        navWidth: navBox.width,
+        navCenterOffset: navBox.left + navBox.width / 2 - (rootBox.left + rootBox.width / 2),
+        groupCenterOffset: (headingBox.top + navBox.bottom) / 2 - (rootBox.top + rootBox.height / 2),
+        cardGaps: cardBoxes.slice(1).map((box, index) => box.left - cardBoxes[index]!.right),
+        cards: cardBoxes.map((box) => {
+          return { width: box.width, height: box.height };
+        }),
+        shots: shots.map((item) => {
+          const box = item.getBoundingClientRect();
+          return box.width / box.height;
+        }),
+        badge: document.body.textContent?.includes('Suits your device') ?? false,
+        imageTransforms: cards.map((item) => getComputedStyle(item.querySelector('img')!).transform),
         faces: [
           document.fonts.check('700 40px "Bricolage Grotesque"'),
           document.fonts.check('400 16px "IBM Plex Sans"'),
@@ -96,6 +73,21 @@ test.describe('storyboard frame', () => {
     expect(look.headingColor).toBe('rgb(27, 35, 71)'); // #1b2347
     expect(look.cardFace).toMatch(/^"?IBM Plex Sans"?,/);
     expect(look.cardFill).toBe('rgba(255, 255, 255, 0.55)');
+    expect(look.headingSize).toBeLessThanOrEqual(42);
+    expect(look.navWidth).toBeLessThanOrEqual(1200);
+    expect(Math.abs(look.navCenterOffset)).toBeLessThanOrEqual(1);
+    expect(Math.abs(look.groupCenterOffset)).toBeLessThanOrEqual(1);
+    for (const gap of look.cardGaps) expect(gap).toBeGreaterThanOrEqual(18);
+    expect(look.cards).toHaveLength(5);
+    for (const card of look.cards) {
+      expect(card.width).toBeLessThan(240);
+      expect(card.height).toBeLessThan(320);
+    }
+    expect(look.shots).toHaveLength(5);
+    for (const aspect of look.shots) expect(aspect).toBeCloseTo(1, 2);
+    expect(look.imageTransforms[0]).not.toBe('none');
+    expect(look.imageTransforms[4]).not.toBe('none');
+    expect(look.badge).toBe(false);
     expect(look.faces).toEqual([true, true]);
   });
 

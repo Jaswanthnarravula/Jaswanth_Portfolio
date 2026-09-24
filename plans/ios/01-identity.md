@@ -24,6 +24,13 @@ scaled 1.06; icons sit above. On tier ≥ 1 with motion full, the wallpaper tran
 position** (fine pointer — laptops and desktops) — no device-orientation permission prompts, no animation loop (writes
 only on pointermove via the ticker). Opening an app scales the wallpaper 1.06 → 1.12 and dims it (part of the flight).
 
+**Official mode (owner decision 2026-09-23: "iphone 15 or 16"):** the Home and Lock Screens show the **iPhone 16
+wallpaper in Ultramarine** — Apple artwork, manifest id `wallpaper.ios`, an overlay exactly like the official app
+icons (`ASSET_MODE=original` restores the gradient above; `TAKEDOWN.md`). One portrait AVIF (1290 × 2796, ≤ 60 KB)
+covers every page shape with `cover`, centred — on a landscape page the two glowing rims become the horizon behind the
+grid. Dark appearance dims it by 30 %, as iOS's "Dark Appearance Dims Wallpaper" does (no second file); its mean colour
+`#525cb8` shows while it loads (`fetchpriority="low"`, shared/11).
+
 ## Press feedback
 Icons and rows **dim** (overlay black 20 %) within 80 ms on press and recover over 200 ms; buttons scale 0.97 with a
 spring. **No ripple** (that is Android).
@@ -49,7 +56,7 @@ page (W × H); sizes are the real iPadOS metrics.
 
 | Element | Exactly as the frame |
 |---|---|
-| Wallpaper | `radial-gradient(60% 90% at 12% 8%, #8e6bd8 0, transparent 60%), radial-gradient(55% 80% at 92% 18%, #ff9f7a 0, transparent 55%), linear-gradient(160deg, #2a1d63 0, #6c3aa3 45%, #e27a86 85%, #ffb07a 100%)` |
+| Wallpaper | `radial-gradient(60% 90% at 12% 8%, #8e6bd8 0, transparent 60%), radial-gradient(55% 80% at 92% 18%, #ff9f7a 0, transparent 55%), linear-gradient(160deg, #2a1d63 0, #6c3aa3 45%, #e27a86 85%, #ffb07a 100%)` — original mode; official mode shows the iPhone 16 wallpaper ("Wallpaper and depth") |
 | Status bar | Left `9:41  Mon 21 Sep`; right Wi-Fi glyph, `80%`, battery glyph (the frame's "Wi-Fi" and `▮` are stand-ins for the real glyphs) |
 | Widgets | Left column from x 5.7 %, y 7.7 %, width 25.6 %: **Résumé** large widget (caps label, name, "{role} · {company}", "Updated {month year}", [Open] filled `#16183a` + [Download] outlined), then two square widgets side by side — **Open to work** ("{headline}") and **Projects** ("{featured repo}", "{language} · ★ {stars}"). White-to-lavender fill `rgb(255 255 255 / .92) → rgb(235 240 255 / .85)`, ink `#16183a` |
 | App grid | From x 37 % to 3 em from the right, 5 columns: Safari · GitHub · Notes · Messages · Settings · **Career** folder (Files, Notes, Mail) |

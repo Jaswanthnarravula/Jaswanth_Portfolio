@@ -648,9 +648,15 @@
   width: 816px;
   transform-origin: 0 0;
 }
+/* The published PDF's pages, one image per sheet, 16 px apart (PAGE_GAP). */
+.pages {
+  display: grid;
+  gap: 16px;
+}
 .pdf {
   display: block;
   width: 100%;
+  height: auto;
   border: 0;
   background: var(--edge-paper);
   box-shadow:

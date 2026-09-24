@@ -335,9 +335,14 @@ describe('IOS-FILES-04 Quick Look: Done, thumbnails, Download, Text version', ()
     expect(document.activeElement).toBe(buttons[0]);
     expect(within(dialog).getByRole('button', { name: 'Share' })).toBeInTheDocument();
     const meta = selectors.getResumeFileMeta()!;
-    const pages = within(dialog).getByRole('navigation', { name: 'Pages' });
-    expect(within(pages).getAllByRole('button')).toHaveLength(meta.pages);
-    expect(within(pages).getByRole('button', { name: 'Page 1' })).toHaveAttribute('aria-current', 'true');
+    // The strip lists every page — and, as in iOS, a one-page document has none.
+    if (meta.pages > 1) {
+      const pages = within(dialog).getByRole('navigation', { name: 'Pages' });
+      expect(within(pages).getAllByRole('button')).toHaveLength(meta.pages);
+      expect(within(pages).getByRole('button', { name: 'Page 1' })).toHaveAttribute('aria-current', 'true');
+    } else expect(within(dialog).queryByRole('navigation', { name: 'Pages' })).toBeNull();
+    // The page is the published PDF: one image per page.
+    expect(dialog.querySelectorAll('[data-ql-pdf] img')).toHaveLength(meta.pages);
     const download = within(dialog).getByRole('button', { name: /^Download \(PDF, \d+ KB\)$/ });
     fireEvent.click(download);
     expect(calls.downloadResume).toHaveLength(1);
@@ -369,7 +374,7 @@ describe('IOS-FILES-04 Quick Look: Done, thumbnails, Download, Text version', ()
     expect(within(dialog).queryByRole('button', { name: /^Download/ })).toBeNull();
     expect(within(dialog).queryByRole('navigation', { name: 'Pages' })).toBeNull();
     expect(within(dialog).queryByRole('button', { name: 'Text version' })).toBeNull();
-    expect(dialog.querySelector('object')).toBeNull();
+    expect(dialog.querySelector('[data-ql-pdf]')).toBeNull();
     expect(within(dialog).getByRole('article', { name: 'Résumé — text version' })).toBeVisible();
   });
 });
@@ -428,15 +433,20 @@ describe('IOS-FILES-06 full page: sidebar + content; Quick Look as a centred she
 });
 
 describe('IOS-FILES-07 semantics: dialog Quick Look, text-first résumé, axe clean', () => {
-  it('the text version precedes the PDF object in the DOM', async () => {
+  it("the text version (the PDF's own text) precedes the PDF's pages in the DOM", async () => {
     renderIosApp(Files, 'files', { location: resume });
     await settle();
     const dialog = screen.getByRole('dialog', { name: 'Résumé.pdf' });
     const text = within(dialog).getByRole('article', { name: 'Résumé — text version' });
-    const object = dialog.querySelector('object[type="application/pdf"]')!;
-    expect(object).not.toBeNull();
-    expect(text.compareDocumentPosition(object) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(within(text).getByRole('heading', { level: 4, name: person().name })).toBeInTheDocument();
+    const page = dialog.querySelector<HTMLImageElement>('[data-ql-pdf] img')!;
+    expect(page).not.toBeNull();
+    expect(page.getAttribute('srcset')).toMatch(/^\/resume\/pages\/[0-9a-f]{10}-1-816\.png 816w/);
+    expect(page).toHaveAttribute('alt', '');
+    expect(dialog.querySelector('object')).toBeNull();
+    expect(text.compareDocumentPosition(page) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(
+      within(text).getByRole('heading', { level: 4, name: new RegExp(`^${person().name}$`, 'i') }),
+    ).toBeInTheDocument();
   });
 
   it('axe: Browse, a folder, a document and Quick Look', async () => {

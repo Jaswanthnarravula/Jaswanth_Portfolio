@@ -53,7 +53,10 @@ Compose UI lives in the OS mail app; the shared panel exposes typed actions:
 - Missing optional fields (`repo`, `live`, `media`) → the action/slot simply isn't rendered; layout doesn't jump.
 - Clipboard blocked → show the address selected in a read-only field with "Press Ctrl/Cmd+C".
 - Long lists (> 12 items) → `content-visibility: auto` with `contain-intrinsic-size`.
-- PDF cannot render inline (mobile Safari) → `ResumeView` shows page images + Download button.
+- The résumé is always shown as the published PDF's **page images** (rendered at build time from the owner's
+  `Resume.pdf`; `ResumePages`), never an inline `<object>` — the CSP forbids it (`object-src 'none'`, `DEPLOY-HDR-01`)
+  and phones have no inline viewer. The text version (`ResumeDocument`) is the **same PDF's own text**, never the
+  data. Pages missing (render failed) → Open / Download links only. See the shared/22 Deviations log 2026-09-23.
 
 ## Feature IDs + acceptance tests
 

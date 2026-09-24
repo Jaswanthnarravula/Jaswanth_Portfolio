@@ -98,7 +98,7 @@ export const SPRINGS = {
   chooserFlight: { response: 0.55, damping: 0.9 },
   /** plans/04 exit: the snapshot shrinks back into its card (settles in ~420 ms, no overshoot). */
   chooserReturn: { response: 0.42, damping: 1 },
-  iosOpen: { response: 0.26, damping: 0.92 },
-  iosClose: { response: 0.28, damping: 0.9 },
+  iosOpen: { response: 0.22, damping: 0.92 },
+  iosClose: { response: 0.24, damping: 0.9 },
   dockMagnify: { response: 0.18, damping: 1 },
 } as const satisfies Record<string, SpringConfig>;

@@ -48,7 +48,7 @@ Status legend: **kit** = official public brand kit/source exists (fetch + record
 | Apple logo (boot), Windows logo (boot), Android boot mark | boot screens | none / brand kits | owner / kit |
 | Netflix ta-dum mp3 (~66 KB), smiley avatars ×5 | Netflix page | none | owner |
 | "JASWANTH" arc wordmark | Netflix page | **original in both modes** (inline SVG) | done in-repo |
-| Wallpapers ×5 OS (light + dark) | OS shells | **original in both modes** (CSS gradients / AVIF ≤ 60 KB) | done in-repo |
+| Wallpapers ×5 OS (light + dark) | OS shells | **original** CSS gradients in both modes — **except iOS**, whose official mode shows the iPhone 16 wallpaper (Ultramarine, one AVIF ≤ 60 KB, owner decision 2026-09-23; original mode keeps the gradient) | done in-repo / owner |
 | OS home snapshots ×5 OS × 2 aspects (landscape + portrait) | chooser cards + enter/exit transition | **generated in-repo** from the real shells at build time (so they match what the visitor enters); **no device frames anywhere** (north-star B17) | built in P8 (placeholders until each OS is released) |
 
 ### Audio

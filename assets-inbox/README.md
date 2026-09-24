@@ -66,6 +66,15 @@ Source: `og:image` of `https://play.google.com/store/apps/details?id=<package>` 
 | `android/settings.png` (432 px, **adaptive-icon foreground layer** — white gear; render on a circle filled with the dynamic `primary` colour, scale ≈ 1.7) | Google (AOSP, Apache-2.0) | `android.googlesource.com/platform/packages/apps/Settings` → `res/mipmap-xxxhdpi/ic_launcher_settings.png` (`?format=TEXT`, base64) |
 | `android/android-head.svg` (boot mark) | Google (CC BY 3.0) | Commons `Android robot head.svg` |
 
+## `wallpapers/` — OS wallpapers (official overlay; the CSS gradients stay the original)
+| File | Owner | Source |
+|---|---|---|
+| `ios-iphone16-ultramarine.jpg` (1290 × 2796, the iPhone 16 Plus screen) | Apple Inc. | iClarified "Download the Official iPhone 16 Wallpaper" → `www.iclarified.com/images/news/94911/453974/453974.jpg` (retrieved 2026-09-23) |
+
+Same family, not used: Teal · Pink · White · Black (same page, ids 453977 · 453978 · 453979 · 453981) and the
+iPhone 16 Pro titanium set (453966 · 453972 · 453969 · 453970, 1320 × 2868). The 945 × 2048 copies on iDownloadBlog are
+too small for a phone screen. The owner's comparison of three original designs is `preview/ios-wallpaper-options.png`.
+
 ## `netflix/`
 | File | Owner | Source |
 |---|---|---|

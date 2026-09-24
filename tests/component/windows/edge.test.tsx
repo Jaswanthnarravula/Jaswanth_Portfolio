@@ -283,12 +283,16 @@ describe('WIN-EDGE-04 the PDF viewer: page, zoom, Save, Print; text version firs
     expect(within(toolbar).getByRole('button', { name: 'Fit to width' })).toHaveAttribute('aria-pressed', 'false');
     expect(announce).toHaveBeenCalledWith(expect.stringMatching(/^Zoom \d+%$/));
 
+    // The text version (the PDF's own text) comes first; then the published PDF's pages as images.
     const text = screen.getByRole('region', { name: 'Résumé — text version' });
-    const object = document.querySelector<HTMLObjectElement>('object[type="application/pdf"]')!;
-    expect(object).toHaveAttribute('data', getResume().file);
-    expect(text.compareDocumentPosition(object) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(within(text).getByRole('heading', { level: 3, name: getPerson().name })).toBeInTheDocument();
-    expect(within(object).getByRole('link', { name: /Open Résumé\.pdf/ })).toHaveAttribute('href', getResume().file);
+    const pages = document.querySelectorAll<HTMLImageElement>('[data-resume-pages] img');
+    expect(pages).toHaveLength(file.pages);
+    expect(pages[0]!.getAttribute('srcset')).toContain('/resume/pages/');
+    expect(document.querySelector('object')).toBeNull();
+    expect(text.compareDocumentPosition(pages[0]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(
+      within(text).getByRole('heading', { level: 3, name: new RegExp(`^${getPerson().name}$`, 'i') }),
+    ).toBeInTheDocument();
   });
 
   it('with no PDF yet (placeholder phase) shows the text version only and hides Save', () => {
@@ -298,9 +302,11 @@ describe('WIN-EDGE-04 the PDF viewer: page, zoom, Save, Print; text version firs
     const toolbar = screen.getByRole('toolbar', { name: 'PDF tools' });
     expect(within(toolbar).queryByRole('link', { name: /^Save/ })).toBeNull();
     expect(within(toolbar).queryByText(/^Page 1 of/)).toBeNull();
-    expect(document.querySelector('object')).toBeNull();
+    expect(document.querySelector('[data-resume-pages]')).toBeNull();
     const text = screen.getByRole('region', { name: 'Résumé — text version' });
-    expect(within(text).getByRole('heading', { level: 3, name: getPerson().name })).toBeInTheDocument();
+    expect(
+      within(text).getByRole('heading', { level: 3, name: new RegExp(`^${getPerson().name}$`, 'i') }),
+    ).toBeInTheDocument();
   });
 });
 

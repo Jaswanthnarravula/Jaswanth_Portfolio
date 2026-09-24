@@ -530,7 +530,24 @@ test('IOS-ID-03 no animation loop at rest; transform-only writes on the wallpape
   await iosAtRest(page);
   const written = await page.evaluate(() => [...(window as unknown as { __written: Set<string> }).__written]);
   expect(written.length, 'the layers were written').toBeGreaterThan(0);
-  expect(written.filter((property) => property !== 'transform' && property !== 'opacity')).toEqual([]);
+  // `will-change` is not animated: it makes them layers while they move (shared/07 rule 5) and is cleared at rest.
+  expect(
+    written.filter((property) => property !== 'transform' && property !== 'opacity' && property !== 'will-change'),
+  ).toEqual([]);
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() =>
+          [
+            document.querySelector('[data-wallpaper]'),
+            document.querySelector('[data-home-layer]'),
+            document.querySelector('[data-home-layer]')?.nextElementSibling,
+            document.querySelector('[data-dock]')?.parentElement,
+          ].map((el) => (el as HTMLElement | null)?.style.willChange ?? ''),
+        ),
+      { message: 'no layer is kept at rest' },
+    )
+    .toEqual(['', '', '', '']);
 
   // Input stopped: the parallax frame and the flights' ticker stop with it.
   await page.waitForTimeout(2500);

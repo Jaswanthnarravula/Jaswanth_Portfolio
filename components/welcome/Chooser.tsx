@@ -5,8 +5,8 @@
  * the heading, and five glass cards — each with a detailed snapshot of that OS's full-page home (no device outline),
  * its name and one line of character.
  *   - Cards are real links to `/{os}` (`CHOOSE-CARD-01`); only released OSes appear (`CHOOSE-REL-01`).
- *   - One "Suits your device" badge from size class + input only — never the profile (`CHOOSE-BADGE-01`).
- *   - Hover/focus prefetches that OS's chunk; idle prefetches the last or badged OS (`CHOOSE-PREF-01`).
+ *   - Cards stay neutral: no device recommendation badge (`CHOOSE-BADGE-01`).
+ *   - Hover/focus prefetches that OS's chunk; idle prefetches the last OS (`CHOOSE-PREF-01`).
  *   - Plain click → the shared-element enter transition (chooser-stage); Esc reverses it (`CHOOSE-ENTER-01`).
  * The profile changes nothing here: the picked avatar's flight ends on the profiles screen and dissolves as the
  * foyer fades in over it (the frame has no avatar).
@@ -23,7 +23,7 @@ import { focusKeys } from '@/lib/kernel/types';
 import { prefersReducedMotion } from '@/lib/motion/dur';
 import { takeHandoff } from '@/lib/motion/handoff';
 import { prefetchOs } from '@/lib/os-loaders';
-import { CHOOSER_HEADING, OS_CHARACTER, suitedOs } from '@/lib/welcome/chooser';
+import { CHOOSER_HEADING, OS_CHARACTER } from '@/lib/welcome/chooser';
 import snapshots from '@/lib/welcome/snapshots.generated.json';
 import { useKernel, usePrefs } from '@/stores/kernel-context';
 import { dispatch, getKernel, subscribeEffects } from '@/stores/kernel-store';
@@ -51,10 +51,6 @@ const REFERENCE_SNAPSHOTS: Readonly<Record<OsId, Snapshot>> = {
   android: { webp: '/assets/chooser/android-hd.webp', width: 2032, height: 1272 },
   linux: { webp: '/assets/chooser/linux-hd.webp', width: 2044, height: 1272 },
 };
-
-/** A per-device number, stable across visits, used only to alternate the phone badge fairly (never the UA). */
-const deviceSeed = () =>
-  typeof screen === 'undefined' ? 0 : Math.max(screen.width, screen.height) + Math.min(screen.width, screen.height);
 
 /** OSes whose boot screen exists (each OS brings its own with its phase; plans/{os}/surfaces/boot.md). */
 const BOOTABLE: readonly OsId[] = ['macos', 'windows', 'ios'];
@@ -118,17 +114,13 @@ export default function Chooser({ oses = VISIBLE_OSES }: { oses?: readonly OsId[
   const [returning] = useState(() => returningFrom(getKernel()));
   const [view, setView] = useState<StageView>({ covered: returning, failed: null });
   const [boot, setBoot] = useState<OsId | null>(null);
-  const pointer = useKernel((state) => state.capabilities.pointer);
-  const sizeClass = useKernel((state) => state.viewport.sizeClass);
   const width = useKernel((state) => state.viewport.w);
   const height = useKernel((state) => state.viewport.h);
   const lastOs = usePrefs((prefs) => prefs.lastOs);
-  const [seed] = useState(deviceSeed);
 
   const orientation: Orientation = width >= height ? 'landscape' : 'portrait';
   // Returning visitors (they have entered an OS before) get "Continue in {lastOs}" above the grid (`CHOOSE-CONT-01`).
   const continueOs = lastOs && oses.includes(lastOs) && enterable(lastOs) ? lastOs : null;
-  const badge = suitedOs({ pointer, sizeClass, seed, visible: oses });
 
   // The stage (enter / reverse / retry) lives as long as the chooser.
   useEffect(() => {
@@ -193,7 +185,7 @@ export default function Chooser({ oses = VISIBLE_OSES }: { oses?: readonly OsId[
       if (!cancelled) tl.play();
     });
     // Idle: warm the chunk the visitor is most likely to pick.
-    const likely = (lastOs && oses.includes(lastOs) ? lastOs : null) ?? badge;
+    const likely = lastOs && oses.includes(lastOs) ? lastOs : null;
     const w = window as Window & { requestIdleCallback?: (cb: () => void) => number };
     const idle = () => likely && !cancelled && prefetchOs(likely);
     if (w.requestIdleCallback) w.requestIdleCallback(idle);
@@ -275,7 +267,6 @@ export default function Chooser({ oses = VISIBLE_OSES }: { oses?: readonly OsId[
               <ul className={styles.cards} data-count={oses.length}>
                 {oses.map((os) => {
                   const shot = orientation === 'landscape' ? REFERENCE_SNAPSHOTS[os] : SNAPSHOTS[os]?.[orientation];
-                  const suits = badge === os;
                   const failed = view.failed === os;
                   const released = enterable(os);
                   return (
@@ -284,7 +275,7 @@ export default function Chooser({ oses = VISIBLE_OSES }: { oses?: readonly OsId[
                         href={`/${os}`}
                         className={`${styles.card} ${released ? '' : styles.comingSoon}`}
                         data-chooser-card={os}
-                        aria-label={`${OS_NAMES[os]} — ${OS_CHARACTER[os]}${suits ? ', suits your device' : ''}`}
+                        aria-label={`${OS_NAMES[os]} — ${OS_CHARACTER[os]}`}
                         aria-disabled={!released || undefined}
                         data-focus-key={released ? focusKeys.chooserCard(os) : undefined}
                         onClick={(event) => {
@@ -296,7 +287,6 @@ export default function Chooser({ oses = VISIBLE_OSES }: { oses?: readonly OsId[
                         onPointerMove={released ? tilt : undefined}
                         onPointerLeave={released ? untilt : undefined}
                       >
-                        {suits ? <span className={styles.badge}>Suits your device</span> : null}
                         <span className={styles.shot} data-shot>
                           {shot ? (
                             // AVIF, or WebP where AVIF cannot decode (older Safari); decorative either way.

@@ -37,6 +37,9 @@ const DEV = [
   'opentype.js',
   'vitest',
   'web-vitals',
+  // build-time résumé page renderer (shared/01 "Dependency policy", 2026-09-23)
+  '@napi-rs/canvas',
+  'pdfjs-dist',
   // the original scaffold toolchain
   '@gltf-transform/cli',
   '@gltf-transform/core',

@@ -3,22 +3,12 @@
  * section generically. Hook-free and server-renderable.
  */
 import type { ContentRef } from '@/data/schema';
-import {
-  getContact,
-  getCredentials,
-  getEducation,
-  getExperience,
-  getPerson,
-  getProjects,
-  getResumeFileMeta,
-  getSkills,
-  resolveContent,
-} from '@/data/selectors';
+import { getResumeFileMeta, getResumePages, getResumeText, resolveContent } from '@/data/selectors';
 import { AboutOverview } from './about';
 import { ContactPanel } from './contact';
 import { EducationDetail, EducationList, ExperienceDetail, ExperienceList } from './experience';
 import { ProjectDetail, ProjectList } from './projects';
-import { ResumeDocument, ResumeView } from './resume';
+import { ResumeDocument, ResumePages, ResumeView } from './resume';
 import { SkillsMatrix } from './skills';
 import type { Density, HeadingLevel, ViewSlots } from './slots';
 import type { TextViewData, ViewId } from './text';
@@ -28,7 +18,7 @@ export interface ContentForProps {
   readonly density?: Density;
   readonly slots?: Partial<ViewSlots>;
   readonly headingLevel?: HeadingLevel;
-  /** Show the résumé's HTML pages under the Open/Download actions. */
+  /** Show the résumé's pages (the published PDF) under the Open/Download actions. */
   readonly resumePages?: boolean;
 }
 
@@ -66,19 +56,12 @@ export function ContentFor({ target, density, slots, headingLevel = 2, resumePag
             {...common}
           />
           {resumePages && (
-            <div className="cv-paper">
-              <ResumeDocument
-                data={{
-                  person: getPerson(),
-                  contact: getContact(),
-                  experience: getExperience(),
-                  projects: getProjects(),
-                  education: getEducation(),
-                  credentials: getCredentials(),
-                  skills: getSkills(),
-                }}
-                headingLevel={sub(headingLevel)}
-              />
+            <div className="cv-resume-pages">
+              {/* The PDF's own text first in DOM order (screen readers, search, no-JS); a keyboard user tabbing in sees it. */}
+              <div className="cv-text-hidden cv-paper">
+                <ResumeDocument data={getResumeText()} headingLevel={sub(headingLevel)} />
+              </div>
+              <ResumePages pages={getResumePages()} className="cv-pages" pageClassName="cv-page" />
             </div>
           )}
         </>

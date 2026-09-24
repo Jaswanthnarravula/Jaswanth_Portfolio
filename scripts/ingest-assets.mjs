@@ -1,7 +1,7 @@
 /**
  * `assets-inbox/` ingestion — shared/11 `ASSET-INBOX-01`.
  * Validates each dropped file (format, minimum dimensions), optimizes it (WebP at the sizes each OS needs; SVGs
- * minified), applies the declared transform, writes content-hashed files to `public/assets/official/`, and records
+ * minified; wallpapers one AVIF at their own size), applies the declared transform, writes content-hashed files to `public/assets/official/`, and records
  * manifest fields in `lib/assets/official.generated.json`. Missing or invalid files are skipped with a warning — the
  * original baseline renders instead; this script never fails a build.
  *   node --experimental-strip-types scripts/ingest-assets.mjs
@@ -16,7 +16,15 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-export const BUDGETS = { 'app-icon': 12 * 1024, 'system-icon': 12 * 1024, avatar: 16 * 1024, audio: 80 * 1024 };
+export const BUDGETS = {
+  'app-icon': 12 * 1024,
+  'system-icon': 12 * 1024,
+  avatar: 16 * 1024,
+  audio: 80 * 1024,
+  wallpaper: 60 * 1024,
+};
+/** A wallpaper must cover a phone screen at its native resolution (the smallest current iPhone, 1179 × 2556). */
+export const WALLPAPER_MIN = { width: 1170, height: 2532 };
 const MAC_GRID = 0.805; // Big Sur icon body / canvas
 
 const hash = (buffer) => createHash('sha256').update(buffer).digest('hex').slice(0, 10);
@@ -102,6 +110,15 @@ async function render(sharp, input, size, transform) {
     .toBuffer();
 }
 
+/** Highest AVIF quality within the budget (smooth artwork compresses well; never below 34). */
+async function encodeWallpaper(sharp, input, budget) {
+  for (let quality = 62; quality >= 34; quality -= 4) {
+    const out = await sharp(input).rotate().avif({ quality, effort: 6 }).toBuffer();
+    if (out.length <= budget || quality <= 34) return out;
+  }
+  throw new Error('unreachable');
+}
+
 async function encodeWebp(sharp, png, budget) {
   for (const quality of [90, 84, 78, 72, 66]) {
     const out = await sharp(png).webp({ quality, alphaQuality: 90, effort: 6 }).toBuffer();
@@ -155,6 +172,27 @@ export async function ingestAssets({ inboxDir, publicDir, manifestPath, sources,
         const name = `${source.id}.${hash(input)}.mp3`;
         await writeFile(join(outDir, name), input);
         entries[source.id] = { ...common, src: `/assets/official/${name}`, bytes: [input.length] };
+        continue;
+      }
+
+      if (source.kind === 'wallpaper') {
+        const meta = await sharp(input).metadata();
+        if (!['png', 'jpeg', 'webp', 'avif', 'heif'].includes(meta.format))
+          throw new Error(`unsupported format ${meta.format}`);
+        if ((meta.width ?? 0) < WALLPAPER_MIN.width || (meta.height ?? 0) < WALLPAPER_MIN.height)
+          throw new Error(`too small (${meta.width}×${meta.height}) for a phone screen`);
+        const avif = await encodeWallpaper(sharp, input, BUDGETS.wallpaper);
+        if (avif.length > BUDGETS.wallpaper)
+          throw new Error(`${avif.length} B exceeds the ${BUDGETS.wallpaper} B budget`);
+        const name = `${source.id}.${hash(avif)}.avif`;
+        await writeFile(join(outDir, name), avif);
+        entries[source.id] = {
+          ...common,
+          src: `/assets/official/${name}`,
+          width: meta.width,
+          height: meta.height,
+          bytes: [avif.length],
+        };
         continue;
       }
 

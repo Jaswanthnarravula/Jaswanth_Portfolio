@@ -91,12 +91,16 @@ test('Q1 résumé is one action away and shell is axe clean', async ({ page }) =
   expect(audit.violations.filter((item) => ['serious', 'critical'].includes(item.impact ?? ''))).toEqual([]);
 });
 
-test('LNX-ID-03/A11Y-06 light and dark themes remain contrast-clean at 200% text', async ({ page }, info) => {
+test('LNX-ID-03/A11Y-06 Linux stays dark and contrast-clean across global themes at 200% text', async ({
+  page,
+}, info) => {
   test.skip(isTouchProject(info), 'desktop accessibility posture only');
   await openLinux(page);
   for (const theme of ['light', 'dark']) {
     await run(page, `theme ${theme}`);
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+    await expect(shell(page)).toHaveCSS('color-scheme', 'dark');
+    await expect(shell(page)).toHaveCSS('background-color', 'rgb(12, 16, 22)');
     await shell(page).getByRole('link', { name: /PDF/ }).click();
     const audit = await new AxeBuilder({ page }).analyze();
     expect(audit.violations.filter((item) => ['serious', 'critical'].includes(item.impact ?? ''))).toEqual([]);

@@ -1,14 +1,15 @@
 /**
- * DATA-GUARD-01 (placeholder guard), GH-FETCH-01, GH-SAFE-01, GH-TOKEN-01, PERF-3D-01, DATA-RESUME-01 (freshness),
- * DEPLOY-STATIC-01 (post-build audit).
+ * DATA-GUARD-01 (placeholder guard), GH-FETCH-01, GH-SAFE-01, GH-TOKEN-01, PERF-3D-01, DATA-RESUME-01 (freshness,
+ * ingestion of the owner's Resume.pdf), VIEW-RESUME-01 (page text extraction), DEPLOY-STATIC-01 (post-build audit).
  */
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { auditClientSecrets, auditStaticOutput } from '../../../scripts/check-build.mjs';
 import { OWNER_RESUME, pdfPageCount, resolveResume } from '../../../scripts/build-resume.mjs';
+import { blocksFromLines, linesFromItems } from '../../../scripts/resume-pages.mjs';
 import { findPlaceholders, shouldCheck } from '../../../scripts/check-content.mjs';
 import { run } from '../../../scripts/fetch-github.mjs';
 import {
@@ -177,7 +178,7 @@ describe('PERF-3D-01 dormant 3D pipeline', () => {
   });
 });
 
-describe('DATA-RESUME-01 (freshness) the committed PDF matches the data', () => {
+describe('DATA-RESUME-01 (freshness) the committed PDF, its pages and text are current', () => {
   it('build-resume --check passes', () => {
     const output = execFileSync(
       process.execPath,
@@ -244,14 +245,14 @@ describe('DATA-RESUME-01 (ingestion) the owner file wins over the generated PDF'
   const generate = () => generated;
   const withOwnerFile = (contents: string | null) => {
     const root = mkdtempSync(join(tmpdir(), 'resume-'));
-    if (contents !== null) {
-      mkdirSync(join(root, 'content'));
-      writeFileSync(join(root, OWNER_RESUME), contents, 'latin1');
-    }
+    if (contents !== null) writeFileSync(join(root, OWNER_RESUME), contents, 'latin1');
     return root;
   };
 
-  it('without content/resume.pdf the PDF is generated from the data', async () => {
+  it('the owner file is Resume.pdf at the repository root', () => {
+    expect(OWNER_RESUME).toBe('Resume.pdf');
+  });
+  it('without Resume.pdf the PDF is generated from the data', async () => {
     const result = await resolveResume({ root: withOwnerFile(null), portfolio, generate });
     expect(result).toEqual({ ...generated, source: 'generated' });
   });
@@ -268,8 +269,115 @@ describe('DATA-RESUME-01 (ingestion) the owner file wins over the generated PDF'
       'is not a PDF',
     );
   });
-  it('the page counter agrees with the generator on the real résumé', () => {
+  it('the page counter agrees with the renderer on the published résumé', () => {
     const published = readFileSync(join('public', portfolio.resume.file));
     expect(pdfPageCount(published)).toBe(JSON.parse(readFileSync('data/generated/resume.json', 'utf8')).pages);
+  });
+  it("compressed object streams hide page objects: the page tree's /Count is the fallback", () => {
+    expect(pdfPageCount(Buffer.from('%PDF-1.7\n1 0 obj <</Type /Pages /Kids [3 0 R] /Count 2>>', 'latin1'))).toBe(2);
+    expect(pdfPageCount(Buffer.from('%PDF-1.7\n1 0 obj <</Type /ObjStm>>', 'latin1'))).toBe(1);
+  });
+  it('the published résumé is the owner file, byte for byte, with one image set per page', () => {
+    const meta = JSON.parse(readFileSync('data/generated/resume.json', 'utf8'));
+    const published = readFileSync(join('public', portfolio.resume.file));
+    if (meta.source === 'owner') expect(published.equals(readFileSync(OWNER_RESUME))).toBe(true);
+    expect(meta.images).toHaveLength(meta.pages);
+    for (const page of meta.images) {
+      expect(page.srcset.map(([, width]: [string, number]) => width)).toEqual([816, 1224, 1632, 2448]);
+      for (const [src] of page.srcset) expect(statSync(join('public', src)).size).toBeGreaterThan(1000);
+    }
+    expect(meta.text.length).toBeGreaterThan(0);
+  });
+});
+
+describe("VIEW-RESUME-01 the text version is the PDF's own text, in reading blocks", () => {
+  /** A positioned text item as pdf.js reports it (x/y in points, y grows upwards). */
+  const item = (str: string, x: number, y: number, options: { size?: number; bold?: boolean; width?: number } = {}) => {
+    const { size = 9, bold = false } = options;
+    return { page: 1, str, x, y, width: options.width ?? str.length * size * 0.45, size, bold };
+  };
+  const text = (runs: { text: string }[]) => runs.map((run) => run.text).join('');
+
+  it('lines read top to bottom; a far-right part (a wide space before it) becomes the aside', () => {
+    const lines = linesFromItems([
+      item('Engineer', 40, 700, { bold: true, width: 40 }),
+      item(' ', 80, 700, { width: 300 }),
+      item('Jun 2025 - Present', 500, 700, { bold: true, width: 70 }),
+      item('NAME', 200, 760, { size: 16, bold: true }),
+    ]);
+    expect(lines.map((line) => text(line.runs))).toEqual(['NAME', 'Engineer']);
+    expect(lines[1]!.aside).toBe('Jun 2025 - Present');
+  });
+  it('adjacent items join without a space; a gap inserts one; bold runs stay separate', () => {
+    const [line] = linesFromItems([
+      item('Languages:', 40, 600, { bold: true, width: 44 }),
+      item('Java, Go', 86.5, 600, { width: 40 }),
+      item('205', 140, 600, { width: 14 }),
+      item('-580', 154, 600, { width: 18 }),
+    ]);
+    expect(line!.runs).toEqual([{ text: 'Languages:', bold: true }, { text: ' Java, Go 205-580' }]);
+  });
+  it('blocks: title, headings, dated rows, bullets with wrapped lines, wrapped paragraphs, labelled lines', () => {
+    const blocks = blocksFromLines(
+      linesFromItems([
+        item('ADA LOVELACE', 200, 760, { size: 16, bold: true }),
+        item('SUMMARY', 40, 730, { bold: true }),
+        item('Engineer building platforms and a long line that reaches the right edge of the page', 40, 715, {
+          width: 530,
+        }),
+        item('services, with more words.', 40, 704, { width: 120 }),
+        item('SKILLS', 40, 680, { bold: true }),
+        item('Systems:', 40, 665, { bold: true, width: 38 }),
+        item('Concurrency, Idempotency, Retry/Backoff, Horizontal Scaling, and a long list to the edge,', 80, 665, {
+          width: 490,
+        }),
+        item('Fault Tolerance', 40, 654, { width: 60 }),
+        item('Security:', 40, 640, { bold: true, width: 40 }),
+        item('OAuth 2.1, OpenID Connect and another long list of protocols that runs to the edge CSRF', 82, 640, {
+          width: 488,
+        }),
+        item('Tools:', 40, 626, { bold: true, width: 28 }),
+        item('Maven, Git', 70, 626, { width: 50 }),
+        item('EXPERIENCE', 40, 600, { bold: true }),
+        item('IBM: Software Engineer', 40, 585, { bold: true, width: 100 }),
+        item('May 2022 - Dec 2023', 500, 585, { bold: true, width: 70 }),
+        item('• Tuned plans, indexes and reporting tables, reducing report-', 44, 572, { width: 526 }),
+        item('generation time by 60%.', 52, 561, { width: 110 }),
+        item('• Second bullet.', 44, 548, { width: 70 }),
+      ]),
+    );
+    expect(blocks.map((block) => [block.kind, text(block.runs), block.aside ?? null])).toEqual([
+      ['title', 'ADA LOVELACE', null],
+      ['heading', 'SUMMARY', null],
+      [
+        'text',
+        'Engineer building platforms and a long line that reaches the right edge of the page services, with more words.',
+        null,
+      ],
+      ['heading', 'SKILLS', null],
+      [
+        'text',
+        'Systems: Concurrency, Idempotency, Retry/Backoff, Horizontal Scaling, and a long list to the edge, Fault Tolerance',
+        null,
+      ],
+      [
+        'text',
+        'Security: OAuth 2.1, OpenID Connect and another long list of protocols that runs to the edge CSRF',
+        null,
+      ],
+      ['text', 'Tools: Maven, Git', null],
+      ['heading', 'EXPERIENCE', null],
+      ['text', 'IBM: Software Engineer', 'May 2022 - Dec 2023'],
+      ['item', 'Tuned plans, indexes and reporting tables, reducing report-generation time by 60%.', null],
+      ['item', 'Second bullet.', null],
+    ]);
+  });
+  it("the committed text is the owner's résumé (every section, every role)", () => {
+    const meta = JSON.parse(readFileSync('data/generated/resume.json', 'utf8'));
+    if (meta.source !== 'owner') return;
+    const words = (meta.text as { runs: { text: string }[] }[]).map((block) => text(block.runs)).join('\n');
+    for (const heading of ['SUMMARY', 'SKILLS', 'PROFESSIONAL EXPERIENCE', 'EDUCATION'])
+      expect(words).toContain(heading);
+    for (const company of ['Xclusive Trading Inc.', 'IBM']) expect(words).toContain(company);
   });
 });

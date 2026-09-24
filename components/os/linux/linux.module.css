@@ -18,17 +18,6 @@
     var(--font-mono-linux, ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace);
   font-variant-numeric: tabular-nums;
 }
-:global(:root[data-theme='light']) .shell {
-  --linux-bg: #faf9f6;
-  --linux-fg: #343438;
-  --linux-dim: #6a6a72;
-  --linux-rule: #c5c5ca;
-  --linux-green: #168344;
-  --linux-blue: #155da3;
-  --linux-cyan: #087578;
-  --linux-yellow: #806200;
-  --linux-magenta: #9a347f;
-}
 .skip {
   position: absolute;
   z-index: 50;
@@ -280,11 +269,6 @@
   border-color: var(--linux-blue);
   background: var(--linux-blue);
   color: var(--linux-bg);
-}
-:global(:root[data-theme='light']) .viewer :global(.cv),
-:global(:root[data-theme='light']) .viewer :global(.cv-paper) {
-  --text-secondary: #54545c;
-  --text-tertiary: #65656d;
 }
 .divider {
   position: absolute;

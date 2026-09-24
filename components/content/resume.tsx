@@ -1,5 +1,6 @@
-import type { Credential, Education, Experience, Person, Project, Resume, SkillGroup, Contact } from '@/data/schema';
-import { formatPeriod, resumeFileLabel, type ResumeFileMeta } from './format';
+import { Fragment, type CSSProperties, type ReactNode } from 'react';
+import type { Person, Resume, ResumeBlock, ResumePage } from '@/data/schema';
+import { resumeFileLabel, type ResumeFileMeta } from './format';
 import { Heading, withSlots, type ViewProps } from './slots';
 
 export { resumeFileLabel, type ResumeFileMeta };
@@ -12,7 +13,7 @@ export interface ResumeData {
 
 /**
  * `ResumeView` — viewer / Quick Look / Edge PDF tab, `open resume`. Offers Open (the OS viewer or the PDF) and
- * Download. When the PDF is missing (placeholder phase) the Download action is hidden and the pages render from data.
+ * Download. When the PDF is missing (placeholder phase) the Download action is hidden.
  */
 export function ResumeView({ data, density = 'comfortable', slots, headingLevel = 2 }: ViewProps<ResumeData>) {
   const { Action } = withSlots(slots);
@@ -71,109 +72,156 @@ export function formatUpdated(iso: string): string {
   return `${MONTHS[Number(month) - 1] ?? ''} ${Number(day)}, ${year}`.trim();
 }
 
-export interface ResumeDocumentData {
-  readonly person: Person;
-  readonly contact: Contact;
-  readonly experience: readonly Experience[];
-  readonly projects: readonly Project[];
-  readonly education: readonly Education[];
-  readonly credentials: readonly Credential[];
-  readonly skills: readonly SkillGroup[];
+/** An address in the résumé's text: an email, or a web address written with a scheme, `www.` or a path. */
+const ADDRESS =
+  /(?<![\w.@/-])(?:[\w.+-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+|(?:https?:\/\/)?(?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}(?:\/[^\s•|,;)]*)?)/g;
+
+function addressHref(text: string): string | null {
+  if (text.includes('@')) return `mailto:${text}`;
+  if (/^https?:\/\//.test(text)) return text;
+  return /^www\./.test(text) || text.includes('/') ? `https://${text}` : null;
+}
+
+/** A run with its addresses as real links (the PDF's page images cannot be clicked). */
+function linkify(text: string): ReactNode[] {
+  const out: ReactNode[] = [];
+  let last = 0;
+  for (const match of text.matchAll(ADDRESS)) {
+    const address = match[0].replace(/[.]+$/, '');
+    const href = addressHref(address);
+    if (!href) continue;
+    if (match.index > last) out.push(text.slice(last, match.index));
+    out.push(
+      href.startsWith('mailto:') ? (
+        <a key={match.index} href={href}>
+          {address}
+        </a>
+      ) : (
+        <a key={match.index} href={href} target="_blank" rel="noopener noreferrer">
+          {address}
+        </a>
+      ),
+    );
+    last = match.index + address.length;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+
+const runs = (block: ResumeBlock) =>
+  block.runs.map((run, index) =>
+    run.bold ? <strong key={index}>{linkify(run.text)}</strong> : <Fragment key={index}>{linkify(run.text)}</Fragment>,
+  );
+
+/**
+ * The résumé's text version — the published PDF's own words (scripts/resume-pages.mjs), so it can never differ from
+ * the pages it sits beside: the name, section headings, entry rows with their dates, bullet lists; addresses are
+ * links. Selectable and screen-reader friendly; hosts render it on paper or keep it first in DOM order.
+ */
+export function ResumeDocument({ data, headingLevel = 2 }: ViewProps<readonly ResumeBlock[]>) {
+  if (!data.length) return null;
+  const sub = Math.min(headingLevel + 1, 6);
+  const title = data.find((block) => block.kind === 'title');
+  const name = title ? title.runs.map((run) => run.text).join('') : 'Résumé';
+  const nodes: ReactNode[] = [];
+  let items: ResumeBlock[] = [];
+  let beforeHeadings = true;
+  const flush = (key: number) => {
+    if (!items.length) return;
+    nodes.push(
+      <ul key={`list-${key}`}>
+        {items.map((item, index) => (
+          <li key={index}>{runs(item)}</li>
+        ))}
+      </ul>,
+    );
+    items = [];
+  };
+  data.forEach((block, index) => {
+    if (block.kind === 'item') {
+      items.push(block);
+      return;
+    }
+    flush(index);
+    if (block.kind === 'title')
+      nodes.push(
+        <Heading key={index} level={headingLevel} className="cv-doc-name">
+          {runs(block)}
+        </Heading>,
+      );
+    else if (block.kind === 'heading') {
+      beforeHeadings = false;
+      nodes.push(
+        <Heading key={index} level={sub} className="cv-doc-section">
+          {runs(block)}
+        </Heading>,
+      );
+    } else if (block.aside)
+      nodes.push(
+        <p key={index} className="cv-doc-row">
+          <span className="cv-doc-lead">{runs(block)}</span>
+          <span className="cv-doc-aside">{block.aside}</span>
+        </p>,
+      );
+    else
+      nodes.push(
+        <p key={index} className={beforeHeadings ? 'cv-doc-headline' : undefined}>
+          {runs(block)}
+        </p>,
+      );
+  });
+  flush(data.length);
+  return (
+    <article className="cv cv-resume-doc" aria-label={`${name} — résumé`}>
+      {nodes}
+    </article>
+  );
+}
+
+export interface ResumePagesProps {
+  readonly pages: readonly ResumePage[];
+  /** The `sizes` attribute: how wide one page is drawn (the host knows its zoom). */
+  readonly sizes?: string;
+  readonly className?: string;
+  readonly pageClassName?: string;
+  /** Layout only (a zoomed width) — never an animated value. */
+  readonly style?: CSSProperties;
+  /** Shown instead when the pages could not be rendered (Open / Download stay available). */
+  readonly children?: ReactNode;
 }
 
 /**
- * The résumé as HTML pages — the same facts as the PDF, readable where a PDF cannot render inline (mobile Safari),
- * selectable and screen-reader friendly. Rendered on a paper-like sheet by the host.
+ * The published PDF's pages as images — the real résumé in every browser, phones included (an inline PDF `<object>`
+ * is blocked by the CSP and phones have none). Decorative: the text version beside them carries the words.
  */
-export function ResumeDocument({ data, headingLevel = 2 }: ViewProps<ResumeDocumentData>) {
-  const { person, contact, experience, projects, education, credentials, skills } = data;
-  const sub = headingLevel + 1;
+export function ResumePages({
+  pages,
+  sizes = '(max-width: 860px) 100vw, 816px',
+  className,
+  pageClassName,
+  style,
+  children = null,
+}: ResumePagesProps) {
+  if (!pages.length) return <>{children}</>;
   return (
-    <article className="cv cv-resume-doc" aria-label={`${person.name} — résumé`}>
-      <header className="cv-doc-header">
-        <Heading level={headingLevel} className="cv-doc-name">
-          {person.name}
-        </Heading>
-        <p className="cv-doc-headline">{person.headline}</p>
-        <p className="cv-doc-contact">
-          <a href={`mailto:${contact.email}`}>{contact.email}</a>
-          {contact.links.map((link) => (
-            <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer">
-              {link.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
-            </a>
-          ))}
-          <span>{person.location}</span>
-        </p>
-      </header>
-      <section aria-labelledby="cv-doc-summary">
-        <Heading level={sub} id="cv-doc-summary" className="cv-doc-section">
-          Summary
-        </Heading>
-        {person.summary.slice(0, 2).map((paragraph) => (
-          <p key={paragraph.slice(0, 24)}>{paragraph}</p>
-        ))}
-      </section>
-      <section aria-labelledby="cv-doc-experience">
-        <Heading level={sub} id="cv-doc-experience" className="cv-doc-section">
-          Experience
-        </Heading>
-        {experience.map((role) => (
-          <div key={role.slug} className="cv-doc-entry">
-            <p className="cv-doc-row">
-              <strong>
-                {[role.role, role.company].filter(Boolean).join(' — ')}
-                {role.client ? ` (client: ${role.client})` : ''}
-              </strong>
-              {formatPeriod(role.start, role.end) && <span>{formatPeriod(role.start, role.end)}</span>}
-            </p>
-            <ul>
-              {role.highlights.map((item) => (
-                <li key={item.slice(0, 32)}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </section>
-      <section aria-labelledby="cv-doc-projects">
-        <Heading level={sub} id="cv-doc-projects" className="cv-doc-section">
-          Selected projects
-        </Heading>
-        {projects.map((project) => (
-          <div key={project.slug} className="cv-doc-entry">
-            <p className="cv-doc-row">
-              <strong>
-                {project.name} — {project.context}
-              </strong>
-              {project.year && <span>{project.year}</span>}
-            </p>
-            <p>{project.tagline}</p>
-          </div>
-        ))}
-      </section>
-      <section aria-labelledby="cv-doc-education">
-        <Heading level={sub} id="cv-doc-education" className="cv-doc-section">
-          Education
-        </Heading>
-        {education.map((school) => (
-          <p key={school.slug} className="cv-doc-row">
-            <strong>
-              {school.degree} — {school.school}
-            </strong>
-            {formatPeriod(school.start, school.end) && <span>{formatPeriod(school.start, school.end)}</span>}
-          </p>
-        ))}
-        {credentials.length > 0 && <p>Credentials: {credentials.map((item) => item.name).join(', ')}</p>}
-      </section>
-      <section aria-labelledby="cv-doc-skills">
-        <Heading level={sub} id="cv-doc-skills" className="cv-doc-section">
-          Skills
-        </Heading>
-        {skills.map((group) => (
-          <p key={group.id}>
-            <strong>{group.label}:</strong> {group.items.map((item) => item.name).join(', ')}
-          </p>
-        ))}
-      </section>
-    </article>
+    <div className={className} style={style} data-resume-pages="">
+      {pages.map((page, index) => (
+        // eslint-disable-next-line @next/next/no-img-element -- pre-rendered at build time, fixed dimensions (CLS)
+        <img
+          key={page.srcset[0]?.[0] ?? index}
+          className={pageClassName}
+          src={(page.srcset[1] ?? page.srcset[0])?.[0]}
+          srcSet={page.srcset.map(([src, width]) => `${src} ${width}w`).join(', ')}
+          sizes={sizes}
+          width={page.width}
+          height={page.height}
+          alt=""
+          decoding="async"
+          loading={index === 0 ? undefined : 'lazy'}
+          draggable={false}
+          data-page={index + 1}
+        />
+      ))}
+    </div>
   );
 }

@@ -2,27 +2,17 @@
 /**
  * Preview — the résumé viewer (plans/macos/apps/preview.md, `MAC-PREV-01…06`; target of the résumé fast path).
  *   · toolbar: thumbnails · zoom out / in / actual size · "1 / N" · Download · Share (Copy Link → /go/resume) · Print;
- *   · the PDF inline (`<object type="application/pdf">`); where a browser cannot show it inline, the same résumé as
- *     HTML pages (shared/22 VIEW-RESUME-01 deviation) — never a dead box;
- *   · the Text version (the semantic résumé from data) is FIRST in DOM order and visually toggled, so assistive tech
- *     gets real headings and lists either way;
+ *   · the published PDF's pages as images (`ResumePages`, rendered at build time from the owner's Resume.pdf) — the
+ *     real résumé in every browser; an inline `<object>` is blocked by the CSP (shared/03 VIEW-RESUME-01 deviation);
+ *   · the Text version (the same PDF's own text) is FIRST in DOM order and visually toggled, so assistive tech gets
+ *     real headings and lists either way;
  *   · zoom 50–300 %, fit-width by default; Ctrl/Cmd + wheel zooms the pages, never the OS;
  *   · Download = `<a download>` + `resume_downloaded` + a banner; Print prints only the résumé (print stylesheet).
  * Missing PDF (placeholder phase): text version only, Download hidden.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { copyText, renderText, ResumeDocument, resumeFileLabel } from '@/components/content';
-import {
-  getContact,
-  getCredentials,
-  getEducation,
-  getExperience,
-  getPerson,
-  getProjects,
-  getResume,
-  getResumeFileMeta,
-  getSkills,
-} from '@/data/selectors';
+import { copyText, ResumeDocument, ResumePages, resumeFileLabel } from '@/components/content';
+import { getResume, getResumeFileMeta, getResumePages, getResumeText } from '@/data/selectors';
 import { analytics } from '@/lib/analytics/loader';
 import { prefersReducedMotion } from '@/lib/motion/dur';
 import { useKernel } from '@/stores/kernel-context';
@@ -38,48 +28,14 @@ const ZOOM_MIN = 50;
 const ZOOM_MAX = 300;
 /** US Letter at 96 dpi: the page's actual size (100 %). */
 const PAGE_W = 816;
-const PAGE_RATIO = 11 / 8.5;
 const PAGE_GAP = 24;
-
-/**
- * The pages as a picture (the analogue of page images): the résumé's text laid out on paper, decorative and inert —
- * the accessible résumé is the Text version, first in DOM order, so nothing here duplicates its headings or links.
- */
-function PageImage() {
-  const person = getPerson();
-  const contact = getContact();
-  const lines = [
-    ...renderText(
-      'about',
-      { person, featured: [], current: getExperience().find((role) => role.end === 'present') },
-      96,
-    ).slice(0, 3),
-    [contact.email, ...contact.links.map((link) => link.url.replace(/^https?:\/\//, ''))].join('  ·  '),
-    '',
-    'EXPERIENCE',
-    ...getExperience().flatMap((role) => [...renderText('experience-detail', role, 96), '']),
-    'SELECTED PROJECTS',
-    ...renderText('project-list', getProjects(), 96),
-    '',
-    ...renderText('education-list', { schools: getEducation(), credentials: getCredentials() }, 96),
-    '',
-    ...renderText('skills', getSkills(), 96),
-  ];
-  return (
-    <div className={styles.pageImage} aria-hidden="true" inert>
-      {lines.map((line, index) => (
-        <p key={index} data-heading={/^[A-Z][A-Z &]+$/.test(line) || undefined}>
-          {line || ' '}
-        </p>
-      ))}
-    </div>
-  );
-}
 
 export default function Preview({ titleId, compact }: WindowBodyProps) {
   const resume = getResume();
   const file = getResumeFileMeta();
   const pages = file?.pages ?? 1;
+  const pageImages = getResumePages();
+  const pageRatio = pageImages[0] ? pageImages[0].height / pageImages[0].width : 11 / 8.5;
   const medium = useKernel((state) => state.viewport.sizeClass === 'medium');
   const [thumbnails, setThumbnails] = useState(!compact && !medium);
   const [text, setText] = useState(!file);
@@ -90,7 +46,7 @@ export default function Preview({ titleId, compact }: WindowBodyProps) {
   const canvas = useRef<HTMLDivElement>(null);
 
   const pageWidth = zoom === 'fit' ? fitWidth : Math.round((PAGE_W * zoom) / 100);
-  const pageHeight = Math.round(pageWidth * PAGE_RATIO);
+  const pageHeight = Math.round(pageWidth * pageRatio);
   const percent = zoom === 'fit' ? Math.round((fitWidth / PAGE_W) * 100) : zoom;
 
   useEffect(() => setAppState('viewer:thumbnails', thumbnails), [thumbnails]);
@@ -269,18 +225,7 @@ export default function Preview({ titleId, compact }: WindowBodyProps) {
           aria-label="Résumé — text version"
         >
           <div className={styles.paper}>
-            <ResumeDocument
-              data={{
-                person: getPerson(),
-                contact: getContact(),
-                experience: getExperience(),
-                projects: getProjects(),
-                education: getEducation(),
-                credentials: getCredentials(),
-                skills: getSkills(),
-              }}
-              headingLevel={3}
-            />
+            <ResumeDocument data={getResumeText()} headingLevel={3} />
           </div>
         </article>
         {file && thumbnails ? (
@@ -294,10 +239,7 @@ export default function Preview({ titleId, compact }: WindowBodyProps) {
                     onClick={() => goToPage(index + 1)}
                   >
                     <span className={styles.thumb} aria-hidden="true">
-                      <i />
-                      <i />
-                      <i />
-                      <i />
+                      <ResumePages pages={pageImages.slice(index, index + 1)} sizes="86px" />
                     </span>
                     Page {index + 1}
                   </button>
@@ -316,16 +258,20 @@ export default function Preview({ titleId, compact }: WindowBodyProps) {
               setPage(Math.min(pages, Math.max(1, Math.floor(top / (pageHeight + PAGE_GAP)) + 1)));
             }}
           >
-            <object
-              className={styles.pdf}
-              data={resume.file}
-              type="application/pdf"
-              title="Résumé (PDF)"
-              style={{ width: pageWidth, height: pages * pageHeight + (pages - 1) * PAGE_GAP }}
+            <ResumePages
+              pages={pageImages}
+              sizes={`${pageWidth}px`}
+              className={styles.pages}
+              pageClassName={styles.pdf}
+              style={{ width: pageWidth }}
             >
-              {/* No inline PDF in this browser: the same résumé as pages. */}
-              <PageImage />
-            </object>
+              {/* The pages could not be rendered at build time: the PDF itself, one click away. */}
+              <p className={styles.below}>
+                <a href={resume.file} type="application/pdf">
+                  Open Résumé.pdf
+                </a>
+              </p>
+            </ResumePages>
             <p className={styles.below}>
               <a href={resume.file} download={resume.downloadName} type="application/pdf" onClick={download}>
                 Download PDF ({resumeFileLabel(file).replace(/^PDF, /, '')})

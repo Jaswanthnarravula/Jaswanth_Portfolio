@@ -14,6 +14,7 @@
  * Notification Center, the Lock Screen, the tour, the eggs, continuity, the keyboard model and the Switch OS exit beat.
  */
 import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { preload } from 'react-dom';
 import { copyText, formatUpdated, goHref } from '@/components/content';
 import { contentIndex } from '@/data/content-index';
 import type { ContentRef } from '@/data/schema';
@@ -28,6 +29,7 @@ import {
   getResumeFileMeta,
 } from '@/data/selectors';
 import { analytics } from '@/lib/analytics/loader';
+import { resolveAsset } from '@/lib/assets/manifest';
 import { createKonami, recordEgg } from '@/lib/eggs';
 import type { AppRole, OsId } from '@/lib/kernel/ids';
 import { OS_NAMES } from '@/lib/kernel/ids';
@@ -119,6 +121,12 @@ const isIosRole = (role: AppRole): role is IosRole => (IOS_ROLES as readonly str
 /** The continuous-corner icon mask (the same path in both asset modes — IOS-ID-02). */
 const SQUIRCLE_MASK = `url("data:image/svg+xml,${encodeURIComponent(squircleSvg(100))}")`;
 
+/** The iPhone 16 wallpaper in official mode; `null` keeps the original gradient (plans/ios/01 "Wallpaper and depth"). */
+const WALLPAPER = (() => {
+  const asset = resolveAsset('wallpaper.ios');
+  return asset.render === 'image' ? asset.src : null;
+})();
+
 /** Page memory survives leaving iOS and coming back (session state, in memory for the page's life). */
 let rememberedPage = 0;
 /** "Cycles only on re-entry": the Projects widget shows the next featured project each time iOS is entered. */
@@ -165,6 +173,8 @@ const monthYear = (iso: string) =>
   new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 
 export default function IosShell({ heading }: OsShellProps) {
+  // Fetched with the shell (shared/11: wallpapers load at low priority; their mean colour shows meanwhile).
+  if (WALLPAPER) preload(WALLPAPER, { as: 'image', type: 'image/avif', fetchPriority: 'low' });
   const root = useRef<HTMLDivElement>(null);
   const homeLayer = useRef<HTMLDivElement>(null);
   const dockLayer = useRef<HTMLDivElement>(null);
@@ -1512,7 +1522,12 @@ export default function IosShell({ heading }: OsShellProps) {
           data-locked={lock || undefined}
           data-shimmer={shimmer || undefined}
           data-transient={(overlayOpen !== null && overlayOpen !== 'quick-actions') || undefined}
-          style={{ ['--icon' as string]: `${home.icon}px`, ['--squircle-mask' as string]: SQUIRCLE_MASK }}
+          data-wallpaper-official={WALLPAPER ? '' : undefined}
+          style={{
+            ['--icon' as string]: `${home.icon}px`,
+            ['--squircle-mask' as string]: SQUIRCLE_MASK,
+            ...(WALLPAPER ? { ['--wallpaper-ios-official' as string]: `url("${WALLPAPER}")` } : {}),
+          }}
         >
           <div ref={wallpaper} className={styles.wallpaper} aria-hidden="true" data-wallpaper="" />
 

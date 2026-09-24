@@ -201,7 +201,8 @@ function buildManifest(): readonly AssetEntry[] {
     original: { synth: 'chime' },
     alt: '',
   });
-  // Original in both modes: the name wordmark (inline SVG) and CSS wallpapers / device frames.
+  // Original in both modes: the name wordmark (inline SVG) and device frames. Wallpapers are CSS originals, with an
+  // official overlay where the owner chose one (iOS: the iPhone 16 wallpaper — plans/ios/01 "Wallpaper and depth").
   entries.push({
     id: assetId('wordmark.name'),
     kind: 'wordmark',
@@ -217,6 +218,7 @@ function buildManifest(): readonly AssetEntry[] {
       os,
       label: `${os} wallpaper`,
       box: { w: 16, h: 10 },
+      official: official(`wallpaper.${os}`),
       original: { css: `var(--wallpaper-${os})` },
       alt: '',
     });

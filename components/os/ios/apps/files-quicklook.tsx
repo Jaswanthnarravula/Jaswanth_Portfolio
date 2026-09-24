@@ -2,9 +2,9 @@
 /**
  * Quick Look — the résumé viewer of iOS Files (plans/ios/apps/files.md "Quick Look", `IOS-FILES-04` · `IOS-FILES-07`):
  *   · a modal `dialog` named "Résumé.pdf": **Done** first in the reading order (left), the title, **Share** (right);
- *   · the page: the **text version** (`ResumeDocument`, from data) comes first in the DOM, then the PDF `<object>`;
- *     the text version is what shows when the visitor asks for it, when the PDF is missing, and where the browser has no
- *     inline PDF viewer (mobile Safari — `navigator.pdfViewerEnabled === false`);
+ *   · the page: the **text version** (`ResumeDocument` — the published PDF's own text) comes first in the DOM, then
+ *     the PDF's pages as images (rendered at build time; iPhone Safari has no inline PDF viewer and the CSP blocks
+ *     `<object>`); the text version is what shows when the visitor asks for it or when the pages are missing;
  *   · bottom: page thumbnails (scroll-snap strip) · **Download** stating type + size (hidden without a PDF) · "Text
  *     version" toggle;
  *   · it opens as a **zoom from the file row's thumbnail** (spring r 0.42 ζ 0.86 sampled into WAAPI keyframes) and
@@ -14,18 +14,8 @@
  * Only `transform` / `opacity` animate, written by WAAPI or directly on the element — never through React state.
  */
 import { useEffect, useId, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import { ResumeDocument, resumeFileLabel } from '@/components/content';
-import {
-  getContact,
-  getCredentials,
-  getEducation,
-  getExperience,
-  getPerson,
-  getProjects,
-  getResume,
-  getResumeFileMeta,
-  getSkills,
-} from '@/data/selectors';
+import { ResumeDocument, ResumePages, resumeFileLabel } from '@/components/content';
+import { getResumeFileMeta, getResumePages, getResumeText } from '@/data/selectors';
 import { drag } from '@/lib/motion/drag';
 import { prefersReducedMotion } from '@/lib/motion/dur';
 import { commits, type IosLayout } from '../model';
@@ -35,8 +25,6 @@ import { Glyph } from '../ui/glyphs';
 import styles from './files.module.css';
 
 export const QUICK_LOOK_TITLE = 'Résumé.pdf';
-/** US Letter: 8.5 × 11 in. */
-const PAGE_RATIO = 11 / 8.5;
 /** Projected travel (of the page height) past which a swipe down dismisses. */
 const DISMISS_AT = 0.3;
 
@@ -74,8 +62,6 @@ export function zoomFrames(from: DOMRect, to: DOMRect, closing: boolean): { fram
   return { frames, durationMs };
 }
 
-const inlinePdf = (): boolean => (typeof navigator === 'undefined' ? true : navigator.pdfViewerEnabled !== false);
-
 export function QuickLook({
   open,
   layout,
@@ -104,11 +90,11 @@ export function QuickLook({
 
   if (open && !present) setPresent(true);
 
-  const resume = getResume();
   const file = getResumeFileMeta();
   const pages = file?.pages ?? 1;
-  // No PDF, no inline viewer (iPhone Safari), or asked for: the text version is the page.
-  const canPdf = file !== null && inlinePdf();
+  // No PDF, no page images, or asked for: the text version is the page.
+  const pageImages = getResumePages();
+  const canPdf = file !== null && pageImages.length > 0;
   const showText = text || !canPdf;
 
   /** An interrupted animation is not its end: WAAPI queues `cancel` events, so detach before cancelling. */
@@ -305,15 +291,6 @@ export function QuickLook({
   };
 
   const label = resumeFileLabel(file);
-  const docData = {
-    person: getPerson(),
-    contact: getContact(),
-    experience: getExperience(),
-    projects: getProjects(),
-    education: getEducation(),
-    credentials: getCredentials(),
-    skills: getSkills(),
-  };
 
   return (
     <div
@@ -361,22 +338,17 @@ export function QuickLook({
             data-ql-text=""
           >
             <div className={styles.paper}>
-              <ResumeDocument data={docData} headingLevel={4} />
+              <ResumeDocument data={getResumeText()} headingLevel={4} />
             </div>
           </article>
           {file ? (
-            <div
-              ref={pdf}
-              className={styles.qlPdf}
-              hidden={showText || undefined}
-              style={{ aspectRatio: `8.5 / ${(11 * pages).toFixed(2)}` }}
-              data-ql-pdf=""
-            >
-              <object data={resume.file} type="application/pdf" title="Résumé (PDF)" className={styles.qlObject}>
-                <p className={styles.qlFallback}>
-                  This browser can&rsquo;t show the PDF here — the text version above has the same résumé.
-                </p>
-              </object>
+            <div ref={pdf} className={styles.qlPdf} hidden={showText || undefined} data-ql-pdf="">
+              <ResumePages
+                pages={pageImages}
+                sizes="(max-width: 820px) 100vw, 820px"
+                className={styles.qlPages}
+                pageClassName={styles.qlObject}
+              />
             </div>
           ) : null}
         </div>
@@ -392,15 +364,8 @@ export function QuickLook({
                       aria-current={page === index + 1 ? 'true' : undefined}
                       onClick={() => goTo(index + 1)}
                     >
-                      <span
-                        className={styles.qlThumb}
-                        aria-hidden="true"
-                        style={{ aspectRatio: `1 / ${PAGE_RATIO.toFixed(3)}` }}
-                      >
-                        <i />
-                        <i />
-                        <i />
-                        <i />
+                      <span className={styles.qlThumb} aria-hidden="true">
+                        <ResumePages pages={pageImages.slice(index, index + 1)} sizes="30px" />
                       </span>
                     </button>
                   </li>

@@ -1,6 +1,6 @@
 /*
  * Linux skin — values owned by plans/linux/01-identity.md. Monospace only, character cells, opaque surfaces, tiles
- * with 1 px borders. Dark by default; light only when the visitor chooses it.
+ * with 1 px borders. Linux keeps its terminal-native dark palette independently of the global site theme.
  */
 
 [data-os='linux'] {
@@ -54,26 +54,6 @@
   --material-chrome: var(--surface-chrome);
   --material-blur: none;
   --line-height: 1.35;
-}
-
-:root[data-theme='light'] [data-os='linux'] {
-  color-scheme: light;
-  --term-bg: oklch(0.985 0.003 90);
-  --term-fg: oklch(0.25 0.01 260);
-  --term-green: oklch(0.5 0.13 150);
-  --term-blue: oklch(0.48 0.14 255);
-  --term-cyan: oklch(0.5 0.1 210);
-  --term-yellow: oklch(0.55 0.12 80);
-  --term-red: oklch(0.5 0.19 27);
-  --term-magenta: oklch(0.5 0.15 330);
-  --term-selection: color-mix(in oklch, var(--term-fg) 18%, transparent);
-  --surface-raised: oklch(0.96 0.003 90);
-  --surface-overlay: oklch(0.95 0.004 90);
-  --surface-chrome: oklch(0.93 0.004 90);
-  --text-secondary: oklch(0.4 0.01 260);
-  --text-tertiary: oklch(0.47 0.01 260);
-  --border-subtle: oklch(0.82 0.005 260);
-  --border-strong: oklch(0.6 0.008 260);
 }
 
 @media (any-pointer: coarse) {

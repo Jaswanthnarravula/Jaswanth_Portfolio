@@ -6,9 +6,9 @@ that environment** rather than navigating to a page. Requirements: R12, R13, R36
 `chooser`; transition machine: `shared/04-os-kernel.md` (`KRN-SWITCH-*`).
 
 ## Portfolio mapping
-None directly. Each card previews that OS's **full-page home** with the visitor's real app set. The approved desktop
-frame uses a tall `0.79245` showcase crop; compact layouts retain orientation-aware snapshots. There is **no device
-outline** around the preview (north-star B17), and the preview remains the shared element for entry.
+None directly. Each card previews that OS's **full-page home** with the visitor's real app set. Every preview uses a
+square crop. There is **no device outline** around the preview (north-star B17), and the preview remains the shared
+element for entry.
 
 ## Anatomy
 ```
@@ -17,29 +17,26 @@ outline** around the preview (north-star B17), and the preview remains the share
   │ iOS home  │ │ macOS     │ │ Windows 11│ │ Android   │ │ Linux     │   five link cards, each a
   │ (page)    │ │ desktop   │ │ desktop   │ │ launcher  │ │ terminal  │   viewport-shaped snapshot,
   └───────────┘ └───────────┘ └───────────┘ └───────────┘ └───────────┘   no device outlines
-   name · one-line character · "Suits your device" badge (one card)
+   name · one-line character
   [Continue in macOS →]   (returning visitors only)        Résumé · Skip the OS
 ```
 - Cards are real links: `nav > ul > li > a[href="/{os}"]` (work without JS).
 - One-line character per OS: iOS "Tap through apps" · macOS "A desktop of windows" · Windows 11 "Start, taskbar,
   snap" · Android "Launcher and Material" · Linux "A real terminal".
-- **"Suits your device" badge** chosen from size class + input modality only (never user agent, **never the
-  profile**): coarse + compact → iOS or Android (alternating by a stable hash so neither is favoured); fine +
-  expanded → macOS; nothing else. Exactly one badge.
+- Cards are neutral: no device recommendation or "Suits your device" badge.
 - Only **released** OSes are rendered (`ARCH-REL-01`); the grid reflows for fewer than five.
 
-## Visual target (approved tall-card selector reference)
+## Visual target (compact square-card owner refinement)
 Rules: `shared/06-design-system.md` → Owner visual targets. Same unit as the welcome screens (1 em = 1.42 % of a
 16:10 screen); desktop values are measured from the approved 1656 × 950 reference.
 
 | Element | Exactly as the frame |
 |---|---|
 | Field | Inset rounded panel over `#e8ecf4`; `radial-gradient(60% 70% at 10% 10%, #c0cbfe 0, transparent 68%), radial-gradient(60% 70% at 95% 90%, #fad2e9 0, transparent 68%), #f0f4fd` |
-| Column | Heading and cards centred as one column, `1.6em` apart, `2.3%` side padding |
-| Heading | Bricolage Grotesque 700, `2.56em`, `#1b2347` |
-| Cards | Five equal columns, gap `.45em`; each `rgb(255 255 255 / .55)` with a 1 px `rgb(255 255 255 / .9)` rim, radius `1.15em`, padding `1em .75em .8em`, IBM Plex Sans; name `1.25em` weight 600, character `.88em` `#4a5576` |
-| Snapshot | Tall `0.79245` showcase window on desktop, radius `.6em`, shadow `0 .3em .8em rgb(20 30 70 / .25)`; compact layouts retain orientation-aware crops |
-| Badge | "Suits your device", `#2447d6` pill centred on the card's top edge (`top: -.87em`), `.78em` white |
+| Column | Heading and cards centred as one column, `1.3em` apart, `2.3%` side padding; card grid capped at `1200px` |
+| Heading | Bricolage Grotesque 700, `2em`, `#1b2347` |
+| Cards | Five equal columns, gap `.8em`; each `rgb(255 255 255 / .55)` with a 1 px `rgb(255 255 255 / .9)` rim, radius `.9em`, padding `.65em .6em .7em`, IBM Plex Sans; name `1.05em` weight 600, character `.78em` `#4a5576` |
+| Snapshot | Square `1 / 1` crop at every posture, radius `.6em`, shadow `0 .3em .8em rgb(20 30 70 / .25)` |
 | Footer | Hidden on the approved desktop frame; the compact layouts retain "Résumé" · "Skip the OS" under the foyer |
 
 ## Behaviour & states
@@ -47,7 +44,7 @@ Rules: `shared/06-design-system.md` → Owner visual targets. Same unit as the w
 |---|---|
 | Entrance | The foyer fades in over the profiles screen once the avatar hand-off lands (the avatar dissolves beneath it — the frame has no avatar); cards stagger in (60 ms apart, 320 ms, rise 16 px) |
 | Hover / focus | Card tilts ≤ 4° toward the pointer (fine pointer only), preview brightens; **prefetch that OS chunk** |
-| Idle | Prefetch `prefs.lastOs` chunk, else the badged OS |
+| Idle | Prefetch `prefs.lastOs` when present; first-time visitors prefetch on hover/focus |
 | Press | Card scales 0.98; release starts the enter transition |
 | Returning visitor | "Continue in {lastOs}" primary button above the grid |
 | Chunk failure | Card shows "Couldn't load — Retry" inline; link to `/plain` |
@@ -80,13 +77,13 @@ chooser, boot or lock screens.
 second click / Back mid-flight retargets or reverses cleanly (`MOTION-DIR-01`).
 
 ## Responsive
-Phone portrait: 2-column cards (fifth spans two), ≥ 88 px tall, each a portrait snapshot cropped to the card. Phone
-landscape: five compact tiles in one row. Tablet: 3 + 2 grid with descriptions. Laptop/desktop: five across; preview
-on hover **and** focus. No tilt on coarse pointers.
+Phone portrait: 2-column cards with the fifth centred at the same width, each with a square snapshot. Phone landscape:
+five compact tiles in one row. Tablet: 3 + 2 grid with descriptions. Laptop/desktop: five smaller cards across;
+preview on hover **and** focus. No tilt on coarse pointers.
 
 ## Accessibility
-`<h1>` "Choose how you want to explore". Link name = "{OS} — {character}"; badge text is part of the name
-("suits your device"). Snapshots are decorative (`alt=""`). The transition overlay is `aria-hidden`; a polite status
+`<h1>` "Choose how you want to explore". Link name = "{OS} — {character}". Snapshots are decorative (`alt=""`).
+The transition overlay is `aria-hidden`; a polite status
 announces "Entering macOS" once. Boot/lock screens are skippable by keyboard.
 
 ## Edge cases
@@ -97,8 +94,8 @@ chooser and cancels the push via back-collapse. Single released OS → the choos
 ## Feature IDs + acceptance tests
 | ID | Feature | Acceptance test |
 |---|---|---|
-| `CHOOSE-CARD-01` | Five link cards with identity, character line and a tall desktop showcase snapshot (no device outline) | `e2e: W1 cards are links to /{os}; desktop snapshot aspect = 0.79245; no frame element; W2 works without JS` |
-| `CHOOSE-BADGE-01` | Device-suited badge from size + input only, never the profile | `unit: badge decision table; identical for all PersonaIds` |
+| `CHOOSE-CARD-01` | Five compact link cards with identity, character line and square snapshots (no device outline) | `e2e: W1 cards are links to /{os}; snapshot aspect = 1; no frame element; W2 works without JS` |
+| `CHOOSE-BADGE-01` | No device recommendation badge; every OS card stays neutral | `component/e2e: "Suits your device" is absent and accessible names contain only OS + character` |
 | `CHOOSE-REL-01` | Only released OSes shown | `unit: chooser renders the released set` |
 | `CHOOSE-PREF-01` | Prefetch on hover/focus and idle | `perf: chunk requested on card focus, not before` |
 | `CHOOSE-ENTER-01` | Shared-element enter transition, reversible | `e2e: Esc mid-flight returns to the chooser with focus on the card` |

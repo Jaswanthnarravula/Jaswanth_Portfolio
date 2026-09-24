@@ -998,12 +998,17 @@
   padding: 26px 26px 96px;
   background: #535654;
 }
-.pdfPaper {
+/* The published PDF's pages, one image per sheet. */
+.pdfPages {
+  display: grid;
+  gap: 16px;
   width: min(800px, 100%);
-  min-height: 1100px;
   margin: auto;
-  padding: clamp(30px, 6vw, 72px);
-  color: #1d1b20;
+}
+.pdfPaper {
+  display: block;
+  width: 100%;
+  height: auto;
   background: white;
   box-shadow: 0 4px 18px rgb(0 0 0 / 30%);
 }

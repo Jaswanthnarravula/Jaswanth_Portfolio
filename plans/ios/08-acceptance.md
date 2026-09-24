@@ -13,7 +13,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 |---|---|---|---|---|---|
 | `IOS-ID-01` | iOS token scope complete | P5 | verified | unit `identity.test.ts` ×5 |see log |
 | `IOS-ID-02` | Squircle icon mask, identical boxes across asset modes | P5 | verified | e2e `ios-surfaces.spec.ts` | |
-| `IOS-ID-03` | Wallpaper depth: static layer + pointer parallax only, scale/dim on app open | P5 | verified | perf `performance.spec.ts` | |
+| `IOS-ID-03` | Wallpaper depth: static layer + pointer parallax only, scale/dim on app open | P5 | verified | perf `performance.spec.ts` › IOS-ID-03 (layers cleared at rest) · e2e `ios.spec.ts` › IOS-ID-03 · ASSET-MODE-01 | see log 2026-09-23 |
 | `IOS-ID-04` | Dim-on-press feedback (80 in / 200 out), no ripple | P5 | verified | e2e `ios.spec.ts` | |
 | `IOS-ID-05` | Materials within the 3-surface cap; solid fallback | P5 | verified | e2e `ios.spec.ts` | |
 | `IOS-ID-06` | Light/dark parity | P5 | verified | e2e `ios-surfaces.spec.ts` |see log |
@@ -137,10 +137,10 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | `IOS-FILES-01` | Browse/Recents tabs, locations, favorites, tags from data | P5 | verified | unit `files-model.test.ts` · cmp `files.test.tsx` |see log |
 | `IOS-FILES-02` | Folder list/icons views with sort menu; pushed navigation + URLs | P5 | verified | unit `files-model.test.ts` · cmp `files.test.tsx` · e2e `ios.spec.ts` | |
 | `IOS-FILES-03` | Document view for roles/schools | P5 | verified | cmp `files.test.tsx` | |
-| `IOS-FILES-04` | **Quick Look résumé**: zoom from row, Done, swipe-down, thumbnails, Download, Text version | P5 | verified | cmp `files.test.tsx` |see log |
+| `IOS-FILES-04` | **Quick Look résumé**: zoom from row, Done, swipe-down, thumbnails, Download, Text version | P5 | verified | cmp `files.test.tsx` · re-verified with the PDF's page images: `e2e/resume.spec.ts` › ios: the résumé viewer shows the published PDF's page · iphone (WebKit), pixel, chromium-desktop green 2026-09-23 (preview build .next-resume) |see log |
 | `IOS-FILES-05` | Synthesized stack on deep open from the Dock | P5 | verified | unit `files-model.test.ts` · cmp `files.test.tsx` · e2e `ios.spec.ts` | |
 | `IOS-FILES-06` | Pad sidebar layout + sheet Quick Look | P5 | verified | cmp `files.test.tsx` | |
-| `IOS-FILES-07` | Semantics (dialog Quick Look, text-first résumé) | P5 | verified | cmp `files.test.tsx` | |
+| `IOS-FILES-07` | Semantics (dialog Quick Look, text-first résumé) | P5 | verified | cmp `files.test.tsx` › the text version (the PDF's own text) precedes the PDF's pages in the DOM · green 2026-09-23 (vitest) | |
 
 ### `apps/github.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
@@ -291,6 +291,8 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 ## Deviations log
 | Date | ID | What changed vs the spec | Why | Owner sign-off |
 |---|---|---|---|---|
+| 2026-09-23 | IOS-MOTION-01 · IOS-MOTION-04 · IOS-FLIGHT-01 · IOS-FLIGHT-02 · IOS-FLIGHT-05 | Second speed pass: flights make the surface, launch layer, Home, Dock, dim veil and wallpaper layers while they move (and on a launcher press); the parallax does the same while the pointer moves; a first-time app renders as a background update from the flight's first frame (was: at 50 %); surfaces and app bodies are memoized; springs trimmed (open r 0.26→0.22, close / settle / folder close 0.28→0.24, folder open 0.26→0.22). `plans/ios/03-motion.md` "Layers during a flight" | Owner: "IOS apps are opening significantly very slow… make sure it is fast". Measured on the preview build (1440 × 900, headed Chromium): an open 453 → 329 ms, 7.8 → 17 frames, mean frame 64 → 20 ms, worst frame 136 → 35 ms. The cause was repaint, not script (no long tasks during a warm flight) | Requested by the owner 2026-09-23; review at the P5 gate |
+| 2026-09-23 | IOS-ID-03 · IOS-ID-06 | Official mode shows the iPhone 16 wallpaper (Ultramarine), dimmed 30 % in dark appearance; original mode keeps the storyboard gradient | The owner compared three original designs on the real Home Screen (`assets-inbox/preview/ios-wallpaper-options.png`) and chose "iphone 15 or 16" | Owner 2026-09-23 |
 | 2026-09-23 | IOS-MOTION-01 · IOS-FLIGHT-01 · IOS-FLIGHT-02 | Flight and in-app springs shortened (open r 0.42→0.26, close 0.50→0.28, settle 0.45→0.28, sheet 0.38→0.32, banner 0.45→0.38; nav push 350→300 ms; banner out and Safari bar 250→200 ms). `plans/ios/03-motion.md` updated | Owner review: "way too slow and not smooth… should give a premium smooth and fast feel". Measured on the preview build: an open took 464 ms and a return Home 578–614 ms against macOS's ~300 ms; they now land in 307 ms and 314 ms | Pending owner review at the P5 gate |
 | 2026-09-23 | IOS-FLIGHT-01 · IOS-MOTION-04 | During a spring flight the app body is laid out but not painted (it is revealed at 72 % openness); a finger-driven or parked surface still shows the live app | Painting a full page of live content through a clip that moves every frame held the flight at ~30 fps; behind the launch layer there is nothing to see | Pending owner review at the P5 gate |
 | 2026-09-22 | IOS-ID-01 · IOS-ID-06 | Tint `#0068da` (light) instead of the storyboard frame's `#0a7aff` | `#0a7aff` on white is 4.0:1 — fails AA for text links and bar buttons; `#0068da` passes 4.5:1 and reads the same | Pending owner review at the P5 gate |
@@ -298,7 +300,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | 2026-09-22 | IOS-WIDG-01 | The Résumé widget's Download action sits bottom-right, not in the header | Keeps the header to title + glyph as in the frame; one tap target per corner | Pending owner review at the P5 gate |
 | 2026-09-22 | IOS-HOME-01 · IOS-RESP-03 | Icon labels clamp their size (`max(var(--u), 13px)`) on the full-page layout | Below 13 px the labels fail legibility at 1366 × 768 | Pending owner review at the P5 gate |
 | 2026-09-22 | IOS-STAT-03 | Inside iOS, `--sa-b` is `max(env(safe-area-inset-bottom), 24px)` | The Home indicator needs a real hit zone on desktops (inset 0) that no app toolbar or pill may overlap (IOS-A11Y-02 target size) | Pending owner review at the P5 gate |
-| 2026-09-22 | IOS-FILES-04 | Quick Look shows the résumé as HTML pages (from data), not page images | Same as VIEW-RESUME-01: selectable, accessible, never stale | Pending owner review at the P5 gate |
+| 2026-09-22 | IOS-FILES-04 | Quick Look shows the résumé as HTML pages (from data), not page images | Same as VIEW-RESUME-01: selectable, accessible, never stale | Pending owner review at the P5 gate — **superseded 2026-09-23**: Quick Look now shows the PDF's page images + its own text (shared/22 log, VIEW-RESUME-01) |
 | 2026-09-22 | IOS-MAIL-02 | One saved draft per session (restored on reopen), not a drafts list | A static site with a `mailto:` hand-off has nothing to keep drafts for beyond the open compose | Pending owner review at the P5 gate |
 | 2026-09-22 | IOS-FILES-01 | The location reads "On My iPhone" on phone and "On My iPad" on the full page | Matches the idiom the layout presents | Pending owner review at the P5 gate |
 | 2026-09-22 | IOS-SET-01 | Appearance options are inline in Settings (no pushed screen) | Three choices fit one group; a push added a step with no content | Pending owner review at the P5 gate |

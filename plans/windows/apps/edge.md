@@ -22,7 +22,7 @@ Right edge: a slim **sidebar strip** (3 glyph buttons: GitHub · Outlook · Sear
 | Tab switch | `/windows/edge` ↔ `/windows/edge/resume` via `go()` (this app owns two sections, so tabs **are** routed) |
 | Overview scroll | Nested scroller with Lenis + ScrollTrigger under the same gates as Safari (`MOTION-SCROLL-01`): fine pointer, tier ≥ 1, motion full |
 | Loading | Thin accent progress line under the toolbar; tab shows a small spinner until ready |
-| PDF | Inline `<object>` or page-image fallback; **Save** → download + toast "Résumé.pdf — Download complete" |
+| PDF | The PDF's page images (shared/03 `VIEW-RESUME-01`; an Open link if they are missing); **Save** → download + toast "Résumé.pdf — Download complete" |
 | Refresh | Re-runs reveal effects (About) / reloads the PDF view |
 | Links to apps | Open the target app window |
 

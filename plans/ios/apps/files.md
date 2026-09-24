@@ -18,7 +18,7 @@ Bottom tab bar: **Recents** · **Browse**.
 - **Document view (pushed) for a role/school:** full-screen "document" — title, meta, highlights as a readable page
   (`ExperienceDetail`), bottom toolbar: Share · Copy link.
 - **Quick Look (résumé):** full-screen viewer, nav bar "Résumé.pdf" with **Done** (left) and **Share** (right);
-  page content (PDF inline or page images); bottom toolbar: page thumbnails strip · **Download** · "Text version".
+  page content (the PDF's page images, shared/03 `VIEW-RESUME-01`); bottom toolbar: page thumbnails strip · **Download** · "Text version".
 - **Recents:** the résumé, last viewed role, last viewed project shortcut (session-derived).
 
 ## Behaviour & states
@@ -46,11 +46,12 @@ Look floats as a large centred sheet. Laptops/desktops: same as pad, filling the
 
 ## Accessibility
 Browse sections are headed lists of links. List rows are links ("Acme — Senior Engineer, 2022 to present").
-Quick Look = modal `dialog` with Done first in order; **text version precedes the PDF object in DOM**; Download
+Quick Look = modal `dialog` with Done first in order; **text version precedes the PDF's pages in DOM**; Download
 states type + size. Sort/View menu = `Menu`.
 
 ## Edge cases
-PDF can't render inline on mobile Safari → page images + text version (expected path on real iPhones). Missing PDF →
+Every browser shows the page images + text version (shared/03 `VIEW-RESUME-01`); a one-page PDF has no thumbnail
+strip. Missing PDF →
 text version only, Download hidden. Removed slug → parent folder + banner.
 
 ## Feature IDs + acceptance tests

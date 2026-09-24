@@ -59,6 +59,15 @@
 }
 
 /* --- Wallpaper (static layer scaled 1.06; flights scale it to 1.12; pointer parallax ±6 px) ------------------------ */
+/* Official mode: the iPhone 16 wallpaper over its own mean colour while it loads; dark appearance dims it, as iOS's
+   "Dark Appearance Dims Wallpaper" does. Original mode keeps the gradient token (TAKEDOWN.md). */
+.ios[data-wallpaper-official] {
+  --wallpaper-ios: var(--wallpaper-ios-official) 50% 50% / cover no-repeat, #525cb8;
+}
+.ios[data-wallpaper-official][data-ios-dark] {
+  --wallpaper-ios:
+    linear-gradient(rgb(0 0 0 / 0.3) 0 0), var(--wallpaper-ios-official) 50% 50% / cover no-repeat, #39408a;
+}
 .wallpaper {
   position: absolute;
   inset: -2%;

@@ -812,6 +812,31 @@ test('IOS-ID-05 · PERF-BLUR-01 X5 at most 3 live backdrop-filter surfaces with 
   expect(live).toBeLessThanOrEqual(3);
 });
 
+test('IOS-ID-03 · ASSET-MODE-01 the iPhone 16 wallpaper in official mode; the original gradient in original mode', async ({
+  page,
+}, info) => {
+  await openIos(page);
+  const wallpaper = page.locator('[data-wallpaper]');
+  const image = await wallpaper.evaluate((el) => getComputedStyle(el).backgroundImage);
+  if (info.project.name === 'asset-original') {
+    expect(image).not.toMatch(/assets\/official/);
+    expect(image).toMatch(/gradient\(/);
+    return;
+  }
+  const src = image.match(/\/assets\/official\/wallpaper\.ios\.[0-9a-f]{10}\.avif/)?.[0];
+  expect(src, image).toBeDefined();
+  // The artwork is a real, full-resolution image (the iPhone 16 Plus screen), not the placeholder colour.
+  if (info.project.name.startsWith('chromium') || info.project.name === 'pixel')
+    expect(
+      await page.evaluate(async (url) => {
+        const img = new Image();
+        img.src = url;
+        await img.decode();
+        return [img.naturalWidth, img.naturalHeight];
+      }, src!),
+    ).toEqual([1290, 2796]);
+});
+
 test('IOS-ID-04 dim-on-press (80 ms in / 200 ms out); never a ripple element', async ({ page }) => {
   await openIos(page);
   const timing = await page.evaluate(() => {

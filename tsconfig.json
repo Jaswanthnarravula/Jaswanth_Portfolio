@@ -48,7 +48,17 @@
     ".next-p3/types/**/*.ts",
     ".next-p3/dev/types/**/*.ts",
     ".next-p4b/types/**/*.ts",
-    ".next-p4b/dev/types/**/*.ts"
+    ".next-p4b/dev/types/**/*.ts",
+    ".next-perf-before/types/**/*.ts",
+    ".next-perf-before/dev/types/**/*.ts",
+    ".next-perf-after/types/**/*.ts",
+    ".next-perf-after/dev/types/**/*.ts",
+    ".next-perf-final/types/**/*.ts",
+    ".next-perf-final/dev/types/**/*.ts",
+    ".next-perf-orig/types/**/*.ts",
+    ".next-perf-orig/dev/types/**/*.ts",
+    ".next-perf-final2/types/**/*.ts",
+    ".next-perf-final2/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

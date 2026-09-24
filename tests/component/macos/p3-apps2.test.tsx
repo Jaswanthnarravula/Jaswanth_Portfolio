@@ -168,9 +168,10 @@ describe('Preview', () => {
     const toolbar = screen.getByRole('toolbar', { name: 'Preview' });
     const text = screen.getByRole('article', { name: 'Résumé — text version' });
     expect(text).toHaveAttribute('data-print-resume');
-    // First in DOM order, before the page canvas.
-    const canvas = container.querySelector('object');
+    // First in DOM order, before the pages (the published PDF as images — never an <object>).
+    const canvas = container.querySelector('[data-resume-pages]');
     if (canvas) expect(text.compareDocumentPosition(canvas) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(container.querySelector('object')).toBeNull();
     if (getResumeFileMeta()) {
       const download = within(toolbar).getByRole('link', { name: /^Download PDF/ });
       expect(download).toHaveAttribute('download', getResume().downloadName);
@@ -187,7 +188,9 @@ describe('Preview', () => {
     const actual = screen.getByRole('button', { name: 'Actual size' });
     await userEvent.click(actual);
     expect(actual).toHaveTextContent('100%');
-    const canvas = container.querySelector<HTMLElement>('object')!.parentElement!;
+    // The pages in the canvas (the thumbnail strip shows the same images, inside its nav).
+    const pages = [...container.querySelectorAll<HTMLElement>('[data-resume-pages]')].find((el) => !el.closest('nav'));
+    const canvas = pages!.parentElement!;
     const event = new WheelEvent('wheel', { deltaY: -100, ctrlKey: true, bubbles: true, cancelable: true });
     act(() => {
       canvas.dispatchEvent(event);

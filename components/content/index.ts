@@ -7,10 +7,11 @@ export { ContactPanel, type ContactData } from './contact';
 export {
   ResumeView,
   ResumeDocument,
+  ResumePages,
   resumeFileLabel,
   formatUpdated,
   type ResumeData,
-  type ResumeDocumentData,
+  type ResumePagesProps,
   type ResumeFileMeta,
 } from './resume';
 export { LegalNotice, PrivacyNotice, type LegalData, type PrivacyData, type LegalCredit } from './legal';

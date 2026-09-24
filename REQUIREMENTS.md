@@ -148,6 +148,15 @@ time with `npm run setup:decoders`.
 
 `next lint` was removed in Next 16, so `npm run lint` calls `eslint` directly.
 
+### Résumé pages (build time only)
+
+| Package           | Version   | Notes                                                                            |
+| ----------------- | --------- | -------------------------------------------------------------------------------- |
+| `pdfjs-dist`      | `6.3.289` | Parses `Resume.pdf` in `scripts/resume-pages.mjs`; needs Node `>=22.13`          |
+| `@napi-rs/canvas` | `1.0.9`   | Rasterizes the pages for pdf.js (prebuilt binaries per platform, in the lockfile) |
+
+`npm run build:resume` turns the owner's `Resume.pdf` into page images + text; neither package reaches the browser.
+
 ### Deployment
 
 | Package  | Version   | Notes                                         |

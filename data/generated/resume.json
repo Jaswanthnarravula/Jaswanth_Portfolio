@@ -1,7 +1,366 @@
 {
   "file": "/resume/jaswanth-narravula-resume.pdf",
-  "bytes": 13245,
-  "pages": 2,
-  "source": "generated",
-  "sha256": "d8034066731d6e189985186ad9fe0c1f07e7c8ea7a3d3f388aee4cd6fada7b8a"
+  "bytes": 113901,
+  "pages": 1,
+  "source": "owner",
+  "sha256": "51c18cb3042f4c84bbc863796d2763c0c583944986b221b4b4fc68c3402ae01a",
+  "version": 1,
+  "images": [
+    {
+      "width": 816,
+      "height": 1056,
+      "srcset": [
+        [
+          "/resume/pages/51c18cb304-1-816.png",
+          816
+        ],
+        [
+          "/resume/pages/51c18cb304-1-1224.png",
+          1224
+        ],
+        [
+          "/resume/pages/51c18cb304-1-1632.png",
+          1632
+        ],
+        [
+          "/resume/pages/51c18cb304-1-2448.png",
+          2448
+        ]
+      ]
+    }
+  ],
+  "text": [
+    {
+      "kind": "title",
+      "runs": [
+        {
+          "text": "JASWANTH NARRAVULA",
+          "bold": true
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "runs": [
+        {
+          "text": "Sugar Land, TX • 205-580-6747 • jaswanthnarravula@gmail.com • linkedin.com/in/jaswanth-narravula • github.com/JaswanthNarravula"
+        }
+      ]
+    },
+    {
+      "kind": "heading",
+      "runs": [
+        {
+          "text": "SUMMARY",
+          "bold": true
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "runs": [
+        {
+          "text": "Software Engineer with 3+ years of experience building backend platforms, Java microservices, REST APIs, authentication systems, distributed workflows, and full-stack applications using Java 17, Spring Boot, Go, Python, SQL, and React/TypeScript. Strong in OAuth 2.1/OpenID Connect security, concurrent transaction processing, PostgreSQL/MySQL optimization, Redis caching, automated testing, CI/CD, and production reliability."
+        }
+      ]
+    },
+    {
+      "kind": "heading",
+      "runs": [
+        {
+          "text": "SKILLS",
+          "bold": true
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "runs": [
+        {
+          "text": "Languages:",
+          "bold": true
+        },
+        {
+          "text": " Java 17, Go, Python, C, C++, TypeScript/JavaScript, SQL, Bash"
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "runs": [
+        {
+          "text": "Backend & Microservices:",
+          "bold": true
+        },
+        {
+          "text": " Spring Boot, Spring Data JPA, Hibernate, REST APIs, FastAPI, Flask, Node.js, Microservices, OpenAPI/Swagger"
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "runs": [
+        {
+          "text": "Data & Storage:",
+          "bold": true
+        },
+        {
+          "text": " MySQL, PostgreSQL, Redis, Elasticsearch, SQLAlchemy, Transaction Management, Query Optimization, Indexing, Caching"
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "runs": [
+        {
+          "text": "Distributed Systems:",
+          "bold": true
+        },
+        {
+          "text": " Concurrent Programming, Java Multithreading, Event-Driven Architecture, Idempotency, Retry/Backoff, Horizontal Scaling, Fault Tolerance"
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "runs": [
+        {
+          "text": "Security & Identity:",
+          "bold": true
+        },
+        {
+          "text": " OAuth 2.1, OpenID Connect, PKCE, JWT, RS256/JWKS, Argon2id, RBAC, SSO, Microsoft Entra ID, Rate Limiting, CSRF"
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "runs": [
+        {
+          "text": "Engineering Tools:",
+          "bold": true
+        },
+        {
+          "text": " Maven, JUnit 5, Mockito, Postman, Git, GitHub Actions, CI/CD, Docker, Selenium, Linux"
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "runs": [
+        {
+          "text": "Frontend:",
+          "bold": true
+        },
+        {
+          "text": " React.js, TypeScript, Redux, Vite, Tailwind CSS"
+        }
+      ]
+    },
+    {
+      "kind": "heading",
+      "runs": [
+        {
+          "text": "PROFESSIONAL EXPERIENCE",
+          "bold": true
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "runs": [
+        {
+          "text": "Xclusive Trading Inc., Sugar Land, TX: Software Engineer",
+          "bold": true
+        }
+      ],
+      "aside": "Jun 2025 - Present"
+    },
+    {
+      "kind": "item",
+      "runs": [
+        {
+          "text": "Engineered an OAuth 2.1 / OpenID Connect identity provider in Go with Authorization Code + PKCE, refresh-token rotation, OIDC discovery, RS256 JWT/JWKS rotation, Argon2id, and RBAC for centralized SSO supporting 3,000+ users."
+        }
+      ]
+    },
+    {
+      "kind": "item",
+      "runs": [
+        {
+          "text": "Hardened authentication with rate limiting, CSRF/HSTS/CSP, audit logging, impersonation-safe sessions, and geo restrictions; integrated Microsoft Entra ID/OIDC with RS256 validation and route-level RBAC."
+        }
+      ]
+    },
+    {
+      "kind": "item",
+      "runs": [
+        {
+          "text": "Decomposed a production platform into 6 microservices and built idempotent, replay-safe ETL workflows with exponential backoff for reliable reprocessing without duplicate records."
+        }
+      ]
+    },
+    {
+      "kind": "item",
+      "runs": [
+        {
+          "text": "Tuned SQLAlchemy pooling/retries and PostgreSQL plans, indexes, and reporting tables, sustaining sub-200 ms p95 latency and reducing report-generation time by ~60% across 8+ services."
+        }
+      ]
+    },
+    {
+      "kind": "item",
+      "runs": [
+        {
+          "text": "Optimized React/TypeScript interfaces with code splitting, lazy loading, request deduplication, TTL caching, cancellation, and memoization; delivered WebSocket chat/notifications and standardized GitHub Actions CI/CD."
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "runs": [
+        {
+          "text": "IBM, Hyderabad, India: Software Engineer",
+          "bold": true
+        }
+      ],
+      "aside": "May 2022 - Dec 2023"
+    },
+    {
+      "kind": "item",
+      "runs": [
+        {
+          "text": "Engineered 10+ production REST APIs using Java 17, Spring Boot, Spring Data JPA, and Hibernate to automate corporate-loan processing, including application intake, eligibility validation, business rules, and multi-stage approvals for DBS Bank."
+        }
+      ]
+    },
+    {
+      "kind": "item",
+      "runs": [
+        {
+          "text": "Architected a state-driven workflow engine for rule-based eligibility decisions and deterministic status transitions, maintaining transactional consistency and data integrity across concurrent approval workflows backed by MySQL."
+        }
+      ]
+    },
+    {
+      "kind": "item",
+      "runs": [
+        {
+          "text": "Reduced API response times by 30% under high-concurrency workloads by analyzing SQL execution plans, optimizing MySQL queries/indexes and JPA/Hibernate access patterns, and applying Redis caching for frequently accessed data."
+        }
+      ]
+    },
+    {
+      "kind": "item",
+      "runs": [
+        {
+          "text": "Designed thread-safe service-layer components using Java concurrency and multithreading primitives to process simultaneous loan requests while preventing race conditions, inconsistent state transitions, and concurrent-update conflicts."
+        }
+      ]
+    },
+    {
+      "kind": "item",
+      "runs": [
+        {
+          "text": "Developed unit tests with JUnit 5 and Mockito and validated REST contracts with Swagger/OpenAPI and Postman; managed repeatable builds, test execution, packaging, and dependencies with Maven."
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "runs": [
+        {
+          "text": "All India Council for Technical Education (AICTE) - Technical Internships, Remote",
+          "bold": true
+        }
+      ],
+      "aside": "Oct 2021 - Mar 2022"
+    },
+    {
+      "kind": "item",
+      "runs": [
+        {
+          "text": "Built AWS lab environments with EC2, S3, VPC, RDS, Lambda, CloudWatch, and IAM, applying AWS Well-Architected principles across security, scalability, availability, monitoring, and cost."
+        }
+      ]
+    },
+    {
+      "kind": "item",
+      "runs": [
+        {
+          "text": "Completed applied ML labs covering data preparation, feature engineering, model training/evaluation, forecasting, computer vision, and NLP; trained and deployed models with Amazon SageMaker."
+        }
+      ]
+    },
+    {
+      "kind": "heading",
+      "runs": [
+        {
+          "text": "ACADEMIC PROJECTS",
+          "bold": true
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "runs": [
+        {
+          "text": "Price Intelligence Platform - FastAPI, PostgreSQL, Redis, Elasticsearch, Docker",
+          "bold": true
+        }
+      ]
+    },
+    {
+      "kind": "item",
+      "runs": [
+        {
+          "text": "Architected a FastAPI price-intelligence platform with asynchronous Scrapy/Celery/Redis ingestion, PostgreSQL persistence, Elasticsearch fuzzy search, cross-retailer ranking, price-history analytics, and Docker Compose packaging."
+        }
+      ]
+    },
+    {
+      "kind": "item",
+      "runs": [
+        {
+          "text": "Hardened asynchronous ingestion with Celery retry and failure-handling workflows and implemented Redis TTL caching to reduce repeated PostgreSQL reads and improve reliability and search-response performance."
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "runs": [
+        {
+          "text": "ASL Gesture Recognition & Translation - Python, PyTorch, ResNet-18",
+          "bold": true
+        }
+      ]
+    },
+    {
+      "kind": "item",
+      "runs": [
+        {
+          "text": "Built and evaluated a PyTorch ASL recognition pipeline for 24 static gestures; transfer learning with ResNet-18 improved test accuracy from 13.21% to 43.36% and macro-F1 from 0.081 to 0.351."
+        }
+      ]
+    },
+    {
+      "kind": "heading",
+      "runs": [
+        {
+          "text": "EDUCATION",
+          "bold": true
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "runs": [
+        {
+          "text": "Master of Science in Computer Science, University of Alabama at Birmingham (UAB), Birmingham, AL",
+          "bold": true
+        }
+      ],
+      "aside": "Jan 2024 - Dec 2025"
+    }
+  ]
 }

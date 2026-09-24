@@ -419,7 +419,7 @@ function QuickLook({ target, origin, onClose }: { target: ContentRef; origin: st
           </button>
         </header>
         <div className={styles.qlBody}>
-          <ContentFor target={target} headingLevel={3} slots={MAC_SLOTS} resumePages={false} />
+          <ContentFor target={target} headingLevel={3} slots={MAC_SLOTS} />
         </div>
       </FocusScope>
     </div>

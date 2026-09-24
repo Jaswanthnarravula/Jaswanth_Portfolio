@@ -4,6 +4,13 @@
 `@vitest/coverage-v8` is a development-only companion to Vitest required to enforce the planned coverage gates.
 It adds zero browser bytes; all runtime budgets below remain unchanged.
 
+## Résumé pages budget (2026-09-23)
+`pdfjs-dist` and `@napi-rs/canvas` run in `npm run build:resume` only — zero browser bytes; JS budgets unchanged.
+The viewers show the published PDF as pre-rendered page images: 4-grey-level PNGs at 816 / 1224 / 1632 / 2448 px
+(≈ 50 / 90 / 135 / 230 KB for the current page), chosen by `srcset` + `sizes`, so a phone loads ≈ 50–90 KB per page.
+They load only where the résumé is shown; the first page is eager (it may be the LCP element on `/go/resume`), the
+rest lazy; every image has explicit dimensions (CLS 0).
+
 ## Purpose
 Hit and hold the targets on real devices: **LCP < 2.5 s · INP < 200 ms · CLS < 0.1 · Lighthouse Accessibility
 ≥ 95 · 60 fps transitions · WebGL lazy · graceful fallbacks.** Requirements: R39, R40, R41, R48, T.

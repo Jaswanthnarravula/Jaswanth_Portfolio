@@ -143,7 +143,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 ### `09-cross-os-features.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `LNX-X-01` | Résumé fast path: status-bar link, `resume`, MOTD entry, viewer download | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
+| `LNX-X-01` | Résumé fast path: status-bar link, `resume`, MOTD entry, viewer download | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 · the viewer shows the published PDF's page: `e2e/resume.spec.ts` › linux: the résumé viewer shows the published PDF's page green 2026-09-23 (preview build .next-resume) | |
 | `LNX-X-02` | `search` output with insertable entries; native `find`/`grep` parity | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
 | `LNX-X-03` | Continuity via MOTD line / one-time notice | P7 | verified | component/linux/shell.test.tsx one-time continuity notice case green 2026-09-23 | |
 | `LNX-X-04` | Suggest-and-wait tour; graceful exit on free typing | P7 | verified | component/linux/shell.test.tsx real tour and free-typing exit case green 2026-09-23 | |

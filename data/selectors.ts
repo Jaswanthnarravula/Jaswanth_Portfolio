@@ -25,6 +25,8 @@ import type {
   Portfolio,
   Project,
   Resume,
+  ResumeBlock,
+  ResumePage,
   SkillGroup,
 } from './schema';
 
@@ -54,12 +56,27 @@ export const getResume = (): Resume => data.resume;
 export const getResumeFile = (): Resume['file'] => data.resume.file;
 export const getProvenance = (): Portfolio['provenance'] => data.provenance;
 
-/** Size and page count of the generated PDF (scripts/build-resume.mjs); `null` if it has not been built. */
+const resumeMeta = resumeJson as unknown as {
+  readonly file?: string;
+  readonly bytes?: number;
+  readonly pages?: number;
+  readonly images?: readonly ResumePage[];
+  readonly text?: readonly ResumeBlock[];
+};
+const resumePublished = resumeMeta.file === data.resume.file;
+
+/** Size and page count of the published PDF (scripts/build-resume.mjs); `null` if it has not been built. */
 export function getResumeFileMeta(): { readonly bytes: number; readonly pages: number } | null {
-  const meta = resumeJson as { file?: string; bytes?: number; pages?: number };
-  if (meta.file !== data.resume.file || typeof meta.bytes !== 'number' || typeof meta.pages !== 'number') return null;
-  return { bytes: meta.bytes, pages: meta.pages };
+  const { bytes, pages } = resumeMeta;
+  if (!resumePublished || typeof bytes !== 'number' || typeof pages !== 'number') return null;
+  return { bytes, pages };
 }
+
+/** The published PDF's pages as images — what every viewer shows; `[]` if they could not be rendered. */
+export const getResumePages = (): readonly ResumePage[] => (resumePublished ? (resumeMeta.images ?? []) : []);
+
+/** The published PDF's own text as reading blocks — the résumé's text version; `[]` if it was not extracted. */
+export const getResumeText = (): readonly ResumeBlock[] => (resumePublished ? (resumeMeta.text ?? []) : []);
 
 /** Featured first, then newest (by year) first; author order breaks ties. */
 export const getProjects = (): readonly Project[] =>

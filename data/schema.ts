@@ -116,6 +116,27 @@ export interface Resume {
   readonly updated: string;
 }
 
+/** One page of the published résumé PDF as images (scripts/resume-pages.mjs): CSS px at 100 % + rendered widths. */
+export interface ResumePage {
+  readonly width: number;
+  readonly height: number;
+  readonly srcset: readonly (readonly [src: string, width: number])[];
+}
+
+/** A run of the published résumé's own text; `bold` where the PDF sets it in a bold face. */
+export interface ResumeRun {
+  readonly text: string;
+  readonly bold?: true;
+}
+
+/** A reading block of the published résumé's own text — its text version (scripts/resume-pages.mjs). */
+export interface ResumeBlock {
+  readonly kind: 'title' | 'heading' | 'text' | 'item';
+  readonly runs: readonly ResumeRun[];
+  /** The right-aligned part of an entry row (its dates). */
+  readonly aside?: string;
+}
+
 export interface Portfolio {
   readonly person: Person;
   readonly contact: Contact;

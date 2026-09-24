@@ -16,7 +16,7 @@ the green border.
 Viewer tile: title strip `viewer — resume.pdf` (or `projects/portfolio-os.md`) with text buttons `[q] close` ·
 `[d] download` (résumé) · `[l] copy link`; body on the terminal background, **monospace headings + proportional-free
 layout**: content views render with mono type, box-drawing rules, tags as `[typescript]` chips, links cyan + underlined,
-images framed by a 1 px border with a caption line. Résumé: PDF inline (or page images) on a slightly lighter panel,
+images framed by a 1 px border with a caption line. Résumé: the PDF's page images (shared/03 `VIEW-RESUME-01`) on a slightly lighter panel,
 "text version" first in DOM.
 **Medium:** viewer overlays the terminal as a full tile (terminal hidden behind, status tags still switch).
 **Compact:** full-screen **pager-style** view with a visible `Close` button (not only `q`).
@@ -57,7 +57,7 @@ button. The terminal tile is **not** `inert` in tiled mode (both are usable); in
 ## Edge cases
 Terminal narrower than 40 cols after a split → viewer opens as overlay instead. Resize during the split animation →
 commit to the final layout immediately. `open` on a text file without a rich view → `less` (pager effect) instead.
-Removed ref in a deep link → parent listing printed in the terminal + dim notice. PDF fails → page images + text version.
+Removed ref in a deep link → parent listing printed in the terminal + dim notice. Pages missing → Open / Download + text version.
 
 ## Feature IDs + acceptance tests
 | ID | Feature | Acceptance test | Phase |

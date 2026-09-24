@@ -13,13 +13,16 @@ the finger's velocity and a projected end point decides the outcome. Slight, fas
 The flight responses were shortened after the owner's review ("way too slow… should give a premium smooth and fast
 feel"): measured on the preview build, an open settled in 707 ms and a return Home in 1152 ms, against 296 ms for a
 macOS window. The physics are unchanged — these are the same springs, tuned to land in about a third of a second.
+A second review (2026-09-23, "opening significantly very slow… make sure it is fast") trimmed them again to land in
+about a quarter of a second (open reaches 90 % in 123 ms and rests at 248 ms); the main fix that time was the frame
+rate — see "Layers during a flight" below.
 
 | Interaction | Spec | Purpose |
 |---|---|---|
-| App open (icon → app) | r 0.26 ζ 0.92 | Causality: the app *is* that icon |
-| App close (app → icon) | r 0.28 ζ 0.90 | Spatial: where it lives |
-| Interactive Home / switcher | finger-driven; release projection `v × 0.499`; settle r 0.28 ζ 0.90 | Direct manipulation |
-| Folder open / close | r 0.26 ζ 0.92 / r 0.28 ζ 0.90 | Same physics as apps |
+| App open (icon → app) | r 0.22 ζ 0.92 | Causality: the app *is* that icon |
+| App close (app → icon) | r 0.24 ζ 0.90 | Spatial: where it lives |
+| Interactive Home / switcher | finger-driven; release projection `v × 0.499`; settle r 0.24 ζ 0.90 | Direct manipulation |
+| Folder open / close | r 0.22 ζ 0.92 / r 0.24 ζ 0.90 | Same physics as apps |
 | Sheet present / dismiss | r 0.32 ζ 1.0 (no overshoot); finger-driven dismiss | Hierarchy |
 | Control Center / Spotlight reveal | finger-driven; settle r 0.32 ζ 0.85–1.0 | Direct manipulation |
 | Banner in | r 0.38 ζ 0.78 | Peripheral arrival |
@@ -38,6 +41,19 @@ macOS window. The physics are unchanged — these are the same springs, tuned to
 | Status-bar style crossfade | 200 ms |
 | Home arrival fly-in | icons 1.15 → 1 + fade, 12 ms column stagger, spring r 0.5 ζ 0.9 |
 | Safari bar collapse | 200 ms `0.32, 0.72, 0, 1` |
+
+## Layers during a flight
+Everything a flight moves is a composited layer **only while it moves** (shared/07 rule 5): the surface and its launch
+layer, the Home and Dock layers, the dim veil and the wallpaper get `will-change` when a spring starts or a finger
+takes the surface, and lose it at rest. A press on a launcher is the start of its flight, so the layers are made on
+`pointerdown` (dropped 600 ms later if nothing launched) and the first frame is not spent creating them. The pointer
+parallax makes the wallpaper a layer while the pointer moves (cleared 300 ms after it rests).
+Measured on the preview build (1440 × 900, headed Chromium, 2026-09-23): a flight frame went from 46–72 ms — the
+gradient wallpaper and the whole Home Screen were repainted at a new scale every frame; no script ran long — to ~18 ms;
+an open lands in ~330 ms with 17 frames instead of ~450 ms with 8.
+An app opened for the first time starts rendering on the flight's first frame as a background (time-sliced) update and
+is laid out, unpainted, long before its reveal at 72 %; shell updates never re-render warm apps (the surface and its
+body element are memoized).
 
 ## Interruption rules (iOS specifics)
 - Every spring supports `retarget()` mid-flight with velocity preserved: tapping another icon during an open
