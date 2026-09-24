@@ -122,4 +122,4 @@ complete · placeholder guard passes with real résumé content.
 ## Backlog (unplanned ideas — need owner approval and a spec before they get IDs)
 | Date | Idea | Proposed home |
 |---|---|---|
-| | | |
+| 2026-09-23 | iOS on slow CPUs: at 4× CPU throttling a flight still shows ~3 frames (as before the 2026-09-23 speed pass) — the first frame restyles the whole Home Screen when it turns `inert` and paints it into its layer, and an app's first open pays ~30–70 ms of one-time text setup. Candidates: `inert` on fewer nodes, a lighter Home paint, font warm-up in idle time | `plans/ios/03-motion.md` · `shared/10-performance.md` |

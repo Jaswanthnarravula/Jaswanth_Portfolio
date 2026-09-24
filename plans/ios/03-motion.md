@@ -48,9 +48,10 @@ layer, the Home and Dock layers, the dim veil and the wallpaper get `will-change
 takes the surface, and lose it at rest. A press on a launcher is the start of its flight, so the layers are made on
 `pointerdown` (dropped 600 ms later if nothing launched) and the first frame is not spent creating them. The pointer
 parallax makes the wallpaper a layer while the pointer moves (cleared 300 ms after it rests).
-Measured on the preview build (1440 × 900, headed Chromium, 2026-09-23): a flight frame went from 46–72 ms — the
-gradient wallpaper and the whole Home Screen were repainted at a new scale every frame; no script ran long — to ~18 ms;
-an open lands in ~330 ms with 17 frames instead of ~450 ms with 8.
+Measured on the preview build (1440 × 900, headed Chromium, real mouse clicks, 2026-09-23): a flight frame went from
+~57 ms — the gradient wallpaper and the whole Home Screen were repainted at a new scale every frame; no script ran
+long — to 17–21 ms. An open lands in 281–304 ms with 15–17 frames (was 374–447 ms with 7–8); Home lands in 293 ms at
+60 fps (was 429 ms, 9 frames).
 An app opened for the first time starts rendering on the flight's first frame as a background (time-sliced) update and
 is laid out, unpainted, long before its reveal at 72 %; shell updates never re-render warm apps (the surface and its
 body element are memoized).
