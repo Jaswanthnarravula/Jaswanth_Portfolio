@@ -1,0 +1,162 @@
+@import 'tailwindcss';
+@import '../styles/tokens.css';
+@import '../styles/os/macos.css';
+@import '../styles/os/windows.css';
+@import '../styles/os/ios.css';
+@import '../styles/os/android.css';
+@import '../styles/os/linux.css';
+@import '../styles/document.css';
+@import '../styles/shell.css';
+
+/*
+ * Layer 1 — primitives (shared/06). Tailwind v4 is configured in CSS; these become variables and utilities.
+ * OKLCH ramps, a 4 px spacing scale, radii, z-layers and motion tokens (per-OS values in styles/os/*).
+ */
+@theme {
+  --color-ink-0: oklch(0.99 0 0);
+  --color-ink-50: oklch(0.97 0.004 265);
+  --color-ink-100: oklch(0.93 0.008 265);
+  --color-ink-200: oklch(0.86 0.012 265);
+  --color-ink-300: oklch(0.76 0.016 265);
+  --color-ink-400: oklch(0.64 0.02 265);
+  --color-ink-500: oklch(0.52 0.022 265);
+  --color-ink-600: oklch(0.42 0.022 265);
+  --color-ink-700: oklch(0.32 0.022 266);
+  --color-ink-800: oklch(0.24 0.022 267);
+  --color-ink-900: oklch(0.18 0.02 268);
+  --color-ink-950: oklch(0.14 0.018 268);
+  --color-brand-300: oklch(0.8 0.1 250);
+  --color-brand-400: oklch(0.72 0.15 256);
+  --color-brand-500: oklch(0.62 0.19 262);
+  --color-brand-600: oklch(0.52 0.2 265);
+  --color-brand-700: oklch(0.42 0.18 268);
+  --color-glow-violet: oklch(0.62 0.2 300);
+  --color-glow-cyan: oklch(0.78 0.13 210);
+  --color-glow-rose: oklch(0.7 0.17 10);
+
+  --spacing: 0.25rem; /* 4 px base: --space-1 … --space-12 below */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 40px;
+  --space-10: 48px;
+  --space-11: 64px;
+  --space-12: 96px;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+
+  --z-wallpaper: 0;
+  --z-desktop: 10;
+  --z-windows: 100;
+  --z-dock: 900;
+  --z-menus: 1000;
+  --z-overlays: 1100;
+  --z-system: 1200;
+  --z-stage: 2000;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Menlo, Consolas, monospace;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Native smooth scrolling would fight Lenis where it runs (desktop browser Overview pages only). */
+    scroll-behavior: auto;
+    background: var(--surface-base);
+  }
+
+  body {
+    margin: 0;
+    min-height: 100svh;
+    background: var(--surface-base);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: var(--font-size-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  canvas {
+    display: block;
+  }
+
+  html.lenis-stopped {
+    overflow: hidden;
+  }
+
+  /* Inputs never trigger iOS focus zoom (RESP-KB-01). */
+  @media (any-pointer: coarse) {
+    input,
+    textarea,
+    select {
+      font-size: max(16px, 1em);
+    }
+  }
+
+  button,
+  a,
+  [role='button'] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* "Skip the OS" — the first focusable element everywhere (A11Y-SKIP-01). Visible on focus. */
+  .skip-link {
+    position: fixed;
+    inset-block-start: calc(var(--sa-t) + 8px);
+    inset-inline-start: calc(var(--sa-l) + 8px);
+    z-index: calc(var(--z-stage) + 10);
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    font: 600 14px/1.2 var(--font-sans);
+    text-decoration: none;
+    box-shadow:
+      var(--elevation-3),
+      0 0 0 1px var(--border-strong);
+    opacity: 0;
+    transform: translateY(calc(-100% - 48px));
+    transition:
+      transform var(--dur-fast) var(--ease-out),
+      opacity var(--dur-fast) var(--ease-out);
+  }
+  .skip-link:focus-visible,
+  .skip-link:focus {
+    opacity: 1;
+    transform: none;
+  }
+}

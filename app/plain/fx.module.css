@@ -1,0 +1,1190 @@
+/*
+ * Reader motion — shared/24 (READER-FX-01…15). Everything here decorates; every fact is already in the HTML.
+ * Scroll-linked motion is CSS (`animation-timeline`), gated by @supports. Pointer / speed values arrive as custom
+ * properties from lib/motion/reader-fx.ts. Only transform, opacity and clip-path animate.
+ * Gates: full motion = no system preference AND html:not([data-motion='reduced']); tier 0 drops the costly layers.
+ */
+
+/* 01 — Motion language */
+.root {
+  --rx-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --rx-ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+  --rx-major: 1100ms;
+  --rx-support: 560ms;
+  --rx-micro: 160ms;
+  --rx-ink: #254ddd;
+  overflow-x: clip;
+}
+@supports (timeline-scope: --rx-a) {
+  .root {
+    timeline-scope: --rx-about, --rx-contact, --rx-ch0, --rx-ch1, --rx-ch2;
+  }
+}
+:global(html):has(.root) {
+  scroll-padding-top: 24px;
+}
+@media (min-width: 1000px) {
+  :global(html):has(.root) {
+    scroll-padding-top: 96px;
+  }
+}
+
+/* 02 — Sticky header, progress, active section */
+.header {
+  position: relative;
+}
+.progress {
+  position: fixed;
+  z-index: 30;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  pointer-events: none;
+}
+@supports (animation-timeline: scroll()) {
+  .progress {
+    animation: rx-grow linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@media (min-width: 1000px) {
+  .header {
+    position: sticky;
+    z-index: 20;
+    top: 0;
+    padding-block: 14px;
+    border-bottom-color: transparent;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0 calc(50% - 50vw);
+    background: rgb(255 255 255 / 0.92);
+    border-bottom: 1px solid var(--border-subtle);
+    backdrop-filter: saturate(1.3) blur(14px);
+  }
+  :global(html[data-glass='solid']) .header::before,
+  :global(html[data-tier='0']) .header::before {
+    background: #ffffff;
+    backdrop-filter: none;
+  }
+  .progress {
+    position: absolute;
+    top: auto;
+    bottom: -1px;
+    left: calc(50% - 50vw);
+    right: calc(50% - 50vw);
+  }
+}
+.nav a {
+  position: relative;
+}
+.nav a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 11px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform var(--rx-micro) var(--rx-ease-out);
+}
+.nav a[aria-current='location'] {
+  color: var(--accent);
+}
+.nav a[aria-current='location']::after {
+  transform: scaleX(1);
+}
+
+/* 03 — Hero depth: far grid, mid object, near name (node network removed by the owner 2026-09-26) */
+.field {
+  position: absolute;
+  z-index: -2;
+  inset: 0 -24px 0;
+  overflow: clip;
+  pointer-events: none;
+  mask-image: linear-gradient(#000 50%, transparent 94%);
+}
+.grid {
+  position: absolute;
+  inset: -12% 0 0;
+  background-image:
+    linear-gradient(to right, rgb(37 77 221 / 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(37 77 221 / 0.07) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 75% 70% at 72% 32%, #000 25%, transparent 78%);
+}
+.spot {
+  position: absolute;
+  z-index: -2;
+  top: 0;
+  left: 0;
+  width: 560px;
+  height: 560px;
+  margin: -280px 0 0 -280px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(37 77 221 / 0.16), rgb(37 77 221 / 0.05) 55%, transparent);
+  opacity: var(--fx-sa, 0);
+  transform: translate3d(var(--fx-sx, 0px), var(--fx-sy, 0px), 0) scale(var(--fx-ss, 1));
+  pointer-events: none;
+}
+.name {
+  transform: skewX(calc(var(--fx-vel, 0) * -7deg));
+}
+.nearLeft,
+.nearRight {
+  width: fit-content;
+}
+
+/* 04 — Hero object: portrait in CSS 3D (static pose under reduced motion) */
+.object {
+  perspective: 1100px;
+}
+.objectTurn,
+.objectTilt {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+.objectTilt {
+  transform: translate3d(0, calc(var(--fx-vel, 0) * -28px), 0) rotateX(var(--fx-ty, 0deg)) rotateY(var(--fx-tx, 0deg));
+}
+.face {
+  position: absolute;
+  inset: 0;
+  transform: translateZ(36px);
+}
+.face img {
+  position: relative;
+  z-index: 1;
+}
+/* Rounded overflow clipping is lost on 3D-composited layers; a clip-path keeps the portrait round when tilted. */
+.face > * {
+  clip-path: circle(50% at 50% 50%);
+}
+
+/* 15 — Portrait loading placeholder (under the image; covered the moment it paints) */
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 32% 26%, #fff, #ececef 58%, #dcdce0);
+  color: rgb(37 77 221 / 0.45);
+  font-size: clamp(40px, 6vw, 76px);
+  font-weight: 600;
+  letter-spacing: -0.08em;
+}
+.placeholder::after {
+  content: '';
+  position: absolute;
+  inset: 14%;
+  border: 1px solid rgb(37 77 221 / 0.3);
+  border-radius: 50%;
+}
+
+/* 06 — Text: letters, masks, words, tilted numbers, extrusion */
+.letters {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+.letter {
+  display: inline-block;
+}
+.letters::before,
+.letters::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+.letters::before {
+  color: rgb(255 45 85 / 0.85);
+}
+.letters::after {
+  color: rgb(0 168 255 / 0.85);
+}
+.mask {
+  display: block;
+}
+.maskInner {
+  display: inline-block;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+.number {
+  display: inline-block;
+  transform-origin: 50% 100%;
+}
+.extrude {
+  text-shadow:
+    1px 1px 0 rgb(37 77 221 / 0.16),
+    2px 2px 0 rgb(37 77 221 / 0.11),
+    3px 3px 0 rgb(37 77 221 / 0.07);
+}
+.lead {
+  view-timeline: --rx-lead block;
+}
+/* A grid item stretches to the whole section; its entrance must span only the heading itself. */
+.heading {
+  align-self: start;
+}
+
+/* 07 — Sections: drawn rule, perspective entrance, tone layer */
+.section {
+  position: relative;
+  view-timeline: --rx-sec block;
+}
+.section[id='about'] {
+  view-timeline-name: --rx-sec, --rx-about;
+  view-timeline-axis: block, block;
+}
+.section[id='contact'] {
+  view-timeline-name: --rx-sec, --rx-contact;
+  view-timeline-axis: block, block;
+}
+.rule {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.6;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+.tone {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+}
+.tone > span {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+.toneAbout {
+  background: radial-gradient(80% 60% at 12% 18%, rgb(37 77 221 / 0.05), transparent 70%);
+}
+.toneCh0 {
+  background: radial-gradient(70% 60% at 82% 28%, rgb(37 77 221 / 0.1), transparent 70%);
+}
+.toneCh1 {
+  background: radial-gradient(70% 60% at 82% 28%, rgb(37 77 221 / 0.06), transparent 70%);
+}
+.toneCh2 {
+  background: radial-gradient(70% 60% at 82% 28%, rgb(106 75 201 / 0.1), transparent 70%);
+}
+.toneContact {
+  background: radial-gradient(90% 60% at 50% 100%, rgb(37 77 221 / 0.12), transparent 70%);
+}
+
+/* 08 — Grain (static) */
+.grain {
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  opacity: 0.02;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* 05 / 10 — Pointer light, tilt, magnets */
+.lit,
+.tilt {
+  position: relative;
+  isolation: isolate;
+}
+.light {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  overflow: clip;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.light::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 440px;
+  height: 440px;
+  margin: -220px 0 0 -220px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(157 177 255 / 0.2), transparent);
+  opacity: var(--fx-la, 0);
+  transform: translate3d(var(--fx-lx, 0px), var(--fx-ly, 0px), 0);
+}
+.tilt {
+  transform: perspective(900px) rotateX(var(--fx-rx, 0deg)) rotateY(var(--fx-ry, 0deg));
+}
+.tilt::after {
+  content: '';
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 28px 60px -24px rgb(11 11 12 / 0.45);
+  opacity: var(--fx-la, 0);
+  pointer-events: none;
+}
+.magnet {
+  transform: translate3d(var(--fx-mx, 0px), var(--fx-my, 0px), 0);
+}
+
+/* 11 — Case-study chapters */
+.chapters {
+  display: grid;
+  gap: clamp(72px, 10vw, 140px);
+}
+.chapter {
+  --tone: #254ddd;
+  --tone-soft: #9db1ff;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'head' 'visual' 'beats';
+  gap: 28px;
+  timeline-scope: --rx-b0, --rx-b1, --rx-b2, --rx-b3;
+}
+.chapter[data-tone='1'] {
+  --tone: #2f7d62;
+  --tone-soft: #86d8b5;
+}
+.chapter[data-tone='2'] {
+  --tone: #6a4bc9;
+  --tone-soft: #c3adff;
+}
+.chapter:nth-child(1) {
+  view-timeline: --rx-ch0 block;
+}
+.chapter:nth-child(2) {
+  view-timeline: --rx-ch1 block;
+}
+.chapter:nth-child(3) {
+  view-timeline: --rx-ch2 block;
+}
+.chapterHead {
+  grid-area: head;
+}
+.chapterHead h3 {
+  margin: 0;
+  font-size: clamp(30px, 3.6vw, 46px);
+  font-weight: 550;
+  line-height: 1.08;
+  letter-spacing: -0.05em;
+}
+.chapterHead h3 a {
+  display: inline-flex;
+  gap: 14px;
+  align-items: start;
+  text-decoration: none;
+}
+.chapterHead h3 a > span {
+  font-size: 0.6em;
+  font-weight: 400;
+  transition: transform var(--rx-micro) var(--rx-ease-out);
+}
+.chapterHead h3 a:hover {
+  color: var(--tone);
+}
+.chapterHead h3 a:hover > span {
+  transform: translate(3px, -3px);
+}
+.chapterHead p {
+  margin: 14px 0 0;
+  max-width: 52ch;
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+.visual {
+  grid-area: visual;
+  view-timeline: --rx-visual block;
+}
+.visualCard {
+  padding: 28px;
+  color: #ffffff;
+  background: #0b0b0c;
+  border-radius: 8px;
+}
+.visualCard a:focus-visible {
+  outline-color: var(--tone-soft);
+}
+.visualTop {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 26px;
+  color: #a1a1aa;
+  font-size: 11px;
+}
+.visualTop > span,
+.visualLabel,
+.steps {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.visualTop > span {
+  color: var(--tone-soft);
+}
+.visualLabel {
+  margin: 0 0 12px;
+  color: #a1a1aa;
+}
+.visualStack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.visualStack li {
+  padding: 4px 9px;
+  color: #e4e4e7;
+  border: 1px solid #2e2e33;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+/* 12 — Architecture flow */
+.flow {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.flowNode {
+  position: relative;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  column-gap: 10px;
+  margin-bottom: 18px;
+  padding: 10px 14px;
+  background: rgb(255 255 255 / 0.035);
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 6px;
+}
+.flowNode:last-child {
+  margin-bottom: 0;
+}
+.flowIndex {
+  grid-row: span 2;
+  align-self: center;
+  color: var(--tone-soft);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+.flowLabel {
+  font-size: 14px;
+  font-weight: 550;
+  letter-spacing: -0.01em;
+}
+.flowDetail {
+  color: #a1a1aa;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.flowLink {
+  position: absolute;
+  top: 100%;
+  left: 28px;
+  width: 1px;
+  height: 18px;
+  background: rgb(255 255 255 / 0.2);
+  transform-origin: 50% 0;
+}
+.pulse {
+  position: absolute;
+  top: 0;
+  left: -2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--tone-soft);
+  box-shadow: 0 0 10px var(--tone-soft);
+  opacity: 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 24px 0 0;
+  padding: 0;
+  color: #d4d4d8;
+  list-style: none;
+}
+.step {
+  position: relative;
+  padding-top: 12px;
+  border-top: 1px solid #2e2e33;
+}
+.step::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--tone-soft);
+  transform-origin: 0 50%;
+}
+
+/* Story beats */
+.beats {
+  grid-area: beats;
+  min-width: 0;
+}
+.beat {
+  padding-block: 34px;
+  border-top: 1px solid var(--border-subtle);
+}
+.beat:first-child {
+  border-top: 0;
+  padding-top: 8px;
+}
+.beat:nth-child(1) {
+  view-timeline: --rx-b0 block;
+}
+.beat:nth-child(2) {
+  view-timeline: --rx-b1 block;
+}
+.beat:nth-child(3) {
+  view-timeline: --rx-b2 block;
+}
+.beat:nth-child(4) {
+  view-timeline: --rx-b3 block;
+}
+.beat h4 {
+  display: flex;
+  gap: 12px;
+  margin: 0 0 16px;
+  color: var(--tone);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.beat h4 > span {
+  color: var(--text-tertiary);
+}
+.beat p {
+  max-width: 60ch;
+  margin: 0 0 14px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.75;
+}
+.beats .beatLead {
+  color: var(--text-primary);
+  font-size: clamp(18px, 1.7vw, 21px);
+  line-height: 1.55;
+  letter-spacing: -0.02em;
+}
+.decisions {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: decision;
+}
+.decisions li {
+  display: grid;
+  gap: 4px;
+  padding-left: 34px;
+  position: relative;
+  counter-increment: decision;
+}
+.decisions li::before {
+  content: counter(decision, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 3px;
+  color: var(--tone);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.decisions strong {
+  font-size: 16px;
+  font-weight: 550;
+  letter-spacing: -0.02em;
+}
+.decisions span {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.65;
+}
+.results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px 24px;
+  margin: 0;
+}
+.results > div {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: end;
+  gap: 6px;
+}
+.results dt {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.results dd {
+  margin: 0;
+  color: var(--tone);
+  font-size: clamp(22px, 2.4vw, 32px);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.045em;
+}
+
+/* 13 — Before → after meter */
+.meter {
+  display: grid;
+  gap: 5px;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.meterRow {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  align-items: center;
+}
+.meterTrack {
+  display: block;
+  height: 4px;
+  overflow: clip;
+  background: var(--border-subtle);
+  border-radius: 2px;
+}
+.meterBefore,
+.meterAfter {
+  display: block;
+  height: 100%;
+  transform-origin: 0 50%;
+}
+.meterBefore {
+  background: var(--border-strong);
+}
+.meterAfter {
+  background: var(--tone);
+  transform: scaleX(var(--ratio, 1));
+}
+.chapterLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 44px;
+  margin-top: 8px;
+  color: var(--tone);
+  font-size: 13px;
+  font-weight: 550;
+  text-decoration: none;
+}
+.chapterLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (min-width: 1000px) {
+  .chapter {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    grid-template-areas: 'visual head' 'visual beats';
+    grid-template-rows: auto 1fr;
+    column-gap: 64px;
+    row-gap: 20px;
+  }
+  .visual {
+    position: sticky;
+    top: 104px;
+    align-self: start;
+  }
+}
+@media (min-width: 1000px) and (max-height: 760px) {
+  .visual {
+    position: static;
+  }
+}
+@media (max-width: 700px) {
+  .visualCard {
+    padding: 22px 18px;
+  }
+  .results {
+    grid-template-columns: 1fr;
+  }
+  .steps {
+    display: none;
+  }
+}
+
+/* 14 — GitHub rail (layout only here; the motion is below) */
+.rail {
+  container-type: inline-size;
+}
+
+/* ———————————————————— Load-time motion (no scroll needed) ———————————————————— */
+@media (prefers-reduced-motion: no-preference) {
+  :global(html:not([data-motion='reduced'])) .letter {
+    animation: rx-letter 900ms var(--rx-ease-out) calc(var(--i) * 34ms) both;
+  }
+  :global(html:not([data-motion='reduced'])) .letters::before {
+    animation: rx-split-left 950ms var(--rx-ease-out) 260ms both;
+  }
+  :global(html:not([data-motion='reduced'])) .letters::after {
+    animation: rx-split-right 950ms var(--rx-ease-out) 260ms both;
+  }
+  :global(html:not([data-motion='reduced'])) .placeholder::after {
+    animation: rx-breathe 1200ms var(--rx-ease-io) 3 alternate both;
+  }
+  :global(html:not([data-motion='reduced'])) .chapter[data-fx-on] .pulse {
+    animation: rx-pulse 1500ms var(--rx-ease-io) calc(var(--i) * 300ms) infinite;
+  }
+  :global(html[data-tier='0']) .letter {
+    animation-name: rx-rise;
+  }
+  :global(html[data-tier='0']) .letters::before,
+  :global(html[data-tier='0']) .letters::after {
+    animation: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 700px) {
+  :global(html:not([data-motion='reduced'])) .letter {
+    animation-name: rx-letter-soft;
+  }
+}
+
+/* ———————————————————— Scroll-linked motion ———————————————————— */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* 03 / 04 — hero depth: far layers trail, the near name drifts apart */
+    :global(html:not([data-motion='reduced'])) .field {
+      animation: rx-far linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100svh;
+    }
+    :global(html:not([data-motion='reduced'])) .object {
+      animation: rx-mid linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100svh;
+    }
+    :global(html:not([data-motion='reduced'])) .objectTurn {
+      animation: rx-turn linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100svh;
+    }
+    :global(html:not([data-motion='reduced'])) .nearLeft {
+      animation: rx-near-left linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 90svh;
+    }
+    :global(html:not([data-motion='reduced'])) .nearRight {
+      animation: rx-near-right linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 90svh;
+    }
+
+    /* 06 — text */
+    :global(html:not([data-motion='reduced'])) .maskInner {
+      animation: rx-mask linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 35%;
+    }
+    :global(html:not([data-motion='reduced'])) .number {
+      animation: rx-tilt-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+    :global(html:not([data-motion='reduced'])) .word {
+      animation: rx-word linear both;
+      animation-timeline: --rx-lead;
+      animation-range: cover calc(6% + var(--p) * 32%) cover calc(14% + var(--p) * 32%);
+    }
+
+    /* 07 — sections */
+    :global(html:not([data-motion='reduced'])) .rule {
+      animation: rx-rule linear both;
+      animation-timeline: --rx-sec;
+      animation-range: entry 0% entry 30%;
+    }
+    :global(html:not([data-motion='reduced'])) .heading {
+      animation: rx-lift linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+
+    /* 11 / 12 — chapters: nodes reveal as the visual arrives; the step rail follows the beats */
+    :global(html:not([data-motion='reduced'])) .flowNode {
+      animation: rx-node linear both;
+      animation-timeline: --rx-visual;
+      animation-range: entry calc(var(--i) * 12%) entry calc(34% + var(--i) * 12%);
+    }
+    :global(html:not([data-motion='reduced'])) .flowLink {
+      animation: rx-link linear both;
+      animation-timeline: --rx-visual;
+      animation-range: entry calc(20% + var(--i) * 12%) entry calc(40% + var(--i) * 12%);
+    }
+    :global(html:not([data-motion='reduced'])) .beat {
+      animation: rx-lift linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 25%;
+    }
+    :global(html:not([data-motion='reduced'])) .meterAfter {
+      animation: rx-shrink linear both;
+      animation-timeline: view();
+      animation-range: cover 12% cover 42%;
+    }
+  }
+
+  /* The step rail and tone layer read named timelines across the tree. */
+  @supports (timeline-scope: --rx-a) {
+    @media (prefers-reduced-motion: no-preference) {
+      :global(html:not([data-motion='reduced'])) .step {
+        animation: rx-step linear both;
+        animation-range: cover 30% cover 70%;
+      }
+      :global(html:not([data-motion='reduced'])) .step::before {
+        animation: rx-step-bar linear both;
+        animation-range: cover 30% cover 70%;
+      }
+      :global(html:not([data-motion='reduced'])) .step:nth-child(1),
+      :global(html:not([data-motion='reduced'])) .step:nth-child(1)::before {
+        animation-timeline: --rx-b0;
+      }
+      :global(html:not([data-motion='reduced'])) .step:nth-child(2),
+      :global(html:not([data-motion='reduced'])) .step:nth-child(2)::before {
+        animation-timeline: --rx-b1;
+      }
+      :global(html:not([data-motion='reduced'])) .step:nth-child(3),
+      :global(html:not([data-motion='reduced'])) .step:nth-child(3)::before {
+        animation-timeline: --rx-b2;
+      }
+      :global(html:not([data-motion='reduced'])) .step:nth-child(4),
+      :global(html:not([data-motion='reduced'])) .step:nth-child(4)::before {
+        animation-timeline: --rx-b3;
+      }
+      :global(html:not([data-motion='reduced'])) .tone > span {
+        animation: rx-tone linear both;
+        animation-range: cover 0% cover 100%;
+      }
+      :global(html:not([data-motion='reduced'])) .toneAbout {
+        animation-timeline: --rx-about;
+      }
+      :global(html:not([data-motion='reduced'])) .toneCh0 {
+        animation-timeline: --rx-ch0;
+      }
+      :global(html:not([data-motion='reduced'])) .toneCh1 {
+        animation-timeline: --rx-ch1;
+      }
+      :global(html:not([data-motion='reduced'])) .toneCh2 {
+        animation-timeline: --rx-ch2;
+      }
+      :global(html:not([data-motion='reduced'])) .toneContact {
+        animation-timeline: --rx-contact;
+      }
+    }
+  }
+
+  /* 14 — the rail: desktop, fine pointer, full motion, tier ≥ 1 */
+  @media (prefers-reduced-motion: no-preference) and (min-width: 1000px) and (hover: hover) and (pointer: fine) {
+    :global(html:not([data-motion='reduced']):not([data-tier='0'])) .rail[data-rail] {
+      height: 160vh;
+      view-timeline: --rx-rail block;
+    }
+    :global(html:not([data-motion='reduced']):not([data-tier='0'])) .rail[data-rail] .railStage {
+      position: sticky;
+      top: 24vh;
+      overflow: clip;
+      padding-block: 8px;
+    }
+    :global(html:not([data-motion='reduced']):not([data-tier='0'])) .rail[data-rail] .railTrack {
+      display: flex;
+      width: max-content;
+      animation: rx-rail linear both;
+      animation-timeline: --rx-rail;
+      animation-range: contain 0% contain 100%;
+    }
+    :global(html:not([data-motion='reduced']):not([data-tier='0'])) .rail[data-rail] .railTrack > li {
+      flex: none;
+      width: 330px;
+    }
+    /* Keyboard focus inside: stop the rail and let the browser scroll the focused card into view. */
+    :global(html:not([data-motion='reduced']):not([data-tier='0'])) .rail[data-rail]:focus-within {
+      height: auto;
+    }
+    :global(html:not([data-motion='reduced']):not([data-tier='0'])) .rail[data-rail]:focus-within .railStage {
+      position: static;
+      overflow-x: auto;
+    }
+    :global(html:not([data-motion='reduced']):not([data-tier='0'])) .rail[data-rail]:focus-within .railTrack {
+      animation: none;
+    }
+  }
+}
+
+/* Reduced motion: nothing moves and nothing dims — the page rests in its final state with its static depth
+   (3D pose, shadows, layers). Only the scroll-progress bar follows the scroll. */
+
+/* ———————————————————— Budgets and fallbacks ———————————————————— */
+:global(html[data-tier='0']) .grain,
+:global(html[data-tier='0']) .tone,
+:global(html[data-tier='0']) .spot,
+:global(html[data-tier='0']) .light {
+  display: none;
+}
+@media (max-width: 700px) {
+  .grain {
+    display: none;
+  }
+}
+@media (forced-colors: active) {
+  .grain,
+  .tone,
+  .spot,
+  .light,
+  .field,
+  .meter,
+  .letters::before,
+  .letters::after {
+    display: none;
+  }
+  .visualCard,
+  .flowNode {
+    border: 1px solid CanvasText;
+  }
+}
+
+/* ———————————————————— Keyframes ———————————————————— */
+@keyframes rx-grow {
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes rx-letter {
+  from {
+    opacity: 0.2;
+    filter: blur(4px);
+    transform: translate3d(0, 0.28em, 0) rotate(4deg);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+  }
+}
+@keyframes rx-letter-soft {
+  from {
+    opacity: 0.4;
+    filter: blur(2px);
+    transform: translate3d(0, 0.18em, 0);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+  }
+}
+@keyframes rx-rise {
+  from {
+    opacity: 0.4;
+    transform: translate3d(0, 0.2em, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rx-split-left {
+  from {
+    opacity: 0.75;
+    transform: translate3d(-0.05em, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: none;
+  }
+}
+@keyframes rx-split-right {
+  from {
+    opacity: 0.75;
+    transform: translate3d(0.05em, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: none;
+  }
+}
+@keyframes rx-breathe {
+  from {
+    opacity: 0.2;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes rx-far {
+  to {
+    transform: translate3d(0, 30vh, 0);
+  }
+}
+@keyframes rx-mid {
+  to {
+    transform: translate3d(0, 14vh, 0);
+  }
+}
+@keyframes rx-turn {
+  to {
+    transform: rotateY(32deg) rotateX(-12deg) scale(0.88);
+  }
+}
+@keyframes rx-near-left {
+  to {
+    transform: translate3d(-6%, -5vh, 0);
+  }
+}
+@keyframes rx-near-right {
+  to {
+    transform: translate3d(6%, -5vh, 0);
+  }
+}
+@keyframes rx-mask {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: translate3d(0, 0.5em, 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: none;
+  }
+}
+@keyframes rx-tilt-up {
+  from {
+    transform: perspective(360px) rotateX(70deg);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes rx-word {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes rx-rule {
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes rx-lift {
+  from {
+    transform: perspective(1200px) translate3d(0, 36px, 0) rotateX(7deg);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes rx-node {
+  from {
+    clip-path: inset(0 100% 0 0 round 6px);
+    transform: translate3d(-12px, 0, 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 6px);
+    transform: none;
+  }
+}
+@keyframes rx-link {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes rx-pulse {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -2px, 0);
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 15px, 0);
+  }
+}
+@keyframes rx-step {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+}
+@keyframes rx-step-bar {
+  0%,
+  100% {
+    transform: scaleX(0);
+  }
+  20%,
+  80% {
+    transform: scaleX(1);
+  }
+}
+@keyframes rx-shrink {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(var(--ratio, 1));
+  }
+}
+@keyframes rx-tone {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  25%,
+  75% {
+    opacity: 1;
+  }
+}
+@keyframes rx-rail {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(calc(-100% + 100cqi), 0, 0);
+  }
+}
