@@ -634,6 +634,71 @@
   justify-content: flex-end;
 }
 
+/* Phone widgets line up with the icons, as on iOS: from the first icon's leading edge to the last one's trailing
+   edge, and from the top of the first row's art to the bottom of the last row's art — so neighbouring widgets keep
+   the icon gutter between them instead of touching. */
+.homeScreen[data-layout='phone'] .widget {
+  width: calc(100% * (var(--span-w) - 1) / var(--span-w) + var(--icon));
+  height: calc(100% * (var(--span-h) - 1) / var(--span-h) + var(--icon));
+  max-width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+.homeScreen[data-layout='phone'] .widget[data-size='small'] .widgetMain {
+  padding: 14px;
+}
+.homeScreen[data-layout='phone'] .widget[data-size='small'] .widgetStrong {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+.homeScreen[data-layout='phone'] .widget[data-size='small'] .widgetLine,
+.homeScreen[data-layout='phone'] .widget[data-size='small'] .widgetMuted {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* The Résumé widget: facts from the top, Open and Download share one baseline along the bottom edge. */
+.homeScreen[data-layout='phone'] .widget[data-size='medium'] .widgetMain {
+  justify-content: flex-start;
+}
+.homeScreen[data-layout='phone'] .widget[data-size='medium'] .widgetOpen {
+  margin-top: auto;
+}
+.homeScreen[data-layout='phone'] .widgetOpen,
+.homeScreen[data-layout='phone'] .widgetDownload {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 28px;
+  padding: 0 13px;
+  line-height: 1;
+}
+/* Short phones (640–720 px tall, and landscape) give the Résumé widget ~130 px: tighter spacing keeps every line and
+   both buttons inside it. Download's hit area still reaches past its outline (::before). */
+@media (max-height: 720px) {
+  .homeScreen[data-layout='phone'] .widget[data-size='medium'] .widgetMain {
+    gap: 2px;
+    padding: 11px 14px 12px;
+  }
+  .homeScreen[data-layout='phone'] .widget[data-size='medium'] .widgetMain {
+    line-height: 1.25;
+  }
+  .homeScreen[data-layout='phone'] .widget[data-size='medium'] .widgetTitle {
+    font-size: 20px;
+    line-height: 1.15;
+  }
+  .homeScreen[data-layout='phone'] .widgetOpen,
+  .homeScreen[data-layout='phone'] .widgetDownload {
+    min-height: 24px;
+  }
+  .homeScreen[data-layout='phone'] .widgetDownload {
+    right: 14px;
+    bottom: 12px;
+  }
+}
+
 /* A short phone (a browser viewport is shorter than the device) must still fit icon + label in one grid row: the art
    shrinks to the row instead of the label sliding under the next row. */
 .homeScreen[data-layout='phone'] .iconCell {

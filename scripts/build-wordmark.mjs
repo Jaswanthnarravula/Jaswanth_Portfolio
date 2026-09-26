@@ -1,6 +1,6 @@
 /**
- * Name wordmark for the intro — plans/03-netflix-page.md "Wordmark" + "Visual target" (`NFLX-MARK-01`).
- * "JASWANTH" (from `person.givenName`) exactly as the owner's storyboard frame sets it (plans/visual-targets/intro.png,
+ * Portfolio wordmark for the intro — plans/03-netflix-page.md "Wordmark" + "Visual target" (`NFLX-MARK-01`).
+ * "PORTFOLIO" exactly as the owner's updated intro direction sets it (plans/visual-targets/intro.png supplies the style,
  * source CSS `.mark` in plans/visual-targets/storyboard.html): Bebas Neue capitals, letter-spacing .015em, line-height
  * .9, padding 0 .1em .12em, and a dark ellipse (`.mark::after`) that trims the letters' feet into a shallow arc.
  * The output is that whole `.mark` box — view box = the box, glyphs on its baseline, the ellipse as a mask — so the
@@ -74,8 +74,7 @@ export function layoutWordmark(font, text) {
 async function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
   const opentype = createRequire(join(root, 'package.json'))('opentype.js');
-  const { portfolio } = await import(pathToFileURL(join(root, 'data/portfolio.ts')).href);
-  const text = portfolio.person.givenName.toUpperCase();
+  const text = 'PORTFOLIO';
   const buffer = await readFile(join(root, 'assets-inbox/fonts/bebasneue-BebasNeue-Regular.ttf'));
   const font = opentype.parse(buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength));
   const output = {

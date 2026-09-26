@@ -82,8 +82,12 @@
   margin: 0;
   padding: 0;
 }
+/* A flex slot centres its title on the bar, so the 44 px touch target (below) reaches past the slim bar evenly above
+   and below — like the status items — instead of pushing the Apple logo and app name down. */
 .menuTitles [data-menubar-slot] {
   position: relative;
+  display: flex;
+  align-items: center;
   height: 100%;
 }
 .menuTitles [data-menubar-item] {

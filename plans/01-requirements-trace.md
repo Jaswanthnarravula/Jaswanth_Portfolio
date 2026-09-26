@@ -59,6 +59,7 @@ strategy, `D` = device support, `N` = later owner additions.
 | R49 | Audit each OS against its plan before moving on | `{os}/08-acceptance.md`, `linux/13-acceptance.md`, `05-roadmap.md` | — |
 | R50 | Five engineered OSes at production polish | `00-north-star.md`, `STATUS.md` | — |
 | R51 | Hire-worthy content depth: recruiter card, Now note, role scope, case studies, deep dives — owner's facts only (2026-09-24) | `shared/23-content-depth.md`, `shared/02-portfolio-data.md`, each OS's `apps/github.md` + one "Now" surface | `CONTENT` `DATA` per OS |
+| R52 | Premium motion on the reader page: depth, text reveals, sticky case-study storytelling, architecture diagrams — within the WebGL, compositor and contrast rules (2026-09-25) | `shared/24-reader-motion.md` (incl. the optional `CaseStudy.flow`) | `READER` |
 | T | LCP < 2.5 s, INP < 200 ms, CLS < 0.1, a11y ≥ 95, 60 fps, lazy WebGL, fallbacks | `shared/10-performance.md`, `shared/12-testing.md` | `PERF` `TEST` |
 | S | Foundation → Welcome → vertical slice → macOS → Windows → iOS → Android → Linux → polish, validated per phase | `05-roadmap.md` | — |
 | D | Mobile, laptop and tablet friendly | `shared/08-responsive.md` | `RESP` |

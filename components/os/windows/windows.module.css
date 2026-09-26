@@ -1246,7 +1246,8 @@
 
 /* --- Menus (the Windows skin of the APG Menu primitive — plans/windows/surfaces/context-menus) --------------------- */
 .menuLayer [data-menu-anchor] {
-  z-index: var(--z-menus);
+  /* Start and other panels use the overlay layer; their menus must sit above them. */
+  z-index: calc(var(--z-overlays) + 1);
 }
 .menu {
   min-width: 220px;

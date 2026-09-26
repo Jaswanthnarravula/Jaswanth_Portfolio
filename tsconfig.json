@@ -48,7 +48,17 @@
     ".next-p3/types/**/*.ts",
     ".next-p3/dev/types/**/*.ts",
     ".next-p4b/types/**/*.ts",
-    ".next-p4b/dev/types/**/*.ts"
+    ".next-p4b/dev/types/**/*.ts",
+    ".next-readerfx/types/**/*.ts",
+    ".next-readerfx/dev/types/**/*.ts",
+    ".next-aa/types/**/*.ts",
+    ".next-aa/dev/types/**/*.ts",
+    ".next-exp/types/**/*.ts",
+    ".next-exp/dev/types/**/*.ts",
+    ".next-globe/types/**/*.ts",
+    ".next-globe/dev/types/**/*.ts",
+    ".next-codecard/types/**/*.ts",
+    ".next-codecard/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

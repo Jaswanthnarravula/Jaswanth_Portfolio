@@ -597,7 +597,17 @@ test('WIN-START-04 · WIN-START-05 All apps with the letter jump; Shut down retu
   await start.getByRole('button', { name: 'O', exact: true }).click();
   await expect(start.getByRole('link', { name: 'Outlook' })).toBeFocused();
   await start.getByRole('button', { name: 'Power' }).click();
-  await page.getByRole('menuitem', { name: 'Shut down' }).click();
+  const shutdown = page.getByRole('menuitem', { name: 'Shut down' });
+  await quiet(page);
+  // The flyout overlaps Start: visibility alone misses a menu painted behind the panel.
+  await expect(shutdown).toBeVisible();
+  expect(
+    await shutdown.evaluate((item) => {
+      const box = item.getBoundingClientRect();
+      return item.contains(document.elementFromPoint(box.left + 8, box.top + box.height / 2));
+    }),
+  ).toBe(true);
+  await shutdown.click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole('heading', { name: 'Choose how you want to explore' })).toBeVisible();
   await page.locator('[data-chooser-card="windows"]').click();

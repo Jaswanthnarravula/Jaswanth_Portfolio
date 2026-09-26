@@ -38,7 +38,7 @@ describe('CHOOSE-REL-01 only released OSes are shown', () => {
     render(<Chooser oses={[]} />);
     expect(document.querySelectorAll('[data-chooser-card]')).toHaveLength(0);
     expect(screen.getByText(/The operating systems open here as each one is finished/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Skip the OS' })).toHaveAttribute('href', '/plain');
+    expect(screen.getByRole('link', { name: 'Plain view' })).toHaveAttribute('href', '/plain');
   });
 
   it('does not ask GSAP to animate cards when no OS is released', () => {

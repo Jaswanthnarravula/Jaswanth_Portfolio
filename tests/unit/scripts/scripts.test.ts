@@ -15,7 +15,9 @@ import { run } from '../../../scripts/fetch-github.mjs';
 import {
   EMPTY_SNAPSHOT,
   fetchGithubSnapshot,
+  parseContributionsPage,
   serializeSnapshot,
+  toCalendar,
   validateSnapshot,
 } from '../../../scripts/lib/github-snapshot.mjs';
 import { portfolio } from '@/data/portfolio';
@@ -101,6 +103,50 @@ describe('GH-FETCH-01 build-time fetch script', () => {
       referencedRepos: ['https://github.com/ada/forked'],
     });
     expect(withFork.repos.map((repo) => repo.name)).toEqual(['one', 'forked']);
+  });
+  it('without a token, the public calendar page gives the contribution graph (dates, counts, GitHub levels)', async () => {
+    // Wednesday 2025-09-24 first: the first week is partial (Wed–Sat), then a full Sunday-first week.
+    const dates = Array.from({ length: 11 }, (_, i) => new Date(Date.UTC(2025, 8, 24 + i)).toISOString().slice(0, 10));
+    const page = [
+      '<h2 id="js-contribution-activity-description" class="f4">\n  1,005\n  contributions\n in the last year</h2>',
+      ...dates.map(
+        (date, i) =>
+          `<td tabindex="0" data-date="${date}" id="d-${i}" data-level="${i % 5}" role="gridcell" class="ContributionCalendar-day"></td>` +
+          `<tool-tip for="d-${i}" class="sr-only">${i % 5 === 0 ? 'No contributions' : `${i} contribution${i === 1 ? '' : 's'}`} on September ${24 + i}th.</tool-tip>`,
+      ),
+    ].join('\n');
+    const calendar = parseContributionsPage(page)!;
+    expect(calendar.total).toBe(1005);
+    expect(calendar.start).toBe('2025-09-24');
+    expect(calendar.weeks).toEqual([
+      [0, 1, 2, 3],
+      [4, 0, 6, 7, 8, 9, 0],
+    ]);
+    expect(calendar.levels).toEqual([
+      [0, 1, 2, 3],
+      [4, 0, 1, 2, 3, 4, 0],
+    ]);
+    expect(parseContributionsPage('<html>changed markup</html>')).toBeNull();
+
+    const fetchMock = (async (url: string) =>
+      String(url).includes('/contributions')
+        ? ({ ok: true, status: 200, text: async () => page } as Response)
+        : String(url).includes('/repos')
+          ? response(REPOS)
+          : response(USER)) as unknown as typeof fetch;
+    const snapshot = await fetchGithubSnapshot({ username: 'ada', fetch: fetchMock });
+    expect(validateSnapshot(snapshot)).toEqual([]);
+    expect(snapshot.contributions?.total).toBe(1005);
+  });
+  it('toCalendar keeps only the last 53 weeks and moves the start with them', () => {
+    const days = Array.from({ length: 60 * 7 }, (_, i) => ({
+      date: new Date(Date.UTC(2024, 0, 7 + i)).toISOString().slice(0, 10), // 2024-01-07 is a Sunday
+      count: 1,
+      level: 1,
+    }));
+    const calendar = toCalendar(days, 420)!;
+    expect(calendar.weeks).toHaveLength(53);
+    expect(calendar.start).toBe(days[7 * 7]!.date);
   });
   it('serializes with a stable key order', () => {
     expect(serializeSnapshot({ b: 1, a: { d: 1, c: 2 } })).toBe(

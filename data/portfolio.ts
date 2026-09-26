@@ -57,6 +57,12 @@ export const portfolio = {
         url: 'https://github.com/Jaswanthnarravula',
         handle: '@Jaswanthnarravula',
       },
+      {
+        kind: 'instagram',
+        label: 'Instagram',
+        url: 'https://www.instagram.com/jaswanth_narravula/',
+        handle: '@jaswanth_narravula',
+      },
     ],
   },
   experience: [
@@ -182,6 +188,13 @@ export const portfolio = {
           { value: '1,200–1,800', label: 'sign-ins per weekday' },
           { value: 'No logouts', label: 'during key rotation, by design' },
         ],
+        flow: [
+          { label: 'Internal apps', detail: '~12 apps and services, one OAuth/OIDC contract' },
+          { label: 'Authorize + PKCE', detail: 'Authorization code flow, OIDC discovery' },
+          { label: 'Go identity provider', detail: 'Chi · PostgreSQL · Argon2id · 4-tier RBAC' },
+          { label: 'RS256 JWT', detail: 'Single-use refresh tokens with reuse detection' },
+          { label: 'JWKS', detail: 'Overlapping key generations, verified by kid' },
+        ],
       },
       deepDives: [
         {
@@ -284,6 +297,13 @@ export const portfolio = {
           { value: '180–195 ms', label: 'p95 at 35–50 req/s' },
           { value: 'Rerun-safe', label: 'failed batches, no manual clean-up' },
         ],
+        flow: [
+          { label: 'React + Vite', detail: 'The sales frontend' },
+          { label: 'SSO roles', detail: 'JWT roles from the internal SSO provider' },
+          { label: '6 Python services', detail: 'Split by domain, isolated failure boundaries' },
+          { label: 'Replayable ETL', detail: 'Deterministic job IDs, checkpoints, backoff' },
+          { label: 'PostgreSQL', detail: 'Daily summary table + composite indexes' },
+        ],
       },
       stack: ['React', 'Vite', 'Python', 'Flask', 'FastAPI', 'PostgreSQL', 'REST'],
       featured: true,
@@ -372,6 +392,13 @@ export const portfolio = {
           { value: '< 650 ms', label: 'p95 at 100 concurrent users' },
           { value: '250–400', label: 'applications / updates per day' },
           { value: '10+', label: 'production APIs' },
+        ],
+        flow: [
+          { label: 'REST APIs', detail: '10+ endpoints: intake, eligibility, approvals' },
+          { label: 'Workflow engine', detail: 'One place defines every valid transition' },
+          { label: 'Optimistic locking', detail: 'JPA @Version rejects stale writes' },
+          { label: 'Redis', detail: 'Hot reads cached' },
+          { label: 'MySQL', detail: 'Indexes tuned from execution plans' },
         ],
       },
       deepDives: [
@@ -493,13 +520,6 @@ export const portfolio = {
       status: 'earned',
       date: '2022-05',
       verifyUrl: 'https://www.linkedin.com/in/jaswanth-narravula/details/certifications/',
-    },
-    {
-      name: 'AWS Certified Solutions Architect – Associate',
-      issuer: 'Amazon Web Services',
-      kind: 'certification',
-      status: 'in-progress',
-      date: '2027-03',
     },
   ],
   skills: [

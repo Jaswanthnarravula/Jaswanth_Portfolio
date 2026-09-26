@@ -18,7 +18,7 @@ once** here. All are delivered in **P1 Welcome** unless noted.
 | `HELLO-MUTE-01` | P1 | built | e2e: welcome.spec W3 muted preference survives a reload; green locally 2026-09-21 on chromium-desktop · iphone · pixel · reduced-motion (preview build) | Deviations log 2026-09-21 (visual target) |
 | `HELLO-RM-01` | P1 | planned | | |
 | `HELLO-RETURN-01` | P1 | planned | | |
-| `HELLO-A11Y-01` | P1 | built | e2e: welcome.spec "the SSR h1 names Jaswanth…", X1 axe + keyboard only; green locally 2026-09-21 on chromium-desktop · iphone · pixel · reduced-motion (preview build) | Deviations log 2026-09-21 (visual target) |
+| `HELLO-A11Y-01` | P1 | built | e2e: welcome.spec "the SSR h1 identifies Hello without showing a personal title" green locally 2026-09-26 on chromium-desktop; X1 axe + keyboard-only evidence from 2026-09-21 | Deviations log 2026-09-26 (owner welcome-copy refinement) |
 | `HELLO-RESP-01` | P1 | built | e2e: welcome.spec X4 no horizontal scroll at 320 px, landscape never scrolls; green locally 2026-09-21 on chromium-desktop · iphone · pixel · reduced-motion (preview build) | Deviations log 2026-09-21 (visual target) |
 
 ### 03 Netflix page
@@ -28,7 +28,7 @@ once** here. All are delivered in **P1 Welcome** unless noted.
 | `NFLX-SKIP-01` | P1 | planned | | |
 | `NFLX-AUDIO-01` | P1 | planned | | |
 | `NFLX-AUDIO-02` | P1 | planned | | |
-| `NFLX-MARK-01` | P1 | built | unit: welcome.test (wordmark = the frame's .mark box); e2e: welcome-visual "the intro lands on the frame"; green locally 2026-09-21 on chromium-desktop · iphone · pixel · reduced-motion (preview build) | Deviations log 2026-09-21 (visual target) |
+| `NFLX-MARK-01` | P1 | built | unit: welcome.test 26/26 + e2e: welcome-visual "portfolio wordmark" green locally 2026-09-26 on chromium-desktop (preview build) | Deviations log 2026-09-26 (owner intro-copy refinement) |
 | `NFLX-PROF-01` | P1 | planned | | |
 | `NFLX-PROF-02` | P1 | planned | | |
 | `NFLX-CARD-01` | P1 | built | e2e: welcome.spec NFLX-CARD-01 + welcome-visual "Who's watching? lands on the frame"; green locally 2026-09-21 on chromium-desktop · iphone · pixel · reduced-motion (preview build) | Deviations log 2026-09-21 (visual target) |
@@ -40,7 +40,7 @@ once** here. All are delivered in **P1 Welcome** unless noted.
 ### 04 OS chooser
 | ID | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|
-| `CHOOSE-CARD-01` | P1 | built | e2e: chooser-visual W1 the foyer lands on the frame, chooser.spec; green locally 2026-09-21 on chromium-desktop · iphone · pixel · reduced-motion (preview build) | Deviations log 2026-09-21 (visual target) |
+| `CHOOSE-CARD-01` | P1 | built | component: chooser.test 4/4 + e2e: welcome.spec RES-PRE-01 (Plain view visible) green locally 2026-09-26 on chromium-desktop; visual review at 1440×900 and 390×844 | Deviations log 2026-09-26 (owner chooser refinement) |
 | `CHOOSE-BADGE-01` | P1 | built | component/welcome/chooser.test.tsx + e2e/chooser.spec.ts assert neutral cards with no recommendation badge 2026-09-23 | Owner refinement 2026-09-23 |
 | `CHOOSE-REL-01` | P1 | planned | | |
 | `CHOOSE-PREF-01` | P1 | planned | | |
@@ -57,17 +57,20 @@ once** here. All are delivered in **P1 Welcome** unless noted.
 
 ## Definition of done — onboarding
 - [ ] W1, W2, W3 journeys green on `chromium-desktop`, `iphone`, `pixel`, `reduced-motion`, `no-js`, `asset-original`.
-- [ ] LCP node on `/` is the `<h1>`; LCP ≤ 2.5 s, CLS ≤ 0.1, Lighthouse Accessibility ≥ 95.
+- [ ] LCP ≤ 2.5 s, CLS ≤ 0.1, Lighthouse Accessibility ≥ 95; the visually hidden `<h1>` names the Hello surface.
 - [ ] No three.js, GSAP or audio request before the `load` event / first paint respectively.
 - [ ] **All five profiles produce the identical transition and land on the chooser** (e2e + unit).
 - [ ] Intro skippable from its first frame; mute persists; silent when audio is blocked or missing.
 - [ ] Neither "Netflix" nor any third-party mark appears in UI text, metadata or OG cards.
-- [ ] Résumé and "Skip the OS" links reachable by keyboard on all three pages.
+- [ ] Résumé and the plain-reader link ("Skip the OS" / "Plain view") are keyboard reachable on all three pages.
 - [ ] Smell tests 5 (keyboard) and 6 (impatience) pass on all three pages.
 
 ## Deviations log
 | Date | ID | What changed vs the spec | Why | Owner sign-off |
 |---|---|---|---|---|
+| 2026-09-26 | `CHOOSE-ENTER-01` · `CHOOSE-EXIT-01` | The snapshot still flies, but its preview fades out in the first 160 ms and the panel is that OS's screen colour (iOS indigo, macOS desktop blue, Windows deep blue, Android sea-green, Linux terminal black); the live shell fades in over it. On return the preview fades back in as the panel lands in its card | Blown up to full screen, the card miniature read as a stretched stock wallpaper ("not professional") | Owner, 2026-09-26 ("the transition … shows the preview of the image … fix it") |
+| 2026-09-26 | `CHOOSE-CARD-01` | Phone-portrait cards show a portrait crop of the same approved HD miniature as desktop (`public/assets/chooser/{os}-portrait.{avif,webp}`, made by `scripts/build-chooser-portraits.mjs`, ≤ 40 KB each) instead of the old live captures (`snapshots.generated.json` stays for its pipeline tests) | The portrait captures were wireframe placeholders and macOS's square crop was a blank white Finder list | Owner, 2026-09-26 ("mobile issues — fix them") |
+| 2026-09-26 | `HELLO-LCP-01` · `HELLO-A11Y-01` · `NFLX-MARK-01` · `CHOOSE-CARD-01` | Removed the visible "Jaswanth — Software Engineer" line from Hello while retaining a visually hidden "Hello" heading; changed the intro wordmark to "PORTFOLIO"; exposed "Plain view" in the chooser footer at every viewport | Owner requested a quieter opening, a non-name intro brand, and a direct plain-reader choice on the OS chooser | Owner, 2026-09-26 (this request) |
 | 2026-09-21 | `HELLO-PATHS-01`, `HELLO-DRAW-01`, `HELLO-GLASS-01`, `HELLO-GL-01` | Hello matches `assets-inbox/preview/storyboard.html`: the opening greeting is the storyboard's authored cursive "hello" (one pen stroke, resampled + normalized by `build-hello-paths.mjs`; the other four stay font-generated); glass-ribbon ink (gradient + SVG light filter, dropped on T0); draw 3200 ms `cubic-bezier(.6,.12,.36,.96)` after 500 ms (was 1600 ms); light pastel field in CSS and in `hello.frag`; name + pill sit inside the lens; top bar is plain links (no glass, not a WebGL panel) | Owner rejected the dark print-letter Hello as not matching the approved storyboard | Owner, 2026-09-21 ("I was expecting the same output" as the storyboard) |
 | 2026-09-21 | `HELLO-PATHS-01` | The four font greetings are centrelines extracted from OFL handwriting fonts (Kalam for Latin + Devanagari, Klee One for Japanese): the shaped text is rasterized with HarfBuzz (via `sharp`), thinned (Zhang–Suen), traced into pen strokes and smoothed | No open-licensed single-line font covers Devanagari and Japanese; centrelines keep one pen stroke per line and correct shaping (the स्ते conjunct) | Owner authorization 2026-09-21 (plans/README); for review at the P1 gate |
 | 2026-09-21 | `HELLO-MORPH-01` | Shapes are normalized and paired (morph or crossfade) at build time; MorphSVG matches points at idle in the browser rather than shipping precompiled point data | The pairing rule is the part the plan fixes and is tested; point matching costs a few ms once per pair, off the input path | Owner authorization 2026-09-21; for review at the P1 gate |

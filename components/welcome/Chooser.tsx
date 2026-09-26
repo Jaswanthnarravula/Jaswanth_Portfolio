@@ -24,7 +24,6 @@ import { prefersReducedMotion } from '@/lib/motion/dur';
 import { takeHandoff } from '@/lib/motion/handoff';
 import { prefetchOs } from '@/lib/os-loaders';
 import { CHOOSER_HEADING, OS_CHARACTER } from '@/lib/welcome/chooser';
-import snapshots from '@/lib/welcome/snapshots.generated.json';
 import { useKernel, usePrefs } from '@/stores/kernel-context';
 import { dispatch, getKernel, subscribeEffects } from '@/stores/kernel-store';
 import { prefsStore } from '@/stores/prefs-store';
@@ -37,19 +36,53 @@ import styles from './chooser.module.css';
 
 type Orientation = 'landscape' | 'portrait';
 type Snapshot = { avif?: string; webp: string; width: number; height: number };
-const SNAPSHOTS = snapshots as Partial<Record<OsId, Record<Orientation, Snapshot>>>;
 
 /**
  * The desktop foyer uses the tall, detailed miniatures from the approved selector reference. The source files keep a
  * landscape canvas around the visible crop so the shared-element transition and orientation contract remain intact;
  * `object-fit: cover` exposes the exact centre artwork in the tall card window.
  */
-const REFERENCE_SNAPSHOTS: Readonly<Record<OsId, Snapshot>> = {
-  ios: { webp: '/assets/chooser/ios-hd.webp', width: 2032, height: 1272 },
-  macos: { webp: '/assets/chooser/macos-hd.webp', width: 2044, height: 1272 },
-  windows: { webp: '/assets/chooser/windows-hd.webp', width: 2036, height: 1272 },
-  android: { webp: '/assets/chooser/android-hd.webp', width: 2032, height: 1272 },
-  linux: { webp: '/assets/chooser/linux-hd.webp', width: 2044, height: 1272 },
+const REFERENCE_SNAPSHOTS: Readonly<Record<Orientation, Record<OsId, Snapshot>>> = {
+  landscape: {
+    ios: { webp: '/assets/chooser/ios-hd.webp', width: 2032, height: 1272 },
+    macos: { webp: '/assets/chooser/macos-hd.webp', width: 2044, height: 1272 },
+    windows: { webp: '/assets/chooser/windows-hd.webp', width: 2036, height: 1272 },
+    android: { webp: '/assets/chooser/android-hd.webp', width: 2032, height: 1272 },
+    linux: { webp: '/assets/chooser/linux-hd.webp', width: 2044, height: 1272 },
+  },
+  // Phones: the central band of the same artwork (scripts/build-chooser-portraits.mjs), not the old wireframes.
+  portrait: {
+    ios: {
+      avif: '/assets/chooser/ios-portrait.avif',
+      webp: '/assets/chooser/ios-portrait.webp',
+      width: 600,
+      height: 759,
+    },
+    macos: {
+      avif: '/assets/chooser/macos-portrait.avif',
+      webp: '/assets/chooser/macos-portrait.webp',
+      width: 600,
+      height: 759,
+    },
+    windows: {
+      avif: '/assets/chooser/windows-portrait.avif',
+      webp: '/assets/chooser/windows-portrait.webp',
+      width: 600,
+      height: 759,
+    },
+    android: {
+      avif: '/assets/chooser/android-portrait.avif',
+      webp: '/assets/chooser/android-portrait.webp',
+      width: 600,
+      height: 759,
+    },
+    linux: {
+      avif: '/assets/chooser/linux-portrait.avif',
+      webp: '/assets/chooser/linux-portrait.webp',
+      width: 600,
+      height: 759,
+    },
+  },
 };
 
 /** OSes whose boot screen exists (each OS brings its own with its phase; plans/{os}/surfaces/boot.md). */
@@ -266,7 +299,7 @@ export default function Chooser({ oses = VISIBLE_OSES }: { oses?: readonly OsId[
             <nav aria-label="Operating systems" className={styles.nav}>
               <ul className={styles.cards} data-count={oses.length}>
                 {oses.map((os) => {
-                  const shot = orientation === 'landscape' ? REFERENCE_SNAPSHOTS[os] : SNAPSHOTS[os]?.[orientation];
+                  const shot = REFERENCE_SNAPSHOTS[orientation][os];
                   const failed = view.failed === os;
                   const released = enterable(os);
                   return (
@@ -328,7 +361,7 @@ export default function Chooser({ oses = VISIBLE_OSES }: { oses?: readonly OsId[
             Start at Hello
           </button>
           <a href="/go/resume">Résumé</a>
-          <a href="/plain">Skip the OS</a>
+          <a href="/plain">Plain view</a>
         </footer>
       </div>
     </div>

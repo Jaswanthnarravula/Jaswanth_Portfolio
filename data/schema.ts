@@ -46,7 +46,7 @@ export interface Person {
   readonly placeholder?: true;
 }
 
-export type ContactLinkKind = 'github' | 'linkedin' | 'site' | 'x';
+export type ContactLinkKind = 'github' | 'linkedin' | 'instagram' | 'site' | 'x';
 export interface ContactLink {
   readonly kind: ContactLinkKind;
   readonly label: string;
@@ -85,11 +85,18 @@ export interface ResultMetric {
   readonly value: string;
   readonly label: string;
 }
+/** One stage of a project's architecture, in request/data order — shared/24 `READER-FX-12`. */
+export interface FlowStep {
+  readonly label: string;
+  readonly detail: string;
+}
 export interface CaseStudy {
   readonly problem: readonly string[];
   readonly role: string;
   readonly decisions: readonly Decision[];
   readonly results: readonly ResultMetric[];
+  /** How the system fits together; written only from facts already in the project's own text. */
+  readonly flow?: readonly FlowStep[];
 }
 
 /** A deep-dive article attached to its project — shared/23 `CONTENT-DIVE-01`. */

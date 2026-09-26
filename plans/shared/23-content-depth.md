@@ -83,7 +83,8 @@ Skill       += { approx?: true }         // "~1 yr" instead of "1+ yr"  // CONTE
 - A deep dive whose project is removed → its `~/notes` file and GitHub document disappear with it; nothing is routed,
   so no redirect is needed.
 - Very long deep dive → the OS's own scroll; Linux pages through `less`.
-- `/plain` shows the card (About) but not case studies (it lists sections only); `/go/projects/{slug}` shows both.
+- `/plain` shows the card (About) and every role in full (`ExperienceDetail`, incl. scope) but not case studies;
+  `/go/projects/{slug}` shows both. (Owner change 2026-09-25, logged under `ROUTE-PLAIN-01`.)
 
 ## Feature IDs + acceptance tests
 

@@ -44,8 +44,9 @@
   --gh-l4: #39d353;
 }
 
-/* The dark title bar variant (the storyboard's GitHub window). */
-.toolbar {
+/* The dark title bar variant (the storyboard's GitHub window). Scoped under .github so it always outranks the shared
+   light toolbar — including its inactive state, or the white title would sit on a light bar. */
+.github > .toolbar {
   border-bottom-color: #30363d;
   background: #24292f;
 }
@@ -53,7 +54,7 @@
 .toolbar button {
   color: #f0f3f6 !important;
 }
-:global([data-window]:not([data-focused])) .toolbar {
+:global([data-window]:not([data-focused])) .github > .toolbar {
   background: #3a4048;
 }
 

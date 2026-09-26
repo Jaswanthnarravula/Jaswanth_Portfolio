@@ -9,6 +9,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { ASSET_MANIFEST, assetCredits, getAsset, resolveAsset } from '@/lib/assets/manifest';
+import { TECH_LOGOS, techAssetId } from '@/lib/assets/tech';
+import { ORG_LOGOS, orgAssetFor, orgAssetId } from '@/lib/assets/orgs';
+import { getCredentials, getEducation, getExperience, getSkills } from '@/data/selectors';
 import { OS_IDS } from '@/lib/kernel/ids';
 import { OS_REGISTRY } from '@/lib/kernel/registry';
 import { BUDGETS, GUEST_GREEN, cssHueSaturate, ingestAssets } from '../../../scripts/ingest-assets.mjs';
@@ -68,6 +71,34 @@ describe('ASSET-ORIG-01 parametric original for every app', () => {
         expect(entry, binding.icon).toBeDefined();
         expect('parametric' in entry!.original).toBe(true);
       }
+  });
+});
+
+describe('ROUTE-PLAIN-01 reader Toolbox logos', () => {
+  it('every logo names a published skill and has a manifest entry with an original', () => {
+    const skills = new Set(getSkills().flatMap((group) => group.items.map((skill) => skill.name)));
+    for (const logo of TECH_LOGOS) {
+      expect(skills.has(logo.skill), logo.skill).toBe(true);
+      const entry = getAsset(techAssetId(logo.slug));
+      expect(entry?.kind).toBe('tech-logo');
+      expect('parametric' in entry!.original).toBe(true);
+    }
+  });
+});
+
+describe('ROUTE-PLAIN-01 reader organisation logos', () => {
+  it('every employer, client, school and issuer in the data has a logo entry with a monogram original', () => {
+    const names = [
+      ...getExperience().flatMap((role) => [role.company, ...(role.client ? [role.client] : [])]),
+      ...getEducation().map((school) => school.school),
+      ...getCredentials().map((credential) => credential.issuer),
+    ];
+    for (const name of names) {
+      const id = orgAssetFor(name);
+      expect(id, name).toBeDefined();
+      expect(getAsset(id!), name).toBeDefined();
+    }
+    for (const logo of ORG_LOGOS) expect('monogram' in getAsset(orgAssetId(logo.slug))!.original).toBe(true);
   });
 });
 

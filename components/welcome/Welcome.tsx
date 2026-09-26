@@ -2,13 +2,12 @@
  * The welcome layer on `/` — plans/02-hello-page.md (Hello) and plans/03-netflix-page.md (intro + "Who's watching?").
  * Each screen is the owner's storyboard frame (plans/visual-targets/{hello,intro,profiles}.png; each plan's "Visual
  * target"): the frame's markup, units and colours, with real data in its slots.
- * Server-rendered and complete without JavaScript: the `<h1>` is the LCP element and never starts hidden, the Hello
- * draws itself in CSS from first paint, the pill jumps to real links. `WelcomeRoot` (client) only switches screens.
- * Personal copy comes from the data layer; nothing here is typed career content.
+ * Server-rendered and complete without JavaScript: the accessible `<h1>` identifies the surface, the visible Hello
+ * draws itself in CSS from first paint, and the pill jumps to real links. `WelcomeRoot` (client) only switches screens.
+ * The opening stays deliberately generic; portfolio facts begin after the welcome flow.
  */
 import { preload } from 'react-dom';
 import { AssetIcon } from '@/components/ui/AssetIcon';
-import { getPerson } from '@/data/selectors';
 import { resolveAsset } from '@/lib/assets/manifest';
 import { OS_NAMES } from '@/lib/kernel/ids';
 import { VISIBLE_OSES } from '@/lib/kernel/route';
@@ -38,7 +37,7 @@ const PLAIN = '/plain';
 const FACE_CSS = `@font-face{font-family:'${TEXT_FACE.family}';src:url(${TEXT_FACE.src}) format('woff2');font-weight:${TEXT_FACE.weight};font-style:normal;font-display:swap}`;
 
 /**
- * The name, set exactly as the frame's `.mark` box (scripts/build-wordmark.mjs): glyphs on the box's baseline and the
+ * The intro label, set as the frame's `.mark` box (scripts/build-wordmark.mjs): glyphs on the box's baseline and the
  * frame's ellipse trimming their feet. `cutId` keeps the mask id unique per instance.
  */
 function Wordmark({ className, cutId }: { className?: string; cutId: string }) {
@@ -156,7 +155,6 @@ function Rod({ href }: { href: string }) {
 }
 
 export function Welcome() {
-  const person = getPerson();
   const hello = helloPaths.greetings[0]!;
   const audio = resolveAsset('audio.intro');
   preload(TEXT_FACE.src, { as: 'font', type: 'font/woff2', crossOrigin: '' });
@@ -216,9 +214,8 @@ export function Welcome() {
                   <Rod href="#hello-glyph-alt" />
                 </g>
               </svg>
-              <p className="sr-only">Hello</p>
-              <h1 id="hello-title" className={styles.title}>
-                {person.givenName} — {person.role}
+              <h1 id="hello-title" className="sr-only">
+                Hello
               </h1>
               <TapToBegin className={`${styles.pill} ${styles.jsOnly}`}>
                 <span>Tap to begin</span>
@@ -230,7 +227,7 @@ export function Welcome() {
           </section>
 
           <section className={`${styles.screen} ${styles.intro}`} aria-label="Intro" data-intro>
-            <p className="sr-only">{person.givenName}</p>
+            <p className="sr-only">{wordmark.text}</p>
             <Wordmark className={styles.wordmark} cutId="wordmark-cut-intro" />
             <SkipIntro className={styles.skip} />
           </section>

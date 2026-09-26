@@ -10,8 +10,19 @@ import { OS_REGISTRY } from '@/lib/kernel/registry';
 import { assetId, type AssetId } from '@/lib/kernel/types';
 import type { GlyphId } from './glyphs';
 import officialJson from './official.generated.json';
+import { ORG_LOGOS, orgAssetId } from './orgs';
+import { TECH_LOGOS, techAssetId } from './tech';
 
-export type AssetKind = 'app-icon' | 'system-icon' | 'wallpaper' | 'avatar' | 'audio' | 'wordmark' | 'device-frame';
+export type AssetKind =
+  | 'app-icon'
+  | 'system-icon'
+  | 'tech-logo'
+  | 'org-logo'
+  | 'wallpaper'
+  | 'avatar'
+  | 'audio'
+  | 'wordmark'
+  | 'device-frame';
 export type IconShape = 'squircle' | 'rounded' | 'circle' | 'none';
 
 export interface OfficialSource {
@@ -40,6 +51,7 @@ export type OriginalSource =
       };
     }
   | { readonly face: { readonly gradient: readonly [string, string] } }
+  | { readonly monogram: { readonly text: string; readonly gradient: readonly [string, string] } }
   | { readonly mark: 'apple' | 'windows' | 'android' | 'wordmark' }
   | { readonly css: string }
   | { readonly synth: 'chime' };
@@ -183,6 +195,28 @@ function buildManifest(): readonly AssetEntry[] {
       box: { w: 96, h: 96 },
       official: official(item.id),
       original: { parametric: { glyph: item.glyph, gradient: item.gradient, shape: 'none' } },
+      alt: '',
+    });
+  // Reader Toolbox logos (lib/assets/tech.ts): free-form marks on a plate the page draws; original = a neutral glyph.
+  for (const logo of TECH_LOGOS)
+    entries.push({
+      id: assetId(techAssetId(logo.slug)),
+      kind: 'tech-logo',
+      label: logo.skill,
+      box: { w: 48, h: 48 },
+      official: official(techAssetId(logo.slug)),
+      original: { parametric: { glyph: logo.glyph, gradient: ['#5d6a60', '#252e29'], shape: 'none' } },
+      alt: '',
+    });
+  // Reader organisation logos (lib/assets/orgs.ts): original = a text monogram tile in the logo's own box.
+  for (const logo of ORG_LOGOS)
+    entries.push({
+      id: assetId(orgAssetId(logo.slug)),
+      kind: 'org-logo',
+      label: logo.names[0]!,
+      box: logo.box,
+      official: official(orgAssetId(logo.slug)),
+      original: { monogram: { text: logo.monogram, gradient: logo.gradient } },
       alt: '',
     });
   for (const persona of PERSONA_IDS)

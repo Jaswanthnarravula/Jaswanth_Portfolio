@@ -8,6 +8,8 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 
 ## Ledger
 
+2026-09-25 regression (`WIN-START-05`, `WIN-CTX-01`): Windows menus now sit above the overlay layer so Start cannot cover its Power/user flyouts. The `WIN-START-04 · WIN-START-05` Playwright test checks pointer hit testing inside the overlapping Power menu before clicking Shut down; it failed on the prior build and passes on `.next-win-layer`. Start, desktop context menus, and the live-blur budget: 6/6 passed across chromium-desktop and reduced-motion. Production build/typecheck, targeted lint, and formatting passed.
+
 ### `01-identity.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|

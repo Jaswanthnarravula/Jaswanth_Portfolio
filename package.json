@@ -31,7 +31,7 @@
     "gltf:meshopt": "gltf-transform meshopt",
     "gltf:ktx2": "gltf-transform uastc",
     "gltf:optimize": "gltf-transform optimize",
-    "prebuild": "node scripts/copy-decoders.mjs && node scripts/fetch-github.mjs && npm run build:resume && node --experimental-strip-types --no-warnings scripts/check-content.mjs && node scripts/check-plans.mjs",
+    "prebuild": "node scripts/copy-decoders.mjs && node --env-file-if-exists=.env.local scripts/fetch-github.mjs && npm run build:resume && node --experimental-strip-types --no-warnings scripts/check-content.mjs && node scripts/check-plans.mjs",
     "build:resume": "node --experimental-strip-types --no-warnings scripts/build-resume.mjs",
     "build:hello": "node scripts/build-hello-paths.mjs",
     "build:wordmark": "node --experimental-strip-types --no-warnings scripts/build-wordmark.mjs",
@@ -41,7 +41,8 @@
     "test:unit": "vitest run --project unit",
     "test:component": "vitest run --project component",
     "test:e2e:build": "node scripts/e2e-build.mjs",
-    "check:build": "node scripts/check-build.mjs"
+    "check:build": "node scripts/check-build.mjs",
+    "github:refresh": "node --env-file-if-exists=.env.local scripts/fetch-github.mjs"
   },
   "dependencies": {
     "@gsap/react": "2.1.2",

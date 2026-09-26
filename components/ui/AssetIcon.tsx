@@ -108,6 +108,36 @@ function OriginalArt({
       </svg>
     );
   }
+  if ('monogram' in source) {
+    // Organisation logos in original mode: the organisation's initials on a tile sized to the logo's own box.
+    const { text, gradient } = source.monogram;
+    const w = typeof width === 'number' ? width : 100;
+    const h = typeof height === 'number' ? height : 100;
+    return (
+      <svg viewBox={`0 0 ${w} ${h}`} width={width} height={height} aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor={gradient[0]} />
+            <stop offset="1" stopColor={gradient[1]} />
+          </linearGradient>
+        </defs>
+        <rect width={w} height={h} rx={Math.min(w, h) * 0.22} fill={`url(#${gradientId})`} />
+        <text
+          x={w / 2}
+          y={h / 2}
+          dy="0.35em"
+          textAnchor="middle"
+          fill="#fff"
+          fontFamily="system-ui, sans-serif"
+          fontWeight={700}
+          fontSize={Math.min(h * 0.46, (w * 1.5) / Math.max(text.length, 2))}
+          letterSpacing="-0.02em"
+        >
+          {text}
+        </text>
+      </svg>
+    );
+  }
   // Boot marks and the name wordmark in original mode: the site's own monogram (never a third-party mark).
   return (
     <svg viewBox="0 0 64 64" width={width} height={height} aria-hidden="true" focusable="false">

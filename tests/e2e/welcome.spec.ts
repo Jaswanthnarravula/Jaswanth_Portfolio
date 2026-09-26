@@ -59,9 +59,12 @@ test.describe('Hello', () => {
     await expect(screen(page)).toHaveAttribute('data-screen', 'intro');
   });
 
-  test('the SSR h1 names Jaswanth and the morphing glyph is hidden from assistive tech', async ({ page }) => {
+  test('the SSR h1 identifies Hello without showing a personal title, and the morphing glyph is hidden from assistive tech', async ({
+    page,
+  }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1, name: 'Jaswanth — Software Engineer' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Hello' })).toBeAttached();
+    await expect(page.getByText('Jaswanth — Software Engineer', { exact: true })).toHaveCount(0);
     await expect(page.locator('svg:has([data-glyph])')).toHaveAttribute('aria-hidden', 'true');
     await expect(page.getByRole('button', { name: 'Sound' })).toHaveAttribute('aria-pressed', 'true');
   });
@@ -427,5 +430,6 @@ test.describe('accessibility and résumé reach', () => {
     await page.getByRole('button', { name: /^Guest/ }).click();
     await expect(chooserHeading(page)).toBeVisible();
     await reachable('[data-chooser-fade="footer"]');
+    await expect(page.getByRole('link', { name: 'Plain view' })).toBeVisible();
   });
 });

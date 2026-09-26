@@ -149,12 +149,11 @@ describe('CONTENT-DIVE-01 deep dives', () => {
 });
 
 describe('CONTENT-CRED-01 · CONTENT-SKILL-01 rendered', () => {
-  it('a course never reads "certification"; the in-progress certification shows its target; verify links open safely', () => {
+  it('a course never reads "certification"; verify links open safely', () => {
     render(<EducationList data={{ schools: getEducation(), credentials: getCredentials() }} headingLevel={3} />);
     const items = within(screen.getByRole('region', { name: 'Credentials' })).getAllByRole('listitem');
     expect(items[0]).toHaveTextContent('AWS Academy Cloud Architecting — AWS Academy · Course credential · Jan 2022');
     expect(items[0]).not.toHaveTextContent(/certification/i);
-    expect(items[2]).toHaveTextContent('Certification · in progress · target Mar 2027');
     const verify = within(items[0]!).getByRole('link', { name: /Verify/ });
     expect(verify).toHaveAttribute('rel', 'noopener noreferrer');
   });

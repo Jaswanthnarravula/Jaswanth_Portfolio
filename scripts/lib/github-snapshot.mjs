@@ -54,15 +54,79 @@ export function validateSnapshot(snapshot) {
   if (!Array.isArray(snapshot.pinned) || !snapshot.pinned.every(isString)) problems.push('pinned');
   if (snapshot.contributions !== null) {
     const c = snapshot.contributions;
+    const isLevel = (value) => Number.isInteger(value) && value >= 0 && value <= 4;
     if (
       !c ||
       !isCount(c.total) ||
       !Array.isArray(c.weeks) ||
-      !c.weeks.every((week) => Array.isArray(week) && week.every(isCount))
+      !c.weeks.every((week) => Array.isArray(week) && week.every(isCount)) ||
+      (c.start !== undefined && !(isString(c.start) && /^\d{4}-\d{2}-\d{2}$/.test(c.start))) ||
+      (c.levels !== undefined &&
+        !(
+          Array.isArray(c.levels) &&
+          c.levels.length === c.weeks.length &&
+          c.levels.every(
+            (week, index) => Array.isArray(week) && week.length === c.weeks[index].length && week.every(isLevel),
+          )
+        ))
     )
       problems.push('contributions');
   }
   return problems;
+}
+
+/** Group dated days (any order) into Sunday-first weeks, like GitHub's calendar; keeps the last 53 weeks. */
+export function toCalendar(days, total) {
+  const sorted = [...days].sort((a, b) => a.date.localeCompare(b.date));
+  if (sorted.length === 0) return null;
+  const dayMs = 86_400_000;
+  const first = Date.parse(`${sorted[0].date}T00:00:00Z`);
+  const firstSunday = first - new Date(first).getUTCDay() * dayMs;
+  const weeks = [];
+  const levels = [];
+  for (const day of sorted) {
+    const index = Math.floor((Date.parse(`${day.date}T00:00:00Z`) - firstSunday) / (7 * dayMs));
+    (weeks[index] ??= []).push(day.count);
+    (levels[index] ??= []).push(day.level);
+  }
+  const keep = Math.max(0, weeks.length - 53);
+  const kept = weeks.slice(keep);
+  // The first kept week may be partial: its first day is the calendar's start.
+  const startMs = keep === 0 ? first : firstSunday + keep * 7 * dayMs;
+  return {
+    total,
+    start: new Date(startMs).toISOString().slice(0, 10),
+    weeks: kept.map((week) => week ?? []),
+    levels: levels.slice(keep).map((week) => week ?? []),
+  };
+}
+
+/**
+ * Parse GitHub's public contribution calendar (`github.com/users/{login}/contributions`) — the same calendar the
+ * profile shows, including private contributions when the account publishes them. Returns null if the markup changed.
+ */
+export function parseContributionsPage(html) {
+  const text = String(html);
+  const totalMatch = text.match(/id="js-contribution-activity-description"[^>]*>\s*([\d,]+)\s+contributions?/);
+  const counts = new Map();
+  for (const match of text.matchAll(/<tool-tip[^>]*\bfor="([^"]+)"[^>]*>([^<]*)<\/tool-tip>/g)) {
+    const label = match[2].trim();
+    const count = /^No contributions/.test(label)
+      ? 0
+      : Number((label.match(/^([\d,]+) contributions?/) ?? [])[1]?.replace(/,/g, ''));
+    if (Number.isInteger(count)) counts.set(match[1], count);
+  }
+  const days = [];
+  for (const match of text.matchAll(/<td\b[^>]*\bContributionCalendar-day\b[^>]*>/g)) {
+    const tag = match[0];
+    const date = tag.match(/\bdata-date="(\d{4}-\d{2}-\d{2})"/)?.[1];
+    const level = Number(tag.match(/\bdata-level="(\d)"/)?.[1]);
+    const id = tag.match(/\bid="([^"]+)"/)?.[1];
+    if (!date || !Number.isInteger(level) || !id || !counts.has(id)) continue;
+    days.push({ date, level, count: counts.get(id) });
+  }
+  if (!totalMatch || days.length < 7) return null;
+  return toCalendar(days, Number(totalMatch[1].replace(/,/g, '')));
 }
 
 /** Stable key order so committed diffs are meaningful. */
@@ -147,8 +211,9 @@ export async function fetchGithubSnapshot({
 
   let contributions = null;
   let pinned = [];
+  const LEVELS = { NONE: 0, FIRST_QUARTILE: 1, SECOND_QUARTILE: 2, THIRD_QUARTILE: 3, FOURTH_QUARTILE: 4 };
   if (token) {
-    const query = `query($login:String!){user(login:$login){contributionsCollection{contributionCalendar{totalContributions weeks{contributionDays{contributionCount}}}} pinnedItems(first:6,types:REPOSITORY){nodes{... on Repository{name}}}}}`;
+    const query = `query($login:String!){user(login:$login){contributionsCollection{contributionCalendar{totalContributions weeks{contributionDays{contributionCount contributionLevel date}}}} pinnedItems(first:6,types:REPOSITORY){nodes{... on Repository{name}}}}}`;
     const graph = await request(`${base}/graphql`, {
       method: 'POST',
       body: JSON.stringify({ query, variables: { login: username } }),
@@ -157,11 +222,33 @@ export async function fetchGithubSnapshot({
     const user = graph?.data?.user;
     const calendar = user?.contributionsCollection?.contributionCalendar;
     if (calendar)
-      contributions = {
-        total: calendar.totalContributions,
-        weeks: calendar.weeks.slice(-53).map((week) => week.contributionDays.map((day) => day.contributionCount)),
-      };
+      contributions = toCalendar(
+        calendar.weeks.flatMap((week) =>
+          week.contributionDays.map((day) => ({
+            date: day.date,
+            count: day.contributionCount,
+            level: LEVELS[day.contributionLevel] ?? 0,
+          })),
+        ),
+        calendar.totalContributions,
+      );
     pinned = (user?.pinnedItems?.nodes ?? []).map((node) => node?.name).filter(Boolean);
+  }
+  // No token (or no calendar): the public profile calendar needs none. A failure here only drops the calendar.
+  if (!contributions) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetchImpl(`https://github.com/users/${encodeURIComponent(username)}/contributions`, {
+        signal: controller.signal,
+        headers: { Accept: 'text/html', 'User-Agent': 'portfolio-build' },
+      });
+      if (response.ok) contributions = parseContributionsPage(await response.text());
+    } catch {
+      /* keep contributions null */
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   return {

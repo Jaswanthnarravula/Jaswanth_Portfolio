@@ -3,12 +3,43 @@
 Single place to see where the project stands. Update this file in the same change that updates a ledger.
 Source of truth for each row is the ledger named in the first column.
 
+2026-09-26 reader About code card + jump rail: `/plain` About shows the lead on the left and a wider `Portfolio.java` card on the right that types itself in a loop (clip-path + caret; full text always in the page; holds on hover/focus; off for reduced motion). Its data comes from the data layer; its two buttons link to Experience and Projects. Wide screens get a fixed section rail on the right: dots, the current section as a ringed icon with a `> Title` label. Deviations logged under `ROUTE-PLAIN-01`; reader e2e 37 passed, 16 designed skips (2 unrelated failures on `/` and `/go/resume`).
+
+2026-09-26 mobile fixes (owner: "mobile issues — fix them"): phone chooser cards show portrait crops of the approved HD miniatures, no longer wireframes or a blank macOS card (`CHOOSE-CARD-01`). The enter/return flight fades the preview out and grows a panel in the OS's own screen colour, so no stretched stock image (`CHOOSE-ENTER-01`, `CHOOSE-EXIT-01`); both are in the plans/06 Deviations log. iOS phone widgets line up with the icon edges and keep the icon gutter, no longer touching; Résumé Open/Download share one line, including 360×640 and landscape (`IOS-WIDG-01…04`). The macOS touch menu bar centres the Apple logo and app name with the status items (`MAC-MENU-07`). The GitHub dark title bar always outranks the shared light inactive bar, so its white title never sits on light grey (`MAC-GH-*`). Evidence: production build, e2e chooser (desktop + pixel), ios.spec + macos.spec (pixel, 38 passed), iOS widget/home journeys 10 passed, Vitest welcome/iOS 120 + 82 passed. `KRN-SWITCH-02` fails on its own: it still expects Android's old preview-stub switcher.
+
+2026-09-26 reader Experience follow-up: `/plain` Experience is now a left/right alternating timeline — card on one side, dates on the other; scope and highlights open with "+ more" (native `<details>`, no-JS safe). Phones get one column. Deviation logged under `ROUTE-PLAIN-01`; reader and no-JS e2e pass (29/29, 7 designed skips).
+
+2026-09-26 welcome follow-up: the visible "Jaswanth — Software Engineer" title is removed from Hello (the accessible
+heading remains "Hello"), the intro wordmark is now "PORTFOLIO", and the OS chooser exposes an always-visible "Plain
+view" link on desktop and mobile. Typecheck, focused unit/component tests, production build, focused Playwright checks,
+and visual review at 1440×900 and 390×844 passed.
+
+2026-09-26 reader Skills follow-up: the `/plain` Toolbox now fits five skills per row on narrow phones and six on wider mobile screens. Production CSS was verified at 375/500 px with no horizontal overflow; desktop layout is unchanged (`ROUTE-PLAIN-01`).
+
+2026-09-26 contact follow-up: Gmail, LinkedIn and Instagram logos now use locally ingested brand artwork. The owner's Instagram profile is in canonical contact data; reader contact checks cover four links and loaded logos at desktop/mobile widths, including no-JS rendering. Asset tests pass 16/16.
+
+**Reader contact (owner request 2026-09-26):** `/plain` has a dedicated email card and professional profile cards with icons, native contact links, responsive layout, and one Contact heading (`ROUTE-PLAIN-01`). Scoped to the reader page. Typecheck, targeted lint/format, 320–1440 px overflow/contact accessibility checks, desktop/mobile visual review, and no-JavaScript link checks passed.
+
+**Reader motion (owner request 2026-09-25, P8):** `/plain` gets a motion layer — `shared/24-reader-motion.md`, 15 IDs
+(`READER-FX-01…15`), verified 2026-09-26 — except `READER-FX-09` (type band), removed by the owner the same day (BLOCKED; the hero also lost its node network and rings) (`e2e/reader-fx.spec.ts` 24 passed / 24 skipped by design on four
+projects, `unit/content/reader-fx.test.ts` 6/6, axe color-contrast 0 in main). Sticky header with scroll progress,
+CSS-3D hero object, text reveals, sticky case-study chapters with architecture flows (new optional `CaseStudy.flow`)
+and before → after meters, card tilt, magnetic CTAs, GitHub rail. No WebGL on the page; items that break a project
+rule are listed in shared/24 "Not built here". `check-plans`: 150 documents · 964 IDs · 964 ledger rows.
+
 **Reader polish (owner-approved 2026-09-25):** `/plain` now includes the owner's LinkedIn portrait as a local,
 responsive, full-color circular WebP portrait. Follow-up adds visible text blur entrances and removes the duplicate
 résumé section heading. Owner clarified that the original portrait size, background placement and text overlay must
 remain; only its circular crop and original colors change. Scoped to the reader page; no OS behavior or shared styles changed.
 `ROUTE-PLAIN-01` deviation recorded in the shared ledger. Verified: typecheck, production build, desktop/mobile
 visual inspection, 320–1440 px overflow checks, WCAG axe scan, and reduced-motion fallback.
+Follow-up (owner, 2026-09-25): `/plain` Experience now shows each role in full — summary, scope, every highlight and
+the stack — via the shared `ExperienceDetail`, not the one-line list. About is a reader-only editorial spread (lead,
+story columns, glance tiles, Now card) with a CSS scroll-linked entrance. Skills adds a black logo "Toolbox"; Education
+is school + credential cards; employer/school/issuer logos throughout (new `tech-logo` / `org-logo` asset kinds, both
+asset modes). Dark panels are black, not green. 2026-09-26: an "On GitHub" panel (snapshot + contribution calendar from
+the public calendar — 975 contributions, no token needed; drawn in GitHub's dark palette), the AWS SAA in-progress credential removed, XTI's real logo, a pure-white page background (no green tint). On phones the hero portrait now sits above the name instead of behind it. Deviations logged
+under `ROUTE-PLAIN-01`.
 
 **Current phase:** P7 Linux implementation and automated acceptance gate complete: all 89 P7 rows are verified.
 The release-wide P8 manual/polish gate remains open (details below).
@@ -24,7 +55,7 @@ verified; the GitHub detail no longer overlaps its tabs in narrow windows). **Wi
 **Previous:** P3 macOS (+ terminal engine core) built — 163 verified · 38 built · 1 BLOCKED; paused for the owner's
 P3 gate review (details below). P0 and P2 gates passed on automated evidence; owner reviews pending. P4 Windows 11 built
 (120 of 152 P4 rows verified; details below), paused for the owner's P4 review.
-**Last updated:** 2026-09-25
+**Last updated:** 2026-09-26
 
 **P6 Android — Pixel rework (2026-09-24, owner: "only android os needs rework").** Approved from a now-vs-proposed
 board and logged in `plans/android/08-acceptance.md` Deviations: genuine Pixel 6 wallpapers (one per palette, official
@@ -41,13 +72,13 @@ this change).
 | Ledger | P0 | P1 | P2 | P3 | P4 | P5 | P6 | P7 | P8 | Total |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `06-onboarding-acceptance.md` (Hello · Netflix · chooser) | – | 32 | 4 | – | – | – | – | – | – | **36** |
-| `shared/22-acceptance.md` | 103 | 19 | 21 | 23 | 5 | 3 | – | 14 | 15 | **203** |
+| `shared/22-acceptance.md` | 103 | 19 | 21 | 23 | 5 | 3 | – | 14 | 30 | **218** |
 | `macos/08-acceptance.md` | – | – | 25 | 129 | 2 | – | – | – | 3 | **159** |
 | `windows/08-acceptance.md` | – | – | – | – | 145 | – | – | – | 3 | **148** |
 | `ios/08-acceptance.md` | – | – | – | – | – | 137 | – | – | 3 | **140** |
 | `android/08-acceptance.md` | – | – | – | – | – | – | 132 | – | 3 | **135** |
 | `linux/13-acceptance.md` | – | – | – | 50 | – | – | – | 75 | 3 | **128** |
-| **Per phase** | **103** | **51** | **50** | **202** | **152** | **140** | **132** | **89** | **30** | **949** |
+| **Per phase** | **103** | **51** | **50** | **202** | **152** | **140** | **132** | **89** | **45** | **964** |
 
 ## Progress
 
@@ -61,8 +92,8 @@ this change).
 | P5 iOS | 140 | 0 | 0 | 140 | 0 | ☐ (automated evidence recorded; see below) | pending review |
 | P6 Android | 132 | 0 | 80 | 52 | 0 | ☐ (focused automated evidence recorded; see below) | pending review |
 | P7 Linux | 89 | 0 | 0 | 89 | 0 | ☑ 2026-09-23 (automated evidence) | pending review |
-| P8 Polish (+ content depth, 19) | 30 | 11 | 0 | 19 | 0 | ☐ | |
-| **Total** | **949** | **55** | **158** | **735** | **1** | | |
+| P8 Polish (+ content depth, 19; reader motion, 15) | 45 | 11 | 0 | 33 | 1 | ☐ | |
+| **Total** | **964** | **55** | **158** | **749** | **2** | | |
 
 ### P0 gate evidence (2026-09-21, local runs on production builds)
 | Gate item (`05-roadmap.md`) | Result |
@@ -162,6 +193,8 @@ Deviations for owner review (logged in each ledger): macOS — `MAC-BOOT-04`, `M
 removed placeholder and the adapted P2 tests · shared — the macOS kernel additions and `RESP-DOM-01`.
 
 ### P4 evidence (2026-09-22, local runs on the preview build `.next-p4`)
+2026-09-25: fixed Windows Start flyout stacking (`WIN-START-05`, `WIN-CTX-01`) with a Windows-only menu layer above panels. The overlap hit-test regression fails before the fix and passes afterward; Start, context-menu, and blur-budget checks pass 6/6 on chromium-desktop and reduced-motion against `.next-win-layer`. Production build/typecheck, targeted lint, and formatting passed.
+
 The Windows 11 shell (taskbar, Start ↔ Search, Task View, Snap, flyouts, toasts, context menus, lock, boot, About
 Windows, continuity, tour) and its seven apps are built. P4 was started at the owner's direct request before the P1–P3
 gates were reviewed. Windows ledger: 115 verified · 30 built · 1 P8 row planned; the 5 shared P4 rows verified; the 2

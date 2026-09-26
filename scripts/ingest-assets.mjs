@@ -19,6 +19,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const BUDGETS = {
   'app-icon': 12 * 1024,
   'system-icon': 12 * 1024,
+  'tech-logo': 12 * 1024,
+  'org-logo': 12 * 1024,
   avatar: 16 * 1024,
   audio: 80 * 1024,
   wallpaper: 60 * 1024,

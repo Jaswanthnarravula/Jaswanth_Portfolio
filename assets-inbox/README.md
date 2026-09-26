@@ -59,6 +59,21 @@ Source: `og:image` of `https://play.google.com/store/apps/details?id=<package>` 
 | `this-pc.png` · `folder.png` (144 px, Windows 10-era art — superseded) | Microsoft | `github.com/DustinBrett/daedalOS` → `public/System/Icons/144x144/` |
 | `folder-11.png` · `this-pc-11.png` · `recycle-bin.png` (256 px, Windows 11 shell art; used by the desktop and File Explorer, P4) | Microsoft | `github.com/blueedgetechno/win11React` → `public/img/icon/win/folder.png` · `thispc.png` · `bin-em.png` (retrieved 2026-09-21) |
 
+## `icons/tech/` — tool logos for the reader page Toolbox (retrieved 2026-09-25)
+Source: Devicon (MIT) — `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/<name>/<name>-original.svg` (Go and AWS use
+the `-original-wordmark` file). One file per slug in `lib/assets/tech.ts`; each mark's owner is listed in
+`scripts/asset-sources.mjs`. `linux` (Tux) and `maven` exceed the SVG budget and are rasterized to WebP.
+
+## `icons/org/` — employer, client and school logos for the reader page (retrieved 2026-09-25)
+| File | Owner | Source | Basis |
+|---|---|---|---|
+| `ibm.svg` | IBM | Commons `IBM logo.svg` | public domain (text logo) |
+| `dbs.svg` | DBS Bank Ltd. | en.wikipedia `File:DBS Bank Logo (alternative).svg` | public domain per its file page |
+| `uab.svg` | The University of Alabama at Birmingham | Commons `UAB Core Logo Centered Full Color.svg` | public domain (text logo) |
+| `aicte.png` (316 px) | All India Council for Technical Education | en.wikipedia `File:All India Council for Technical Education logo.png` | Wikipedia fair-use file |
+| `jntuh.png` (309 px) | JNTU Hyderabad | en.wikipedia `File:JNTU Hyderabad logo.png` | Wikipedia fair-use file |
+| `xclusive.jpg` (100 px) | Xclusive Trading Inc. | LinkedIn company-page logo (`media.licdn.com/…/company-logo_100_100/…/1630633784582`, link supplied by the owner 2026-09-26; the signed URL expires) | supplied by the owner (an employee); the website is a parked domain |
+
 ## `icons/ios/` and `icons/android/`
 | File | Owner | Source |
 |---|---|---|
@@ -99,6 +114,7 @@ Profile mapping: Recruiter = blue · Developer = grey · Adventurer = yellow · 
 (e.g. desktop icons at 2×, Start menu tiles). Drop a larger file with the same name and nothing else changes.
 
 ## Fetch notes
+- Contact logos (2026-09-26): `icons/org/gmail.png` from Google's `gstatic.com/images/branding/product/2x/gmail_2020q4_48dp.png`; `linkedin.png` from the `LI-In-Bug.png` in [LinkedIn's logo download](https://brand.linkedin.com/downloads); `instagram.png` from `Instagram_Glyph_Gradient.png` in [Meta's Instagram asset pack](https://www.meta.com/brand/resources/instagram/instagram-brand/). Resized with proportions preserved onto transparent 128 px squares. The ingestion manifest records ownership and emits local 64/128 px WebP variants.
 - Wikimedia's API rate-limits after a few calls; use `https://commons.wikimedia.org/wiki/Special:FilePath/<File_name>?width=512`
   with a 4–6 s pause between requests.
 - Apple's support/guide pages render with JavaScript — nothing to scrape there.

@@ -89,9 +89,12 @@ export interface HomeProps extends IconHandlers {
   readonly folderFocusKey?: string;
 }
 
+// The span reaches CSS too: a phone widget lines up with the icon edges of the cells it covers.
 const CELL_STYLE = (placed: { col: number; row: number; w: number; h: number }) => ({
   gridColumn: `${placed.col + 1} / span ${placed.w}`,
   gridRow: `${placed.row + 1} / span ${placed.h}`,
+  ['--span-w' as string]: placed.w,
+  ['--span-h' as string]: placed.h,
 });
 
 export const Home = forwardRef<HomeHandle, HomeProps>(function Home(props, ref) {

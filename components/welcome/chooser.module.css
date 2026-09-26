@@ -232,7 +232,7 @@
   text-align: center;
 }
 
-/* Résumé and Skip the OS stay one click away (north-star reachability), quiet under the foyer. */
+/* Résumé and Plain view stay one click away (north-star reachability), quiet under the foyer. */
 .footer {
   display: flex;
   justify-content: center;
@@ -266,12 +266,26 @@
   border-radius: 4px;
 }
 
-/* The flying snapshot (shared element) sits on the stage layer, above every OS layer. */
+/* The flying snapshot (shared element) sits on the stage layer, above every OS layer. Its panel is that OS's screen —
+   the base colour of its first frame (home or lock wallpaper, terminal): the preview fades off it as it grows
+   (chooser-stage PREVIEW_OUT_S), so the live shell fades in over its own colour, never a stretched miniature. */
 .stage {
   z-index: var(--z-stage);
   overflow: hidden;
-  background: #eef2fb;
+  background: #0b0e13;
   pointer-events: none;
+}
+.stage[data-os='ios'] {
+  background: #1d2a8f;
+}
+.stage[data-os='macos'] {
+  background: #3a6694;
+}
+.stage[data-os='windows'] {
+  background: #0c2266;
+}
+.stage[data-os='android'] {
+  background: #5f7f80;
 }
 .stage img {
   display: block;
@@ -461,7 +475,7 @@
   }
 
   .inner {
-    grid-template-rows: 1fr;
+    grid-template-rows: 1fr auto;
   }
 
   .main {
@@ -494,9 +508,9 @@
     font-size: max(0.85em, 0.875rem);
   }
 
-  /* The supplied frame intentionally ends at the cards; keep the utility links available on compact layouts. */
+  /* The owner requested an explicit Plain view option on the desktop chooser too. */
   .footer {
-    display: none;
+    padding-bottom: 0.8em;
   }
 }
 

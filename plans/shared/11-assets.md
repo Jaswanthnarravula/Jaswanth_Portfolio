@@ -20,12 +20,13 @@ switch from official artwork to original artwork by changing one flag. Requireme
 
 ### Manifest (`lib/assets/manifest.ts`)
 ```ts
-type AssetKind = 'app-icon' | 'system-icon' | 'wallpaper' | 'avatar' | 'audio' | 'wordmark' | 'device-frame';
+type AssetKind = 'app-icon' | 'system-icon' | 'tech-logo' | 'org-logo' | 'wallpaper' | 'avatar' | 'audio' | 'wordmark' | 'device-frame';
 interface AssetEntry {
   id: AssetId; kind: AssetKind; os?: OsId;
   box: { w: number; h: number };                     // identical in both modes → zero layout shift
   official?: { src: string; owner: string; sourceUrl: string; retrieved: string; terms: string };
-  original: { src: string } | { parametric: { glyph: string; gradient: [string, string]; shape: 'squircle'|'rounded'|'circle'|'none' } };
+  original: { src: string } | { parametric: { glyph: string; gradient: [string, string]; shape: 'squircle'|'rounded'|'circle'|'none' } }
+          | { monogram: { text: string; gradient: [string, string] } };  // org-logo: initials tile (reader page, 2026-09-25)
   alt: '';                                            // icons are decorative; the label names the app
 }
 export function resolveAsset(id: AssetId): ResolvedAsset;   // honours ASSET_MODE; falls back to original if official missing

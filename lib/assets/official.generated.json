@@ -603,6 +603,177 @@
         14046
       ]
     },
+    "org.aicte": {
+      "kind": "org-logo",
+      "label": "AICTE",
+      "owner": "All India Council for Technical Education",
+      "sourceUrl": "https://en.wikipedia.org/wiki/File:All_India_Council_for_Technical_Education_logo.png",
+      "retrieved": "2026-09-25",
+      "terms": "Emblem of the All India Council for Technical Education (Wikipedia fair-use file). Used referentially to name the owner's employer, client or school. No affiliation or endorsement.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/org.aicte.128.76ae0dac14.webp",
+      "srcSet": "/assets/official/org.aicte.64.b4cd8868ad.webp 64w, /assets/official/org.aicte.128.76ae0dac14.webp 128w",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        4066,
+        10654
+      ]
+    },
+    "org.dbs": {
+      "kind": "org-logo",
+      "label": "DBS Bank",
+      "owner": "DBS Bank Ltd.",
+      "sourceUrl": "https://en.wikipedia.org/wiki/File:DBS_Bank_Logo_(alternative).svg",
+      "retrieved": "2026-09-25",
+      "terms": "Public domain per its Wikipedia file page; DBS trademark. Used referentially to name the owner's employer, client or school. No affiliation or endorsement.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/org.dbs.b4a4ea0726.svg",
+      "width": 579,
+      "height": 173,
+      "bytes": [
+        3554
+      ]
+    },
+    "org.github": {
+      "kind": "org-logo",
+      "label": "GitHub",
+      "owner": "GitHub, Inc.",
+      "sourceUrl": "https://github.com/primer/octicons",
+      "retrieved": "2026-09-25",
+      "terms": "Trademark and artwork of GitHub, Inc.; used referentially to identify the app. No affiliation.",
+      "derived": false,
+      "monochrome": true,
+      "src": "/assets/official/org.github.bce4941897.svg",
+      "width": 24,
+      "height": 24,
+      "bytes": [
+        873
+      ]
+    },
+    "org.gmail": {
+      "kind": "org-logo",
+      "label": "Gmail",
+      "owner": "Google LLC",
+      "sourceUrl": "https://www.gstatic.com/images/branding/product/2x/gmail_2020q4_48dp.png",
+      "retrieved": "2026-09-26",
+      "terms": "Official Gmail artwork from its owner. Used referentially for the portfolio owner's contact link; no affiliation or endorsement. Trademarks belong to Google LLC.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/org.gmail.128.2add10bc03.webp",
+      "srcSet": "/assets/official/org.gmail.64.56ba15d0ac.webp 64w, /assets/official/org.gmail.128.2add10bc03.webp 128w",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        1958,
+        2596
+      ]
+    },
+    "org.ibm": {
+      "kind": "org-logo",
+      "label": "IBM",
+      "owner": "International Business Machines Corporation",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:IBM%20logo.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Public domain on Wikimedia Commons (below the threshold of originality); IBM trademark. Used referentially to name the owner's employer, client or school. No affiliation or endorsement.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/org.ibm.2af19b4697.svg",
+      "width": 1075,
+      "height": 401,
+      "bytes": [
+        3508
+      ]
+    },
+    "org.instagram": {
+      "kind": "org-logo",
+      "label": "Instagram",
+      "owner": "Meta Platforms, Inc.",
+      "sourceUrl": "https://www.meta.com/brand/resources/instagram/instagram-brand/",
+      "retrieved": "2026-09-26",
+      "terms": "Official Instagram artwork from its owner. Used referentially for the portfolio owner's contact link; no affiliation or endorsement. Trademarks belong to Meta Platforms, Inc..",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/org.instagram.128.2c5bad9862.webp",
+      "srcSet": "/assets/official/org.instagram.64.1e43f34e65.webp 64w, /assets/official/org.instagram.128.2c5bad9862.webp 128w",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        3674,
+        7334
+      ]
+    },
+    "org.jntuh": {
+      "kind": "org-logo",
+      "label": "JNTU Hyderabad",
+      "owner": "Jawaharlal Nehru Technological University Hyderabad",
+      "sourceUrl": "https://en.wikipedia.org/wiki/File:JNTU_Hyderabad_logo.png",
+      "retrieved": "2026-09-25",
+      "terms": "Emblem of JNTU Hyderabad (Wikipedia fair-use file). Used referentially to name the owner's employer, client or school. No affiliation or endorsement.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/org.jntuh.128.ac7dca33ac.webp",
+      "srcSet": "/assets/official/org.jntuh.64.49593c642e.webp 64w, /assets/official/org.jntuh.128.ac7dca33ac.webp 128w",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        4256,
+        11842
+      ]
+    },
+    "org.linkedin": {
+      "kind": "org-logo",
+      "label": "LinkedIn",
+      "owner": "LinkedIn Corporation",
+      "sourceUrl": "https://brand.linkedin.com/downloads",
+      "retrieved": "2026-09-26",
+      "terms": "Official LinkedIn artwork from its owner. Used referentially for the portfolio owner's contact link; no affiliation or endorsement. Trademarks belong to LinkedIn Corporation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/org.linkedin.128.7609db8cbd.webp",
+      "srcSet": "/assets/official/org.linkedin.64.a6429f19b6.webp 64w, /assets/official/org.linkedin.128.7609db8cbd.webp 128w",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        1704,
+        2980
+      ]
+    },
+    "org.uab": {
+      "kind": "org-logo",
+      "label": "University of Alabama at Birmingham",
+      "owner": "The University of Alabama at Birmingham",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:UAB%20Core%20Logo%20Centered%20Full%20Color.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Public domain on Wikimedia Commons (text logo); UAB trademark. Used referentially to name the owner's employer, client or school. No affiliation or endorsement.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/org.uab.ae9711e442.svg",
+      "width": 343,
+      "height": 143,
+      "bytes": [
+        10614
+      ]
+    },
+    "org.xclusive": {
+      "kind": "org-logo",
+      "label": "Xclusive Trading Inc.",
+      "owner": "Xclusive Trading Inc.",
+      "sourceUrl": "https://media.licdn.com/dms/image/v2/C4E0BAQEjjLJaA7JJrg/company-logo_100_100/company-logo_100_100/0/1630633784582",
+      "retrieved": "2026-09-25",
+      "terms": "Company logo from its LinkedIn page, supplied by the owner (an employee). Used referentially to name the owner's employer, client or school. No affiliation or endorsement.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/org.xclusive.64.5a359cb756.webp",
+      "srcSet": "/assets/official/org.xclusive.64.5a359cb756.webp 64w",
+      "width": 64,
+      "height": 64,
+      "bytes": [
+        1668
+      ]
+    },
     "system.android-boot": {
       "kind": "system-icon",
       "label": "Android robot",
@@ -703,6 +874,442 @@
       "bytes": [
         996,
         2468
+      ]
+    },
+    "tech.amazonwebservices": {
+      "kind": "tech-logo",
+      "label": "AWS",
+      "owner": "Amazon.com, Inc.",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/amazonwebservices/amazonwebservices-original-wordmark.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Amazon.com, Inc.; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.amazonwebservices.297c352669.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        3738
+      ]
+    },
+    "tech.azure": {
+      "kind": "tech-logo",
+      "label": "Microsoft Azure",
+      "owner": "Microsoft Corporation",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/azure/azure-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Microsoft Corporation; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.azure.fa2a85e260.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        1712
+      ]
+    },
+    "tech.docker": {
+      "kind": "tech-logo",
+      "label": "Docker",
+      "owner": "Docker, Inc.",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/docker/docker-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Docker, Inc.; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.docker.3fd830ea69.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        4452
+      ]
+    },
+    "tech.elasticsearch": {
+      "kind": "tech-logo",
+      "label": "Elasticsearch",
+      "owner": "Elasticsearch B.V.",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/elasticsearch/elasticsearch-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Elasticsearch B.V.; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.elasticsearch.0f237f6602.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        535
+      ]
+    },
+    "tech.fastapi": {
+      "kind": "tech-logo",
+      "label": "FastAPI",
+      "owner": "Sebastián Ramírez (FastAPI)",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/fastapi/fastapi-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Sebastián Ramírez (FastAPI); file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.fastapi.804836bfcc.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        3064
+      ]
+    },
+    "tech.flask": {
+      "kind": "tech-logo",
+      "label": "Flask",
+      "owner": "Pallets Projects",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/flask/flask-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Pallets Projects; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.flask.7a27bb8cb7.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        9161
+      ]
+    },
+    "tech.git": {
+      "kind": "tech-logo",
+      "label": "Git",
+      "owner": "Jason Long (CC BY 3.0) · Software Freedom Conservancy",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/git/git-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Jason Long (CC BY 3.0) · Software Freedom Conservancy; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.git.717a57ea97.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        778
+      ]
+    },
+    "tech.githubactions": {
+      "kind": "tech-logo",
+      "label": "GitHub Actions",
+      "owner": "GitHub, Inc.",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/githubactions/githubactions-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of GitHub, Inc.; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.githubactions.998937ff2e.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        2853
+      ]
+    },
+    "tech.go": {
+      "kind": "tech-logo",
+      "label": "Go",
+      "owner": "Google LLC",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/go/go-original-wordmark.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Google LLC; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.go.a514c8c94b.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        1865
+      ]
+    },
+    "tech.hibernate": {
+      "kind": "tech-logo",
+      "label": "Hibernate",
+      "owner": "Red Hat, Inc.",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/hibernate/hibernate-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Red Hat, Inc.; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.hibernate.8e9a96191c.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        320
+      ]
+    },
+    "tech.java": {
+      "kind": "tech-logo",
+      "label": "Java",
+      "owner": "Oracle Corporation",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/java/java-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Oracle Corporation; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.java.7582e518a9.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        1540
+      ]
+    },
+    "tech.javascript": {
+      "kind": "tech-logo",
+      "label": "JavaScript",
+      "owner": "JavaScript community logo (unofficial)",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/javascript/javascript-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of JavaScript community logo (unofficial); file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.javascript.0656ff65fc.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        1144
+      ]
+    },
+    "tech.junit": {
+      "kind": "tech-logo",
+      "label": "JUnit 5",
+      "owner": "The JUnit Team",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/junit/junit-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of The JUnit Team; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.junit.dbe238c3b5.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        1060
+      ]
+    },
+    "tech.linux": {
+      "kind": "tech-logo",
+      "label": "Tux (Linux)",
+      "owner": "Larry Ewing (lewing@isc.tamu.edu) and The GIMP",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/linux/linux-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Larry Ewing (lewing@isc.tamu.edu) and The GIMP; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.linux.96.5e0e2a6902.webp",
+      "srcSet": "/assets/official/tech.linux.48.e5b33a3ba9.webp 48w, /assets/official/tech.linux.96.5e0e2a6902.webp 96w",
+      "width": 96,
+      "height": 96,
+      "bytes": [
+        1530,
+        3210
+      ]
+    },
+    "tech.maven": {
+      "kind": "tech-logo",
+      "label": "Apache Maven",
+      "owner": "The Apache Software Foundation",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/maven/maven-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of The Apache Software Foundation; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.maven.96.47124100e3.webp",
+      "srcSet": "/assets/official/tech.maven.48.f150c31f5f.webp 48w, /assets/official/tech.maven.96.47124100e3.webp 96w",
+      "width": 96,
+      "height": 96,
+      "bytes": [
+        1138,
+        2366
+      ]
+    },
+    "tech.mysql": {
+      "kind": "tech-logo",
+      "label": "MySQL",
+      "owner": "Oracle Corporation",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/mysql/mysql-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Oracle Corporation; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.mysql.9c915628be.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        2764
+      ]
+    },
+    "tech.nginx": {
+      "kind": "tech-logo",
+      "label": "NGINX",
+      "owner": "F5, Inc.",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/nginx/nginx-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of F5, Inc.; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.nginx.a28c7002fd.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        1094
+      ]
+    },
+    "tech.postgresql": {
+      "kind": "tech-logo",
+      "label": "PostgreSQL",
+      "owner": "PostgreSQL Community Association",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/postgresql/postgresql-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of PostgreSQL Community Association; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.postgresql.f220a43625.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        9178
+      ]
+    },
+    "tech.postman": {
+      "kind": "tech-logo",
+      "label": "Postman",
+      "owner": "Postman, Inc.",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/postman/postman-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Postman, Inc.; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.postman.6851ed6ecf.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        3712
+      ]
+    },
+    "tech.python": {
+      "kind": "tech-logo",
+      "label": "Python",
+      "owner": "Python Software Foundation",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/python/python-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Python Software Foundation; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.python.7e3fc93987.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        2299
+      ]
+    },
+    "tech.react": {
+      "kind": "tech-logo",
+      "label": "React",
+      "owner": "Meta Platforms, Inc.",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/react/react-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Meta Platforms, Inc.; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.react.5825b649c8.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        2387
+      ]
+    },
+    "tech.redis": {
+      "kind": "tech-logo",
+      "label": "Redis",
+      "owner": "Redis Ltd.",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/redis/redis-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Redis Ltd.; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.redis.4707378b19.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        1728
+      ]
+    },
+    "tech.spring": {
+      "kind": "tech-logo",
+      "label": "Spring",
+      "owner": "Broadcom Inc.",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/spring/spring-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Broadcom Inc.; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.spring.4f6db3b72c.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        942
+      ]
+    },
+    "tech.sqlalchemy": {
+      "kind": "tech-logo",
+      "label": "SQLAlchemy",
+      "owner": "the SQLAlchemy authors",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/sqlalchemy/sqlalchemy-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of the SQLAlchemy authors; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.sqlalchemy.3b03dabdf1.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        2766
+      ]
+    },
+    "tech.swagger": {
+      "kind": "tech-logo",
+      "label": "Swagger",
+      "owner": "SmartBear Software",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/swagger/swagger-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of SmartBear Software; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.swagger.76b3970c68.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        2277
+      ]
+    },
+    "tech.typescript": {
+      "kind": "tech-logo",
+      "label": "TypeScript",
+      "owner": "Microsoft Corporation",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/typescript/typescript-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of Microsoft Corporation; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.typescript.c9191199f4.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        943
+      ]
+    },
+    "tech.vitejs": {
+      "kind": "tech-logo",
+      "label": "Vite",
+      "owner": "VoidZero Inc.",
+      "sourceUrl": "https://github.com/devicons/devicon/blob/master/icons/vitejs/vitejs-original.svg",
+      "retrieved": "2026-09-25",
+      "terms": "Logo of VoidZero Inc.; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/tech.vitejs.47aa07ceab.svg",
+      "width": 128,
+      "height": 128,
+      "bytes": [
+        1275
       ]
     },
     "wallpaper.android": {

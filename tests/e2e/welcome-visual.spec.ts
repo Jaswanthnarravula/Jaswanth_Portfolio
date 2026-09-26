@@ -15,13 +15,12 @@ const FRAME = {
     skip: [50.5, 42.73, 100.34, 25.23],
     end: [1211.95, 42.73, 177.55, 25.23],
     lens: [316.8, 144, 806.41, 630],
-    // The glyph, and with it the name and pill below, follow the owner's liquid-glass decision of 2026-09-21, not the
+    // The glyph and pill below follow the owner's liquid-glass decision of 2026-09-21, not the
     // frame: the rod "hello" is 25 em wide (the frame's is 17 em). Measured on the build (plans/06 Deviations log).
-    glyph: [464.41, 293.64, 511.19, 185.94],
-    title: [500.61, 502.06, 438.77, 39.86],
-    pill: [624.83, 564.41, 190.34, 59.94],
+    glyph: [464.41, 324.81, 511.19, 185.94],
+    pill: [624.83, 533.25, 190.34, 59.94],
   },
-  intro: { mark: [253.75, 314.44, 932.5, 271.13], skip: [1260.88, 812.16, 130.06, 46.95] },
+  intro: { mark: [246.04, 314.44, 947.93, 271.13], skip: [1260.88, 812.16, 130.06, 46.95] },
   profiles: {
     heading: [467.86, 253.19, 504.28, 87.72],
     cards: [
@@ -66,7 +65,7 @@ test.describe('storyboard frames', () => {
     test.skip(info.project.name !== 'chromium-desktop', 'the frames are measured at 1440 × 900, fine pointer');
   });
 
-  test('W1 Hello lands on the frame: top bar, glass lens, glyph, name and pill @smoke', async ({ page }) => {
+  test('W1 Hello lands on the frame: top bar, glass lens, glyph and pill @smoke', async ({ page }) => {
     await page.goto('/');
     await page.evaluate(() => document.fonts.ready);
     const [skip] = await boxes(page, '[data-welcome-bar] > a', true);
@@ -75,17 +74,13 @@ test.describe('storyboard frames', () => {
     expectBox(end, FRAME.hello.end, 'Résumé · Sound on');
     expectBox((await boxes(page, '[data-lens]'))[0], FRAME.hello.lens, 'lens');
     expectBox((await boxes(page, 'svg:has([data-glyph])'))[0], FRAME.hello.glyph, 'glyph');
-    expectBox((await boxes(page, '#hello-title'))[0], FRAME.hello.title, 'name');
+    await expect(page.getByRole('heading', { level: 1, name: 'Hello' })).toBeAttached();
+    await expect(page.getByText('Jaswanth — Software Engineer', { exact: true })).toHaveCount(0);
     expectBox((await boxes(page, '[data-tap-to-begin]'))[0], FRAME.hello.pill, 'pill');
 
     const look = await page.evaluate(() => {
       const lens = getComputedStyle(document.querySelector('[data-lens]')!);
-      const title = document.querySelector('#hello-title')!;
       return {
-        text: title.textContent,
-        titleColor: getComputedStyle(title).color,
-        titleWeight: getComputedStyle(title).fontWeight,
-        face: getComputedStyle(title).fontFamily,
         // The tint is the lens's surface layer (::after), above its backdrop layer; it clears when refraction is on.
         lensFill: getComputedStyle(document.querySelector('[data-lens]')!, '::after').backgroundImage,
         refract: document.documentElement.dataset.refract === 'on',
@@ -96,10 +91,6 @@ test.describe('storyboard frames', () => {
         plex: document.fonts.check('600 20px "IBM Plex Sans"'),
       };
     });
-    expect(look.text).toBe('Jaswanth — Software Engineer');
-    expect(look.titleColor).toBe('rgb(27, 35, 71)'); // #1b2347
-    expect(look.titleWeight).toBe('600');
-    expect(look.face).toMatch(/^"?IBM Plex Sans"?,/);
     expect(look.plex).toBe(true);
     // Liquid glass: a clear body (white 12–30 %; 5–20 % while the edge refracts), not the frame's frosted white at 34 %.
     expect(look.lensFill).toBe(
@@ -114,7 +105,7 @@ test.describe('storyboard frames', () => {
     expect(look.endText).toBe('Résumé  ·  Sound on');
   });
 
-  test('W1 the intro lands on the frame: the name box and Skip intro', async ({ page }) => {
+  test('W1 the intro lands on the frame: the portfolio wordmark and Skip intro', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Tap to begin' }).click();
     // Measured at rest (scale 1): the zoom is a transform on the same box.

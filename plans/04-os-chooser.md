@@ -18,7 +18,7 @@ element for entry.
   │ (page)    │ │ desktop   │ │ desktop   │ │ launcher  │ │ terminal  │   viewport-shaped snapshot,
   └───────────┘ └───────────┘ └───────────┘ └───────────┘ └───────────┘   no device outlines
    name · one-line character
-  [Continue in macOS →]   (returning visitors only)        Résumé · Skip the OS
+  [Continue in macOS →]   (returning visitors only)        Résumé · Plain view
 ```
 - Cards are real links: `nav > ul > li > a[href="/{os}"]` (work without JS).
 - One-line character per OS: iOS "Tap through apps" · macOS "A desktop of windows" · Windows 11 "Start, taskbar,
@@ -37,7 +37,7 @@ Rules: `shared/06-design-system.md` → Owner visual targets. Same unit as the w
 | Heading | Bricolage Grotesque 700, `2em`, `#1b2347` |
 | Cards | Five equal columns, gap `.8em`; each `rgb(255 255 255 / .55)` with a 1 px `rgb(255 255 255 / .9)` rim, radius `.9em`, padding `.65em .6em .7em`, IBM Plex Sans; name `1.05em` weight 600, character `.78em` `#4a5576` |
 | Snapshot | Square `1 / 1` crop at every posture, radius `.6em`, shadow `0 .3em .8em rgb(20 30 70 / .25)` |
-| Footer | Hidden on the approved desktop frame; the compact layouts retain "Résumé" · "Skip the OS" under the foyer |
+| Footer | Visible at every size with "Start at Hello" · "Résumé" · "Plain view" under the foyer |
 
 ## Behaviour & states
 | State | Behaviour |
@@ -94,7 +94,7 @@ chooser and cancels the push via back-collapse. Single released OS → the choos
 ## Feature IDs + acceptance tests
 | ID | Feature | Acceptance test |
 |---|---|---|
-| `CHOOSE-CARD-01` | Five compact link cards with identity, character line and square snapshots (no device outline) | `e2e: W1 cards are links to /{os}; snapshot aspect = 1; no frame element; W2 works without JS` |
+| `CHOOSE-CARD-01` | Five compact OS link cards plus an always-visible Plain view option | `e2e: W1 cards are links to /{os}; /plain is visible; snapshot aspect = 1; no frame element; W2 works without JS` |
 | `CHOOSE-BADGE-01` | No device recommendation badge; every OS card stays neutral | `component/e2e: "Suits your device" is absent and accessible names contain only OS + character` |
 | `CHOOSE-REL-01` | Only released OSes shown | `unit: chooser renders the released set` |
 | `CHOOSE-PREF-01` | Prefetch on hover/focus and idle | `perf: chunk requested on card focus, not before` |

@@ -17,7 +17,7 @@ content, routes, badges, notifications, hints or anything else (`KRN-PERSONA-01`
 
 ### A. Intro
 - Stage `#141414` (Hello's canvas dims to it via `uDim`; no hard cut).
-- **Wordmark:** "JASWANTH" in the storyboard frame's red arc style: flat Bebas Neue capitals whose feet are trimmed
+- **Wordmark:** "PORTFOLIO" in the storyboard frame's red arc style: flat Bebas Neue capitals whose feet are trimmed
   into a shallow arc by the frame's ellipse (Visual target), red `#E50914`, inline SVG paths (original in both asset
   modes; Netflix's logo / "N" / the word "Netflix" never appear in UI or metadata).
 - "Skip intro" text button, bottom-right, visible from the first frame. It also stops the sound (no other chrome on
@@ -103,7 +103,7 @@ single row of five 84 px cards. Tablet/laptop/desktop: single centred row. Tap t
 ## Accessibility
 Profiles are a `group[aria-labelledby=heading]` of five real `<button>`s (names = profile names); arrows and Tab
 both move between them; Enter/Space selects. No radio auto-advance (WCAG 3.2.2). The wordmark is `aria-hidden`
-with visually hidden text "Jaswanth". "Skip intro" is the first focusable element during the intro. When the
+with visually hidden text "PORTFOLIO". "Skip intro" is the first focusable element during the intro. When the
 intro ends, focus moves to the heading. Audio is ≤ 3.5 s and user-initiated (WCAG 1.4.2 satisfied); the Sound
 toggle is on Hello (where the sound is armed) and on the returning visitor's profiles screen (where replay arms it),
 and "Skip intro" — the intro's first focusable element — stops the sound.
@@ -121,7 +121,7 @@ layer does not exist; Hello links go straight to OS URLs.
 | `NFLX-SKIP-01` | Any input or "Skip intro" jumps to profiles | `e2e: W1 keypress at t=200 ms shows profiles immediately` |
 | `NFLX-AUDIO-01` | Tap-unlocked sound; official mp3 / original chime | `e2e: W3 blocked, missing, muted and both asset modes complete` |
 | `NFLX-AUDIO-02` | Audio fetched on idle, never before first paint | `perf: no audio request before first paint` |
-| `NFLX-MARK-01` | Name wordmark; no Netflix logo/word anywhere | `unit: UI strings + metadata contain no "Netflix"` |
+| `NFLX-MARK-01` | PORTFOLIO wordmark; no Netflix logo/word anywhere | `unit: generated label is PORTFOLIO; UI strings + metadata contain no "Netflix"` |
 | `NFLX-PROF-01` | Five profiles, data-driven | `unit: profiles config has exactly the five PersonaIds` |
 | `NFLX-PROF-02` | **All profiles navigate identically to the chooser** | `e2e: W1 each of 5 profiles → identical transition → chooser; unit: KRN-PERSONA-01` |
 | `NFLX-CARD-01` | Card layout, hover/focus/press, breakpoints | `e2e: visual + layout assertions at 390 and 1440 px` |

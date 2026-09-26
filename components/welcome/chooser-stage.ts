@@ -77,6 +77,14 @@ const BOOT_HOLD_S = 0.12;
 const BOOT_STEP_S = 0.2;
 const BOOT_DELAY_MS = 150;
 const SHELL_WAIT_MS = 1000;
+/**
+ * The card's preview is a miniature, not the OS: blown up to full screen it reads as a stretched stock image. So the
+ * flying panel is the OS's screen — the preview fades out while it grows, leaving that OS's own base colour, and the
+ * live shell fades in over it. Returning, the preview fades back in as the panel lands.
+ */
+const PREVIEW_OUT_S = 0.16;
+const PREVIEW_IN_S = 0.24;
+const previewOf = (overlay: HTMLElement) => overlay.querySelector('img');
 const full = (): Rect => ({ x: 0, y: 0, width: window.innerWidth, height: window.innerHeight });
 const rectOf = (el: Element): Rect => {
   const r = el.getBoundingClientRect();
@@ -116,9 +124,10 @@ export function createChooserStage(deps: ChooserStageDeps): ChooserStage {
     reduced: prefersReducedMotion(),
   });
 
-  function makeOverlay(shot: HTMLElement): HTMLElement {
+  function makeOverlay(shot: HTMLElement, os: OsId): HTMLElement {
     const overlay = document.createElement('div');
     overlay.className = deps.overlayClassName;
+    overlay.dataset.os = os; // the panel takes that OS's screen colour (chooser.module.css .stage)
     overlay.setAttribute('aria-hidden', 'true');
     const source = shot.querySelector('img');
     if (source) {
@@ -146,6 +155,8 @@ export function createChooserStage(deps: ChooserStageDeps): ChooserStage {
     stopBoot(current);
     gsap.set(faders(current.os), { clearProps: 'opacity,transform' });
     shotOf(current.os)?.style.removeProperty('visibility');
+    const preview = previewOf(current.overlay);
+    if (preview) gsap.killTweensOf(preview);
     current.overlay.remove();
     for (const release of current.releases) release();
     if (run === current) run = null;
@@ -163,7 +174,7 @@ export function createChooserStage(deps: ChooserStageDeps): ChooserStage {
     const current: Run = {
       os,
       label,
-      overlay: makeOverlay(shot),
+      overlay: makeOverlay(shot, os),
       releases: [claimPhases(epoch, phases)],
       flight: null,
       dismiss: null,
@@ -184,6 +195,8 @@ export function createChooserStage(deps: ChooserStageDeps): ChooserStage {
     });
     const forward = fly(current.overlay, from, full(), flightOptions([radiusOf(shot), 0]));
     current.flight = forward;
+    const preview = previewOf(current.overlay);
+    if (preview) gsap.to(preview, { opacity: 0, duration: reduced ? 0 : PREVIEW_OUT_S, ease: 'power1.in' });
     void forward.done.then((end) => {
       if (run !== current || end !== 'landed' || current.phase !== 'flying') return;
       current.phase = 'covered';
@@ -321,6 +334,8 @@ export function createChooserStage(deps: ChooserStageDeps): ChooserStage {
       current.flight = back;
     }
     current.dismiss?.reverse();
+    const preview = previewOf(current.overlay);
+    if (preview) gsap.to(preview, { opacity: 1, duration: PREVIEW_IN_S, ease: 'power1.out', overwrite: true });
     const finish = () => {
       cleanup(current);
       if (completeEpoch !== null) deps.dispatch({ type: 'PHASE_DONE', target: { kind: 'os', epoch: completeEpoch } });
@@ -435,7 +450,7 @@ export function createChooserStage(deps: ChooserStageDeps): ChooserStage {
       const current: Run = {
         os,
         label,
-        overlay: makeOverlay(shot),
+        overlay: makeOverlay(shot, os),
         releases: [],
         flight: null,
         dismiss: null,
@@ -455,6 +470,8 @@ export function createChooserStage(deps: ChooserStageDeps): ChooserStage {
       });
       shot.style.visibility = 'hidden';
       gsap.set(faders(os), { opacity: 0, y: 10 });
+      const preview = previewOf(current.overlay);
+      if (preview) gsap.set(preview, { opacity: 0 });
       // The OS's snapshot fades in over its (now empty) desktop, then shrinks back into its re-measured card.
       gsap.to(current.overlay, {
         opacity: 1,
@@ -478,6 +495,7 @@ export function createChooserStage(deps: ChooserStageDeps): ChooserStage {
             flightOptions([0, radiusOf(shot)], SPRINGS.chooserReturn),
           );
           current.flight = back;
+          if (preview) gsap.to(preview, { opacity: 1, duration: PREVIEW_IN_S, delay: 0.06, ease: 'power1.out' });
           void back.done.then(() => {
             if (run === current) cleanup(current);
           });

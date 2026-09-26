@@ -73,7 +73,7 @@ describe('NFLX-PROF-01 five profiles, data-driven', () => {
   });
 });
 
-describe('NFLX-MARK-01 the name wordmark; no "Netflix" in UI strings or metadata', () => {
+describe('NFLX-MARK-01 the portfolio wordmark; no "Netflix" in UI strings or metadata', () => {
   const sourceFiles = (dir: string): string[] =>
     readdirSync(dir).flatMap((name) => {
       const path = join(dir, name);
@@ -85,8 +85,8 @@ describe('NFLX-MARK-01 the name wordmark; no "Netflix" in UI strings or metadata
       .replace(/\/\*[\s\S]*?\*\//g, '')
       .replace(/(^|[^:])\/\/.*$/gm, '$1');
 
-  it('the wordmark is the visitor-facing name, generated as original artwork', () => {
-    expect(wordmark.text).toBe('JASWANTH');
+  it('the wordmark is the visitor-facing portfolio label, generated as original artwork', () => {
+    expect(wordmark.text).toBe('PORTFOLIO');
     expect(wordmark.source.licence).toBe('SIL OFL 1.1');
   });
   it('the wordmark is the storyboard frame’s `.mark` box: line-height .9 + .12 em padding, ellipse under the feet', () => {

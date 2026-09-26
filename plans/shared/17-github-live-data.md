@@ -20,7 +20,11 @@ The GitHub app shows real repositories, stars, languages and a contribution grap
 1. No `GITHUB_USERNAME` → exit 0, keep snapshot.
 2. REST `GET /users/{u}` and `/users/{u}/repos?per_page=100&sort=pushed` (public only, forks excluded unless
    referenced by a project).
-3. With `GITHUB_TOKEN`: GraphQL `contributionsCollection` (last 52 weeks), pinned repositories.
+3. With `GITHUB_TOKEN`: GraphQL `contributionsCollection` (last 52 weeks, with each day's date and GitHub level),
+   pinned repositories. **Without a token (or if GraphQL has no calendar)** the contribution calendar comes from the
+   public profile calendar `github.com/users/{u}/contributions` (same data the profile shows); a failure there only
+   leaves `contributions` null (owner change 2026-09-26, logged in shared/22). `prebuild` and `npm run github:refresh`
+   load `.env.local` when it exists.
 4. Validate against the schema below; on success write `data/generated/github.json` (stable key order so diffs
    are meaningful) with `fetchedAt`.
 5. Any error (network, 403 rate limit, schema mismatch, timeout 8 s) → log a warning, **keep the existing file**, exit 0.
@@ -28,7 +32,9 @@ The GitHub app shows real repositories, stars, languages and a contribution grap
 ### Schema
 ```ts
 interface GithubSnapshot { v: 1; fetchedAt: string | null; user: { login: string; name: string | null; followers: number; publicRepos: number; url: string } | null;
-  repos: readonly GithubRepo[]; pinned: readonly string[]; contributions: { total: number; weeks: readonly (readonly number[])[] } | null }
+  repos: readonly GithubRepo[]; pinned: readonly string[];
+  contributions: { total: number; weeks: readonly (readonly number[])[]; start?: string /* ISO date of weeks[0][0] */;
+                   levels?: readonly (readonly number[])[] /* GitHub's 0–4, same shape as weeks */ } | null }
 interface GithubRepo { name: string; url: string; description: string | null; stars: number; forks: number;
   language: string | null; languages?: Readonly<Record<string, number>>; topics: readonly string[]; pushedAt: string; archived: boolean }
 ```

@@ -6,9 +6,9 @@ portfolio hero. It ends with **Tap to begin**, the gesture that unlocks audio fo
 (`03-netflix-page.md`). Requirements: R10, R40, R41, T. Kernel onboarding state: `hello`.
 
 ## Portfolio mapping
-Only `person.givenName` and `person.role` (the server-rendered `<h1>` "Jaswanth — Software Engineer", exactly as the
-storyboard frame sets it). No other content — this page sets tone, it does not list anything. A discreet "Résumé"
-link (`RES-PRE-01`) and "Skip the OS" link are present.
+No personal name or role is shown on the opening screen. A server-rendered, visually hidden `<h1>` names the surface
+"Hello" while the drawn greeting carries the visual identity. A discreet "Résumé" link (`RES-PRE-01`) and "Skip the
+OS" link are present.
 
 ## Anatomy
 ```
@@ -16,7 +16,6 @@ link (`RES-PRE-01`) and "Skip the OS" link are present.
 │ Skip the OS                              Résumé · Sound on  │  top bar (plain text links + Sound toggle)
 │                                                              │
 │                     ✍  Hello  (SVG morph)                    │  aria-hidden; static text alternative
-│              Jaswanth — <role>            ← <h1> LCP element │
 │                                                              │
 │                  ( Tap to begin  ◌ beam )                    │  glass pill button
 │                                                              │
@@ -41,13 +40,13 @@ pixels (checked at 1280 × 800, 1440 × 900, 1680 × 1050 and 1920 × 1200). Val
 | Light field | Static `radial-gradient(60% 70% at 18% 20%, #9db9ff 0, transparent 60%), radial-gradient(55% 60% at 85% 25%, #ffc0de 0, transparent 60%), radial-gradient(60% 70% at 60% 95%, #ffd9a0 0, transparent 60%), #eaf0ff`; no drift, no grain. T2's shader computes this same field (see the shader spec) |
 | Text face | IBM Plex Sans (OFL, self-hosted, preloaded on `/` — `DS-FONT-01`), line-height 1.3, base colour `#111` |
 | Top bar | `inset: 2.2em 2.6em auto` at `.95em`, colour `#2a3350`: "Skip the OS" left; "Résumé · Sound on" right (space + nbsp either side of the dot). Plain text — no icons, no glass. The hit areas are padded without moving the text |
-| Name (`<h1>`) | "{givenName} — {role}", `1.5em`, weight 600, `#1b2347`, centred in the lens, `1.1em` below the glyph |
+| Heading (`<h1>`) | Visually hidden "Hello"; no personal name or role is painted in the lens |
 | Lens, glyph, pill | **Not the frame: the owner's liquid-glass decision** (2026-09-21, Deviations log of `06-onboarding-acceptance.md`; Apple Liquid Glass is the bar). **Lens:** the frame's box (`inset: 16% 22% 14%`, radius `2.4em`) as clear glass — `linear-gradient(160deg, white .30 → .12 at 55 % → .22)` under `blur(6px) saturate(185%) brightness(1.04)`; rim = inset catch-lights top (.95) and bottom (.45), a .28 hairline, light entering the top edge and focused at the bottom, blue / pink bent into the left / right edges; a 1.5 px conic specular rim bright on the top-left and bottom-right corners; drop shadow `0 40px 80px -40px rgb(30 45 120 / .38)`. Three layers under the content: backdrop (blur or refraction) < surface (tint, rim light, shadow) < corner speculars, so a refraction bends only the page, never the glass's own tint. **Refracting (Chromium, see Liquid glass by tier):** the backdrop layer is 135 px larger than the lens and clipped back to it; `url(#hello-refract) blur(1.5px) saturate(160%) brightness(1.04)`; the field's colours around the glass bend into a 120 px band at the rim (up to 130 px, strongest at the edge); the tint clears to `white .20 → .05 → .14` and the rim gains a fresnel glow (`inset 0 0 6px 1px white .7`, `inset 0 0 22px 2px white .35`). **Glyph:** 25 em wide (frame 17 em); each greeting is a clear glass rod of 9 layered strokes of one path (`ROD` in `Welcome.tsx`, frame units: blurred shadow 32 ↓16, hairline 38, edge 36 in `#5f7fff → #9a86ff → #ff7fbf` at .66, rim light 31, clear body 27 + the field seen flipped through it, caustic 7 at (3, 9), specular 5 at (−4, −9) + glint 1.8, the lights fading top → bottom); no lighting filter — the shadow's blur is the only one and T0 drops it. **Pill:** the frame's size and 3.2 s conic beam (blue → pink); glass body `white .62 → .34`, top catch-light, focused light at the bottom, soft drop shadow, label weight 500. T2's shader frosts the lens to the same values. The frame's own values, for reference: lens `rgb(255 255 255 / .34)` + `blur(14px) saturate(160%)`, 1 px `rgb(255 255 255 / .75)` rim; glyph 17 em in `#hiGlass`; pill white .82 |
 
 ## Behaviour & states
 | State | Behaviour |
 |---|---|
-| First paint (no JS yet) | `<h1>`, static drawn "Hello" (CSS `pathLength` stroke draw 1600 ms `cubic-bezier(0.65,0,0.35,1)`, `fill-mode: both`), pill visible as a real `<a href="#begin">`/button |
+| First paint (no JS yet) | Visually hidden `<h1>`, static drawn "Hello" (CSS `pathLength` stroke draw 1600 ms `cubic-bezier(0.65,0,0.35,1)`, `fill-mode: both`), pill visible as a real `<a href="#begin">`/button |
 | Idle | After the draw, greetings morph every 2.4 s (morph 900 ms `power2.inOut`); loop pauses when the tab is hidden |
 | Hover / focus on pill | Beam brightens; focus ring per `--focus-ring` |
 | Press | Pill scales 0.97 (spring r 0.18 ζ 1); on release → `ONBOARDING_ADVANCE` → `intro` |
@@ -90,11 +89,11 @@ to the Netflix intro without a cut.
 ## Responsive
 Laptop/desktop (landscape, ≥ 1024 px): the Visual target, scaled by `--u`; T2 eligible. Tablet, portrait screens and
 narrow windows: the same composition in a centred column ≤ 660 px, `--u` 13–18 px, top bar text 15 px. Phone
-landscape: glyph left, name and pill right, no scroll. Safe-area tokens pad the top bar and pill.
+landscape: glyph and pill share the available space without scrolling. Safe-area tokens pad the top bar and pill.
 
 ## Accessibility
-`<main>` with one `<h1>` ("Jaswanth — {role}"). The morphing glyph is `aria-hidden`; a visually hidden
-"Hello" precedes the `<h1>`. The pill is a real `<button>` named "Tap to begin". Mute toggle is a `<button
+`<main>` with one visually hidden `<h1>` ("Hello"). The morphing glyph is `aria-hidden`. The pill is a real
+`<button>` named "Tap to begin". Mute toggle is a `<button
 aria-pressed>` named "Sound" (its visible "on" / "off" is `aria-hidden`; `aria-pressed` carries the state). No
 autofocus (would scroll/zoom on mobile). First Tab → "Skip the OS".
 
@@ -106,7 +105,7 @@ Tab hidden → loops pause. Double-tap on the pill → second tap is ignored (st
 ## Feature IDs + acceptance tests
 | ID | Feature | Acceptance test |
 |---|---|---|
-| `HELLO-LCP-01` | SSR `<h1>` is the LCP element, never starts hidden | `lhci: LCP node is the h1; LCP ≤ 2.5 s (target 1.5 s)` |
+| `HELLO-LCP-01` | SSR Hello content paints immediately; the accessible `<h1>` never exposes a personal title | `lhci: LCP ≤ 2.5 s (target 1.5 s); e2e: no visible personal title` |
 | `HELLO-DRAW-01` | CSS stroke draw from first paint, no JS | `e2e: W2 no-js project shows drawn Hello` |
 | `HELLO-MORPH-01` | Precompiled greeting morphs with crossfade fallback | `unit: every greeting pair has morph data or explicit crossfade` |
 | `HELLO-PATHS-01` | Paths generated from an open-licensed single-line font | `unit: build-hello-paths output normalized + deterministic` |

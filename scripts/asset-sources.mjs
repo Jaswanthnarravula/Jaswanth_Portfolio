@@ -36,7 +36,7 @@ const appStore = (id) => `https://apps.apple.com/app/id${id}`;
 const play = (pkg) => `https://play.google.com/store/apps/details?id=${pkg}`;
 const commons = (file) => `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(file)}`;
 
-/** @typedef {{ id: string, file: string, kind: 'app-icon'|'system-icon'|'avatar'|'audio'|'wallpaper', sizes?: number[], transform?: string, monochrome?: boolean, derivedFrom?: string, owner: string, terms: string, sourceUrl: string, retrieved: string, label: string }} AssetSource */
+/** @typedef {{ id: string, file: string, kind: 'app-icon'|'system-icon'|'tech-logo'|'org-logo'|'avatar'|'audio'|'wallpaper', sizes?: number[], transform?: string, monochrome?: boolean, derivedFrom?: string, owner: string, terms: string, sourceUrl: string, retrieved: string, label: string }} AssetSource */
 
 /** @type {AssetSource[]} */
 export const ASSET_SOURCES = [
@@ -482,6 +482,144 @@ export const ASSET_SOURCES = [
     retrieved: '2026-09-24',
     label,
   })),
+
+  // Reader Toolbox logos (lib/assets/tech.ts) — Devicon files (MIT); each mark belongs to the owner named here.
+  ...[
+    ['java', 'java-original', 'Java', 'Oracle Corporation'],
+    ['go', 'go-original-wordmark', 'Go', 'Google LLC'],
+    ['python', 'python-original', 'Python', 'Python Software Foundation'],
+    ['typescript', 'typescript-original', 'TypeScript', 'Microsoft Corporation'],
+    ['javascript', 'javascript-original', 'JavaScript', 'JavaScript community logo (unofficial)'],
+    ['spring', 'spring-original', 'Spring', 'Broadcom Inc.'],
+    ['hibernate', 'hibernate-original', 'Hibernate', 'Red Hat, Inc.'],
+    ['fastapi', 'fastapi-original', 'FastAPI', 'Sebastián Ramírez (FastAPI)'],
+    ['flask', 'flask-original', 'Flask', 'Pallets Projects'],
+    ['sqlalchemy', 'sqlalchemy-original', 'SQLAlchemy', 'the SQLAlchemy authors'],
+    ['swagger', 'swagger-original', 'Swagger', 'SmartBear Software'],
+    ['postgresql', 'postgresql-original', 'PostgreSQL', 'PostgreSQL Community Association'],
+    ['mysql', 'mysql-original', 'MySQL', 'Oracle Corporation'],
+    ['redis', 'redis-original', 'Redis', 'Redis Ltd.'],
+    ['elasticsearch', 'elasticsearch-original', 'Elasticsearch', 'Elasticsearch B.V.'],
+    ['react', 'react-original', 'React', 'Meta Platforms, Inc.'],
+    ['vitejs', 'vitejs-original', 'Vite', 'VoidZero Inc.'],
+    ['docker', 'docker-original', 'Docker', 'Docker, Inc.'],
+    ['nginx', 'nginx-original', 'NGINX', 'F5, Inc.'],
+    ['linux', 'linux-original', 'Tux (Linux)', 'Larry Ewing (lewing@isc.tamu.edu) and The GIMP'],
+    ['git', 'git-original', 'Git', 'Jason Long (CC BY 3.0) · Software Freedom Conservancy'],
+    ['githubactions', 'githubactions-original', 'GitHub Actions', 'GitHub, Inc.'],
+    ['amazonwebservices', 'amazonwebservices-original-wordmark', 'AWS', 'Amazon.com, Inc.'],
+    ['azure', 'azure-original', 'Microsoft Azure', 'Microsoft Corporation'],
+    ['maven', 'maven-original', 'Apache Maven', 'The Apache Software Foundation'],
+    ['junit', 'junit-original', 'JUnit 5', 'The JUnit Team'],
+    ['postman', 'postman-original', 'Postman', 'Postman, Inc.'],
+  ].map(([slug, file, label, owner]) => ({
+    id: `tech.${slug}`,
+    file: `icons/tech/${slug}.svg`,
+    kind: 'tech-logo',
+    sizes: [48, 96],
+    owner,
+    terms: `Logo of ${owner}; file from Devicon (MIT). Used referentially to name a tool the owner works with. No affiliation.`,
+    sourceUrl: `https://github.com/devicons/devicon/blob/master/icons/${slug}/${file}.svg`,
+    retrieved: '2026-09-25',
+    label,
+  })),
+
+  // Reader organisation logos (lib/assets/orgs.ts). Xclusive Trading Inc.'s website is a parked domain; its logo is the
+  // LinkedIn company-page image the owner supplied (100 px).
+  ...[
+    [
+      'xclusive',
+      'jpg',
+      'Xclusive Trading Inc.',
+      'Xclusive Trading Inc.',
+      'https://media.licdn.com/dms/image/v2/C4E0BAQEjjLJaA7JJrg/company-logo_100_100/company-logo_100_100/0/1630633784582',
+      'Company logo from its LinkedIn page, supplied by the owner (an employee)',
+    ],
+    [
+      'ibm',
+      'svg',
+      'IBM',
+      'International Business Machines Corporation',
+      commons('IBM logo.svg'),
+      'Public domain on Wikimedia Commons (below the threshold of originality); IBM trademark',
+    ],
+    [
+      'dbs',
+      'svg',
+      'DBS Bank',
+      'DBS Bank Ltd.',
+      'https://en.wikipedia.org/wiki/File:DBS_Bank_Logo_(alternative).svg',
+      'Public domain per its Wikipedia file page; DBS trademark',
+    ],
+    [
+      'aicte',
+      'png',
+      'AICTE',
+      'All India Council for Technical Education',
+      'https://en.wikipedia.org/wiki/File:All_India_Council_for_Technical_Education_logo.png',
+      'Emblem of the All India Council for Technical Education (Wikipedia fair-use file)',
+    ],
+    [
+      'uab',
+      'svg',
+      'University of Alabama at Birmingham',
+      'The University of Alabama at Birmingham',
+      commons('UAB Core Logo Centered Full Color.svg'),
+      'Public domain on Wikimedia Commons (text logo); UAB trademark',
+    ],
+    [
+      'jntuh',
+      'png',
+      'JNTU Hyderabad',
+      'Jawaharlal Nehru Technological University Hyderabad',
+      'https://en.wikipedia.org/wiki/File:JNTU_Hyderabad_logo.png',
+      'Emblem of JNTU Hyderabad (Wikipedia fair-use file)',
+    ],
+  ].map(([slug, ext, label, owner, sourceUrl, basis]) => ({
+    id: `org.${slug}`,
+    file: `icons/org/${slug}.${ext}`,
+    kind: 'org-logo',
+    sizes: [64, 128],
+    owner,
+    terms: `${basis}. Used referentially to name the owner's employer, client or school. No affiliation or endorsement.`,
+    sourceUrl,
+    retrieved: '2026-09-25',
+    label,
+  })),
+
+  // Contact logos from the brands' own downloads; the inbox PNGs preserve aspect ratio on transparent squares.
+  ...[
+    ['gmail', 'Gmail', 'Google LLC', 'https://www.gstatic.com/images/branding/product/2x/gmail_2020q4_48dp.png'],
+    ['linkedin', 'LinkedIn', 'LinkedIn Corporation', 'https://brand.linkedin.com/downloads'],
+    [
+      'instagram',
+      'Instagram',
+      'Meta Platforms, Inc.',
+      'https://www.meta.com/brand/resources/instagram/instagram-brand/',
+    ],
+  ].map(([slug, label, owner, sourceUrl]) => ({
+    id: `org.${slug}`,
+    file: `icons/org/${slug}.png`,
+    kind: 'org-logo',
+    sizes: [64, 128],
+    owner,
+    terms: `Official ${label} artwork from its owner. Used referentially for the portfolio owner's contact link; no affiliation or endorsement. Trademarks belong to ${owner}.`,
+    sourceUrl,
+    retrieved: '2026-09-26',
+    label,
+  })),
+
+  // The GitHub mark for the reader page's GitHub panel (same Octicons file as the Windows app icon).
+  {
+    id: 'org.github',
+    file: 'icons/desktop/github-mark.svg',
+    kind: 'org-logo',
+    monochrome: true,
+    ...GITHUB,
+    sourceUrl: 'https://github.com/primer/octicons',
+    retrieved: '2026-09-25',
+    label: 'GitHub',
+  },
 
   // Intro sound (fetched on idle, decoded on the Hello tap)
   {
