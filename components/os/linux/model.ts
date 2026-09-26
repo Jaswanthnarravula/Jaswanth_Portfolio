@@ -65,17 +65,23 @@ export function bootLines(contentRev: string, projects: number, roles: number): 
   ];
 }
 
-export function motdLines(projects: number, openTo: string): readonly Line[] {
+/**
+ * The login MOTD (LNX-BOOT-03): insert-only entries, labels padded to one column. `hasNow` adds the "what I'm
+ * working on → cat .plan" entry (LNX-BOOT-08, shared/23), keeping the MOTD within 10 lines with a continuity line.
+ */
+export function motdLines(projects: number, openTo: string, hasNow = false): readonly Line[] {
+  const rows: readonly (readonly [text: string, command: string, insert: string])[] = [
+    ['résumé ready', 'open resume', 'open resume'],
+    [`${projects} ${projects === 1 ? 'project' : 'projects'}`, 'cd projects && ls', 'cd projects && ls'],
+    ...(hasNow ? [["what I'm working on", 'cat .plan', 'cat .plan'] as const] : []),
+    [openTo.replace(/\.$/, ''), 'contact', 'contact'],
+    ['new here?', 'help        (or: tour)', 'help'],
+  ];
+  const label = Math.max(...rows.map(([text]) => text.length));
   return [
     { t: "Welcome. This is Jaswanth's portfolio — as a shell.", cls: 'dim' },
     { t: '' },
-    { t: '  * résumé ready          →  open resume', insert: 'open resume' },
-    {
-      t: `  * ${projects} projects${' '.repeat(Math.max(1, 13 - String(projects).length))}→  cd projects && ls`,
-      insert: 'cd projects && ls',
-    },
-    { t: `  * ${openTo}       →  contact`, insert: 'contact' },
-    { t: '  * new here?             →  help        (or: tour)', insert: 'help' },
+    ...rows.map(([text, command, insert]) => ({ t: `  * ${text.padEnd(label, ' ')}  →  ${command}`, insert })),
     { t: '' },
     { t: 'Tip: Tab completes, ↑ recalls, and nothing here can be broken.', cls: 'dim' },
   ];

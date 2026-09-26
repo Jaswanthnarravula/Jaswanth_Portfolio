@@ -81,6 +81,26 @@ describe('IOS-HOME-01 configured grid (apps, folder, widget) — order from the 
   });
 });
 
+describe('IOS-WIDG-05 the Now widget on page 2', () => {
+  it('sits after Open to work, 2 × 2, with no overlap, in portrait and landscape', () => {
+    for (const viewport of [viewportFor(390, 844, 'coarse'), viewportFor(844, 390, 'coarse')]) {
+      const layout = homeLayout(viewport, { hasProject: true, hasNow: true });
+      expect(ids(layout, 1).slice(0, 3)).toEqual(['widget:open-to-work', 'widget:now', 'widget:projects']);
+      const cells = new Set<string>();
+      for (const placed of layout.pages[1]!.items)
+        for (let c = placed.col; c < placed.col + placed.w; c++)
+          for (let r = placed.row; r < placed.row + placed.h; r++) {
+            expect(cells.has(`${c},${r}`)).toBe(false);
+            cells.add(`${c},${r}`);
+          }
+      expect(layout.pages[1]!.items.find((placed) => placed.item.id === 'widget:now')).toMatchObject({ w: 2, h: 2 });
+    }
+  });
+  it('no Now note → no Now widget', () => {
+    expect(ids(homeLayout(viewportFor(390, 844, 'coarse'), { hasProject: true }), 1)).not.toContain('widget:now');
+  });
+});
+
 describe('IOS-HOME-06 layouts: phone portrait 4 × 6, landscape 6 × 3 (Dock trailing), full page 6/7/8 columns', () => {
   it('phone portrait / landscape', () => {
     const portrait = homeLayout(viewportFor(390, 844, 'coarse'), { hasProject: true });

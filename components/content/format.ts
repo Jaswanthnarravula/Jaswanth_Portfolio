@@ -1,5 +1,5 @@
 /** Pure formatting helpers shared by the content views and their text renderers. */
-import type { PartialDate } from '@/data/schema';
+import type { Credential, PartialDate, Skill } from '@/data/schema';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
 
@@ -18,6 +18,29 @@ export function formatPeriod(start: PartialDate | null, end: PartialDate | 'pres
   if (from && to) return `${from} – ${to}`;
   if (to === 'Present') return 'Present';
   return from ?? to;
+}
+
+/**
+ * Skill years as the owner states them (shared/23 `CONTENT-SKILL-01`): "1.5+ yrs", "~1 yr"; `long` spells it out
+ * for accessible names ("1.5+ years", "about 1 year"). `null` when no years are published.
+ */
+export function formatYears(skill: Pick<Skill, 'years' | 'approx'>, long = false): string | null {
+  if (!skill.years) return null;
+  const unit = long ? (skill.years > 1 ? 'years' : 'year') : skill.years > 1 ? 'yrs' : 'yr';
+  if (skill.approx) return long ? `about ${skill.years} ${unit}` : `~${skill.years} ${unit}`;
+  return `${skill.years}+ ${unit}`;
+}
+
+/**
+ * What a credential is, never overstated (shared/23 `CONTENT-CRED-01`): "Course credential · Jan 2022",
+ * "Certification · in progress · target Mar 2027".
+ */
+export function formatCredential(credential: Credential): string {
+  const parts: string[] = [credential.kind === 'course' ? 'Course credential' : 'Certification'];
+  const date = formatPartialDate(credential.date ?? null);
+  if (credential.status === 'in-progress') parts.push(date ? `in progress · target ${date}` : 'in progress');
+  else if (date) parts.push(date);
+  return parts.join(' · ');
 }
 
 /** Machine-readable `<time dateTime>` value for a partial date. */
@@ -45,10 +68,11 @@ export function wrap(text: string, width: number, indent = ''): string[] {
   return lines;
 }
 
-/** Bullet with hanging indent: "• first line" / "  continuation". */
+/** Bullet with hanging indent: "• first line" / "  continuation" (the indent follows the marker: "1. " → 3). */
 export function bullet(text: string, width: number, marker = '•'): string[] {
-  const [first = '', ...rest] = wrap(text, width - 2);
-  return [`${marker} ${first}`, ...rest.map((line) => `  ${line}`)];
+  const indent = ' '.repeat(marker.length + 1);
+  const [first = '', ...rest] = wrap(text, width - indent.length);
+  return [`${marker} ${first}`, ...rest.map((line) => `${indent}${line}`)];
 }
 
 export const rule = (width: number, char = '─') => char.repeat(Math.max(4, Math.min(width, 80)));

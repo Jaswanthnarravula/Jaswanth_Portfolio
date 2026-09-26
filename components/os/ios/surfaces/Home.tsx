@@ -51,6 +51,8 @@ export interface WidgetData {
   readonly updated: string;
   readonly openTo: string;
   readonly location: string;
+  /** `IOS-WIDG-05`: the Now note and its "Updated …" line, or null. */
+  readonly now: { readonly text: string; readonly updated: string } | null;
   readonly hasPdf: boolean;
   readonly project: {
     readonly slug: string;
@@ -327,6 +329,7 @@ export const Home = forwardRef<HomeHandle, HomeProps>(function Home(props, ref) 
                   <Widget id="resume" size="large" {...props} />
                   <div className={styles.widgetRow}>
                     <Widget id="open-to-work" size="small" {...props} />
+                    {props.widgets.now ? <Widget id="now" size="small" {...props} /> : null}
                     {props.widgets.project ? <Widget id="projects" size="small" {...props} /> : null}
                   </div>
                 </div>
@@ -426,6 +429,24 @@ function Widget({
       >
         <span className={styles.widgetStrong}>{widgets.openTo}</span>
         <span className={styles.widgetMuted}>{widgets.location}</span>
+      </WidgetFrame>
+    );
+  }
+  if (id === 'now') {
+    if (!widgets.now) return null;
+    const ref: ContentRef = { section: 'about' };
+    return (
+      <WidgetFrame
+        id="now"
+        size={size}
+        eyebrow="Now"
+        href={hrefFor({ os: 'ios', ref })}
+        label={`Now: ${widgets.now.text} — open About`}
+        onOpen={(origin) => onOpenContent(ref, origin)}
+        onLongPress={(anchor) => onWidgetActions('now', anchor)}
+      >
+        <span className={`${styles.widgetLine} ${styles.widgetClamp}`}>{widgets.now.text}</span>
+        <span className={styles.widgetMuted}>{widgets.now.updated}</span>
       </WidgetFrame>
     );
   }

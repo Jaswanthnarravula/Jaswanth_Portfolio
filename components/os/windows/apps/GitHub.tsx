@@ -12,13 +12,15 @@
  *   · Repositories: stack filter chips and Sort ▾ (session state), a `content-visibility` list, "No repositories
  *     match" + Clear filters, "More on GitHub" (repositories no project references);
  *   · project page (`/windows/github/{slug}`, `WIN-GH-02`): breadcrumb `Repositories › {project}`, Pivot tabs README ·
- *     Stack · Links (APG; Links only with a repository or live site), the info card (year, language, topics, pushed,
+ *     Case study · Stack · Links (APG; Case study only with a case study, Links only with a repository or live site), the info card (year, language, topics, pushed,
  *     stars / forks when the snapshot has them), an InfoBar when archived; a removed slug lands on Repositories with an
  *     InfoBar;
  *   · page changes drill in (the page rises 16 px + fades, 250 ms entrance); going back drills out (the page left
  *     behind sinks and fades, 167 ms exit) while the page returned to is already there, so nothing waits; a new page
  *     mid-flight lands both at once (`WIN-GH-05`). External links open a new tab (`rel="noopener noreferrer"`, ↗,
  *     "opens in new tab").
+ *   · Case study pivot (`WIN-GH-07`, shared/23): the problem, my role, each decision as a Fluent Expander, results as
+ *     stroked metric cards, and a Docs list whose rows drill into `docs/{slug}.md` (session state; Back drills out);
  * compact (`WIN-GH-06`): the rail is a full-height hamburger overlay, pages are one column, pivots scroll sideways.
  * Résumé data decides which projects exist; GitHub only enriches them (`GH-MERGE-01`, `GH-OFF-01`).
  */
@@ -33,7 +35,7 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react';
-import { formatUpdated } from '@/components/content';
+import { DeepDiveArticle, deepDiveFile, formatUpdated } from '@/components/content';
 import { RovingGroup } from '@/components/primitives/RovingGroup';
 import { hrefFor } from '@/components/shell/KernelLink';
 import { AssetIcon } from '@/components/ui/AssetIcon';
@@ -58,6 +60,7 @@ import {
   flCheckmark,
   flChevronDown,
   flChevronRight,
+  flDocumentText,
   flFork,
   flHome,
   flHomeFilled,
@@ -75,7 +78,7 @@ import { TitleBar, useWindowChrome, windowStyles, type WindowBodyProps } from '.
 import styles from './github.module.css';
 
 type Page = 'overview' | 'repos';
-type Pivot = 'readme' | 'stack' | 'links';
+type Pivot = 'readme' | 'case' | 'stack' | 'links';
 type Sort = 'featured' | 'newest' | 'name' | 'pushed';
 
 const SORT_LABELS: Readonly<Record<Sort, string>> = {
@@ -392,6 +395,9 @@ export default function GitHub({ window: win, compact }: WindowBodyProps) {
   const [page, setPage] = useState<Page>('overview');
   const [pivot, setPivot] = useState<Pivot>('readme');
   const [pivotFor, setPivotFor] = useState(slug);
+  /** The open deep dive (`docs/{slug}.md`) — session state, one drill level below the project (shared/23). */
+  const [doc, setDoc] = useState<string | null>(null);
+  const returnDoc = useRef<string | null>(null);
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<readonly string[]>([]);
   const [sort, setSort] = useState<Sort>('featured');
@@ -408,10 +414,12 @@ export default function GitHub({ window: win, compact }: WindowBodyProps) {
   if (slug !== pivotFor) {
     setPivotFor(slug);
     setPivot('readme');
+    setDoc(null);
   }
 
   const view: 'overview' | 'repos' | 'project' = entry ? 'project' : missing ? 'repos' : page;
-  const pageKey = entry ? `project:${entry.project.slug}` : view;
+  const openDive = (doc && entry?.project.deepDives?.find((dive) => dive.slug === doc)) || null;
+  const pageKey = entry ? `project:${entry.project.slug}${openDive ? `:docs:${openDive.slug}` : ''}` : view;
   const featured = projects.filter(({ project }) => project.featured);
   const pinned = featured.length ? featured : projects.slice(0, 6);
   const stars = snapshot.repos.reduce((sum, repo) => sum + repo.stars, 0);
@@ -430,6 +438,29 @@ export default function GitHub({ window: win, compact }: WindowBodyProps) {
     sort,
   );
   const filtering = needle.length > 0 || filters.length > 0;
+
+  // Alt+← is Back everywhere in the app (the title-bar button's shortcut), listened on the app body.
+  const appBody = useRef<HTMLDivElement>(null);
+  const backRef = useRef<() => void>(() => undefined);
+  useEffect(() => {
+    const el = appBody.current;
+    if (!el) return;
+    const onKey = (event: globalThis.KeyboardEvent) => {
+      if (!event.altKey || event.key !== 'ArrowLeft') return;
+      event.preventDefault();
+      backRef.current();
+    };
+    el.addEventListener('keydown', onKey);
+    return () => el.removeEventListener('keydown', onKey);
+  }, []);
+
+  // Closing a document drills out and returns focus to its row in the Docs list.
+  useLayoutEffect(() => {
+    if (doc || !returnDoc.current) return;
+    const row = scroller.current?.querySelector<HTMLElement>(`[data-gh-doc="${returnDoc.current}"]`);
+    returnDoc.current = null;
+    row?.focus({ preventScroll: false });
+  }, [doc]);
 
   // Focus follows a cleared filter or a dismissed InfoBar to the page heading (the control that had it is gone).
   useLayoutEffect(() => {
@@ -462,10 +493,22 @@ export default function GitHub({ window: win, compact }: WindowBodyProps) {
   const toList = () =>
     dispatchSoon({ type: 'NAVIGATE_IN_APP', id: win.id, location: { kind: 'content', ref: projectsRef() } });
   const canBack = win.nav.index > 0 || view === 'project' || !!missing;
+  // Alt+← is Back everywhere in the app (the title-bar button's shortcut).
+  const closeDoc = () => {
+    returnDoc.current = doc;
+    setDoc(null);
+  };
   const back = () => {
-    if (win.nav.index > 0) dispatchSoon({ type: 'APP_BACK', id: win.id });
+    if (openDive) closeDoc();
+    else if (win.nav.index > 0) dispatchSoon({ type: 'APP_BACK', id: win.id });
     else if (slug) toList();
   };
+  // The shortcut always calls the latest Back (it honours canBack).
+  useEffect(() => {
+    backRef.current = () => {
+      if (canBack) back();
+    };
+  });
   const choosePage = (next: Page) => {
     setPage(next);
     if (slug) toList();
@@ -635,7 +678,17 @@ export default function GitHub({ window: win, compact }: WindowBodyProps) {
   );
 
   let body: ReactNode;
-  if (view === 'project' && entry) {
+  if (view === 'project' && entry && openDive) {
+    body = (
+      <DocPage
+        entry={entry}
+        dive={openDive}
+        windowId={win.id}
+        onRepositories={() => setPage('repos')}
+        onProject={closeDoc}
+      />
+    );
+  } else if (view === 'project' && entry) {
     body = (
       <ProjectPage
         entry={entry}
@@ -643,6 +696,7 @@ export default function GitHub({ window: win, compact }: WindowBodyProps) {
         onPivot={setPivot}
         windowId={win.id}
         onRepositories={() => setPage('repos')}
+        onOpenDoc={setDoc}
       />
     );
   } else if (view === 'repos') {
@@ -831,6 +885,7 @@ export default function GitHub({ window: win, compact }: WindowBodyProps) {
         </div>
       </TitleBar>
       <div
+        ref={appBody}
         className={styles.github}
         data-rail={compact ? 'overlay' : expanded ? 'expanded' : 'collapsed'}
         data-compact={compact || undefined}
@@ -841,7 +896,7 @@ export default function GitHub({ window: win, compact }: WindowBodyProps) {
             <DrillPage
               key={pageKey}
               pageKey={pageKey}
-              depth={view === 'project' ? 1 : 0}
+              depth={view === 'project' ? (openDive ? 2 : 1) : 0}
               flow={flow}
               ghosts={ghosts}
               scroller={scroller}
@@ -857,25 +912,171 @@ export default function GitHub({ window: win, compact }: WindowBodyProps) {
   );
 }
 
-/** The project page: breadcrumb header, Pivot (README · Stack · Links) and the info card. */
+/** A Fluent Expander: the header button shows the title; the detail opens beneath it (`WIN-GH-07`). */
+function Expander({
+  id,
+  title,
+  children,
+}: {
+  readonly id: string;
+  readonly title: string;
+  readonly children: ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={styles.expander} data-open={open || undefined}>
+      <h5 className={styles.expanderHeading}>
+        <button
+          type="button"
+          className={styles.expanderHeader}
+          aria-expanded={open}
+          aria-controls={id}
+          onClick={() => setOpen((value) => !value)}
+        >
+          <span>{title}</span>
+          <Fl icon={flChevronDown} size={12} className={styles.expanderChevron} />
+        </button>
+      </h5>
+      <div id={id} className={styles.expanderBody} hidden={!open}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/** The Case study pivot (`WIN-GH-07`, shared/23): text, Expanders, stroked metric cards and the Docs list. */
+function CaseStudyPivot({
+  project,
+  onOpenDoc,
+}: {
+  readonly project: EnrichedProject['project'];
+  readonly onOpenDoc: (slug: string) => void;
+}) {
+  const study = project.caseStudy!;
+  return (
+    <div className={styles.caseStudy}>
+      <h4 className={styles.readmeTitle}>The problem</h4>
+      {study.problem.map((paragraph) => (
+        <p key={paragraph.slice(0, 32)}>{paragraph}</p>
+      ))}
+      <h4 className={styles.readmeTitle}>My role</h4>
+      <p>{study.role}</p>
+      <h4 className={styles.readmeTitle}>Key decisions</h4>
+      <div className={styles.expanders}>
+        {study.decisions.map((decision, index) => (
+          <Expander key={decision.title} id={`gh-decision-${project.slug}-${index}`} title={decision.title}>
+            <p>{decision.detail}</p>
+            {decision.rejected ? <p className={styles.muted}>Rejected: {decision.rejected}</p> : null}
+          </Expander>
+        ))}
+      </div>
+      <h4 className={styles.readmeTitle}>Results</h4>
+      <dl className={styles.metrics}>
+        {study.results.map((metric) => (
+          <div key={metric.label} className={`${styles.card} ${styles.metric}`}>
+            <dt>{metric.label}</dt>
+            <dd>{metric.value}</dd>
+          </div>
+        ))}
+      </dl>
+      {project.deepDives?.length ? (
+        <>
+          <h4 className={styles.readmeTitle}>Docs</h4>
+          <ul className={styles.docs} role="list">
+            {project.deepDives.map((dive) => (
+              <li key={dive.slug}>
+                <button
+                  type="button"
+                  className={styles.docRow}
+                  data-gh-doc={dive.slug}
+                  onClick={() => onOpenDoc(dive.slug)}
+                >
+                  <Fl icon={flDocumentText} size={20} className={styles.rowGlyph} />
+                  <span className={styles.rowMain}>
+                    <span className={styles.rowName}>{deepDiveFile(dive)}</span>
+                    <span className={styles.rowBody}>{dive.title}</span>
+                  </span>
+                  <Fl icon={flChevronRight} size={12} className={styles.rowChevron} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+/** A deep dive as its own drill-in page: `Repositories › {project} › docs › {slug}.md` (`WIN-GH-07`). */
+function DocPage({
+  entry,
+  dive,
+  windowId,
+  onRepositories,
+  onProject,
+}: {
+  readonly entry: EnrichedProject;
+  readonly dive: NonNullable<EnrichedProject['project']['deepDives']>[number];
+  readonly windowId: WindowId;
+  readonly onRepositories: () => void;
+  readonly onProject: () => void;
+}) {
+  return (
+    <>
+      <nav className={styles.crumbs} aria-label="Breadcrumb">
+        <ol>
+          <li>
+            <RepoLink windowId={windowId} className={styles.crumb} onNavigate={onRepositories}>
+              Repositories
+            </RepoLink>
+            <Fl icon={flChevronRight} size={16} className={styles.crumbSep} />
+          </li>
+          <li>
+            <button type="button" className={styles.crumb} onClick={onProject}>
+              {entry.project.name}
+            </button>
+            <Fl icon={flChevronRight} size={16} className={styles.crumbSep} />
+          </li>
+          <li>
+            <span className={styles.crumbPlain}>docs</span>
+            <Fl icon={flChevronRight} size={16} className={styles.crumbSep} />
+          </li>
+          <li aria-current="page">
+            <h3 className={styles.pageTitle} tabIndex={-1} data-page-heading="">
+              {deepDiveFile(dive)}
+            </h3>
+          </li>
+        </ol>
+      </nav>
+      <div className={`${styles.card} ${styles.docCard}`}>
+        <DeepDiveArticle data={dive} headingLevel={4} />
+      </div>
+    </>
+  );
+}
+
+/** The project page: breadcrumb header, Pivot (README · Case study · Stack · Links) and the info card. */
 function ProjectPage({
   entry,
   pivot,
   onPivot,
   windowId,
   onRepositories,
+  onOpenDoc,
 }: {
   readonly entry: EnrichedProject;
   readonly pivot: Pivot;
   readonly onPivot: (pivot: Pivot) => void;
   readonly windowId: WindowId;
   readonly onRepositories: () => void;
+  readonly onOpenDoc: (slug: string) => void;
 }) {
   const { project, github } = entry;
   const list = useRef<HTMLDivElement>(null);
   const lastCenter = useRef<number | null>(null);
   const pivots: readonly { id: Pivot; label: string }[] = [
     { id: 'readme', label: 'README' },
+    ...(project.caseStudy ? [{ id: 'case' as const, label: 'Case study' }] : []),
     { id: 'stack', label: 'Stack' },
     ...(project.repo || project.live ? [{ id: 'links' as const, label: 'Links' }] : []),
   ];
@@ -986,6 +1187,9 @@ function ProjectPage({
                   <p className={styles.muted}>Built in production; the source is proprietary.</p>
                 ) : null}
               </>
+            ) : null}
+            {current === 'case' && project.caseStudy ? (
+              <CaseStudyPivot project={project} onOpenDoc={onOpenDoc} />
             ) : null}
             {current === 'stack' ? (
               <ul className={styles.tags} role="list" aria-label="Stack">

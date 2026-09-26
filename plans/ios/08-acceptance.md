@@ -130,6 +130,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | `IOS-WIDG-02` | Widget = link; separate Download control (no nested interactives) | P5 | verified | cmp `shell.test.tsx` | |
 | `IOS-WIDG-03` | Flight from/to the widget rect | P5 | verified | e2e `ios-surfaces.spec.ts` | |
 | `IOS-WIDG-04` | No timers/loops; static per session | P5 | verified | perf `performance.spec.ts` | |
+| `IOS-WIDG-05` | Small "Now" widget on page 2 from `person.now`, opens Safari About | P8 | verified | unit `ios/model.test.ts` › IOS-WIDG-05 sits after Open to work, 2 × 2, no overlap, portrait + landscape; no Now note → no widget · cmp `ios/shell.test.tsx` › IOS-WIDG-05 one link to About in Safari with its date · iOS e2e iphone + chromium-desktop green except pre-existing IOS-ID-02 / IOS-BOOT-03 / IOS-NOTIF-03 (2026-09-25, production build) | |
 
 ### `apps/files.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
@@ -151,6 +152,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | `IOS-GH-04` | Search-on-pull field + stack filter chips | P5 | verified | cmp `github.test.tsx` ×5 | |
 | `IOS-GH-05` | Pad split view | P5 | verified | e2e `ios-journeys.spec.ts` | |
 | `IOS-GH-06` | Navigation semantics (nav + aria-current, radiogroup segments) | P5 | verified | cmp `github.test.tsx` ×4 · e2e `ios-journeys.spec.ts` | |
+| `IOS-GH-07` | Case Study segment (grouped inset lists) + pushed deep-dive documents | P8 | verified | cmp `ios/github.test.tsx` › IOS-GH-07 grouped inset lists; a deep-dive row pushes its document; the back chevron pops to the row (axe clean) · no Case Study without a case study · e2e `ios-journeys.spec.ts` › IOS-GH-06 X1 (four segments, axe) · green 2026-09-25 (production build) | |
 
 ### `apps/mail.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |

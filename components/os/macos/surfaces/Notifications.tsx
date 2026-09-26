@@ -12,6 +12,8 @@
  */
 import { gsap } from 'gsap';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { nowUpdated } from '@/components/content';
+import { KernelLink } from '@/components/shell/KernelLink';
 import { AssetIcon } from '@/components/ui/AssetIcon';
 import { getPerson } from '@/data/selectors';
 import { drag } from '@/lib/motion/drag';
@@ -354,6 +356,19 @@ export function NotificationCenter() {
             Open résumé
           </button>
         </div>
+        {person.now ? (
+          // MAC-NOTIF-07 (shared/23): what Jaswanth is working on now — a static widget that opens Safari's About.
+          <KernelLink
+            to={{ os: 'macos', ref: { section: 'about' } }}
+            className={`${styles.widget} ${styles.nowWidget}`}
+            data-now-widget=""
+            onActivate={() => closeOverlay('notification-center')}
+          >
+            <span className={styles.widgetLabel}>Now</span>
+            <span className={styles.widgetText}>{person.now.text}</span>
+            <span className={styles.widgetCaption}>{nowUpdated(person)}</span>
+          </KernelLink>
+        ) : null}
       </div>
       <div className={styles.listHead}>
         <h3 className={styles.listTitle}>Notifications</h3>

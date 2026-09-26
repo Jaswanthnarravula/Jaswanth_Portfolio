@@ -251,14 +251,15 @@ test('IOS-GH-06 X1 axe clean on GitHub: nav + aria-current, radiogroup segments'
   await expect(page).toHaveURL(/\/ios\/github\/[a-z0-9-]+$/);
   await settle(page);
   const segments = gh.getByRole('radiogroup', { name: 'Project sections' });
-  await expect(segments.getByRole('radio')).toHaveText(['README', 'Stack', 'About']);
+  // The first repository (featured) has a case study, so a fourth segment sits after README (IOS-GH-07).
+  await expect(segments.getByRole('radio')).toHaveText(['README', 'Case Study', 'Stack', 'About']);
   await expect(segments.getByRole('radio', { name: 'README' })).toHaveAttribute('aria-checked', 'true');
   await segments.getByRole('radio', { name: 'README' }).focus();
   await page.keyboard.press('ArrowRight');
-  await expect(segments.getByRole('radio', { name: 'Stack' })).toHaveAttribute('aria-checked', 'true');
-  await expect(segments.getByRole('radio', { name: 'Stack' })).toBeFocused();
+  await expect(segments.getByRole('radio', { name: 'Case Study' })).toHaveAttribute('aria-checked', 'true');
+  await expect(segments.getByRole('radio', { name: 'Case Study' })).toBeFocused();
   await expect(segments.getByRole('radio', { name: 'README' })).toHaveAttribute('tabindex', '-1');
-  await scan('project detail');
+  await scan('project detail · case study');
 
   if (!(await isPad(page))) {
     for (const name of ['Home', 'Profile']) {

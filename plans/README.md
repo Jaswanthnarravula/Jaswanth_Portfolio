@@ -28,7 +28,7 @@ not planned here, and nothing planned here is silently dropped.
 | `06-onboarding-acceptance.md` | Ledger for the three pre-OS pages |
 | `STATUS.md` | Roll-up of every ledger per phase |
 | `visual-targets/` | The owner's approved storyboard frames (PNG) + their source CSS, and `frames/` (every frame full screen at 1440 × 900) — the required look of the welcome screens, the chooser and each OS |
-| `shared/` | Cross-cutting contracts `01`–`21` + `22-acceptance.md` (ledger) |
+| `shared/` | Cross-cutting contracts `01`–`21`, `23` + `22-acceptance.md` (ledger) |
 | `macos/` `windows/` `ios/` `android/` `linux/` | One dedicated folder per OS: identity, lifecycle, `surfaces/`, `apps/`, motion, responsive, accessibility, edge cases, cross-OS features, acceptance ledger |
 
 Build order of the OSes (and writing order of their plans): **macOS → Windows 11 → iOS → Android → Linux**.
@@ -98,6 +98,7 @@ assigned to exactly one phase in `05-roadmap.md`. `scripts/check-plans.mjs` (add
 | `HELLO` · `NFLX` · `CHOOSE` | `02-hello-page.md` · `03-netflix-page.md` · `04-os-chooser.md` |
 | `ARCH` `DATA` `VIEW` `KRN` `ROUTE` `DS` `MOTION` `RESP` `A11Y` `PERF` `ASSET` `TEST` `DEPLOY` | `shared/01` … `shared/13` |
 | `RES` `SRCH` `CONT` `GH` `ANL` `OG` `TOUR` `EGG` | `shared/14` … `shared/21` |
+| `CONTENT` | `shared/23-content-depth.md` |
 | `MAC` `WIN` `IOS` `AND` `LNX` | the OS folders |
 
 ## File templates
@@ -115,6 +116,7 @@ Definition-of-done audit checklist · Deviations log.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-25 | **Content depth.** Owner-approved copy (recruiter card, Now note, role scope, case studies, three deep dives, credential and skill corrections) from the owner's own answers; work authorization, GPA and recommendations are never shown. Deep dives live inside each OS's GitHub app (no new routes); "Now" gets one native surface per OS. Delivered in P8 | owner conversation + "Portfolio Copy Review" page; `shared/23-content-depth.md` |
 | 2026-09-21 | **Welcome screens = the storyboard frames.** Hello (top bar, field, face, name), the intro, "Who's watching?" and the chooser use the frame's own unit (1 em = 1.42 % of a 16:10 screen) and values, and land on its pixels at any 16:10 size; returning-visitor controls (replay, Sound on the profiles) appear only where the frame's first visit has none. | owner conversation ("exactly same as this html page"); `02`/`03`/`04` "Visual target", `06-onboarding-acceptance.md` Deviations log |
 | 2026-09-21 | **Owner visual targets.** The chooser and every OS must look exactly like the approved storyboard frames (`plans/visual-targets/`), and exactly like the real OS wherever a frame abbreviates it — not "close". Sample names in the frames are replaced by real data. | owner conversation; `00-north-star.md` smell test 8, `shared/06-design-system.md`, each `{os}/01-identity.md`, `04-os-chooser.md` |
 | 2026-09-21 | Owner authorized implementation to completion and reconstruction of any missing plans. Proceed through validated gates without repeat permission requests; do not waive tests or claim manual checks were performed. | owner conversation; `IMPLEMENTATION.md` |

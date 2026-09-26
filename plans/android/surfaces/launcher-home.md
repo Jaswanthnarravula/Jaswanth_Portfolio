@@ -8,8 +8,10 @@ underneath. R20, R25.
 - **At-a-glance** (top-left, 2 lines): line 1 = "{weekday}, {month} {day}" · line 2 = a **smart chip** "Résumé ready ·
   Open" (résumé fast path, `RES-IDIOM-01`). When a continuity offer exists, line 2 becomes "Continue: {title}"
   (`shared/16`).
-- **Grid:** a few deliberate icons only (GitHub · Keep · Settings · "Career" folder of Files shortcuts) — the rest
-  live in the drawer. Layout is configuration.
+- **Grid:** a few deliberate icons only (a pinned **Résumé** shortcut — the PDF badged with Files · Keep · Settings ·
+  "Career" folder of Files shortcuts) — the rest live in the drawer; GitHub is in the favorites row. Layout is
+  configuration. Phones follow the Pixel launcher: At-a-glance at the top, the grid low above the favorites row, the
+  Google search bar at the very bottom; the favorites row is part of Home and never shows over an open app.
 - **Favorites row + search bar:** see `favorites-dock.md`.
 
 ## Anatomy

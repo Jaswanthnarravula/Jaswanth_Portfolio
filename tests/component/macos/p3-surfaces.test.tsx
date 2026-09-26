@@ -31,7 +31,7 @@ import {
   resetMacUi,
   setLocked,
 } from '@/components/os/macos/ui';
-import { getContact, getExperience, getProjects } from '@/data/selectors';
+import { getContact, getExperience, getProjects, getPerson } from '@/data/selectors';
 import { DEFAULT_CAPABILITIES, DEFAULT_PREFS } from '@/lib/kernel/state';
 import type { SearchEntry } from '@/lib/search/types';
 import type { WindowId } from '@/lib/kernel/types';
@@ -209,6 +209,20 @@ describe('Banners and the Notification Center', () => {
     expect(within(center).getByText('No notifications')).toBeInTheDocument();
     await userEvent.keyboard('{Escape}');
     expect(macUi.getState().overlay).toBeNull();
+  });
+});
+
+describe('MAC-NOTIF-07 the Now widget', () => {
+  it('shows person.now with its date and links to Safari About; closing the Center on activation', async () => {
+    render(<NotificationCenter />);
+    act(() => {
+      requestOverlay('notification-center');
+    });
+    const center = screen.getByRole('region', { name: 'Notification Center' });
+    const widget = within(center).getByRole('link', { name: /^Now/ });
+    expect(widget).toHaveTextContent(getPerson().now!.text);
+    expect(widget).toHaveTextContent('Updated Sep 2026');
+    expect(widget).toHaveAttribute('href', '/macos/safari');
   });
 });
 

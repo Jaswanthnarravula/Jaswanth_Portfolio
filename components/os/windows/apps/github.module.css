@@ -1054,3 +1054,139 @@
     border: 1px solid CanvasText;
   }
 }
+
+/* WIN-GH-07 (shared/23): the Case study pivot — Fluent Expanders, stroked metric cards, the Docs drill-in. */
+.caseStudy p {
+  max-width: 72ch;
+}
+.expanders {
+  display: grid;
+  gap: 4px;
+}
+.expander {
+  border: 1px solid var(--win-card-stroke);
+  border-radius: var(--radius-control);
+  background: var(--win-card);
+}
+.expanderHeading {
+  margin: 0;
+  font: inherit;
+}
+.expanderHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: none;
+  color: var(--win-text);
+  font: inherit;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--win-d83) linear;
+}
+.expanderHeader:hover {
+  background: var(--win-row-hover);
+}
+.expanderHeader:focus-visible,
+.docRow:focus-visible,
+.crumbs button.crumb:focus-visible {
+  outline: 2px solid var(--win-accent);
+  outline-offset: -2px;
+}
+.expanderChevron {
+  flex: none;
+  color: var(--win-text-dim);
+  transition: transform var(--win-d167) var(--win-ease-in);
+}
+.expander[data-open] .expanderChevron {
+  transform: rotate(180deg);
+}
+.expanderBody {
+  padding: 4px 16px 12px;
+  border-top: 1px solid var(--win-card-stroke);
+}
+.expanderBody p {
+  margin: 8px 0 0;
+}
+.metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+}
+.metric {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;
+  min-width: 128px;
+  padding: 12px 16px;
+}
+.metric dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--win-fs-subtitle, 20px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.metric dt {
+  color: var(--win-text-dim);
+  font-size: var(--win-fs-caption);
+}
+.docs {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.docRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 16px;
+  border: 1px solid var(--win-card-stroke);
+  border-radius: var(--radius-control);
+  background: var(--win-card);
+  color: var(--win-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--win-d83) linear;
+}
+.docRow:hover {
+  background: var(--win-row-hover);
+}
+.crumbs button.crumb {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.crumbs button.crumb:hover {
+  color: var(--win-text);
+}
+.crumbPlain {
+  color: var(--win-text-dim);
+  font-family: var(--font-display);
+  font-size: var(--win-fs-title);
+  font-weight: 600;
+  line-height: 36px;
+}
+.docCard {
+  padding: 20px 24px;
+}
+.docCard :global(.cv-title) {
+  font-family: var(--font-display);
+  font-size: var(--win-fs-subtitle, 20px);
+}
+:global([data-motion='reduced']) .expanderChevron {
+  transition: none;
+}

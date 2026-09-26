@@ -32,17 +32,29 @@ export function shouldCheck(env) {
   return env.CHECK_CONTENT === '1' || env.VERCEL_ENV === 'production';
 }
 
+/**
+ * Reports the guard's verdict and returns the process exit code.
+ * @param {any} data
+ * @param {{ log: (message: string) => void; error: (message: string) => void }} [log]
+ * @returns {0 | 1}
+ */
+export function checkContent(data, log = console) {
+  const offenders = findPlaceholders(data);
+  if (offenders.length) {
+    log.error(
+      `[content] ${offenders.length} placeholder entr${offenders.length === 1 ? 'y' : 'ies'} cannot ship to production:\n  - ${offenders.join('\n  - ')}`,
+    );
+    return 1;
+  }
+  log.log('[content] no placeholders — content is production-ready.');
+  return 0;
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   if (!shouldCheck(process.env)) {
     console.log('[content] placeholder guard skipped (not a production build).');
   } else {
     const { portfolio } = await import(pathToFileURL(join(root, 'data/portfolio.ts')).href);
-    const offenders = findPlaceholders(portfolio);
-    if (offenders.length) {
-      console.error(
-        `[content] ${offenders.length} placeholder entr${offenders.length === 1 ? 'y' : 'ies'} cannot ship to production:\n  - ${offenders.join('\n  - ')}`,
-      );
-      process.exitCode = 1;
-    } else console.log('[content] no placeholders — content is production-ready.');
+    process.exitCode = checkContent(portfolio);
   }
 }

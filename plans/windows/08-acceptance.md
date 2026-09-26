@@ -103,6 +103,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | `WIN-START-06` | Open/close motion (250 / 167 ms), window opens from the tile rect | P4 | built |  |  |
 | `WIN-START-07` | Compact full-height sheet, modal, Back closes | P4 | verified | `e2e/windows.spec.ts` › WIN-WM-12 · WIN-START-07 · WIN-RESP-03 · WIN-RESP-04 N3 compact: one maximized window, min + close at 48 × … · iphone, pixel · green 2026-09-22 (preview build) |  |
 | `WIN-START-08` | Dialog semantics, 2-D roving grid, focus rules | P4 | verified | `component/windows/shell.test.tsx` › WIN-START-01 · WIN-START-08 · WIN-SEARCH-02 · WIN-SEARCH-06 Start and Search › Start: a dialog with the search box, a pinned grid of links… Esc → Start button · `e2e/windows.spec.ts` › WIN-A11Y-02 · A11Y-AXE-01 · WIN-START-08 · WIN-SEARCH-06 X1 axe clean with Start open · chromium-desktop, reduced-motion (3 of 3 runs each) · green 2026-09-22 (preview build) |  |
+| `WIN-START-09` | "Now" as the first Recommended item, opens Edge About | P8 | verified | `unit/windows/model.test.ts` › WIN-START-09 · Recommended: Now first (title, Updated Sep 2026, opens About in Edge), then Résumé.pdf … six slots · Windows e2e chromium-desktop 47 passed · green 2026-09-25 (production build) | |
 
 ### `surfaces/task-view.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
@@ -157,6 +158,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | `WIN-GH-04` | Filters, sort, rail expand/collapse | P4 | verified | `component/windows/github.test.tsx` › WIN-GH-04 filters, sort and rail expand / collapse (session state) › chips filter, the empty state clears, … · green 2026-09-22 (preview build) |  |
 | `WIN-GH-05` | Drill-in/out page motion, reversible | P4 | verified | `e2e/windows-edge-github.spec.ts` › WIN-GH-05 back mid-transition lands cleanly · chromium-desktop, reduced-motion · `component/windows/github.test.tsx` › WIN-GH-05 drill-in / drill-out page motion › going back leaves an inert, id-free copy of the page to drill … · green 2026-09-22 (preview build) |  |
 | `WIN-GH-06` | Compact layout | P4 | verified | `e2e/windows-edge-github.spec.ts` › WIN-GH-06 N3 compact GitHub: hamburger overlay rail, one column, scrolling pivots · iphone, pixel · `component/windows/github.test.tsx` › WIN-GH-06 compact layout › the rail is a hamburger overlay (Esc closes it and focus returns), pages are one… · green 2026-09-22 (preview build) |  |
+| `WIN-GH-07` | Case study pivot (expanders + metric cards) + docs drill-in for deep dives | P8 | verified | `component/windows/github.test.tsx` › WIN-GH-07 the Case study pivot holds expanders and metric cards; a doc drills in and Back drills out to its row (axe clean) · a project without a case study has no Case study pivot · e2e WIN-GH-02 D1 green (pre-existing WIN-SET-02/03/04 failures unchanged) · green 2026-09-25 (production build) | |
 
 ### `apps/outlook.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |

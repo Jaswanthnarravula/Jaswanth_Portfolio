@@ -95,6 +95,9 @@ const GLYPH_OVERRIDES: Readonly<Partial<Record<`${OsId}.${string}`, GlyphId>>> =
   'linux.viewer': 'document',
 };
 
+/** Android palettes other than the default (sage), each with its own wallpaper (`wallpaper.android-{palette}`). */
+export const ANDROID_WALLPAPER_PALETTES = ['blue', 'violet', 'coral'] as const;
+
 const ICON_BOX: Readonly<Record<OsId, number>> = { macos: 128, windows: 64, ios: 180, android: 144, linux: 64 };
 
 const AVATAR_COLOURS: Readonly<Record<PersonaId, readonly [string, string]>> = {
@@ -222,6 +225,19 @@ function buildManifest(): readonly AssetEntry[] {
       original: { css: `var(--wallpaper-${os})` },
       alt: '',
     });
+    // Android: one genuine Pixel wallpaper per Material You palette; the palette's CSS gradient is the original.
+    if (os === 'android')
+      for (const palette of ANDROID_WALLPAPER_PALETTES)
+        entries.push({
+          id: assetId(`wallpaper.android-${palette}`),
+          kind: 'wallpaper',
+          os,
+          label: `android wallpaper (${palette})`,
+          box: { w: 16, h: 10 },
+          official: official(`wallpaper.android-${palette}`),
+          original: { css: 'var(--wallpaper-android)' },
+          alt: '',
+        });
     entries.push({
       id: assetId(`frame.${os}`),
       kind: 'device-frame',

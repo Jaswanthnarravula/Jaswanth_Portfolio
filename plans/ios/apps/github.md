@@ -49,9 +49,22 @@ horizontal scroll region is keyboard focusable with a label.
 Removed slug → Projects root + inline notice. Deep link to a project → stack is synthesized as [Projects, project] so
 the back chevron works. Very long README → collapses with "Show more".
 
+## Case study and deep dives (`shared/23-content-depth.md`)
+- A project with a `caseStudy` gets a fourth segment, **Case Study** (README | Case Study | Stack | About). Its body
+  is **grouped inset lists**: "The Problem" and "My Role" as text cells, "Key Decisions" as one cell per decision
+  (bold title, detail, secondary "Rejected: …"), "Results" as value/label rows (value in the trailing position).
+- Deep dives follow as a "Deep Dives" group of **disclosure rows** (title + summary, chevron). A row **pushes** a
+  document page onto the Projects tab's stack — large title = deep-dive title, the shared `DeepDiveArticle` below,
+  back chevron "‹ {project}" and edge-swipe back. The pushed page is session stack state (like `IOS-GH-02`'s stack),
+  not a new URL.
+- Motion: the standard push/pop (`ios/03-motion.md`); reduced motion cross-fades.
+- A11y: the segmented control stays a radiogroup; disclosure rows are links with "button" hint text; focus moves to
+  the pushed page's title and returns to the row on pop.
+
 ## Feature IDs + acceptance tests
 | ID | Feature | Acceptance test | Phase |
 |---|---|---|---|
+| `IOS-GH-07` | Case Study segment (grouped inset lists) + pushed deep-dive documents | `cmp: segment only when caseStudy exists; a deep-dive row pushes its document; pop returns focus` | P8 |
 | `IOS-GH-01` | Tab-bar app: Home, Projects, Profile with large titles | `e2e: I1 tabs keep independent stacks` | P5 |
 | `IOS-GH-02` | Pushed project detail with segmented README / Stack / About | `e2e: D1 /ios/github/{slug} synthesizes the stack` | P5 |
 | `IOS-GH-03` | Enrichment + scrollable heatmap with accessible alternative | `cmp: absent when snapshot empty; axe clean` | P5 |
@@ -62,3 +75,5 @@ the back chevron works. Very long README → collapses with "Show more".
 ## Not like the others
 **Bottom tab bar, large collapsing titles, push navigation with edge-swipe back, segmented control** (Android GitHub:
 Material top app bar, chips, bottom navigation with M3 indicators and **system Back**; desktops: sidebar/rail in a window).
+The case study is **grouped inset lists** and deep dives are **pushed pages with large titles** (macOS: in-place
+file view; Windows: expanders + drill-in; Android: full-screen reader).

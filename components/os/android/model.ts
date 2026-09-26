@@ -1,14 +1,34 @@
 import type { ContentRef } from '@/data/schema';
 import { getBinding } from '@/lib/kernel/registry';
+import type { SymbolName } from './symbols.generated';
 
 export const ANDROID_ROLES = ['files', 'browser', 'github', 'mail', 'notes', 'settings'] as const;
 export type AndroidRole = (typeof ANDROID_ROLES)[number];
 
 export type AndroidOverlay = 'drawer' | 'shade' | 'recents' | 'folder' | 'shortcuts' | 'wallpaper-menu' | 'switch-os';
 
-export const HOME_APPS: readonly AndroidRole[] = ['github', 'notes', 'settings'];
+/**
+ * Home grid, left to right: a pinned **Résumé** shortcut (Files → the PDF; rendered by the shell), these apps, then the
+ * "Career" folder. GitHub lives in the favourites row and the drawer (plans/android Deviations log 2026-09-24).
+ */
+export const HOME_APPS: readonly AndroidRole[] = ['notes', 'settings'];
 export const FAVORITES: readonly AndroidRole[] = ['files', 'browser', 'github', 'mail'];
-export const DRAWER_APPS: readonly AndroidRole[] = ['browser', 'files', 'mail', 'github', 'notes', 'settings'];
+/** The drawer's "All apps" grid, A–Z by label. */
+export const DRAWER_APPS: readonly AndroidRole[] = ['browser', 'files', 'github', 'mail', 'notes', 'settings'];
+
+/**
+ * How each official icon sits on the circular adaptive plate (AND-ID-05): `bleed` — full-bleed artwork cropped to the
+ * circle; `inset` — transparent artwork on a white plate; `foreground` — an adaptive-icon foreground layer on the
+ * dynamic primary colour.
+ */
+export const ICON_PLATE: Readonly<Record<AndroidRole, 'bleed' | 'inset' | 'foreground'>> = {
+  browser: 'bleed',
+  files: 'bleed',
+  github: 'bleed',
+  mail: 'bleed',
+  notes: 'inset',
+  settings: 'foreground',
+};
 
 export const androidBinding = (role: AndroidRole) => {
   const binding = getBinding('android', role);
@@ -27,10 +47,11 @@ export const ROLE_LABEL: Readonly<Record<AndroidRole, string>> = {
   settings: 'Settings',
 };
 
-export const ROLE_GLYPH: Readonly<Record<AndroidRole, string>> = {
+/** Themed icons (Settings → Wallpaper & style): each app's monochrome glyph on the primary container. */
+export const ROLE_GLYPH: Readonly<Record<AndroidRole, SymbolName>> = {
   browser: 'language',
   files: 'folder',
-  github: 'account_tree',
+  github: 'code',
   mail: 'mail',
   notes: 'lightbulb',
   settings: 'settings',

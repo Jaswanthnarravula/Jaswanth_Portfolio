@@ -459,6 +459,30 @@ export const ASSET_SOURCES = [
     label: 'iPhone 16 wallpaper (Ultramarine)',
   },
 
+  // Android wallpapers: genuine Pixel 6 artwork, one per Material You palette (plans/android/01 "Wallpaper"; owner
+  // decision 2026-09-24). `wallpaper.android` is the default (sage) palette.
+  ...[
+    [
+      'wallpaper.android',
+      'android-pixel6-la-mer.jpg',
+      'Pixel 6 wallpaper "La Mer"',
+      'Pixel-6-landscapes/8-La-Mer.jpeg',
+    ],
+    ['wallpaper.android-blue', 'android-pixel6-art-4.png', 'Pixel 6 wallpaper (art 4)', 'Pixel-6-art/4.png'],
+    ['wallpaper.android-violet', 'android-pixel6-art-13.png', 'Pixel 6 wallpaper (art 13)', 'Pixel-6-art/13.png'],
+    ['wallpaper.android-coral', 'android-pixel6-art-9.png', 'Pixel 6 wallpaper (art 9)', 'Pixel-6-art/9.png'],
+  ].map(([id, file, label, path]) => ({
+    id,
+    file: `wallpapers/${file}`,
+    kind: 'wallpaper',
+    owner: 'Google LLC',
+    terms:
+      'Artwork of Google LLC (a Pixel 6 wallpaper); used referentially to recreate the Pixel launcher. No affiliation.',
+    sourceUrl: `https://github.com/wacko1805/Pixel-Wallpapers/blob/main/${path}`,
+    retrieved: '2026-09-24',
+    label,
+  })),
+
   // Intro sound (fetched on idle, decoded on the Hello tap)
   {
     id: 'audio.intro',

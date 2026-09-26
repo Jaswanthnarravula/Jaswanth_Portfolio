@@ -5,38 +5,57 @@ Source of truth for each row is the ledger named in the first column.
 
 **Current phase:** P7 Linux implementation and automated acceptance gate complete: all 89 P7 rows are verified.
 The release-wide P8 manual/polish gate remains open (details below).
+**In progress (P8, owner-approved 2026-09-25): content depth** — `shared/23-content-depth.md`, 19 IDs (`DATA-COPY-01`,
+`CONTENT-*` ×8, and per OS a GitHub case-study/deep-dive ID + a "Now" surface ID). Order: data + shared views →
+Linux → macOS → Windows → iOS → Android, pausing after Linux for the owner's look review. `check-plans`: 149
+documents · 949 IDs · 949 ledger rows. **Done 2026-09-25:** data + shared views (9 shared IDs verified) and Linux
+(`LNX-FS-08`, `LNX-BOOT-08` verified); also fixed the shared terminal's column count (it assumed 16 px padding, so
+wrapped text overflowed by one character on Linux). Owner said "continue" after the Linux review. **macOS done 2026-09-25** (`MAC-GH-08`, `MAC-NOTIF-07`
+verified; the GitHub detail no longer overlaps its tabs in narrow windows). **Windows done 2026-09-25** (`WIN-GH-07`,
+`WIN-START-09` verified). **iOS done 2026-09-25** (`IOS-GH-07`, `IOS-WIDG-05` verified). **Android done 2026-09-25** (`AND-GH-07`,
+`AND-KEEP-07` verified). **All 19 content-depth IDs verified**; paused for the owner's review.
 **Previous:** P3 macOS (+ terminal engine core) built — 163 verified · 38 built · 1 BLOCKED; paused for the owner's
 P3 gate review (details below). P0 and P2 gates passed on automated evidence; owner reviews pending. P4 Windows 11 built
 (120 of 152 P4 rows verified; details below), paused for the owner's P4 review.
-**Last updated:** 2026-09-23
+**Last updated:** 2026-09-25
+
+**P6 Android — Pixel rework (2026-09-24, owner: "only android os needs rework").** Approved from a now-vs-proposed
+board and logged in `plans/android/08-acceptance.md` Deviations: genuine Pixel 6 wallpapers (one per palette, official
+overlay) with a build-time Material You palette (`scripts/build-android-palette.mjs`), Google Sans Flex (Android chunk
+only), real Material Symbols (`scripts/build-android-symbols.mjs`) instead of text stand-ins, circular adaptive icons,
+the Pixel-launcher phone Home (search bar at the bottom, pinned Résumé shortcut) and a fix for the phone favourites row
+covering open apps. Evidence: Android e2e 34 passed / 14 skipped by design (chromium-desktop · pixel · iphone ·
+reduced-motion, production build); perf font check 7/7; résumé 2/2; Vitest 1666 passed, 3 failed — the two open
+`ARCH-REL-01` codec tests and the `rendering.test.tsx` case that still expects Android's old preview stub (both predate
+this change).
 
 ## Feature IDs by ledger and phase
 
 | Ledger | P0 | P1 | P2 | P3 | P4 | P5 | P6 | P7 | P8 | Total |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `06-onboarding-acceptance.md` (Hello · Netflix · chooser) | – | 32 | 4 | – | – | – | – | – | – | **36** |
-| `shared/22-acceptance.md` | 103 | 19 | 21 | 23 | 5 | 3 | – | 14 | 6 | **194** |
-| `macos/08-acceptance.md` | – | – | 25 | 129 | 2 | – | – | – | 1 | **157** |
-| `windows/08-acceptance.md` | – | – | – | – | 145 | – | – | – | 1 | **146** |
-| `ios/08-acceptance.md` | – | – | – | – | – | 137 | – | – | 1 | **138** |
-| `android/08-acceptance.md` | – | – | – | – | – | – | 132 | – | 1 | **133** |
-| `linux/13-acceptance.md` | – | – | – | 50 | – | – | – | 75 | 1 | **126** |
-| **Per phase** | **103** | **51** | **50** | **202** | **152** | **140** | **132** | **89** | **11** | **930** |
+| `shared/22-acceptance.md` | 103 | 19 | 21 | 23 | 5 | 3 | – | 14 | 15 | **203** |
+| `macos/08-acceptance.md` | – | – | 25 | 129 | 2 | – | – | – | 3 | **159** |
+| `windows/08-acceptance.md` | – | – | – | – | 145 | – | – | – | 3 | **148** |
+| `ios/08-acceptance.md` | – | – | – | – | – | 137 | – | – | 3 | **140** |
+| `android/08-acceptance.md` | – | – | – | – | – | – | 132 | – | 3 | **135** |
+| `linux/13-acceptance.md` | – | – | – | 50 | – | – | – | 75 | 3 | **128** |
+| **Per phase** | **103** | **51** | **50** | **202** | **152** | **140** | **132** | **89** | **30** | **949** |
 
 ## Progress
 
 | Phase | In scope | planned | built | verified | BLOCKED | Gate passed | Owner sign-off |
 |---|---|---|---|---|---|---|---|
 | P0 Foundation | 103 | 0 | 1 | 102 | 0 | ☑ 2026-09-21 | pending review |
-| P1 Welcome | 51 | 43 | 8 | 0 | 0 | ☐ | |
+| P1 Welcome | 51 | 42 | 9 | 0 | 0 | ☐ | |
 | P2 Vertical slice | 50 | 0 | 0 | 50 | 0 | ☑ 2026-09-22 (automated evidence) | pending review |
 | P3 macOS (+ engine core) | 202 | 0 | 38 | 163 | 1 | ☐ (awaiting review) | pending review |
 | P4 Windows 11 | 152 | 2 | 30 | 120 | 0 | ☐ (automated evidence recorded; see below) | pending review |
 | P5 iOS | 140 | 0 | 0 | 140 | 0 | ☐ (automated evidence recorded; see below) | pending review |
-| P6 Android | 132 | 0 | 81 | 51 | 0 | ☐ (focused automated evidence recorded; see below) | pending review |
+| P6 Android | 132 | 0 | 80 | 52 | 0 | ☐ (focused automated evidence recorded; see below) | pending review |
 | P7 Linux | 89 | 0 | 0 | 89 | 0 | ☑ 2026-09-23 (automated evidence) | pending review |
-| P8 Polish | 11 | 11 | 0 | 0 | 0 | ☐ | |
-| **Total** | **930** | **56** | **158** | **715** | **1** | | |
+| P8 Polish (+ content depth, 19) | 30 | 11 | 0 | 19 | 0 | ☐ | |
+| **Total** | **949** | **55** | **158** | **735** | **1** | | |
 
 ### P0 gate evidence (2026-09-21, local runs on production builds)
 | Gate item (`05-roadmap.md`) | Result |
@@ -220,20 +239,20 @@ touch accessory keys, visual-viewport handling, focus restoration, reduced-motio
 | Area | Files | Status |
 |---|---|---|
 | Root (index, north star, trace, Hello, Netflix, chooser, roadmap, onboarding ledger, status) | 9 | complete |
-| `shared/` contracts + ledger | 22 | complete |
+| `shared/` contracts + ledger | 23 | complete (23 added 2026-09-25) |
 | `macos/` | 26 | complete |
 | `windows/` | 25 | complete |
 | `ios/` | 27 | complete |
 | `android/` | 25 | complete |
 | `linux/` | 14 | complete |
-| **Total in `plans/`** | **148** | **reviewed; implementation authorized 2026-09-21** |
+| **Total in `plans/`** | **149** | **reviewed; implementation authorized 2026-09-21** |
 | `CLAUDE.md` (repo root) | 1 | complete |
 
 ## Inputs with working defaults (nothing blocks on these)
 
 | Input | Default until provided | How to provide |
 |---|---|---|
-| Résumé | **Provided 2026-09-23:** the owner's `Resume.pdf` (repository root) is what every Open, preview and Download serves — published byte for byte, shown as its page images + its own text in every OS viewer. `data/portfolio.ts` still marks facts `placeholder: true` (experience start dates, the IBM role and dates), so the guard blocks a production deploy until they are filled | Replace `Resume.pdf` and run `npm run build:resume` (also runs in `prebuild`); fill the remaining placeholders in `data/portfolio.ts` from the PDF |
+| Résumé | **Provided 2026-09-23; facts filled 2026-09-24:** the owner's `Resume.pdf` (repository root) is what every Open, preview and Download serves — published byte for byte, shown as its page images + its own text in every OS viewer. Every fact `data/portfolio.ts` held as `placeholder: true` (Xclusive and IBM dates, locations, the IBM role) now comes from the PDF; the AICTE internship, the fuller résumé bullets and a Distributed systems skill group were added, and Price Intelligence is labelled an academic project as the PDF states. The guard passes | Replace `Resume.pdf` and run `npm run build:resume` (also runs in `prebuild`); re-sync `data/portfolio.ts` by hand-review |
 | Official icons / Netflix sound + avatars | 37 official files ingested; the green profile avatar is a hue-shifted copy of the blue one until the real file arrives; original artwork renders in `ASSET_MODE=original` | Drop files in `assets-inbox/`, then `npm run assets:ingest` |
 | GitHub username (+ optional token) | `Jaswanthnarravula`; committed snapshot (2 public repos) is used if a build-time fetch fails | Optional `GITHUB_TOKEN` in Vercel |
 | Vercel plan | Page views + Speed Insights | Custom events switch on automatically if supported |
@@ -245,7 +264,7 @@ touch accessory keys, visual-viewport handling, focus restoration, reduced-motio
 | Every released ID `verified` | ☐ | |
 | PR gates + nightly green | ☐ | |
 | Lighthouse targets on `/` + one deep link per released OS | ☐ | |
-| Placeholder guard passes | ☐ | |
+| Placeholder guard passes | ☑ | 2026-09-24 · `CHECK_CONTENT=1 scripts/check-content.mjs` → "no placeholders — content is production-ready"; unit `DATA-GUARD-01` (fixture exits 1, real data exits 0) |
 | Journey suite green in both asset modes | ☐ | |
 | Manual device + screen-reader script signed | ☐ | |
 | OG cards validated | ☐ | |

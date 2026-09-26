@@ -7,7 +7,9 @@ The hub: pinned apps, recommended items (real portfolio shortcuts), the user til
 - **Pinned** (grid 6 × 3): every Windows app + shortcuts *Résumé*, *Projects*, *Experience*, *Contact* (open the
   owning app at that section).
 - **Recommended** (2 columns × 3): generated from data — "Résumé.pdf · Updated {date}", the three featured projects
-  ("Recently added"), the current role ("Most used"), "Say hello".
+  ("Recently added"), the current role ("Most used"), "Say hello". The first Recommended slot is **"Now"**
+  (`WIN-START-09`, `shared/23`): Edge icon (it opens in Edge), title "Now — {first sentence of person.now.text}", caption "Updated
+  {now.updated}"; it opens Edge at About. The grid stays 2 × 3, so the last generated item drops off.
 - **User tile:** initials avatar + "Jaswanth" → flyout: About me (Edge) · Settings · **Switch operating system** · Lock.
 
 ## Anatomy
@@ -60,6 +62,7 @@ Recommended item whose content was removed → omitted. Very short viewport → 
 | `WIN-START-06` | Open/close motion (250 / 167 ms), window opens from the tile rect | `e2e: R1 variant fades only` | P4 |
 | `WIN-START-07` | Compact full-height sheet, modal, Back closes | `e2e: N3 Start sheet + Back` | P4 |
 | `WIN-START-08` | Dialog semantics, 2-D roving grid, focus rules | `cmp: grid roving; e2e: X1 with Start open` | P4 |
+| `WIN-START-09` | "Now" as the first Recommended item, opens Edge About | `unit: recommended list starts with Now when person.now exists; cmp: item opens Edge` | P8 |
 
 ## Not like the others
 A **centred Acrylic panel that rises from the taskbar** with Pinned/Recommended and a power footer (macOS has no

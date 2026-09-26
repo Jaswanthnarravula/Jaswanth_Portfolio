@@ -1,6 +1,6 @@
 # shared/22 — Acceptance ledger (shared contracts)
 
-Every feature ID defined in `shared/01`–`21` appears **exactly once** here. The feature description and its named
+Every feature ID defined in `shared/01`–`21` and `shared/23` appears **exactly once** here. The feature description and its named
 acceptance test live in the spec file; this ledger tracks delivery.
 
 Status: `planned` → `built` → `verified` (or `BLOCKED` + reason + owner sign-off). **Evidence** = the passing test
@@ -33,6 +33,7 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `DATA-GUARD-01` | P0 | verified | `unit/scripts/scripts.test.ts` › DATA-GUARD-01 placeholder guard blocks production · vitest 587/587 (2026-09-21) |  |
 | `DATA-EMPTY-01` | P0 | verified | `unit/content/views.test.ts` › DATA-EMPTY-01 · `unit/data/data.test.ts` › DATA-EMPTY-01 (selectors) · vitest 587/587 (2026-09-21) |  |
 | `DATA-RESUME-01` | P0 | verified | `e2e/foundation.spec.ts` › the résumé PDF is served with the right type · `unit/scripts/scripts.test.ts` › DATA-RESUME-01 (ingestion) the owner file is Resume.pdf at the repository root · the published résumé is the owner file, byte for byte, with one image set per page + (freshness) build-resume --check · `e2e/resume.spec.ts` › the résumé page shows the real pages and downloads the exact file (the saved download equals Resume.pdf) · chromium-desktop, iphone, pixel, webkit-desktop, firefox-desktop green 2026-09-23 (preview build .next-resume) | see log (2026-09-23) |
+| `DATA-COPY-01` | P8 | verified | `unit/data/content-depth.test.ts` › DATA-COPY-01 owner-approved copy (headline, Java first, before → after numbers, project contexts, no placeholder) · green 2026-09-25 (vitest; no-js on the production build) |  |
 
 ### 03 Content views
 | ID | Phase | Status | Evidence | Deviation |
@@ -285,6 +286,18 @@ name / CI run / capture. **Phase** = where the ID is first delivered and gated; 
 | `EGG-LAZY-01` | P3 | built | egg effects load on trigger (dynamic imports); the "egg chunks absent from first load" perf check is pending |  |
 | `EGG-SAFE-01` | P7 | verified | unit/terminal/commands.test.ts safe non-destructive egg cases green 2026-09-23 | |
 | `EGG-COUNT-01` | P3 | verified | `unit/macos/tour-eggs.test.ts` › EGG-COUNT-01 an egg counts once; n / N per OS · `e2e/macos-p3b.spec.ts` › MAC-X-04 · EGG-COUNT-01 terminal eggs and About This Mac count once each in Settings → General · green locally 2026-09-22 (preview build .next-p3; chromium-desktop · reduced-motion · pixel · iphone) |  |
+
+### 23 Content depth
+| ID | Phase | Status | Evidence | Deviation |
+|---|---|---|---|---|
+| `CONTENT-GLANCE-01` | P8 | verified | `component/content/content-depth.test.tsx` › CONTENT-GLANCE-01 recruiter card (dl rows; never work authorization; about text at 80/40) · `e2e/no-js.spec.ts` › CONTENT-GLANCE-01 /go/about carries the recruiter card and the Now note · green 2026-09-25 (vitest; no-js on the production build) |  |
+| `CONTENT-NOW-01` | P8 | verified | `unit/data/content-depth.test.ts` › CONTENT-INV-01 the Now note and recruiter card are present, dated · `component/content/content-depth.test.tsx` › CONTENT-NOW-01 About shows the Now note with its date; the text form prints it · green 2026-09-25 (vitest; no-js on the production build) |  |
+| `CONTENT-SCOPE-01` | P8 | verified | `component/content/content-depth.test.tsx` › CONTENT-SCOPE-01 role scope in the header; text within 80/40 · green 2026-09-25 (vitest; no-js on the production build) |  |
+| `CONTENT-CASE-01` | P8 | verified | `component/content/content-depth.test.tsx` › CONTENT-CASE-01 four parts in order; nothing without a case study; ProjectDetail only with depth; ContentFor depth; text within width · `e2e/no-js.spec.ts` › CONTENT-CASE-01 · CONTENT-DIVE-01 /go/projects/{slug} · green 2026-09-25 (vitest; no-js on the production build) |  |
+| `CONTENT-DIVE-01` | P8 | verified | `component/content/content-depth.test.tsx` › CONTENT-DIVE-01 steps as an ordered list; text numbered within width · `unit/data/content-depth.test.ts` › deep-dive slugs unique · `e2e/no-js.spec.ts` › /go/projects/{slug} deep dives · green 2026-09-25 (vitest; no-js on the production build) |  |
+| `CONTENT-CRED-01` | P8 | verified | `unit/data/content-depth.test.ts` › CONTENT-CRED-01 every credential has a kind; a course never reads "certification" · `component/content/content-depth.test.tsx` › CONTENT-CRED-01 rendered (Verify link rel) · green 2026-09-25 (vitest; no-js on the production build) |  |
+| `CONTENT-SKILL-01` | P8 | verified | `unit/data/content-depth.test.ts` › CONTENT-SKILL-01 years only where given; removed skills gone; format · `component/content/content-depth.test.tsx` › skill years read "1.5+ yrs" / "~1 yr" · green 2026-09-25 (vitest; no-js on the production build) |  |
+| `CONTENT-INV-01` | P8 | verified | `unit/data/content-depth.test.ts` › CONTENT-INV-01 content-depth invariants (four parts, unique dive slugs, metrics consistent, withheld facts absent, scope present) · green 2026-09-25 (vitest; no-js on the production build) |  |
 
 ## Definition of done — shared contracts
 - [ ] Every ID above is `verified` with evidence, or `BLOCKED` with owner sign-off.

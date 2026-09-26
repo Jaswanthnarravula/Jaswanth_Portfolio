@@ -213,6 +213,6 @@ test('titles are unique per route and match the shared title function', async ({
     expect(titles.has(title), title).toBe(false);
     titles.add(title);
   }
-  expect(titles).toContain('IBM · Finder · macOS — Jaswanth');
+  expect(titles).toContain('Software Engineer · IBM · Finder · macOS — Jaswanth');
   expect(titles).toContain('~/projects · Terminal · Linux — Jaswanth');
 });

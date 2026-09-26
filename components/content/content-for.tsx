@@ -20,6 +20,8 @@ export interface ContentForProps {
   readonly headingLevel?: HeadingLevel;
   /** Show the résumé's pages (the published PDF) under the Open/Download actions. */
   readonly resumePages?: boolean;
+  /** Project pages: append the case study and deep dives (shared/23) — reader pages only. */
+  readonly depth?: boolean;
 }
 
 /**
@@ -28,7 +30,14 @@ export interface ContentForProps {
  */
 const sub = (level: HeadingLevel): HeadingLevel => Math.min(level + 1, 4) as HeadingLevel;
 
-export function ContentFor({ target, density, slots, headingLevel = 2, resumePages = true }: ContentForProps) {
+export function ContentFor({
+  target,
+  density,
+  slots,
+  headingLevel = 2,
+  resumePages = true,
+  depth = false,
+}: ContentForProps) {
   const content = resolveContent(target);
   const common = { density, slots, headingLevel };
   switch (content.section) {
@@ -37,7 +46,7 @@ export function ContentFor({ target, density, slots, headingLevel = 2, resumePag
     case 'projects':
       return <ProjectList data={content.projects} {...common} />;
     case 'project':
-      return <ProjectDetail data={content} {...common} />;
+      return <ProjectDetail data={{ ...content, depth }} {...common} />;
     case 'experience':
       return <ExperienceList data={content.roles} {...common} />;
     case 'role':
@@ -78,7 +87,7 @@ export function ContentFor({ target, density, slots, headingLevel = 2, resumePag
 /** The text view + data for a ref (terminal output, screen-reader summaries). */
 export function viewDataFor(
   target: ContentRef,
-): { [K in ViewId]: { view: K; data: TextViewData[K] } }[Exclude<ViewId, 'legal'>] {
+): { [K in ViewId]: { view: K; data: TextViewData[K] } }[Exclude<ViewId, 'legal' | 'deep-dive'>] {
   const content = resolveContent(target);
   switch (content.section) {
     case 'about':

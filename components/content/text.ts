@@ -2,14 +2,14 @@
  * `renderText` — shared/03 `VIEW-TEXT-01`. Every view has a width-aware text form: the Linux filesystem, terminal
  * output and screen-reader summaries all come from here, so they state exactly the facts the GUI apps show.
  */
-import type { Contact, Experience, Education, Project, SkillGroup } from '@/data/schema';
-import type { AboutData } from './about';
+import type { Contact, DeepDive, Experience, Education, Project, SkillGroup } from '@/data/schema';
+import { glanceRows, nowUpdated, type AboutData } from './about';
 import type { ContactData } from './contact';
 import type { EducationData } from './experience';
 import type { LegalData } from './legal';
 import type { ProjectDetailData } from './projects';
 import type { ResumeData } from './resume';
-import { bullet, formatPeriod, resumeFileLabel, rule, wrap } from './format';
+import { bullet, formatCredential, formatPeriod, resumeFileLabel, rule, wrap } from './format';
 
 export type ViewId =
   | 'about'
@@ -22,7 +22,8 @@ export type ViewId =
   | 'skills'
   | 'resume'
   | 'contact'
-  | 'legal';
+  | 'legal'
+  | 'deep-dive';
 
 export interface TextViewData {
   readonly about: AboutData;
@@ -36,6 +37,7 @@ export interface TextViewData {
   readonly resume: ResumeData;
   readonly contact: ContactData;
   readonly legal: LegalData;
+  readonly 'deep-dive': DeepDive;
 }
 
 const blank = '';
@@ -45,13 +47,17 @@ function about({ person, featured, current }: AboutData, width: number): string[
   const lines = [
     person.name,
     ...wrap(person.headline, width),
-    wrap(`${current?.role ? `${current.role} at ${current.company}` : person.role} · ${person.location}`, width).join(
-      ' ',
-    ),
+    ...wrap(`${current?.role ? `${current.role} at ${current.company}` : person.role} · ${person.location}`, width),
     blank,
   ];
+  if (person.glance) {
+    lines.push(...heading('At a glance', width));
+    for (const [label, value] of glanceRows(person.glance)) lines.push(...wrap(`${label}: ${value}`, width, ''));
+    lines.push(blank);
+  }
   for (const paragraph of person.summary) lines.push(...wrap(paragraph, width), blank);
   lines.push(...wrap(person.openTo, width));
+  if (person.now) lines.push(blank, ...wrap(`Now: ${person.now.text} (${nowUpdated(person)})`, width));
   if (featured.length) {
     lines.push(blank, ...heading('Selected work', width));
     for (const project of featured) lines.push(...bullet(`${project.name} — ${project.tagline}`, width));
@@ -73,6 +79,11 @@ function projectDetail({ project, github }: ProjectDetailData, width: number): s
   for (const paragraph of project.description) lines.push(...wrap(paragraph, width), blank);
   lines.push(...heading('Highlights', width));
   for (const item of project.highlights) lines.push(...bullet(item, width));
+  lines.push(...caseStudyText(project, width));
+  if (project.deepDives?.length) {
+    lines.push(blank, ...heading('Deep dives', width));
+    for (const dive of project.deepDives) lines.push(...bullet(`${dive.title} — ${dive.summary}`, width));
+  }
   lines.push(blank, ...heading('Stack', width), ...wrap(project.stack.join(', '), width));
   if (github)
     lines.push(blank, ...wrap(`GitHub: ${github.stars} ★${github.language ? ` · ${github.language}` : ''}`, width));
@@ -80,6 +91,34 @@ function projectDetail({ project, github }: ProjectDetailData, width: number): s
   if (project.live) lines.push(...wrap(`Live: ${project.live}`, width));
   if (project.closedSource && !project.repo)
     lines.push(blank, ...wrap('Built in production; source is proprietary.', width));
+  return lines;
+}
+
+/** shared/23 `CONTENT-CASE-01` in text: THE PROBLEM → MY ROLE → KEY DECISIONS → RESULTS (empty without a case study). */
+function caseStudyText(project: Project, width: number): string[] {
+  const study = project.caseStudy;
+  if (!study) return [];
+  const lines: string[] = [blank, ...heading('The problem', width)];
+  study.problem.forEach((paragraph, index) => lines.push(...(index ? [blank] : []), ...wrap(paragraph, width)));
+  lines.push(blank, ...heading('My role', width), ...wrap(study.role, width));
+  lines.push(blank, ...heading('Key decisions', width));
+  study.decisions.forEach((decision, index) => {
+    lines.push(...bullet(`${decision.title} ${decision.detail}`, width, `${index + 1}.`));
+    if (decision.rejected) lines.push(...wrap(`Rejected: ${decision.rejected}`, width, '   '));
+  });
+  lines.push(blank, ...heading('Results', width));
+  for (const metric of study.results) lines.push(...bullet(`${metric.value} — ${metric.label}`, width));
+  return lines;
+}
+
+/** shared/23 `CONTENT-DIVE-01` in text: title, summary, paragraphs and numbered steps. */
+function deepDive(dive: DeepDive, width: number): string[] {
+  const lines = [...wrap(dive.title, width), rule(Math.min(width, dive.title.length)), ...wrap(dive.summary, width)];
+  for (const block of dive.blocks) {
+    lines.push(blank);
+    if (block.kind === 'p') lines.push(...wrap(block.text, width));
+    else block.items.forEach((item, index) => lines.push(...bullet(item, width, `${index + 1}.`)));
+  }
   return lines;
 }
 
@@ -104,6 +143,7 @@ function experienceDetail(role: Experience, width: number): string[] {
   const lines = [...wrap(roleTitle(role) + (role.client ? ` (client: ${role.client})` : ''), width)];
   if (meta) lines.push(meta);
   lines.push(blank, ...wrap(role.summary, width), blank);
+  if (role.scope) lines.push(...wrap(`Scope: ${role.scope}`, width), blank);
   for (const item of role.highlights) lines.push(...bullet(item, width));
   lines.push(blank, ...wrap(`Stack: ${role.stack.join(', ')}`, width));
   return lines;
@@ -122,7 +162,8 @@ function educationList({ schools, credentials }: EducationData, width: number): 
   });
   if (credentials.length) {
     lines.push(blank, ...heading('Credentials', width));
-    for (const credential of credentials) lines.push(...bullet(`${credential.name} — ${credential.issuer}`, width));
+    for (const credential of credentials)
+      lines.push(...bullet(`${credential.name} — ${credential.issuer} · ${formatCredential(credential)}`, width));
   }
   return lines;
 }
@@ -200,6 +241,7 @@ const RENDERERS: { readonly [K in ViewId]: (data: TextViewData[K], width: number
   resume,
   contact: contactView,
   legal,
+  'deep-dive': deepDive,
 };
 
 export function renderText<K extends ViewId>(view: K, data: TextViewData[K], width: number): readonly string[] {

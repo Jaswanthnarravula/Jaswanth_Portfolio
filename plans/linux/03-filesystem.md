@@ -21,8 +21,11 @@ mobile Files apps. Requirements: R8, R29, R44. Nothing here is hand-typed career
 │     │  └─ {slug}.md                renderText(ExperienceDetail) one per role
 │     ├─ education/
 │     │  └─ {slug}.md                one per school
+│     ├─ notes/                      deep dives (shared/23) — LNX-FS-08
+│     │  ├─ README.md                index: {slug}.md — title (project)
+│     │  └─ {slug}.md                renderText(deep-dive) one per deep dive; no ContentRef → `open` pages it in `less`
 │     ├─ .bashrc                     the alias table (real: it is what the engine loads)
-│     ├─ .plan                       person.openTo (finger-style)
+│     ├─ .plan                       person.now (finger-style "what I'm working on") + person.openTo — LNX-FS-08
 │     └─ .ssh/                       directory, mode 700 → "Permission denied" for everyone (dry humour)
 ├─ etc/
 │  ├─ motd                           the message of the day (08-boot-and-motd.md)
@@ -74,6 +77,7 @@ limit), with the MOTD recommending `less`. Unicode names display correctly and s
 | `LNX-FS-05` | `.bashrc` is the real alias source; `/usr/bin` mirrors the command table | `unit: alias table parsed from .bashrc; which/ls /usr/bin agree with the registry` | P3 |
 | `LNX-FS-06` | cwd ↔ URL mapping; unique extension-less sibling names | `unit: codec round-trip; build fails on collision` | P3 |
 | `LNX-FS-07` | Permission-denied and read-only behaviours | `unit: cd .ssh → EACCES; touch x → Read-only file system` | P3 |
+| `LNX-FS-08` | Content depth in the tree: case-study sections in `projects/{slug}.md`, scope in `experience/{slug}.md`, `~/notes/` deep dives, `.plan` = Now | `unit: VFS tree lists notes/{slug}.md per deep dive; project file prints THE PROBLEM … RESULTS within width; .plan starts with the Now text` | P8 |
 
 ## Not like the others
 The other OSes *present* the virtual tree through file-manager UIs; here the tree **is the interface**, with truthful

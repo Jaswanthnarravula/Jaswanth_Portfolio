@@ -149,7 +149,7 @@ test('WIN-EXP-02 D1 /windows/explorer/experience/{slug} opens only File Explorer
   // The file opens as its document in the tab: the role from data, headings from h3.
   const document = documentView(page, file);
   await expect(document).toBeVisible();
-  await expect(document.getByRole('heading', { level: 3 }).first()).toHaveText(role.role ?? role.company);
+  await expect(document.getByRole('heading', { level: 3 }).first()).toHaveText(role.role);
   await expect(document).toContainText(role.summary);
   if (!isCompact(info)) await expect(address(page).getByRole('link')).toHaveText(['Home', EXPERIENCE, file]);
 
@@ -337,7 +337,7 @@ test('WIN-EXP-08 N3 compact drill-down: places first, a folder with a back arrow
   await expect(page).toHaveURL(new RegExp(`/windows/explorer/experience/${escape(role.slug)}$`));
   const document = documentView(page, docx(role.company));
   await expect(document).toBeVisible();
-  await expect(document.getByRole('heading', { level: 3 }).first()).toHaveText(role.role ?? role.company);
+  await expect(document.getByRole('heading', { level: 3 }).first()).toHaveText(role.role);
   expect((await document.boundingBox())!.width).toBeCloseTo(width, 0);
 
   // Back up the levels: the title-row arrow, then the browser's Back — one history.

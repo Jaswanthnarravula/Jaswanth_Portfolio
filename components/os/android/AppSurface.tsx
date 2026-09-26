@@ -1,8 +1,8 @@
 'use client';
 import { useEffect, useLayoutEffect, useRef, useState, type ComponentType } from 'react';
-import { AssetIcon } from '@/components/ui/AssetIcon';
 import { focusKeys, type WindowId } from '@/lib/kernel/types';
-import { androidBinding, androidIcon, type AndroidRole } from './model';
+import { androidBinding, type AndroidRole } from './model';
+import { AdaptiveIcon } from './ui';
 import { loadApp, loadedApp } from './apps/registry';
 import type { AndroidAppProps } from './apps/types';
 import styles from './android.module.css';
@@ -64,7 +64,7 @@ export function AppSurface({
         {title}
       </h2>
       <div className={styles.launchSplash} aria-hidden="true">
-        <AssetIcon id={androidIcon(role)} size={112} />
+        <AdaptiveIcon app={role} />
       </div>
       <div className={styles.appBody}>
         {failed ? (

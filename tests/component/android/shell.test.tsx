@@ -77,8 +77,33 @@ describe('AND-HOME-01/05 and AND-BARS-01/02', () => {
       'href',
       '/android/files/resume',
     );
+    expect(within(favorites).getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', '/android/github');
     const home = screen.getByRole('region', { name: 'Home screen' });
-    expect(within(home).getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', '/android/github');
+    // The pinned Résumé shortcut leads the Home grid (Pixel rework, 08 Deviations log 2026-09-24).
+    expect(within(home).getByRole('link', { name: 'Résumé' })).toHaveAttribute('href', '/android/files/resume');
+    expect(within(home).getByRole('link', { name: 'Keep' })).toHaveAttribute('href', '/android/keep');
+  });
+  it('AND-ID-05 every launcher icon sits on the one circular adaptive plate; themed icons swap in the glyph', () => {
+    const { container } = shell();
+    const plates = [...container.querySelectorAll('[data-plate]')];
+    expect(plates.length).toBeGreaterThanOrEqual(10);
+    for (const plate of plates) expect(['bleed', 'inset', 'foreground']).toContain(plate.getAttribute('data-plate'));
+    act(() => prefsStore.getState().patch({ androidThemedIcons: true }));
+    expect(container.querySelector('[data-android-layout]')).toHaveAttribute('data-themed-icons');
+    expect(container.querySelectorAll('[data-symbol="lightbulb"]').length).toBeGreaterThan(0);
+  });
+  it('AND-ID-04 · the Pixel wallpaper and Google Sans Flex come with the shell, glyphs are real Material Symbols', () => {
+    const { container } = shell();
+    const root = container.querySelector('[data-android-layout]') as HTMLElement;
+    expect(root.style.getPropertyValue('--android-wallpaper-official')).toMatch(
+      /^url\("\/assets\/official\/wallpaper\.android\.[0-9a-f]{10}\.avif"\)$/,
+    );
+    expect([...document.querySelectorAll('style')].some((node) => node.textContent?.includes('Google Sans Flex'))).toBe(
+      true,
+    );
+    const status = screen.getByRole('button', { name: 'Notifications and quick settings' });
+    expect(status.querySelectorAll('svg[data-symbol]').length).toBeGreaterThanOrEqual(2);
+    expect(status.textContent).not.toMatch(/[▾◢█]/);
   });
 });
 
@@ -114,11 +139,26 @@ describe('AND-DRAWER and AND-SHADE', () => {
   });
 });
 
+describe('AND-FAV phone favourites belong to Home', () => {
+  it('on a phone the favourites row is part of the Home screen, so it is inert under an open app', async () => {
+    boot(412, 915, 'coarse');
+    shell();
+    const home = screen.getByRole('region', { name: 'Home screen' });
+    const favorites = screen.getByRole('navigation', { name: 'Favorites' });
+    expect(home.contains(favorites)).toBe(true);
+    fireEvent.click(within(favorites).getByRole('link', { name: 'Gmail' }));
+    await settle();
+    expect(getKernel().sessions.android.focused).toBe('android:mail');
+    expect(home).toHaveAttribute('inert');
+    boot();
+  });
+});
+
 describe('AND-LIFE and AND-RECENTS', () => {
   it('opens an app once, Home preserves its instance, and Recents can close it', async () => {
     shell();
-    const home = screen.getByRole('region', { name: 'Home screen' });
-    fireEvent.click(within(home).getByRole('link', { name: 'GitHub' }));
+    const favorites = screen.getByRole('navigation', { name: 'Favorites' });
+    fireEvent.click(within(favorites).getByRole('link', { name: 'GitHub' }));
     await settle();
     expect(getKernel().sessions.android.focused).toBe('android:github');
     fireEvent.click(screen.getByRole('button', { name: 'Home' }));

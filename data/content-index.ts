@@ -117,7 +117,9 @@ export function buildContentIndex(data: Portfolio): ContentCatalog {
       key: `projects/${project.slug}`,
       title: project.name,
       summary: project.tagline,
-      keywords: unique(words(project.name, project.context, ...project.stack)),
+      keywords: unique(
+        words(project.name, project.context, ...project.stack, ...(project.deepDives ?? []).map((dive) => dive.title)),
+      ),
       parent: { section: 'projects' },
     });
   }

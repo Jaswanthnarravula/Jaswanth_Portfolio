@@ -15,9 +15,9 @@ import { parsePrefs } from '@/lib/kernel/persist/prefs';
 
 describe('AND-HOME / AND-FAV / AND-DRAWER launcher model', () => {
   it('keeps a sparse configured Home, four favorites and all six drawer apps', () => {
-    expect(HOME_APPS).toEqual(['github', 'notes', 'settings']);
+    expect(HOME_APPS).toEqual(['notes', 'settings']);
     expect(FAVORITES).toEqual(['files', 'browser', 'github', 'mail']);
-    expect(DRAWER_APPS).toEqual(['browser', 'files', 'mail', 'github', 'notes', 'settings']);
+    expect(DRAWER_APPS).toEqual(['browser', 'files', 'github', 'mail', 'notes', 'settings']);
   });
 
   it('derives lock/shade cards from data and marks contact silent', () => {

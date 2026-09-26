@@ -30,7 +30,7 @@ import type {
   WindowId,
   WindowInstance,
 } from '@/lib/kernel/types';
-import { formatUpdated } from '@/components/content';
+import { formatPartialDate, formatUpdated } from '@/components/content';
 import type { KernelTarget } from '@/components/shell/KernelLink';
 
 // --- Registry ------------------------------------------------------------------------------------------------------
@@ -331,13 +331,28 @@ export interface Recommended {
   readonly title: string;
   readonly detail: string;
   readonly to: KernelTarget;
-  readonly kind: 'pdf' | 'project' | 'role' | 'mail';
+  readonly kind: 'pdf' | 'project' | 'role' | 'mail' | 'now';
 }
 
-/** Recommended (2 × 3): Résumé.pdf, the featured projects ("Recently added"), the current role, "Say hello". */
+/**
+ * Recommended (2 × 3): "Now" first (`WIN-START-09`, shared/23), Résumé.pdf, the featured projects ("Recently added"),
+ * the current role, "Say hello" — the grid keeps six, so the last generated item drops off.
+ */
 export function startRecommended(): readonly Recommended[] {
   const resume = getResume();
+  const now = getPerson().now;
   const items: Recommended[] = [
+    ...(now
+      ? [
+          {
+            id: 'now',
+            title: `Now — ${now.text.split(/(?<=\.)\s/)[0]}`,
+            detail: `Updated ${formatPartialDate(now.updated)}`,
+            to: { os: 'windows', ref: { section: 'about' } },
+            kind: 'now',
+          } satisfies Recommended,
+        ]
+      : []),
     {
       id: 'resume',
       title: 'Résumé.pdf',

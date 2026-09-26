@@ -1,4 +1,5 @@
 import type { SkillGroup } from '@/data/schema';
+import { formatYears } from './format';
 import { Heading, withSlots, type ViewProps } from './slots';
 
 /** `SkillsMatrix` — editor / notes apps, `skills`, `neofetch`. Ratings appear only if the owner publishes them. */
@@ -21,7 +22,7 @@ export function SkillsMatrix({
               <li key={item.name}>
                 <Tag>
                   {item.name}
-                  {item.years ? <span className="cv-muted"> · {item.years} yrs</span> : null}
+                  {item.years ? <span className="cv-muted"> · {formatYears(item)}</span> : null}
                 </Tag>
               </li>
             ))}

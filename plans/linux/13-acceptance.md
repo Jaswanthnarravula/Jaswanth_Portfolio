@@ -42,6 +42,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | `LNX-FS-05` | `.bashrc` is the real alias source; `/usr/bin` mirrors the command table | P3 | verified | `unit/terminal/vfs.test.ts` › LNX-FS-05 .bashrc is the alias source; /usr/bin mirrors the command table · green locally 2026-09-22 (vitest) |  |
 | `LNX-FS-06` | cwd ↔ URL mapping; unique extension-less sibling names | P3 | verified | `unit/terminal/vfs.test.ts` › LNX-FS-06 cwd ↔ URL mapping; unique extension-less sibling names · green locally 2026-09-22 (vitest) |  |
 | `LNX-FS-07` | Permission-denied and read-only behaviours | P3 | verified | `unit/terminal/vfs.test.ts` › LNX-FS-07 permission-denied and read-only behaviours · green locally 2026-09-22 (vitest) |  |
+| `LNX-FS-08` | Content depth in the tree: case study, scope, `~/notes/` deep dives, `.plan` = Now | P8 | verified | `unit/terminal/content-depth.test.ts` › LNX-FS-08 (~/notes README + one file per dive, collision-free; dive text numbered within 80/40 and `open` pages it in less; project file THE PROBLEM … DEEP DIVES; role scope; .plan = Now then openTo) · `e2e/linux.spec.ts` chromium-desktop + pixel 18 passed / 6 skipped · green 2026-09-25 (production build) | |
 
 ### `04-commands.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
@@ -139,6 +140,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | `LNX-BOOT-05` | Autofocus on fine pointers only; "tap here to type" on coarse | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
 | `LNX-BOOT-06` | Slow/failure states without alarming output | P7 | verified | component/terminal/terminal-view.test.tsx calm loading failure and retry case green 2026-09-23 | |
 | `LNX-BOOT-07` | Reduced motion skips boot/login; announcer summaries | P7 | verified | component/linux/shell.test.tsx + e2e/linux.spec.ts green across desktop, iPhone, Pixel and reduced-motion 2026-09-23 | |
+| `LNX-BOOT-08` | MOTD "what I'm working on → cat .plan" line; ≤ 10 lines with continuity | P8 | verified | `unit/terminal/content-depth.test.ts` › LNX-BOOT-08 both builders carry the insertable entry, one arrow column, ≤ 10 lines with continuity · `e2e/linux.spec.ts` › L2 MOTD entries insert but never execute · green 2026-09-25 (production build) | |
 
 ### `09-cross-os-features.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |

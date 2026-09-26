@@ -31,7 +31,8 @@ test('AND-HOME-01 · AND-BARS-01 · AND-RESP-02 fills the page with a sparse lin
   });
   await expect(page.getByRole('button', { name: 'Search apps and more' })).toBeVisible();
   const home = page.getByRole('region', { name: 'Home screen' });
-  await expect(home.getByRole('link', { name: 'GitHub' })).toBeVisible();
+  await expect(home.getByRole('link', { name: 'Résumé' })).toHaveAttribute('href', '/android/files/resume');
+  await expect(home.getByRole('link', { name: 'Keep' })).toBeVisible();
   const favorites = page.getByRole('navigation', { name: 'Favorites' });
   await expect(favorites.getByRole('link', { name: 'Files, Résumé' })).toHaveAttribute('href', '/android/files/resume');
   for (const link of await favorites.getByRole('link').all()) {
@@ -65,7 +66,7 @@ test('AND-DRAWER-01 · AND-SEARCH-01 search opens portfolio content and Back unw
 test('AND-LIFE-01 · AND-RECENTS-01 Home preserves one instance and Recents closes it', async ({ page }, info) => {
   desktopOnly(info);
   await openAndroid(page);
-  await page.getByRole('region', { name: 'Home screen' }).getByRole('link', { name: 'GitHub' }).click();
+  await page.getByRole('navigation', { name: 'Favorites' }).getByRole('link', { name: 'GitHub' }).click();
   await expect(page.locator('[data-app="github"]')).toBeVisible();
   await page.getByRole('navigation', { name: 'System navigation' }).getByRole('button', { name: 'Home' }).click();
   await expect(page).toHaveURL(/\/android$/);
@@ -141,8 +142,62 @@ test('AND-RESP-01 · AND-BARS-05 phone layout keeps 48px gesture targets and rev
   await expect(page.locator('[data-app="keep"]')).toBeVisible();
 });
 
+test('AND-FAV-01 · AND-LIFE-01 on a phone an open app owns the whole screen — the favourites row never covers it', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 412, height: 915 });
+  await openAndroid(page);
+  const favorites = page.getByRole('navigation', { name: 'Favorites' });
+  await expect(favorites.getByRole('link', { name: 'Gmail' })).toBeVisible();
+  const box = (await favorites.boundingBox())!;
+  await page.getByRole('region', { name: 'Home screen' }).getByRole('link', { name: 'Keep' }).click();
+  await expect(page.locator('[data-app="keep"]')).toBeVisible();
+  await expect(page.locator('[data-app-surface][data-opening]')).toHaveCount(0);
+  // Whatever sits where the favourites row was is the app, not a launcher icon.
+  const topmost = await page.evaluate(
+    ({ x, y }) => document.elementFromPoint(x, y)?.closest('[data-app-surface]')?.getAttribute('data-app-surface'),
+    { x: box.x + box.width / 2, y: box.y + box.height / 2 },
+  );
+  expect(topmost).toBe('notes');
+});
+
+test('AND-ID-02 · AND-ID-06 the Pixel wallpaper, its palette and Google Sans Flex load with Android', async ({
+  page,
+}, info) => {
+  desktopOnly(info);
+  test.skip(info.project.name === 'asset-original', 'official wallpaper overlay');
+  await openAndroid(page);
+  const shell = page.locator('[data-android-layout]');
+  await expect(shell).toHaveAttribute('data-wallpaper-official', '');
+  // The generated Material You palette is applied (Chrome reports the computed colour in lab()).
+  expect(await shell.evaluate((node) => getComputedStyle(node).getPropertyValue('--md-primary').trim())).not.toBe('');
+  await page.evaluate(() => document.fonts.ready);
+  expect(await page.evaluate(() => document.fonts.check('16px "Google Sans Flex"'))).toBe(true);
+  // Status-bar glyphs are the official Material Symbols (SVG), not text stand-ins.
+  const status = page.getByRole('button', { name: 'Notifications and quick settings' });
+  expect(await status.locator('svg[data-symbol]').count()).toBeGreaterThanOrEqual(2);
+});
+
 test('AND-A11Y-01 home has no serious axe violations', async ({ page }) => {
   await openAndroid(page);
   const report = await new AxeBuilder({ page }).include('[data-android-layout]').analyze();
   expect(report.violations.filter((item) => ['serious', 'critical'].includes(item.impact ?? ''))).toEqual([]);
+});
+
+test('AND-GH-07 the Case study tab; a deep dive opens full screen and system Back closes it into its item', async ({
+  page,
+}) => {
+  await openAndroid(page, '/android/github/enterprise-sso');
+  const gh = page.locator('[data-app="github"]');
+  await gh.getByRole('tablist', { name: 'Repository' }).getByRole('tab', { name: 'Case study' }).click();
+  await expect(gh.getByRole('heading', { name: 'Key decisions' })).toBeVisible();
+  await gh.getByRole('button', { name: /Rotating signing keys without logging anyone out/ }).click();
+  const reader = gh.getByRole('region', { name: 'Rotating signing keys without logging anyone out' });
+  await expect(reader).toBeVisible();
+  await expect(reader.getByRole('heading', { level: 3 })).toBeFocused();
+  // System Back: in gesture navigation its button is the keyboard alternative (shown on focus), so press it.
+  await page.getByRole('navigation', { name: 'System navigation' }).getByRole('button', { name: 'Back' }).press('Enter');
+  await expect(reader).toHaveCount(0);
+  await expect(page).toHaveURL(/\/android\/github\/enterprise-sso$/);
+  await expect(gh.locator('[data-and-doc="rotating-signing-keys"]')).toBeFocused();
 });

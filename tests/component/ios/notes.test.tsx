@@ -145,11 +145,11 @@ describe('IOS-NOTES-02 generated notes: checklists + meters, table, tags', () =>
     await openNote('Skills');
     const note = noteArticle('Skills');
     expect(within(note).getByRole('heading', { level: 4, name: 'Frontend' })).toBeInTheDocument();
-    expect(within(note).getByRole('img', { name: 'TypeScript: 4 of 5, 6 years' })).toBeInTheDocument();
+    expect(within(note).getByRole('img', { name: 'TypeScript: 4 of 5, 6+ years' })).toBeInTheDocument();
     expect(within(note).getByRole('img', { name: 'Svelte: 2 of 5' })).toBeInTheDocument();
     // No level → no meter (never inferred), only the years text.
     expect(within(note).queryByRole('img', { name: /^CSS/ })).toBeNull();
-    expect(within(note).getByText('8 yrs')).toBeVisible();
+    expect(within(note).getByText('8+ yrs')).toBeVisible();
     const meter = within(note).getByRole('img', { name: /TypeScript/ });
     expect(meter.querySelectorAll('i[data-on]')).toHaveLength(4);
     expect(meter.querySelectorAll('i')).toHaveLength(5);

@@ -14,6 +14,7 @@ presentation). One note per skill group plus summary notes:
 | One per `SkillGroup` (Languages, Frontend, Backend, Cloud, Tools…) | group items | checklist-style lines with a level bar, each group a different M3 container colour |
 | **Stack by project** | projects × stack | list with links |
 | **Currently learning** | skills with level ≤ 2 | only if non-empty |
+| 📌 **Now** (`AND-KEEP-07`, `shared/23`) | `person.now.text` + "Updated {now.updated}" | pinned first, Keep's blue note colour (tone 2); label "Now"; one sentence per line |
 Labels (Keep "labels") = the skill group ids → filter.
 
 ## Anatomy
@@ -67,6 +68,7 @@ Very long group → card truncates at 8 lines with "…"; full content in the no
 | `AND-KEEP-04` | Search, labels drawer filter, grid/list toggle | `cmp: filter + toggle` | P6 |
 | `AND-KEEP-05` | Read-only FAB dialog → Gmail; read-only snackbar | `e2e: FAB dialog opens Gmail` | P6 |
 | `AND-KEEP-06` | Pad columns + rail; semantics + plain skills alternative | `e2e: tablet; X1 axe clean` | P6 |
+| `AND-KEEP-07` | Pinned "Now" note from `person.now`, first on the board | `cmp: Now note first among pinned; text equals data; opens like any note` | P8 |
 
 ## Not like the others
 A **colourful masonry board with labels and a FAB** (iOS Notes: paper canvas, folders → list → note, dot meters;

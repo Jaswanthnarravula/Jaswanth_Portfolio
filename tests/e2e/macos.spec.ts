@@ -158,12 +158,16 @@ test('MAC-FIND-01 · MAC-FIND-02 Finder: sidebar, columns from data, select → 
   await expect(page).toHaveURL(/\/macos\/finder\/experience$/);
   await expect(finder.getByRole('heading', { level: 2 })).toHaveText('Finder — Experience');
   const entries = finder.locator('[data-column="entries"] a');
-  await expect(entries).toHaveText(['Xclusive Trading Inc. — Software Engineer', 'IBM']); // data/portfolio via selectors
+  await expect(entries).toHaveText([
+    'Xclusive Trading Inc. — Software Engineer',
+    'IBM — Software Engineer',
+    'All India Council for Technical Education (AICTE) — Technical Intern',
+  ]); // data/portfolio via selectors
   await entries.first().click();
   await expect(page).toHaveURL(/\/macos\/finder\/experience\/xclusive-trading$/);
   const preview = finder.getByRole('region', { name: 'Preview' });
   await expect(preview.getByRole('heading', { level: 3 })).toHaveText('Software Engineer');
-  await expect(preview).toContainText('Xclusive Trading Inc. · Present');
+  await expect(preview).toContainText('Xclusive Trading Inc. · Jun 2025 – Present');
   await expect(preview.getByRole('list', { name: 'Stack' }).getByRole('listitem').first()).toHaveText('Go');
   await preview.getByRole('button', { name: 'Open' }).click();
   const document = finder.locator('[data-finder-document]');
@@ -188,10 +192,10 @@ test('ROUTE-DEEP-01 · MAC-FIND-02 D1 cold deep link: only Finder opens, the sel
   await openMacos(page, '/macos/finder/experience/ibm');
   await expect(page.locator('[data-window]')).toHaveCount(1);
   await expect(win(page, 'files')).toBeVisible();
-  await expect(win(page, 'files').locator('[data-column="entries"] [aria-current="true"]')).toHaveText('IBM');
+  await expect(win(page, 'files').locator('[data-column="entries"] [aria-current="true"]')).toHaveText('IBM — Software Engineer');
   await expect(win(page, 'files').getByRole('region', { name: 'Preview' })).toContainText('for DBS Bank');
   await expect(page.locator('[data-boot]')).toHaveCount(0);
-  await expect(page).toHaveTitle('IBM · Finder · macOS — Jaswanth');
+  await expect(page).toHaveTitle('Software Engineer · IBM · Finder · macOS — Jaswanth');
 });
 
 test('MAC-FIND-03 · ROUTE-EVENT-01 · MAC-WM-11 H1: in-app Back equals browser Back; window events follow the history table', async ({

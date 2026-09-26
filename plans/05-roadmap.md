@@ -18,8 +18,8 @@ deviations → **stop for the owner's review**.
 | P5 iOS | iOS P5 (137) + shared P5 (3) | 140 |
 | P6 Android | Android P6 (132) | 132 |
 | P7 Linux | Linux P7 (75) + shared P7 (14) | 89 |
-| P8 Polish | shared P8 (6) + one release-script ID per OS (5) | 11 |
-| **Total** | | **930** |
+| P8 Polish | shared P8 (6 + 9 content depth) + per OS (1 release script + 2 content depth) ×5 | 30 |
+| **Total** | | **949** |
 
 ---
 
@@ -105,8 +105,11 @@ real-device keyboard check · audit · release Linux. **All five OSes are now li
 **Build:** cross-OS restore + continuity across all OS pairs · full Playwright matrix + nightly · visual baselines (Linux
 container) · profiling procedure on production builds (`shared/10`) · leak loops · real-device + screen-reader scripts
 for all five OSes (`*-A11Y-06`, `LNX-A11Y-08`, `TEST-MANUAL-01`) · OG card validation · analytics event audit ·
-scheduled redeploy (`DEPLOY-CRON-01`) · forced-colors pass (`DS-THEME-01`).
-**Gate:** `STATUS.md` shows 930 / 930 `verified` (or signed `BLOCKED`) · release checklist in `shared/13-deployment.md`
+scheduled redeploy (`DEPLOY-CRON-01`) · forced-colors pass (`DS-THEME-01`) · **content depth** (`shared/23-content-depth.md`:
+`DATA-COPY-01`, `CONTENT-*`, `MAC-GH-08`, `MAC-NOTIF-07`, `WIN-GH-07`, `WIN-START-09`, `IOS-GH-07`, `IOS-WIDG-05`,
+`AND-GH-07`, `AND-KEEP-07`, `LNX-FS-08`, `LNX-BOOT-08`) — data + shared views first, then one OS at a time
+(Linux → macOS → Windows → iOS → Android), pausing after Linux for the owner's look review.
+**Gate:** `STATUS.md` shows 949 / 949 `verified` (or signed `BLOCKED`) · release checklist in `shared/13-deployment.md`
 complete · placeholder guard passes with real résumé content.
 
 ---

@@ -71,7 +71,7 @@ export function dockRecents(warmMostRecentFirst: readonly AppRole[]): readonly I
 
 // --- Home Screen configuration ---------------------------------------------------------------------------------------
 
-export type WidgetId = 'resume' | 'open-to-work' | 'projects';
+export type WidgetId = 'resume' | 'open-to-work' | 'now' | 'projects';
 export type ShortcutId = 'about' | 'projects' | 'contact';
 
 export type HomeItem =
@@ -157,6 +157,8 @@ export interface HomeLayout {
 export interface HomeData {
   /** A featured project exists (else the Projects widget is omitted and its cells return to icons). */
   readonly hasProject: boolean;
+  /** A Now note exists (`IOS-WIDG-05`, shared/23) — else no Now widget. */
+  readonly hasNow?: boolean;
 }
 
 /** Cell size of a widget: medium 4 × 2 (3 × 2 in phone landscape), small 2 × 2 (plans/ios/surfaces/widgets). */
@@ -230,7 +232,11 @@ export function homeLayout(viewport: Viewport, data: HomeData): HomeLayout {
   const layout = layoutFor(viewport.sizeClass);
   const landscape = viewport.orientation === 'landscape';
   const icon = iconSize(viewport);
-  const smallWidgets = [widget('open-to-work'), ...(data.hasProject ? [widget('projects')] : [])];
+  const smallWidgets = [
+    widget('open-to-work'),
+    ...(data.hasNow ? [widget('now')] : []),
+    ...(data.hasProject ? [widget('projects')] : []),
+  ];
   if (layout === 'phone') {
     // Portrait 4 × 6 (5 on very short screens); landscape 6 × 3 with the Dock on the trailing edge.
     const columns = landscape ? 6 : 4;

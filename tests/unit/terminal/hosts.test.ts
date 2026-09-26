@@ -29,7 +29,7 @@ const rich = terminalDataFrom(
       },
       { id: 'cloud', label: 'Cloud', items: [{ name: 'AWS' }] },
     ],
-    credentials: [{ name: 'Cert One', issuer: 'Issuer' }],
+    credentials: [{ name: 'Cert One', issuer: 'Issuer', kind: 'certification', status: 'earned' }],
     education: [
       { ...fixturePortfolio.education[0]!, school: 'A Very Long University Name That Needs Wrapping At Forty Columns' },
     ],

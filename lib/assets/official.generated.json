@@ -705,6 +705,70 @@
         2468
       ]
     },
+    "wallpaper.android": {
+      "kind": "wallpaper",
+      "label": "Pixel 6 wallpaper \"La Mer\"",
+      "owner": "Google LLC",
+      "sourceUrl": "https://github.com/wacko1805/Pixel-Wallpapers/blob/main/Pixel-6-landscapes/8-La-Mer.jpeg",
+      "retrieved": "2026-09-24",
+      "terms": "Artwork of Google LLC (a Pixel 6 wallpaper); used referentially to recreate the Pixel launcher. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/wallpaper.android.14d5306b03.avif",
+      "width": 2880,
+      "height": 3120,
+      "bytes": [
+        47982
+      ]
+    },
+    "wallpaper.android-blue": {
+      "kind": "wallpaper",
+      "label": "Pixel 6 wallpaper (art 4)",
+      "owner": "Google LLC",
+      "sourceUrl": "https://github.com/wacko1805/Pixel-Wallpapers/blob/main/Pixel-6-art/4.png",
+      "retrieved": "2026-09-24",
+      "terms": "Artwork of Google LLC (a Pixel 6 wallpaper); used referentially to recreate the Pixel launcher. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/wallpaper.android-blue.140a20b0fb.avif",
+      "width": 2880,
+      "height": 3120,
+      "bytes": [
+        32385
+      ]
+    },
+    "wallpaper.android-coral": {
+      "kind": "wallpaper",
+      "label": "Pixel 6 wallpaper (art 9)",
+      "owner": "Google LLC",
+      "sourceUrl": "https://github.com/wacko1805/Pixel-Wallpapers/blob/main/Pixel-6-art/9.png",
+      "retrieved": "2026-09-24",
+      "terms": "Artwork of Google LLC (a Pixel 6 wallpaper); used referentially to recreate the Pixel launcher. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/wallpaper.android-coral.c7c0124521.avif",
+      "width": 2880,
+      "height": 3120,
+      "bytes": [
+        32493
+      ]
+    },
+    "wallpaper.android-violet": {
+      "kind": "wallpaper",
+      "label": "Pixel 6 wallpaper (art 13)",
+      "owner": "Google LLC",
+      "sourceUrl": "https://github.com/wacko1805/Pixel-Wallpapers/blob/main/Pixel-6-art/13.png",
+      "retrieved": "2026-09-24",
+      "terms": "Artwork of Google LLC (a Pixel 6 wallpaper); used referentially to recreate the Pixel launcher. No affiliation.",
+      "derived": false,
+      "monochrome": false,
+      "src": "/assets/official/wallpaper.android-violet.2ec723ad78.avif",
+      "width": 2880,
+      "height": 3120,
+      "bytes": [
+        33470
+      ]
+    },
     "wallpaper.ios": {
       "kind": "wallpaper",
       "label": "iPhone 16 wallpaper (Ultramarine)",

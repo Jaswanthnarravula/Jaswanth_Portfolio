@@ -257,6 +257,114 @@
     color: var(--text-secondary);
     font-weight: 500;
   }
+  .cv-now,
+  .cv-scope {
+    color: var(--text-secondary);
+    max-width: 65ch;
+    text-wrap: pretty;
+  }
+  .cv-scope {
+    margin: 10px 0 0;
+    font-size: 0.9375rem;
+  }
+
+  /* shared/23 content depth: recruiter card, case study, deep dives */
+  .cv-glance-list {
+    display: grid;
+    gap: 0;
+    margin: 0;
+  }
+  .cv-glance-row {
+    display: grid;
+    grid-template-columns: minmax(96px, 132px) 1fr;
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .cv-glance-row dt {
+    color: var(--text-tertiary);
+    font-size: 0.875rem;
+  }
+  .cv-glance-row dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .cv-case-part + .cv-case-part {
+    margin-top: 4px;
+  }
+  .cv-case-role {
+    margin: 0;
+    max-width: 65ch;
+  }
+  .cv-decisions {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .cv-decision {
+    padding-left: 14px;
+    border-left: 2px solid var(--border-strong);
+  }
+  .cv-decision p {
+    margin: 0;
+    max-width: 65ch;
+  }
+  .cv-decision-title {
+    font-weight: 600;
+  }
+  .cv-decision-rejected {
+    color: var(--text-tertiary);
+    font-size: 0.875rem;
+  }
+  .cv-results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+  }
+  .cv-result {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 2px;
+    min-width: 0;
+    padding: 8px 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+  }
+  .cv-result dd {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .cv-result dt {
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+  }
+  .cv-dive + .cv-dive {
+    margin-top: 28px;
+  }
+  .cv-dive .cv-title {
+    font-size: 1.25rem;
+  }
+  .cv-steps {
+    margin: 0 0 14px;
+    padding-left: 22px;
+    max-width: 65ch;
+    /* Numbered in every OS: the base reset removes list markers. */
+    list-style: decimal;
+  }
+  .cv-steps li {
+    padding-block: 3px;
+  }
+  @media (max-width: 480px) {
+    .cv-glance-row {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+  }
   .cv-list,
   .cv-projects,
   .cv-timeline,

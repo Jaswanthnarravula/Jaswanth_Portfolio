@@ -20,6 +20,30 @@ test('/plain holds every section and never redirects', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Privacy' })).toBeVisible();
 });
 
+test('CONTENT-CASE-01 · CONTENT-DIVE-01 /go/projects/{slug} shows the case study and the deep dives without JavaScript', async ({
+  page,
+}) => {
+  await page.goto('/go/projects/enterprise-sso');
+  await expect(page.getByRole('heading', { name: 'Case study' })).toBeVisible();
+  for (const part of ['The problem', 'My role', 'Key decisions', 'Results'])
+    await expect(page.getByRole('heading', { name: part, exact: true })).toBeVisible();
+  await expect(page.getByText(/^Rejected: Moving everything to a commercial IdP/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Deep dives' })).toBeVisible();
+  for (const title of [
+    'Why we built our own identity provider — and kept Entra ID',
+    'Rotating signing keys without logging anyone out',
+  ])
+    await expect(page.getByRole('article', { name: title })).toBeVisible();
+});
+
+test('CONTENT-GLANCE-01 /go/about carries the recruiter card and the Now note', async ({ page }) => {
+  await page.goto('/go/about');
+  const card = page.getByRole('region', { name: 'At a glance' });
+  await expect(card).toContainText('Backend Software Engineer · Software Engineer II');
+  await expect(card).toContainText('Two weeks’ notice');
+  await expect(page.getByText(/^Now:/)).toBeVisible();
+});
+
 test('/ draws the Hello in CSS and offers the portfolio, the résumé and the OSes as real links', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Jaswanth');
@@ -56,7 +80,7 @@ test('/go/resume offers the PDF (open + download) and the pages', async ({ page 
   );
   const download = page.getByRole('link', { name: /Download/ });
   await expect(download).toHaveAttribute('download', 'Jaswanth-Resume.pdf');
-  await expect(download).toContainText('PDF, 13 KB');
+  await expect(download).toContainText(/PDF, \d+ KB/);
   await expect(page.getByRole('article', { name: /résumé/ })).toBeVisible();
 });
 

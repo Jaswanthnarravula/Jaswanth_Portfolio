@@ -50,11 +50,15 @@ export default function Chrome({ id, headingId, layout }: AndroidAppProps) {
       {layout === 'large' ? (
         <div className={styles.tabStrip}>
           <button type="button" aria-current="page">
+            <Symbol>language</Symbol>
             About
           </button>
-          <a href="/plain">Plain version</a>
+          <a href="/plain">
+            <Symbol>article</Symbol>
+            Plain version
+          </a>
           <button type="button" aria-label="New tab">
-            +
+            <Symbol>add</Symbol>
           </button>
         </div>
       ) : null}
@@ -76,7 +80,7 @@ export default function Chrome({ id, headingId, layout }: AndroidAppProps) {
         ) : (
           <>
             <label className={styles.omnibox}>
-              <Symbol>lock</Symbol>
+              <Symbol>tune</Symbol>
               <input
                 aria-label="Address"
                 readOnly
@@ -85,7 +89,7 @@ export default function Chrome({ id, headingId, layout }: AndroidAppProps) {
               />
             </label>
             <button className={styles.tabCount} type="button" aria-label="2 open tabs" onClick={() => setTabs(true)}>
-              2
+              <span aria-hidden="true">2</span>
             </button>
             <IconButton label="Chrome menu" aria-haspopup="menu" onClick={() => setMenu((value) => !value)}>
               <Symbol>more_vert</Symbol>

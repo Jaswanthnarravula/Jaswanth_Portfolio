@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest';
 import { auditClientSecrets, auditStaticOutput } from '../../../scripts/check-build.mjs';
 import { OWNER_RESUME, pdfPageCount, resolveResume } from '../../../scripts/build-resume.mjs';
 import { blocksFromLines, linesFromItems } from '../../../scripts/resume-pages.mjs';
-import { findPlaceholders, shouldCheck } from '../../../scripts/check-content.mjs';
+import { checkContent, findPlaceholders, shouldCheck } from '../../../scripts/check-content.mjs';
 import { run } from '../../../scripts/fetch-github.mjs';
 import {
   EMPTY_SNAPSHOT,
@@ -36,18 +36,20 @@ describe('DATA-GUARD-01 placeholder guard blocks production', () => {
     expect(shouldCheck({ CHECK_CONTENT: '1' })).toBe(true);
     expect(shouldCheck({ VERCEL_ENV: 'preview' })).toBe(false);
   });
-  it('check-content exits non-zero with a placeholder present (the real data still has unconfirmed facts)', () => {
-    expect(findPlaceholders(portfolio).length).toBeGreaterThan(0);
-    let code = 0;
-    try {
-      execFileSync(process.execPath, ['--experimental-strip-types', '--no-warnings', 'scripts/check-content.mjs'], {
-        env: { ...process.env, CHECK_CONTENT: '1' },
-        stdio: 'pipe',
-      });
-    } catch (error) {
-      code = (error as { status: number }).status;
-    }
-    expect(code).toBe(1);
+  it('check-content exits non-zero with a placeholder present', () => {
+    const log = { log: () => {}, error: () => {} };
+    const flagged = { ...fixturePortfolio, experience: [{ ...fixturePortfolio.experience[0]!, placeholder: true }] };
+    expect(checkContent(flagged, log)).toBe(1);
+    expect(checkContent(fixturePortfolio, log)).toBe(0);
+  });
+  it('the real data carries no placeholder, so the production build passes the guard', () => {
+    expect(findPlaceholders(portfolio)).toEqual([]);
+    const out = execFileSync(
+      process.execPath,
+      ['--experimental-strip-types', '--no-warnings', 'scripts/check-content.mjs'],
+      { env: { ...process.env, CHECK_CONTENT: '1' }, stdio: 'pipe' },
+    ).toString();
+    expect(out).toContain('production-ready');
   }, 30_000);
 });
 

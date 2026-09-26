@@ -189,6 +189,41 @@ describe('WIN-GH-01 NavigationView rail, title-bar search, Overview cards', () =
   });
 });
 
+describe('WIN-GH-07 case study pivot and docs', () => {
+  it('the Case study pivot holds expanders and metric cards; a doc drills in and Back drills out to its row', async () => {
+    const user = userEvent.setup();
+    openGitHub(projectAt('enterprise-sso'));
+    const { container } = renderGitHub();
+    const tabs = screen.getByRole('tablist', { name: 'Project' });
+    expect(within(tabs).getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['README', 'Case study', 'Stack']);
+    await user.click(within(tabs).getByRole('tab', { name: 'Case study' }));
+    const panel = screen.getByRole('tabpanel', { name: 'Case study' });
+    const expander = within(panel).getByRole('button', { name: 'Run beside Entra ID, not instead of it.' });
+    expect(expander).toHaveAttribute('aria-expanded', 'false');
+    await user.click(expander);
+    expect(expander).toHaveAttribute('aria-expanded', 'true');
+    expect(within(panel).getByText(/^Rejected: Moving everything to a commercial IdP/)).toBeVisible();
+    expect(within(panel).getByText('~3,000')).toBeInTheDocument();
+    await user.click(within(panel).getByRole('button', { name: /rotating-signing-keys.md/ }));
+    const crumbs = screen.getByRole('navigation', { name: 'Breadcrumb' });
+    expect(within(crumbs).getByRole('heading', { name: 'rotating-signing-keys.md' })).toHaveFocus();
+    expect(within(crumbs).getByRole('button', { name: 'Enterprise SSO Identity Provider' })).toBeInTheDocument();
+    expect(screen.getByRole('article', { name: 'Rotating signing keys without logging anyone out' })).toBeInTheDocument();
+    // The location is still the project: the document is session state.
+    expect(currentLocation(githubWindow())).toEqual(projectAt('enterprise-sso'));
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.queryByRole('article', { name: 'Rotating signing keys without logging anyone out' })).toBeNull();
+    expect(screen.getByRole('button', { name: /rotating-signing-keys.md/ })).toHaveFocus();
+    const results = await axe.run(container, { rules: { region: { enabled: false } } });
+    expect(results.violations.map((violation) => violation.id)).toEqual([]);
+  });
+  it('a project without a case study has no Case study pivot', () => {
+    openGitHub(projectAt('asl-gesture-recognition'));
+    renderGitHub();
+    expect(screen.queryByRole('tab', { name: 'Case study' })).toBeNull();
+  });
+});
+
 describe('WIN-GH-02 project page: breadcrumb, pivots, info card', () => {
   it('opens a real project, shows its breadcrumb, pivots and info card; Back returns to the list', async () => {
     const user = userEvent.setup();

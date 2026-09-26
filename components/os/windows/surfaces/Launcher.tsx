@@ -668,6 +668,8 @@ function StartHome({
                     <PdfFile size={28} />
                   ) : item.kind === 'project' ? (
                     <AssetIcon id={winBinding('github').icon} size={28} />
+                  ) : item.kind === 'now' ? (
+                    <AssetIcon id={winBinding('browser').icon} size={28} />
                   ) : item.kind === 'role' ? (
                     <AssetIcon id="system.windows-folder" size={28} />
                   ) : (

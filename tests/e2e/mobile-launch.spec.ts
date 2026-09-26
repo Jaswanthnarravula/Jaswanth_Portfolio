@@ -18,7 +18,7 @@ test('Android app links atomically update the URL and foreground surface without
   await waitForOs(page, 'android');
   await plantSentinel(page);
 
-  await page.getByRole('region', { name: 'Home screen' }).getByRole('link', { name: 'GitHub' }).click();
+  await page.getByRole('navigation', { name: 'Favorites' }).getByRole('link', { name: 'GitHub' }).click();
   await expect(page).toHaveURL(/\/android\/github$/);
   await expect(page.locator('[data-app-surface="github"] [data-app="github"]')).toBeVisible();
   await assertDocumentStayedMounted(page);

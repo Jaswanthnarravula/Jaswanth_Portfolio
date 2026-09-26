@@ -149,11 +149,13 @@ export default function Gmail({ id, headingId, layout }: AndroidAppProps) {
           <button className={styles.railFab} aria-label="Compose" onClick={compose}>
             <Symbol>edit</Symbol>
           </button>
-          {[
-            ['inbox', 'Inbox'],
-            ['star', 'Starred'],
-            ['send', 'Sent'],
-          ].map(([glyph, label], index) => (
+          {(
+            [
+              ['inbox', 'Inbox'],
+              ['star', 'Starred'],
+              ['send', 'Sent'],
+            ] as const
+          ).map(([glyph, label], index) => (
             <button key={label} aria-current={index === 0 ? 'page' : undefined}>
               <Symbol filled={index === 0}>{glyph}</Symbol>
               <span>{label}</span>

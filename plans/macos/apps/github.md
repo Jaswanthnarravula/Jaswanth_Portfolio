@@ -52,9 +52,22 @@ summary label + a visually hidden table alternative. Tabs follow APG. External l
 Removed slug → list with a quiet "That project isn't here anymore". 20+ projects → list virtualizes via
 `content-visibility`. Project without repo/live → Links tab hidden.
 
+## Case study and deep dives (`shared/23-content-depth.md`)
+- A project with a `caseStudy` gets a **Case study** tab after README (README · Case study · Stack · Links). It holds
+  the shared `ProjectCaseStudy` view (problem, my role, key decisions, results) at `headingLevel` 4; the results also
+  appear as rows in the About rail `<dl>` ("Results").
+- A project with `deepDives` lists them at the end of the Case study tab as a **`docs/` file list** (file icon,
+  `{slug}.md`, summary). Clicking one opens it **in place inside the repository page**, the way GitHub shows a file:
+  breadcrumb `jaswanth / {project} / docs / {slug}.md`, the shared `DeepDiveArticle`, and a "‹ Back to Case study"
+  link; Esc and ⌘[ also return. The open document is session state (not routed), like the tabs.
+- Motion: the file view cross-fades in (`shared/07` short fade); reduced motion swaps instantly.
+- A11y: the file list is a `ul` of buttons with `aria-describedby` on the summary; opening moves focus to the
+  article's h4; returning restores focus to the file row.
+
 ## Feature IDs + acceptance tests
 | ID | Feature | Acceptance test | Phase |
 |---|---|---|---|
+| `MAC-GH-08` | Case study tab + Results in the About rail + `docs/` deep-dive file view | `cmp: Case study tab only when caseStudy exists; a docs file opens in place and returns focus` | P8 |
 | `MAC-GH-01` | App shell: sidebar profile, pinned grid, repository list | `e2e: M2 projects match data` | P3 |
 | `MAC-GH-02` | Project detail with README / Stack / Links tabs + About rail | `e2e: D1 /macos/github/{slug}` | P3 |
 | `MAC-GH-03` | GitHub enrichment + heatmap with accessible alternative | `cmp: GH-UI-01 axe clean; absent when snapshot empty` | P3 |
@@ -66,4 +79,6 @@ Removed slug → list with a quiet "That project isn't here anymore". 20+ projec
 ## Not like the others
 A **desktop client with a sidebar and tabs in a window** (iOS GitHub: bottom tab bar, large-title lists, push
 navigation; Android: Material top app bar, FAB-less list with chips; Windows: same data in a Fluent-styled window
-with a NavigationView rail and Mica title bar).
+with a NavigationView rail and Mica title bar). Deep dives open **in place as repository files** with a path
+breadcrumb, desktop-GitHub style (Windows: a Case study pivot with Fluent expanders; iOS: pushed documents;
+Android: a full-screen Material reader).

@@ -12,11 +12,11 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
 | `AND-ID-01` | M3 token scope complete incl. tonal surface containers | P6 | verified | Android unit/component/e2e evidence set (2026-09-22) | |
-| `AND-ID-02` | Build-time dynamic colour from 4 wallpaper seeds, light + dark, contrast-validated | P6 | verified | Android unit/component/e2e evidence set (2026-09-22) | |
+| `AND-ID-02` | Build-time dynamic colour from 4 wallpaper seeds, light + dark, contrast-validated | P6 | verified | `unit/android/pixel.test.ts` › AND-ID-02 build-time Material You palette (committed block = seeds output; every text pair ≥ 4.5:1; light + dark + ink per palette) · `e2e/android.spec.ts` › AND-ID-02 · AND-ID-06 on chromium-desktop + reduced-motion (production build, 2026-09-24) | 08 Deviations 2026-09-24 (Pixel rework) |
 | `AND-ID-03` | State layers at M3 opacities + focus outline | P6 | built | P6 implementation audit; named acceptance evidence pending | |
 | `AND-ID-04` | **Zero `backdrop-filter`** on Android; scrims only | P6 | verified | Android unit/component/e2e evidence set (2026-09-22) | |
-| `AND-ID-05` | Adaptive icon mask + themed-icons option; identical boxes across asset modes | P6 | built | P6 implementation audit; named acceptance evidence pending | |
-| `AND-ID-06` | Roboto Flex loaded only in the Android chunk | P6 | built | P6 implementation audit; named acceptance evidence pending | |
+| `AND-ID-05` | Adaptive icon mask + themed-icons option; identical boxes across asset modes | P6 | built | `component/android/shell.test.tsx` › AND-ID-05 every launcher icon sits on the one circular adaptive plate; themed icons swap in the glyph (2026-09-24); e2e themed-icon toggle still pending | 08 Deviations 2026-09-24 (Pixel rework) |
+| `AND-ID-06` | Google Sans Flex loaded only in the Android chunk | P6 | verified | `e2e/performance.spec.ts` › only Inter and Google Sans Flex are declared or fetched on /android, and only Inter on /, /plain, /go/…, /macos, /windows/edge/resume, /ios (perf project, production build 2026-09-24) · `e2e/android.spec.ts` › AND-ID-02 · AND-ID-06 (`document.fonts.check`) | 08 Deviations 2026-09-24 (Pixel rework) |
 
 ### `02-app-lifecycle.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
@@ -61,7 +61,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 ### `surfaces/favorites-dock.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `AND-FAV-01` | Favorites row: four links, no plate/labels, notification dot state | P6 | verified | Android unit/component/e2e evidence set (2026-09-22) | |
+| `AND-FAV-01` | Favorites row: four links, no plate/labels, notification dot state | P6 | verified | Android evidence set (2026-09-22) · `e2e/android.spec.ts` › AND-FAV-01 · AND-LIFE-01 on a phone an open app owns the whole screen (chromium-desktop, pixel, iphone, reduced-motion) · `component/android/shell.test.tsx` › AND-FAV phone favourites belong to Home (2026-09-24) | 08 Deviations 2026-09-24 (Pixel rework) |
 | `AND-FAV-02` | Files favorite = résumé fast path | P6 | verified | Android unit/component/e2e evidence set (2026-09-22) | |
 | `AND-FAV-03` | Search bar opens the drawer focused, with bar → field morph | P6 | verified | Android unit/component/e2e evidence set (2026-09-22) | |
 | `AND-FAV-04` | Landscape column + pad taskbar dock with recents | P6 | verified | Android unit/component/e2e evidence set (2026-09-22) | |
@@ -79,7 +79,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 ### `surfaces/launcher-home.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
 |---|---|---|---|---|---|
-| `AND-HOME-01` | Sparse configured grid + At-a-glance with résumé/continuity chip | P6 | verified | Android unit/component/e2e evidence set (2026-09-22) | |
+| `AND-HOME-01` | Sparse configured grid + At-a-glance with résumé/continuity chip | P6 | verified | `e2e/android.spec.ts` › AND-HOME-01 · AND-BARS-01 · AND-RESP-02 (Résumé shortcut + Keep on the grid) · `component/android/shell.test.tsx` › launcher apps are real links (2026-09-24) | 08 Deviations 2026-09-24 (Pixel rework) |
 | `AND-HOME-02` | Swipe-up drawer / swipe-down shade with visible button alternatives | P6 | verified | Android unit/component/e2e evidence set (2026-09-22) | |
 | `AND-HOME-03` | M3 folder popup (container transform, Back closes) | P6 | built | P6 implementation audit; named acceptance evidence pending | |
 | `AND-HOME-04` | Roving keyboard grid + semantics | P6 | built | P6 implementation audit; named acceptance evidence pending | |
@@ -153,6 +153,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | `AND-GH-04` | Enrichment + heatmap with accessible alternative | P6 | built | P6 implementation audit; named acceptance evidence pending | |
 | `AND-GH-05` | Pad navigation rail + list-detail layout | P6 | built | P6 implementation audit; named acceptance evidence pending | |
 | `AND-GH-06` | Semantics | P6 | built | P6 implementation audit; named acceptance evidence pending | |
+| `AND-GH-07` | Case study tab (M3 cards + tonal result cards) + full-screen deep-dive reader closed by system Back | P8 | verified | `component/android/content-depth.test.tsx` › AND-GH-07 tab + cards + results, README without the case study; reader focus on its title, system Back closes it to its list item (case-study markup axe clean); no tab without a case study · `e2e/android.spec.ts` › AND-GH-07 system Back closes the reader into its item · pixel + chromium-desktop · green 2026-09-25 (production build) | |
 
 ### `apps/gmail.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
@@ -174,6 +175,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | `AND-KEEP-04` | Search, labels drawer filter, grid/list toggle | P6 | built | P6 implementation audit; named acceptance evidence pending | |
 | `AND-KEEP-05` | Read-only FAB dialog → Gmail; read-only snackbar | P6 | built | P6 implementation audit; named acceptance evidence pending | |
 | `AND-KEEP-06` | Pad columns + rail; semantics + plain skills alternative | P6 | built | P6 implementation audit; named acceptance evidence pending | |
+| `AND-KEEP-07` | Pinned "Now" note from `person.now`, first on the board | P8 | verified | `component/android/content-depth.test.tsx` › AND-KEEP-07 first among pinned, carries the data, opens like any note · green 2026-09-25 (vitest) | |
 
 ### `apps/settings.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
@@ -282,4 +284,4 @@ screen-reader row remains planned. See `plans/STATUS.md` for exact commands and 
 ## Deviations log
 | Date | ID | What changed vs the spec | Why | Owner sign-off |
 |---|---|---|---|---|
-| | | | | |
+| 2026-09-24 | AND-ID-01 · AND-ID-02 · AND-ID-05 · AND-ID-06 · AND-HOME-01 · AND-HOME-05 · AND-FAV-* · AND-BARS-* · AND-SHADE-* · AND-DRAWER-* · every `AND-{CHROME,GH,FILES,GMAIL,KEEP,SET}` look | **Pixel rework.** The storyboard frames' flat gradient, text-character glyphs and mixed icon shapes are replaced by a real-Pixel finish: the genuine Pixel 6 "La Mer" wallpaper (official overlay `wallpaper.android.*`, one real Pixel wallpaper per palette; the CSS gradients stay the original baseline) with its Material You scheme (tinted surfaces, light + dark); **Google Sans Flex** (OFL) replaces Roboto Flex as the Android-only face; real **Material Symbols Rounded** (Apache-2.0) as inline SVG replace the Unicode stand-ins; every launcher icon sits on the same circular adaptive plate; the phone home follows the Pixel Launcher (At-a-glance top-left, grid + favourites low, Google search bar with G · mic · Lens at the bottom); the Home grid's GitHub becomes a pinned **Résumé** shortcut (GitHub stays in favourites and the drawer); the phone favourites row is part of Home only and never covers an open app | Owner, 2026-09-24: "only android os needs rework … we can make it lot more far better"; approved from the now-vs-proposed boards (phone Home · GitHub · shade, laptop Home · Gmail) | Owner 2026-09-24 ("Yes Proceed") |

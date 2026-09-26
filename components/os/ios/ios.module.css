@@ -2420,3 +2420,13 @@
 :global([data-motion='reduced']) .coachRing {
   animation: none;
 }
+
+/* IOS-WIDG-05 (shared/23): the Now widget's note, clamped to three lines so the date stays clear. */
+.widgetClamp {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  white-space: normal;
+}

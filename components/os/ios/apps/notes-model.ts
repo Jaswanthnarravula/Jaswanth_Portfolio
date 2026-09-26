@@ -12,6 +12,7 @@
  *
  * React-free, DOM-free: the app renders the blocks; unit tests snapshot them.
  */
+import { formatYears } from '@/components/content';
 import type { Experience, Person, Project, SkillGroup } from '@/data/schema';
 
 export type NoteId = 'skills' | 'how-i-work' | 'stack' | 'learning';
@@ -20,6 +21,7 @@ export interface SkillLine {
   readonly name: string;
   readonly level?: number;
   readonly years?: number;
+  readonly approx?: true;
 }
 
 export type NoteBlock =
@@ -79,7 +81,8 @@ export const tagOf = (label: string): string =>
 /** "TypeScript: 4 of 5, 6 years" — the meter's accessible name (only when a level exists). */
 export function meterLabel(skill: SkillLine): string | null {
   if (!skill.level) return null;
-  const years = skill.years ? `, ${skill.years} ${skill.years === 1 ? 'year' : 'years'}` : '';
+  const spelled = formatYears(skill, true);
+  const years = spelled ? `, ${spelled}` : '';
   return `${skill.name}: ${skill.level} of 5${years}`;
 }
 
@@ -87,7 +90,8 @@ export function meterLabel(skill: SkillLine): string | null {
 export function skillMeta(skill: SkillLine): string {
   const parts: string[] = [];
   if (skill.level) parts.push(`${skill.level} of 5`);
-  if (skill.years) parts.push(`${skill.years} ${skill.years === 1 ? 'yr' : 'yrs'}`);
+  const years = formatYears(skill);
+  if (years) parts.push(years);
   return parts.join(' · ');
 }
 
@@ -116,6 +120,7 @@ const skillsNote = (skills: readonly SkillGroup[]): Note => {
         name: skill.name,
         ...(skill.level ? { level: skill.level } : {}),
         ...(skill.years ? { years: skill.years } : {}),
+        ...(skill.approx ? { approx: skill.approx } : {}),
       })),
     });
   }

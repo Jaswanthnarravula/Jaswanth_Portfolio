@@ -1,6 +1,10 @@
 import type { GithubRepo } from '@/data/github-schema';
 import type { Project } from '@/data/schema';
-import { Heading, withSlots, type ViewProps } from './slots';
+import { DeepDiveArticle, ProjectCaseStudy } from './case-study';
+import { Heading, withSlots, type HeadingLevel, type ViewProps } from './slots';
+
+/** Two levels below a detail title, capped at h4 (shared/09). */
+const partLevel = (level: HeadingLevel): HeadingLevel => Math.min(level + 2, 4) as HeadingLevel;
 
 /** `ProjectList` — github apps, `projects`, `ls ~/projects`. */
 export function ProjectList({ data, density = 'comfortable', slots, headingLevel = 2 }: ViewProps<readonly Project[]>) {
@@ -40,6 +44,8 @@ export function ProjectList({ data, density = 'comfortable', slots, headingLevel
 export interface ProjectDetailData {
   readonly project: Project;
   readonly github?: GithubRepo;
+  /** Append the case study and deep dives (shared/23) — `/go/projects/{slug}`; OS apps place them themselves. */
+  readonly depth?: boolean;
 }
 
 /** `ProjectDetail` — github apps, viewer, `/go/projects/{slug}`. */
@@ -50,7 +56,7 @@ export function ProjectDetail({
   headingLevel = 2,
 }: ViewProps<ProjectDetailData>) {
   const { Tag, Media } = withSlots(slots);
-  const { project, github } = data;
+  const { project, github, depth } = data;
   return (
     <article className="cv cv-project" data-density={density}>
       <header className="cv-header">
@@ -95,6 +101,24 @@ export function ProjectDetail({
           ))}
         </ul>
       </section>
+      {depth && project.caseStudy && (
+        <section className="cv-section" aria-labelledby={`cv-case-${project.slug}`}>
+          <Heading level={headingLevel + 1} id={`cv-case-${project.slug}`} className="cv-subtitle">
+            Case study
+          </Heading>
+          <ProjectCaseStudy data={project} density={density} headingLevel={partLevel(headingLevel)} />
+        </section>
+      )}
+      {depth && project.deepDives && project.deepDives.length > 0 && (
+        <section className="cv-section" aria-labelledby={`cv-dives-${project.slug}`}>
+          <Heading level={headingLevel + 1} id={`cv-dives-${project.slug}`} className="cv-subtitle">
+            Deep dives
+          </Heading>
+          {project.deepDives.map((dive) => (
+            <DeepDiveArticle key={dive.slug} data={dive} density={density} headingLevel={partLevel(headingLevel)} />
+          ))}
+        </section>
+      )}
       {(project.repo || project.live || project.closedSource) && (
         <p className="cv-actions">
           {project.repo && (

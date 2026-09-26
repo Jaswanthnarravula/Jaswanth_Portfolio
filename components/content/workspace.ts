@@ -11,7 +11,7 @@
  * Pure, hook-free and OS-agnostic: both editors (macOS, Windows) render the same files.
  */
 import type { Contact, Experience, Person, Project, Skill, SkillGroup } from '@/data/schema';
-import { wrap } from './format';
+import { formatYears, wrap } from './format';
 import type { SyntaxLanguage } from './syntax';
 
 export interface WorkspaceFile {
@@ -54,7 +54,8 @@ export const fileKey = (file: Pick<WorkspaceFile, 'path'>): string => file.path.
 export function skillHint(skill: Skill): string | null {
   const parts: string[] = [];
   if (skill.level) parts.push(`${skill.level}/5`);
-  if (skill.years) parts.push(`${skill.years} ${skill.years === 1 ? 'yr' : 'yrs'}`);
+  const years = formatYears(skill);
+  if (years) parts.push(years);
   return parts.length ? parts.join(' · ') : null;
 }
 

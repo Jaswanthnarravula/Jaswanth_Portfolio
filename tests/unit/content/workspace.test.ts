@@ -173,7 +173,7 @@ describe('MAC-CODE-02 / WIN-CODE-02 generated files', () => {
     });
     const skills = rated.find((file) => fileKey(file) === 'skills.json')!;
     const lines = skills.text.split('\n');
-    expect(skills.hints).toEqual({ 2: '4/5 · 6 yrs', 4: '1 yr' });
+    expect(skills.hints).toEqual({ 2: '4/5 · 6+ yrs', 4: '1+ yr' });
     expect(lines[2]).toContain('"Go"');
     expect(lines[4]).toContain('"SQL"');
     expect(skillHint({ name: 'Bash' })).toBeNull();

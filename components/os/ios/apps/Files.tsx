@@ -18,7 +18,7 @@
  *     Look floats as a large centred sheet.
  */
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
-import { EducationDetail, ExperienceDetail, formatUpdated, resumeFileLabel } from '@/components/content';
+import { EducationDetail, ExperienceDetail, formatCredential, formatUpdated, resumeFileLabel } from '@/components/content';
 import { Menu, type MenuEntry } from '@/components/primitives/Menu';
 import type { ContentRef } from '@/data/schema';
 import {
@@ -737,7 +737,7 @@ export default function Files({ id, layout, landscape }: IosAppProps) {
             key={credential.name}
             kind="static"
             title={credential.name}
-            subtitle={credential.issuer}
+            subtitle={`${credential.issuer} · ${formatCredential(credential)}`}
             icon={{ glyph: 'graduation' }}
           />
         ))}

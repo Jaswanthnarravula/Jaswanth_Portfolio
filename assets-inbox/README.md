@@ -70,6 +70,11 @@ Source: `og:image` of `https://play.google.com/store/apps/details?id=<package>` 
 | File | Owner | Source |
 |---|---|---|
 | `ios-iphone16-ultramarine.jpg` (1290 × 2796, the iPhone 16 Plus screen) | Apple Inc. | iClarified "Download the Official iPhone 16 Wallpaper" → `www.iclarified.com/images/news/94911/453974/453974.jpg` (retrieved 2026-09-23) |
+| `android-pixel6-la-mer.jpg` (2880 × 3120, Pixel 6 "La Mer" — `wallpaper.android`, sage) | Google LLC | `github.com/wacko1805/Pixel-Wallpapers` → `Pixel-6-landscapes/8-La-Mer.jpeg` (retrieved 2026-09-24) |
+| `android-pixel6-art-4.png` · `-art-13.png` · `-art-9.png` (2880 × 3120 — blue · violet · coral) | Google LLC | same repository → `Pixel-6-art/4.png` · `13.png` · `9.png` (retrieved 2026-09-24) |
+
+Android alternatives seen and not used (same repository): Pixel 6 "Greece" (white text too faint on its pale sky),
+Pixel 7/7a feathers and Pixel 8/8a sets (below the 1170 × 2532 phone minimum), Pixel Fold (2208 px tall).
 
 Same family, not used: Teal · Pink · White · Black (same page, ids 453977 · 453978 · 453979 · 453981) and the
 iPhone 16 Pro titanium set (453966 · 453972 · 453969 · 453970, 1320 × 2868). The 945 × 2048 copies on iDownloadBlog are

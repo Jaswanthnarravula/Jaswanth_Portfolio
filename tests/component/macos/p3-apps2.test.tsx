@@ -147,7 +147,12 @@ describe('GitHub', () => {
       within(tabs)
         .getAllByRole('tab')
         .map((tab) => tab.textContent?.trim()),
-    ).toEqual(withLinks ? ['README', 'Stack', 'Links'] : ['README', 'Stack']); // Links only when there are some
+    ).toEqual([
+      'README',
+      ...(getProjectsWithGithub().find(({ project }) => project.slug === slug)!.project.caseStudy ? ['Case study'] : []),
+      'Stack',
+      ...(withLinks ? ['Links'] : []),
+    ]); // Case study and Links only when the project has them
     if (withLinks) {
       await userEvent.click(within(tabs).getByRole('tab', { name: /Links/ }));
       expect(within(tabs).getByRole('tab', { name: /Links/ })).toHaveAttribute('aria-selected', 'true');
@@ -157,6 +162,47 @@ describe('GitHub', () => {
       expect(external).toHaveAttribute('rel', 'noopener noreferrer');
       expect(external).toHaveAccessibleName(/opens in new tab/);
     }
+  });
+});
+
+describe('MAC-GH-08 case study + docs', () => {
+  const open = (slug: string) =>
+    render(
+      <GitHub
+        window={openWindow('github', { kind: 'content', ref: { section: 'projects', slug } })}
+        titleId="mac-title-github"
+        focused
+        compact={false}
+      />,
+    );
+
+  it('the Case study tab exists only with a case study; the About rail lists the results', () => {
+    const { unmount } = open('asl-gesture-recognition');
+    expect(screen.queryByRole('tab', { name: /Case study/ })).toBeNull();
+    unmount();
+    open('enterprise-sso');
+    expect(screen.getByRole('tab', { name: /Case study/ })).toBeInTheDocument();
+    const rail = screen.getByRole('complementary', { name: 'About' });
+    expect(within(rail).getByText('~3,000')).toBeInTheDocument();
+  });
+
+  it('a docs file opens in place with its path, focus moves to its title, and Esc returns focus to the file', async () => {
+    const { container } = open('enterprise-sso');
+    await userEvent.click(screen.getByRole('tab', { name: /Case study/ }));
+    const panel = screen.getByRole('tabpanel', { name: /Case study/ });
+    for (const part of ['The problem', 'My role', 'Key decisions', 'Results'])
+      expect(within(panel).getByRole('heading', { level: 4, name: part })).toBeInTheDocument();
+    const file = within(panel).getByRole('button', { name: 'rotating-signing-keys.md' });
+    await userEvent.click(file);
+    const view = screen.getByRole('region', { name: 'docs/rotating-signing-keys.md' });
+    expect(view).toHaveTextContent(/\/ enterprise-sso \/ docs \/ rotating-signing-keys\.md/);
+    const title = within(view).getByRole('heading', { name: 'Rotating signing keys without logging anyone out' });
+    await waitFor(() => expect(title).toHaveFocus());
+    expect(within(view).getAllByRole('listitem')).toHaveLength(4);
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByRole('region', { name: 'docs/rotating-signing-keys.md' })).toBeNull();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'rotating-signing-keys.md' })).toHaveFocus());
+    await noAxeViolations(container);
   });
 });
 

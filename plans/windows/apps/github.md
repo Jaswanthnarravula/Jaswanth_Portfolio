@@ -46,9 +46,21 @@ Rail = `nav` with a list of links/buttons, selected `aria-current="page"`. Cards
 Removed slug → Repositories page + InfoBar. Many projects → `content-visibility` on the list. No repo/live → Links
 pivot hidden.
 
+## Case study and deep dives (`shared/23-content-depth.md`)
+- A project with a `caseStudy` gets a **Case study** pivot after README (README · Case study · Stack · Links). It
+  shows the problem and my role as text, each key decision as a **Fluent Expander** (title visible; detail and
+  "Rejected: …" inside), and the results as **stroked metric cards** in a wrapping row. Pivots stay session state.
+- A project with `deepDives` adds a "Docs" group at the end of the pivot: a list of `{slug}.md` rows (document glyph,
+  title, summary). Activating one drills into a document page with the breadcrumb `Repositories › {project} › docs ›
+  {slug}.md` and the shared `DeepDiveArticle`; the title-bar back button and Alt+← return to the pivot (the document
+  is session state, like the pivots). Drill-in/out reuses the `WIN-GH-05` page motion.
+- A11y: expanders are buttons with `aria-expanded` + `aria-controls`; the docs list is a `ul` of links-as-buttons;
+  focus lands on the document's heading and returns to the row.
+
 ## Feature IDs + acceptance tests
 | ID | Feature | Acceptance test | Phase |
 |---|---|---|---|
+| `WIN-GH-07` | Case study pivot (expanders + metric cards) + docs drill-in for deep dives | `cmp: pivot only when caseStudy exists; expander aria-expanded toggles; docs drill-in and back restore focus` | P8 |
 | `WIN-GH-01` | App shell with NavigationView rail, title-bar search, Overview cards | `e2e: N2 projects match data` | P4 |
 | `WIN-GH-02` | Project page with breadcrumb, pivots, info card | `e2e: D1 /windows/github/{slug}` | P4 |
 | `WIN-GH-03` | Enrichment + heatmap card with accessible alternative | `cmp: absent when snapshot empty; axe clean` | P4 |
@@ -58,4 +70,6 @@ pivot hidden.
 
 ## Not like the others
 **NavigationView rail with an accent selection bar, stroked cards, pivots, InfoBars, drill-in motion** (macOS: sidebar
-+ tabs with a title flight; iOS: bottom tab bar and large titles; Android: Material top app bar with chips).
++ tabs with a title flight; iOS: bottom tab bar and large titles; Android: Material top app bar with chips). The case
+study uses **Fluent Expanders and stroked metric cards**; deep dives are a drill-in page (macOS: in-place file view;
+iOS: pushed document; Android: full-screen reader).

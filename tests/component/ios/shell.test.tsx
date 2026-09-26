@@ -172,6 +172,16 @@ describe('IOS-WIDG-01 / IOS-WIDG-02 widgets from data: a link + a sibling Downlo
   });
 });
 
+describe('IOS-WIDG-05 the Now widget', () => {
+  it('shows the Now note with its date as one link to About in Safari', () => {
+    renderShell();
+    const widget = screen.getByRole('article', { name: 'Now' });
+    const link = within(widget).getByRole('link', { name: /^Now: Building a clean-room OAuth\/OIDC provider/ });
+    expect(link).toHaveAttribute('href', '/ios/safari');
+    expect(widget).toHaveTextContent('Updated Sep 2026');
+  });
+});
+
 describe('IOS-FOLD-04 the Career folder: dialog semantics, focus in and out', () => {
   it('opens as a modal dialog labelled Career with links; Esc closes it back to the folder button', async () => {
     renderShell();

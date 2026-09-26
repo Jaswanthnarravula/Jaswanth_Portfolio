@@ -89,7 +89,8 @@ export type ContentRef =
 | `DATA-GUARD-01` | Placeholder guard blocks production | `unit: check-content exits non-zero with placeholder present` |
 | `DATA-EMPTY-01` | Empty collections handled | `cmp: each content view renders empty state` |
 | `DATA-RESUME-01` | Résumé file wired | `e2e: resume PDF returns 200 with correct content-type` |
+| `DATA-COPY-01` | Owner-approved copy (2026-09-25): headline, About text, sharper role bullets with before → after numbers, Java/Spring first, corrected project contexts, UAB coursework (`shared/23-content-depth.md`) | `unit: real data carries the approved headline and metrics; no placeholder; lead language is Java 17` |
 
 ## Open questions
-None — the owner's `Resume.pdf` is published (2026-09-23); the remaining `placeholder: true` facts are listed in
-`plans/STATUS.md`.
+None — the owner's `Resume.pdf` is published (2026-09-23) and every former `placeholder: true` fact was filled from
+it on 2026-09-24.

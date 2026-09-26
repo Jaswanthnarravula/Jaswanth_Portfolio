@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
+import { nowUpdated } from '@/components/content';
 import { getPerson, getProjects, getResume, getSkills } from '@/data/selectors';
 import { IconButton, Symbol, TopBar } from '../ui';
 import { useAndroid, useAppUi } from '../shell-context';
@@ -25,7 +26,21 @@ export default function Keep({ id, headingId }: AndroidAppProps) {
   const [dialog, setDialog] = useState(false);
   const notes = useMemo<readonly Note[]>(() => {
     const skills = getSkills();
+    const person = getPerson();
     return [
+      // AND-KEEP-07 (shared/23): what I'm working on now, pinned first — one sentence per line.
+      ...(person.now
+        ? [
+            {
+              id: 'now',
+              title: 'Now',
+              lines: [...person.now.text.split(/(?<=\.)\s+/), nowUpdated(person) ?? ''].filter(Boolean),
+              label: 'Now',
+              pinned: true,
+              tone: 2,
+            },
+          ]
+        : []),
       {
         id: 'overview',
         title: 'Skills — overview',
@@ -51,7 +66,7 @@ export default function Keep({ id, headingId }: AndroidAppProps) {
       ...skills.map((group, index) => ({
         id: group.id,
         title: group.label,
-        lines: group.items.map((item) => `${item.name} · ${item.level}/5`),
+        lines: group.items.map((item) => (item.level ? `${item.name} · ${item.level}/5` : item.name)),
         label: group.label,
         tone: (index % 4) + 2,
       })),
@@ -137,8 +152,13 @@ export default function Keep({ id, headingId }: AndroidAppProps) {
       <main className={styles.appScroller}>
         <div className={styles.noteBoard} data-list={list || undefined}>
           {label ? (
-            <button className={styles.filterChip} onClick={() => setLabel('')}>
-              {label} ×
+            <button
+              className={styles.filterChip}
+              aria-label={`Remove label filter ${label}`}
+              onClick={() => setLabel('')}
+            >
+              {label}
+              <Symbol>close</Symbol>
             </button>
           ) : null}
           {['Pinned', 'Others'].map((section) => (
@@ -182,14 +202,16 @@ export default function Keep({ id, headingId }: AndroidAppProps) {
           onMouseDown={(event) => event.target === event.currentTarget && setDrawer(false)}
         >
           <nav className={styles.sideSheet} aria-label="Labels">
-            <h3>Labels</h3>
+            <h3>Keep</h3>
             <button
+              aria-current={!label ? 'page' : undefined}
               onClick={() => {
                 setLabel('');
                 setDrawer(false);
               }}
             >
-              All notes
+              <Symbol>lightbulb</Symbol>
+              Notes
             </button>
             {notes
               .map((note) => note.label)
@@ -197,11 +219,13 @@ export default function Keep({ id, headingId }: AndroidAppProps) {
               .map((item) => (
                 <button
                   key={item}
+                  aria-current={label === item ? 'page' : undefined}
                   onClick={() => {
                     setLabel(item);
                     setDrawer(false);
                   }}
                 >
+                  <Symbol>label</Symbol>
                   {item}
                 </button>
               ))}

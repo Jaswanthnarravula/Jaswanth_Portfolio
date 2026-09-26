@@ -418,9 +418,12 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
     let timer: ReturnType<typeof setTimeout> | null = null;
     const commit = () => {
       const width = cell.getBoundingClientRect().width / 10 || 8;
-      const lineHeight = parseFloat(getComputedStyle(node).fontSize || '13') * LINE_HEIGHT;
+      const style = getComputedStyle(node);
+      const lineHeight = parseFloat(style.fontSize || '13') * LINE_HEIGHT;
+      // The real inline padding (each OS sets its own --term-pad), so wrapped text never overflows by a character.
+      const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
       const next = {
-        cols: Math.max(20, Math.floor((node.clientWidth - 16) / width)),
+        cols: Math.max(20, Math.floor((node.clientWidth - (padding || 16)) / width)),
         rows: Math.max(4, Math.floor(node.clientHeight / lineHeight)),
       };
       if (next.cols === size.current.cols && next.rows === size.current.rows) return;

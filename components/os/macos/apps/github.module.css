@@ -411,3 +411,150 @@
 .split {
   min-width: 0;
 }
+
+/* MAC-GH-08 (shared/23): the Case study tab, the docs/ list, the in-place document view, Results in the About rail. */
+.main {
+  container-type: inline-size;
+}
+.detailMain {
+  min-width: 0;
+}
+.tabs {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs > button {
+  flex: none;
+  white-space: nowrap;
+}
+@container (max-width: 620px) {
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+}
+/* The shared case-study view in GitHub's Markdown voice: sentence-case headings, hairline rules. */
+.caseStudy :global(.cv-subtitle) {
+  margin: 18px 0 6px;
+  color: var(--gh-ink);
+  font-size: 15px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.caseStudy :global(.cv-case-part:first-child .cv-subtitle) {
+  margin-top: 0;
+}
+.caseStudy :global(.cv-prose p),
+.caseStudy :global(.cv-case-role) {
+  margin: 0 0 8px;
+}
+.caseStudy :global(.cv-decision) {
+  border-left-color: var(--gh-border);
+}
+.caseStudy :global(.cv-decision-rejected) {
+  color: var(--gh-dim);
+}
+.caseStudy :global(.cv-result) {
+  border-color: var(--gh-border);
+  border-radius: 6px;
+}
+.docs h4 {
+  font-family: var(--font-mono, ui-monospace, monospace);
+}
+.docs ul {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  list-style: none;
+}
+.docs li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 8px 12px;
+}
+.docs li + li {
+  border-top: 1px solid var(--gh-border);
+}
+.docs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gh-accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.docs button:hover {
+  text-decoration: underline;
+}
+.docs button:focus-visible,
+.docBack:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.docs li > span {
+  color: var(--gh-dim);
+  font-size: 13px;
+}
+.docView {
+  animation: docIn 160ms ease-out;
+}
+:global([data-motion='reduced']) .docView {
+  animation: none;
+}
+@keyframes docIn {
+  from {
+    opacity: 0;
+  }
+}
+.docCrumbs {
+  margin: 0 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--gh-border);
+  color: var(--gh-dim);
+  font-size: 14px;
+}
+.docCrumbs strong {
+  color: var(--gh-ink);
+}
+.docBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gh-accent);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.docView :global(.cv-title) {
+  font-size: 20px;
+}
+.docView :global(.cv-title:focus) {
+  outline: none;
+}
+.results {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+}
+.results > div {
+  display: grid;
+  gap: 0;
+}
+.results dt {
+  color: var(--gh-dim);
+}
+.results dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

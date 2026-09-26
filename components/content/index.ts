@@ -1,5 +1,6 @@
 /** Shared content views — shared/03. Hook-free, server-renderable, slot-based; OS apps supply the idiom. */
-export { AboutOverview, type AboutData } from './about';
+export { AboutOverview, glanceRows, nowUpdated, type AboutData } from './about';
+export { ProjectCaseStudy, DeepDiveArticle, deepDiveFile } from './case-study';
 export { ProjectList, ProjectDetail, type ProjectDetailData } from './projects';
 export { ExperienceList, ExperienceDetail, EducationList, EducationDetail, type EducationData } from './experience';
 export { SkillsMatrix } from './skills';
@@ -17,7 +18,7 @@ export {
 export { LegalNotice, PrivacyNotice, type LegalData, type PrivacyData, type LegalCredit } from './legal';
 export { renderText, type ViewId, type TextViewData } from './text';
 export { mailtoUrl, copyText, type CopyOutcome } from './contact-actions';
-export { formatPeriod, formatPartialDate, wrap } from './format';
+export { formatCredential, formatPeriod, formatPartialDate, formatYears, wrap } from './format';
 export {
   DEFAULT_SLOTS,
   goHref,

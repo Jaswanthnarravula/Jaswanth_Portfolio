@@ -21,8 +21,10 @@ but with Material motion, Back-centric navigation and a different launcher philo
 | `notes` | Keep Notes | `keep` | `skills` as a board of notes | `/android/keep` |
 | `settings` | Settings | `settings` | preferences, accessibility, legal, privacy, Switch OS | `/android/settings` |
 
-**Home:** At-a-glance (date · "Résumé ready" chip) · grid row: GitHub · Keep · Settings · "Career" folder · favorites
-row: **Files (Résumé)** · Chrome · GitHub · Gmail · search bar. **Drawer:** all six apps A–Z + a suggestions row.
+**Home:** At-a-glance (date · "Résumé ready" smart line) · grid row: **Résumé** (pinned shortcut) · Keep · Settings ·
+"Career" folder · favorites row: **Files (Résumé)** · Chrome · GitHub · Gmail · Google search bar (G · mic · Lens).
+**Drawer:** all six apps A–Z + a suggestions row. Look: the genuine Pixel 6 "La Mer" wallpaper and its Material You
+palette, Google Sans Flex, Material Symbols, circular adaptive icons (08 Deviations log, 2026-09-24).
 
 ## Reading order
 1. `01-identity.md` 2. `02-app-lifecycle.md`

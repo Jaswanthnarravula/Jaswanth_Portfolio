@@ -8,7 +8,10 @@
  *   · Projects: large title "Repositories", a search field and stack filter chips (session state), rows with name,
  *     tagline and a meta line (language dot · ★ · year); "No repositories" + Clear when nothing matches;
  *   · project detail (pushed, `/ios/github/{slug}`): back chevron "Repositories", Share; name, tagline · year; a
- *     segmented control README · Stack · About (`radiogroup`); topic chips; Repository ↗ / Live site ↗ (new tab);
+ *     segmented control README · Case Study · Stack · About (`radiogroup`; Case Study only with a case study); topic
+ *     chips; Repository ↗ / Live site ↗ (new tab);
+ *   · Case Study (`IOS-GH-07`, shared/23): grouped inset lists; each deep dive is a disclosure row that pushes its
+ *     document onto the stack (session state), popped by the back chevron or the edge swipe;
  *   · Profile: initials avatar, name, headline, stats and the contribution heatmap only when the snapshot has them
  *     (`role="img"` + summary + a table — `IOS-GH-03`), "Pinned" 2-up;
  *   · full page (`IOS-GH-05`): the owner's frame `ios-github.png` — sidebar (large title "GitHub", search, Home ·
@@ -18,7 +21,8 @@
  * with a notice. Résumé projects are the source of truth; GitHub only enriches them (`GH-MERGE-01`).
  */
 import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { refSlug, type Project } from '@/data/schema';
+import { DeepDiveArticle } from '@/components/content';
+import { refSlug, type DeepDive, type Project } from '@/data/schema';
 import { getGithubSnapshot, getPerson, getProjectsWithGithub, type EnrichedProject } from '@/data/selectors';
 import { currentLocation } from '@/lib/kernel/state';
 import type { AppLocation, WindowId, WindowInstance } from '@/lib/kernel/types';
@@ -45,7 +49,7 @@ import type { IosAppProps } from './registry';
 import styles from './github.module.css';
 
 type Tab = 'home' | 'projects' | 'profile';
-type Segment = 'readme' | 'stack' | 'about';
+type Segment = 'readme' | 'case' | 'stack' | 'about';
 
 const TABS: readonly { id: Tab; label: string; glyph: 'house' | 'repo' | 'person' }[] = [
   { id: 'home', label: 'Home', glyph: 'house' },
@@ -111,6 +115,8 @@ export default function GitHub({ id, layout, headingId }: IosAppProps) {
   const [query, setQuery] = useAppUi(id, 'q', '');
   const [filter, setFilter] = useAppUi(id, 'filter', '');
   const [segment, setSegment] = useAppUi(id, 'segment', 'readme');
+  /** The pushed deep dive, as `{project}:{dive}` — session state, stale once another project is shown. */
+  const [docRaw, setDoc] = useAppUi(id, 'doc', '');
   const [tops, setTopsRaw] = useAppUiJson<Partial<Record<Tab, string>>>(id, 'tops', {});
   const setTops = (update: (all: Partial<Record<Tab, string>>) => Partial<Record<Tab, string>>) =>
     setTopsRaw(update(tops));
@@ -123,6 +129,11 @@ export default function GitHub({ id, layout, headingId }: IosAppProps) {
   const current = slug ? items.find((item) => item.project.slug === slug) : undefined;
   // A deep link lands on Projects; the tab remembered in the session wins otherwise.
   const tab: Tab = tabRaw === 'home' || tabRaw === 'profile' || tabRaw === 'projects' ? tabRaw : 'projects';
+  const openDive: DeepDive | null =
+    (current &&
+      docRaw.startsWith(`${current.project.slug}:`) &&
+      current.project.deepDives?.find((dive) => `${current.project.slug}:${dive.slug}` === docRaw)) ||
+    null;
   const removed =
     requested?.kind === 'content' && requested.ref.section === 'projects' && refSlug(requested.ref) && !current;
 
@@ -398,11 +409,38 @@ export default function GitHub({ id, layout, headingId }: IosAppProps) {
     render: () => (
       <ProjectDetailView
         item={item}
-        segment={segment === 'stack' || segment === 'about' ? segment : 'readme'}
+        segment={
+          segment === 'stack' || segment === 'about' || (segment === 'case' && item.project.caseStudy)
+            ? segment
+            : 'readme'
+        }
         onSegment={(next) => setSegment(next)}
+        onOpenDoc={(dive) => setDoc(`${item.project.slug}:${dive}`)}
       />
     ),
   });
+
+  /** A deep dive pushed above its project (`IOS-GH-07`): large title, the shared article, back chevron to the project. */
+  const docScreen = (item: EnrichedProject, dive: DeepDive): NavScreen => ({
+    key: `doc:${dive.slug}`,
+    title: dive.title,
+    large: true,
+    tone: 'plain',
+    backLabel: 'Back',
+    render: () => (
+      <div className={styles.doc}>
+        <DeepDiveArticle data={dive} headingLevel={4} />
+      </div>
+    ),
+  });
+  /** Popping the document closes it; popping further goes to the tab's root. */
+  const pop = (toIndex: number, depth: number) => {
+    if (openDive && toIndex === depth - 2) setDoc(null);
+    else {
+      if (openDive) setDoc(null);
+      popToRoot();
+    }
+  };
 
   const rootScreen = (which: Tab): NavScreen => ({
     key: `root:${which}`,
@@ -442,6 +480,7 @@ export default function GitHub({ id, layout, headingId }: IosAppProps) {
             : [emptyDetail]
         : [rootScreen(tab)];
     if (tab !== 'projects' && current) detailScreens.push(detail(current));
+    if (current && openDive) detailScreens.push(docScreen(current, openDive));
     return (
       <div className={styles.split} aria-labelledby={headingId}>
         <nav className={styles.sidebar} aria-label="GitHub">
@@ -478,7 +517,7 @@ export default function GitHub({ id, layout, headingId }: IosAppProps) {
             id={`gh-pad-${tab}`}
             window={id}
             screens={detailScreens}
-            onPop={() => popToRoot()}
+            onPop={(toIndex) => pop(toIndex, detailScreens.length)}
             rootBack={
               current && tab === 'projects' ? (
                 <button
@@ -502,6 +541,7 @@ export default function GitHub({ id, layout, headingId }: IosAppProps) {
   // --- Phone: tab bar + one stack per tab ---------------------------------------------------------------------------
   const screens: NavScreen[] = [rootScreen(tab)];
   if (current) screens.push(detail(current));
+  if (current && openDive) screens.push(docScreen(current, openDive));
   const tabBar = (
     <TabBar
       label="GitHub"
@@ -511,7 +551,14 @@ export default function GitHub({ id, layout, headingId }: IosAppProps) {
     />
   );
   return (
-    <NavStack key={tab} id={`gh-${tab}`} window={id} screens={screens} onPop={() => popToRoot()} tabBar={tabBar} />
+    <NavStack
+      key={tab}
+      id={`gh-${tab}`}
+      window={id}
+      screens={screens}
+      onPop={(toIndex) => pop(toIndex, screens.length)}
+      tabBar={tabBar}
+    />
   );
 }
 
@@ -519,10 +566,12 @@ function ProjectDetailView({
   item,
   segment,
   onSegment,
+  onOpenDoc,
 }: {
   readonly item: EnrichedProject;
   readonly segment: Segment;
   readonly onSegment: (next: Segment) => void;
+  readonly onOpenDoc: (dive: string) => void;
 }) {
   const { project, github } = item;
   const [expanded, setExpanded] = useState(false);
@@ -544,6 +593,7 @@ function ProjectDetailView({
         onChange={onSegment}
         options={[
           { id: 'readme', label: 'README' },
+          ...(project.caseStudy ? [{ id: 'case' as const, label: 'Case Study' }] : []),
           { id: 'stack', label: 'Stack' },
           { id: 'about', label: 'About' },
         ]}
@@ -572,6 +622,7 @@ function ProjectDetailView({
             ) : null}
           </>
         ) : null}
+        {segment === 'case' ? <CaseStudy project={project} onOpenDoc={onOpenDoc} /> : null}
         {segment === 'stack' ? (
           <>
             <h4 className="sr-only">Stack</h4>
@@ -607,6 +658,63 @@ function ProjectDetailView({
         ) : null}
       </p>
     </article>
+  );
+}
+
+/** The Case Study segment (`IOS-GH-07`): grouped inset lists, the deep dives as disclosure rows that push. */
+function CaseStudy({ project, onOpenDoc }: { readonly project: Project; readonly onOpenDoc: (dive: string) => void }) {
+  const study = project.caseStudy;
+  if (!study) return null;
+  return (
+    <div className={styles.caseStudy}>
+      <Group header="The Problem">
+        {study.problem.map((paragraph) => (
+          <Row
+            key={paragraph.slice(0, 40)}
+            kind="static"
+            title={<span className={styles.cellText}>{paragraph}</span>}
+          />
+        ))}
+      </Group>
+      <Group header="My Role">
+        <Row kind="static" title={<span className={styles.cellText}>{study.role}</span>} />
+      </Group>
+      <Group header="Key Decisions">
+        {study.decisions.map((decision) => (
+          <Row
+            key={decision.title}
+            kind="static"
+            title={<span className={styles.cellTitle}>{decision.title}</span>}
+            subtitle={
+              <span className={styles.cellText}>
+                {decision.detail}
+                {decision.rejected ? <span className={styles.rejected}>Rejected: {decision.rejected}</span> : null}
+              </span>
+            }
+          />
+        ))}
+      </Group>
+      <Group header="Results">
+        {study.results.map((metric) => (
+          <Row key={metric.label} kind="static" title={metric.label} value={metric.value} />
+        ))}
+      </Group>
+      {project.deepDives?.length ? (
+        <Group header="Deep Dives">
+          {project.deepDives.map((dive) => (
+            <Row
+              key={dive.slug}
+              kind="button"
+              pushKey={`doc:${dive.slug}`}
+              title={dive.title}
+              subtitle={dive.summary}
+              accessory="chevron"
+              onPress={() => onOpenDoc(dive.slug)}
+            />
+          ))}
+        </Group>
+      ) : null}
+    </div>
   );
 }
 

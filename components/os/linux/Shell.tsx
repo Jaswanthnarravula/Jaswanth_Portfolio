@@ -230,7 +230,7 @@ function Viewer({ target, onClose }: { target: ContentRef; onClose(): void }) {
         tabIndex={0}
         onKeyDown={onKeyDown}
       >
-        <ContentFor target={target} density="compact" headingLevel={3} slots={{ Link }} />
+        <ContentFor target={target} density="compact" headingLevel={3} slots={{ Link }} depth />
       </div>
       {siblings.length ? (
         <footer className={styles.viewerFooter}>
@@ -627,7 +627,7 @@ export default function LinuxShell({ heading }: OsShellProps) {
               { t: '' },
             ]
           : []),
-        ...motdLines(getProjects().length, getPerson().openTo),
+        ...motdLines(getProjects().length, getPerson().openTo, Boolean(getPerson().now)),
       ];
   const seed: TerminalSessionSnapshot = {
     cwd: routeCwd,

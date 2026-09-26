@@ -14,7 +14,7 @@ import type { ContentRef } from '@/data/schema';
 import { currentLocation } from '@/lib/kernel/state';
 import { useKernel } from '@/stores/kernel-context';
 import { dispatchSoon } from '@/stores/kernel-store';
-import { BottomNav, IconButton, Symbol, TopBar } from '../ui';
+import { BottomNav, IconButton, Symbol, TopBar, type SymbolName } from '../ui';
 import { useAndroid, useAppUiJson } from '../shell-context';
 import type { AndroidAppProps } from './types';
 import styles from '../android.module.css';
@@ -157,7 +157,7 @@ export default function Files({ id, headingId }: AndroidAppProps) {
                       onClick={() => navigate({ section: ref.section as 'experience' | 'education', slug })}
                     >
                       <span className={styles.fileArt}>
-                        <Symbol>description</Symbol>
+                        <Symbol filled>{ref.section === 'education' ? 'school' : 'work'}</Symbol>
                       </span>
                       <span>
                         <strong>{primary}</strong>
@@ -227,11 +227,11 @@ export default function Files({ id, headingId }: AndroidAppProps) {
       </div>
     );
   }
-  const categories = [
+  const categories: readonly { title: string; glyph: SymbolName; ref: ContentRef }[] = [
     { title: 'Documents', glyph: 'description', ref: { section: 'resume' } as ContentRef },
     { title: 'Experience', glyph: 'work', ref: { section: 'experience' } as ContentRef },
     { title: 'Education', glyph: 'school', ref: { section: 'education' } as ContentRef },
-    { title: 'Projects', glyph: 'source', ref: { section: 'projects' } as ContentRef },
+    { title: 'Projects', glyph: 'code', ref: { section: 'projects' } as ContentRef },
   ];
   return (
     <div className={styles.app} aria-labelledby={headingId} data-app="files">
@@ -248,7 +248,7 @@ export default function Files({ id, headingId }: AndroidAppProps) {
             <>
               <h3>Starred</h3>
               <button className={styles.recentCard} onClick={() => navigate({ section: 'resume' })}>
-                <Symbol>picture_as_pdf</Symbol>
+                <Symbol filled>picture_as_pdf</Symbol>
                 <span>
                   <strong>Résumé.pdf</strong>
                   <small>Updated {formatUpdated(getResume().updated)}</small>
@@ -260,7 +260,7 @@ export default function Files({ id, headingId }: AndroidAppProps) {
               <h3>Recents</h3>
               <div className={styles.cardRail}>
                 <button className={styles.recentCard} onClick={() => navigate({ section: 'resume' })}>
-                  <Symbol>picture_as_pdf</Symbol>
+                  <Symbol filled>picture_as_pdf</Symbol>
                   <span>
                     <strong>Résumé.pdf</strong>
                     <small>PDF document</small>
@@ -300,7 +300,9 @@ export default function Files({ id, headingId }: AndroidAppProps) {
               </div>
               <h3>Storage devices</h3>
               <button className={styles.listRow} onClick={() => navigate({ section: 'experience' })}>
-                <Symbol>smartphone</Symbol>
+                <span className={styles.tonalIcon}>
+                  <Symbol>smartphone</Symbol>
+                </span>
                 <span>
                   <strong>Internal storage</strong>
                   <small>Jaswanth · {experience.length + education.length + getProjects().length + 1} items</small>

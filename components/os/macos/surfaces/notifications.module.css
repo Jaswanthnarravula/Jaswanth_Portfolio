@@ -337,3 +337,21 @@ button.body:focus-visible {
     border: 1px solid CanvasText;
   }
 }
+
+/* MAC-NOTIF-07 (shared/23): the Now widget spans the widget grid and opens Safari's About. */
+.nowWidget {
+  grid-column: 1 / -1;
+  color: inherit;
+  text-decoration: none;
+}
+.nowWidget:hover {
+  background: rgb(255 255 255 / 0.6);
+}
+.nowWidget:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.widgetCaption {
+  color: var(--text-secondary);
+  font-size: 11px;
+}

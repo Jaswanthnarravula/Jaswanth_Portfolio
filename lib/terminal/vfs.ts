@@ -82,6 +82,7 @@ function motd(data: TerminalData, cols: number, hasTour: boolean): readonly stri
   const rows: [string, string][] = [
     ['résumé ready', 'open resume'],
     [`${data.projects.length} ${data.projects.length === 1 ? 'project' : 'projects'}`, 'cd projects && ls'],
+    ...(data.person.now ? [["what I'm working on", 'cat .plan'] as [string, string]] : []),
     [data.person.openTo.replace(/\.$/, ''), 'contact'],
     ['new here?', hasTour ? 'help        (or: tour)' : 'help'],
   ];
@@ -127,6 +128,20 @@ export function buildVfs(data: TerminalData, options: VfsOptions = {}): Vfs {
       section: 'experience',
       slug: role.slug,
     }),
+  );
+  // shared/23: deep dives live in ~/notes (LNX-FS-08); no ContentRef, so `open` pages them in `less`.
+  const dives = data.projects.flatMap((project) => (project.deepDives ?? []).map((dive) => ({ dive, project })));
+  const notes = dives.map(({ dive }) =>
+    textFile(`${dive.slug}.md`, (cols) => renderText('deep-dive', dive, cols), updated),
+  );
+  const notesIndex = textFile(
+    'README.md',
+    (cols) => [
+      '# Notes — deep dives',
+      '',
+      ...dives.flatMap(({ dive, project }) => wrap(`${dive.slug}.md — ${dive.title} (${project.name})`, cols)),
+    ],
+    updated,
   );
   const schools = data.education.map((school) =>
     textFile(`${school.slug}.md`, (cols) => renderText('education-detail', school, cols), dateOf(school.end, updated), {
@@ -177,8 +192,16 @@ export function buildVfs(data: TerminalData, options: VfsOptions = {}): Vfs {
     dir('projects', [projectIndex, ...projects], DIR_MODE, { section: 'projects' }, updated),
     dir('experience', roles, DIR_MODE, { section: 'experience' }, updated),
     dir('education', schools, DIR_MODE, { section: 'education' }, updated),
+    ...(notes.length ? [dir('notes', [notesIndex, ...notes], DIR_MODE, undefined, updated)] : []),
     textFile('.bashrc', () => bashrcText(), updated),
-    textFile('.plan', (cols) => wrap(data.person.openTo, cols), updated),
+    textFile(
+      '.plan',
+      (cols) => [
+        ...(data.person.now ? [...wrap(data.person.now.text, cols), ''] : []),
+        ...wrap(data.person.openTo, cols),
+      ],
+      updated,
+    ),
     dir('.ssh', [], PRIVATE_MODE, undefined, updated),
   ]);
 

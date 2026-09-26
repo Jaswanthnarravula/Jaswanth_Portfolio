@@ -17,6 +17,22 @@ export interface Provenance {
   readonly metricsReported: true;
 }
 
+/** The recruiter card — shared/23 `CONTENT-GLANCE-01`. Deliberately has no work-authorization field. */
+export interface Glance {
+  readonly targetRoles: readonly string[];
+  readonly experience: string;
+  readonly coreStack: readonly string[];
+  readonly strengths: readonly string[];
+  readonly workModes: readonly string[];
+  readonly availability: string;
+}
+
+/** What the owner is working on now — shared/23 `CONTENT-NOW-01`. */
+export interface NowNote {
+  readonly text: string;
+  readonly updated: PartialDate;
+}
+
 export interface Person {
   readonly name: string;
   readonly givenName: string;
@@ -25,6 +41,8 @@ export interface Person {
   readonly location: string;
   readonly summary: readonly string[];
   readonly openTo: string;
+  readonly glance?: Glance;
+  readonly now?: NowNote;
   readonly placeholder?: true;
 }
 
@@ -50,9 +68,38 @@ export interface Experience {
   readonly end: PartialDate | 'present' | null;
   readonly location: string | null;
   readonly summary: string;
+  /** Team, ownership and scale — shared/23 `CONTENT-SCOPE-01`. */
+  readonly scope?: string;
   readonly highlights: readonly string[];
   readonly stack: readonly string[];
   readonly placeholder?: true;
+}
+
+/** Case study parts — shared/23 `CONTENT-CASE-01`. */
+export interface Decision {
+  readonly title: string;
+  readonly detail: string;
+  readonly rejected?: string;
+}
+export interface ResultMetric {
+  readonly value: string;
+  readonly label: string;
+}
+export interface CaseStudy {
+  readonly problem: readonly string[];
+  readonly role: string;
+  readonly decisions: readonly Decision[];
+  readonly results: readonly ResultMetric[];
+}
+
+/** A deep-dive article attached to its project — shared/23 `CONTENT-DIVE-01`. */
+export type ArticleBlock =
+  { readonly kind: 'p'; readonly text: string } | { readonly kind: 'steps'; readonly items: readonly string[] };
+export interface DeepDive {
+  readonly slug: string;
+  readonly title: string;
+  readonly summary: string;
+  readonly blocks: readonly ArticleBlock[];
 }
 
 export interface MediaRef {
@@ -78,6 +125,8 @@ export interface Project {
   /** Source is proprietary: explains why no repository link exists. */
   readonly closedSource?: true;
   readonly media?: readonly MediaRef[];
+  readonly caseStudy?: CaseStudy;
+  readonly deepDives?: readonly DeepDive[];
   readonly placeholder?: true;
 }
 
@@ -92,16 +141,25 @@ export interface Education {
   readonly placeholder?: true;
 }
 
+/** shared/23 `CONTENT-CRED-01`: a course is never presented as a certification. */
 export interface Credential {
   readonly name: string;
   readonly issuer: string;
+  readonly kind: 'course' | 'certification';
+  readonly status: 'earned' | 'in-progress';
+  /** Issued (earned) or target (in progress). */
+  readonly date?: PartialDate;
+  readonly verifyUrl?: string;
 }
 
 export interface Skill {
   readonly name: string;
   /** Only when the owner publishes a rating — never inferred (owner decision 2026-09-21). */
   readonly level?: 1 | 2 | 3 | 4 | 5;
+  /** At least this many years, as the owner states them (shared/23 `CONTENT-SKILL-01`). */
   readonly years?: number;
+  /** "About {years}" rather than "{years}+". */
+  readonly approx?: true;
 }
 
 export interface SkillGroup {

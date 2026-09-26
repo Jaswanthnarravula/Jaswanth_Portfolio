@@ -111,7 +111,7 @@ export function SemanticFallback({ route }: { route: FallbackRoute }) {
         )}
         {needsTitle && <h1 className="doc-title">{title}</h1>}
         {ref ? (
-          <ContentFor target={ref} headingLevel={needsTitle ? 2 : 1} slots={{ Link }} />
+          <ContentFor target={ref} headingLevel={needsTitle ? 2 : 1} slots={{ Link }} depth />
         ) : (
           <p className="doc-lede">
             {app?.title} is part of the interactive {os ? OS_NAMES[os] : ''} experience.

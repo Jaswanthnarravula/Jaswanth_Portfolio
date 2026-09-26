@@ -1,5 +1,22 @@
-import type { Experience, Person, Project } from '@/data/schema';
+import type { Experience, Glance, Person, Project } from '@/data/schema';
+import { formatPartialDate } from './format';
 import { Heading, withSlots, type ViewProps } from './slots';
+
+/** The recruiter card's rows (shared/23 `CONTENT-GLANCE-01`) — there is deliberately no work-authorization row. */
+export function glanceRows(glance: Glance): readonly (readonly [label: string, value: string])[] {
+  return [
+    ['Target role', glance.targetRoles.join(' · ')],
+    ['Experience', glance.experience],
+    ['Core stack', glance.coreStack.join(' · ')],
+    ['Strengths', glance.strengths.join(' · ')],
+    ['Location', glance.workModes.join(' · ')],
+    ['Availability', glance.availability],
+  ];
+}
+
+/** "Updated Sep 2026" for the Now note. */
+export const nowUpdated = (person: Person): string | null =>
+  person.now ? `Updated ${formatPartialDate(person.now.updated)}` : null;
 
 export interface AboutData {
   readonly person: Person;
@@ -24,11 +41,31 @@ export function AboutOverview({ data, density = 'comfortable', slots, headingLev
           </p>
         </header>
       )}
+      {person.glance && (
+        <section className="cv-section cv-glance" aria-labelledby="cv-about-glance">
+          <Heading level={headingLevel + 1} id="cv-about-glance" className="cv-subtitle">
+            At a glance
+          </Heading>
+          <dl className="cv-glance-list">
+            {glanceRows(person.glance).map(([label, value]) => (
+              <div key={label} className="cv-glance-row">
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
       <div className="cv-prose">
         {person.summary.map((paragraph) => (
           <p key={paragraph.slice(0, 32)}>{paragraph}</p>
         ))}
         <p className="cv-open-to">{person.openTo}</p>
+        {person.now && (
+          <p className="cv-now">
+            <strong>Now:</strong> {person.now.text} <span className="cv-muted">({nowUpdated(person)})</span>
+          </p>
+        )}
       </div>
       {featured.length > 0 && density !== 'compact' && (
         <section className="cv-section" aria-labelledby="cv-about-featured">

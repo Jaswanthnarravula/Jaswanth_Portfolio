@@ -41,6 +41,7 @@ Welcome, {visitor is never named}. This is Jaswanth's portfolio — as a shell.
 
   * résumé ready          →  open resume
   * {n} projects          →  cd projects && ls
+  * what I'm working on   →  cat .plan
   * {person.openTo}       →  contact
   * new here?             →  help        (or: tour)
 
@@ -81,6 +82,7 @@ buttons named "Insert command: open resume".
 | `LNX-BOOT-05` | Autofocus on fine pointers only; "tap here to type" on coarse | `e2e: desktop focused; iphone not focused` | P7 |
 | `LNX-BOOT-06` | Slow/failure states without alarming output | `e2e: offline → [FAILED] line + Retry + plain link` | P7 |
 | `LNX-BOOT-07` | Reduced motion skips boot/login; announcer summaries | `e2e: R1; cmp: single summarized announcement` | P7 |
+| `LNX-BOOT-08` | MOTD "what I'm working on → cat .plan" line (Now, `shared/23`), insertable; MOTD stays ≤ 10 lines with the continuity line | `unit: motd lines include the Now entry in both builders; ≤ 10 lines with continuity` | P8 |
 
 ## Not like the others
 Boot is a **scrolling kernel log**, the lock screen is a **login line**, and "notifications" are **MOTD lines you can

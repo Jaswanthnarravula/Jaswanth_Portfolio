@@ -1,9 +1,10 @@
 /**
  * `perf` project (PR gate, shared/12). Lighthouse CI covers LCP/CLS/TBT/a11y/budgets; this file holds the
  * browser-side performance assertions Lighthouse cannot make.
- *   DS-FONT-01 — Inter is the only webfont on every route outside the Linux chunk (Roboto Flex and the mono face
- *   arrive with the Android and Linux chunks), and it never blocks text (`font-display: swap`). The one addition is
- *   `/`, whose welcome screens are the storyboard frames: it also declares and preloads the frame's IBM Plex Sans.
+ *   DS-FONT-01 — Inter is the only webfont on every route outside the Android and Linux chunks (Google Sans Flex
+ *   arrives with Android — AND-ID-06 — and the mono face with Linux), and it never blocks text (`font-display: swap`).
+ *   The other addition is `/`, whose welcome screens are the storyboard frames: it also declares and preloads the
+ *   frame's IBM Plex Sans.
  *   P1: PERF-LAZY-01 · NFLX-AUDIO-02 · HELLO-LCP-01 · HELLO-GL-01 · PERF-GL-01 · PERF-GL-02 · CHOOSE-PREF-01 ·
  *   TEST-PERF-01 (INP + session CLS).
  */
@@ -14,9 +15,9 @@ const ROUTES = ['/', '/plain', '/go/projects/enterprise-sso', '/macos', '/window
 
 for (const path of ROUTES) {
   const welcome = path === '/';
-  test(`only Inter${welcome ? ' and the storyboard text face are' : ' is'} declared or fetched on ${path} @perf`, async ({
-    page,
-  }) => {
+  const android = path === '/android';
+  const extra = welcome ? ' and the storyboard text face are' : android ? ' and Google Sans Flex are' : ' is';
+  test(`only Inter${extra} declared or fetched on ${path} @perf`, async ({ page }) => {
     const fetched: string[] = [];
     page.on('request', (request) => {
       if (request.resourceType() === 'font') fetched.push(new URL(request.url()).pathname);
@@ -37,14 +38,22 @@ for (const path of ROUTES) {
     expect(faces.length).toBeGreaterThan(0);
     for (const face of faces) {
       expect(face.family, JSON.stringify(face)).toMatch(
-        welcome ? /^(inter( Fallback)?|IBM Plex Sans)$/ : /^inter( Fallback)?$/,
+        welcome
+          ? /^(inter( Fallback)?|IBM Plex Sans)$/
+          : android
+            ? /^(inter( Fallback)?|Google Sans Flex)$/
+            : /^inter( Fallback)?$/,
       );
       if (face.remote) expect(face.display, face.family).toBe('swap');
     }
-    expect(fetched.length).toBeLessThanOrEqual(welcome ? 2 : 1);
+    expect(fetched.length).toBeLessThanOrEqual(welcome || android ? 2 : 1);
     for (const url of fetched)
       expect(url).toMatch(
-        welcome ? /\/(inter[^/]*|ibm-plex-sans-latin-var\.[0-9a-f]{10})\.woff2$/ : /\/inter[^/]*\.woff2$/,
+        welcome
+          ? /\/(inter[^/]*|ibm-plex-sans-latin-var\.[0-9a-f]{10})\.woff2$/
+          : android
+            ? /\/(inter[^/]*|google-sans-flex-latin-var\.[0-9a-f]{10})\.woff2$/
+            : /\/inter[^/]*\.woff2$/,
       );
   });
 }

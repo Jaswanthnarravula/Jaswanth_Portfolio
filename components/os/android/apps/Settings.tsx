@@ -3,12 +3,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { LegalNotice, PrivacyNotice, formatUpdated } from '@/components/content';
 import { contentRev } from '@/data/content-index';
 import { getContact, getPerson, getResume } from '@/data/selectors';
-import { assetCredits, ASSET_MODE } from '@/lib/assets/manifest';
+import { assetCredits, ASSET_MODE, resolveAsset } from '@/lib/assets/manifest';
 import { useKernel, usePrefs } from '@/stores/kernel-context';
 import { dispatch } from '@/stores/kernel-store';
 import type { CapabilityProfile, UserPreferences } from '@/lib/kernel/types';
 import { eggProgress } from '@/lib/eggs';
-import { Switch, Symbol, TopBar } from '../ui';
+import { ANDROID_ROLES, ROLE_LABEL } from '../model';
+import { AdaptiveIcon, Switch, Symbol, TopBar, type SymbolName } from '../ui';
 import { useAndroid, useAppUi } from '../shell-context';
 import type { AndroidAppProps } from './types';
 import styles from '../android.module.css';
@@ -24,20 +25,34 @@ type Screen =
   | 'apps'
   | 'about'
   | 'legal';
-const ROWS: readonly { id: Screen; title: string; subtitle: string; glyph: string }[] = [
-  { id: 'wallpaper', title: 'Wallpaper & style', subtitle: 'Colours, dark theme, themed icons', glyph: 'palette' },
+/** Pixel Settings rows, each icon on its own tonal hue as Android 14+ Settings draws them. */
+const ROWS: readonly { id: Screen; title: string; subtitle: string; glyph: SymbolName; hue: number }[] = [
+  {
+    id: 'wallpaper',
+    title: 'Wallpaper & style',
+    subtitle: 'Colours, dark theme, themed icons',
+    glyph: 'palette',
+    hue: 300,
+  },
   {
     id: 'accessibility',
     title: 'Accessibility',
     subtitle: 'Motion, contrast, text and shortcuts',
     glyph: 'accessibility_new',
+    hue: 250,
   },
-  { id: 'sound', title: 'Sound & vibration', subtitle: 'Volume and interface sounds', glyph: 'volume_up' },
-  { id: 'navigation', title: 'Navigation mode', subtitle: 'Gesture or 3-button navigation', glyph: 'gesture' },
-  { id: 'notifications', title: 'Notifications', subtitle: 'Heads-up alerts', glyph: 'notifications' },
-  { id: 'privacy', title: 'Privacy', subtitle: 'Anonymous analytics, no cookies', glyph: 'shield' },
-  { id: 'apps', title: 'Apps', subtitle: 'App info for six apps', glyph: 'apps' },
-  { id: 'about', title: 'About phone', subtitle: "Jaswanth's Portfolio", glyph: 'info' },
+  { id: 'sound', title: 'Sound & vibration', subtitle: 'Volume and interface sounds', glyph: 'volume_up', hue: 190 },
+  {
+    id: 'navigation',
+    title: 'Navigation mode',
+    subtitle: 'Gesture or 3-button navigation',
+    glyph: 'gesture',
+    hue: 150,
+  },
+  { id: 'notifications', title: 'Notifications', subtitle: 'Heads-up alerts', glyph: 'notifications', hue: 60 },
+  { id: 'privacy', title: 'Privacy', subtitle: 'Anonymous analytics, no cookies', glyph: 'shield', hue: 25 },
+  { id: 'apps', title: 'Apps', subtitle: 'App info for six apps', glyph: 'apps', hue: 220 },
+  { id: 'about', title: 'About phone', subtitle: "Jaswanth's Portfolio", glyph: 'info', hue: 270 },
 ];
 
 export default function Settings({ id, headingId, layout }: AndroidAppProps) {
@@ -101,8 +116,8 @@ export default function Settings({ id, headingId, layout }: AndroidAppProps) {
                 setQuery('');
               }}
             >
-              <span className={styles.tonalIcon}>
-                <Symbol>{row.glyph}</Symbol>
+              <span className={styles.tonalIcon} data-hue="" style={{ ['--hue' as string]: row.hue }}>
+                <Symbol filled>{row.glyph}</Symbol>
               </span>
               <span>
                 <strong>{row.title}</strong>
@@ -114,7 +129,7 @@ export default function Settings({ id, headingId, layout }: AndroidAppProps) {
         ))}
         <li>
           <button onClick={(event) => android.openSwitchOs(event.currentTarget)}>
-            <span className={styles.tonalIcon}>
+            <span className={styles.tonalIcon} data-hue="" style={{ ['--hue' as string]: 130 }}>
               <Symbol>power_settings_new</Symbol>
             </span>
             <span>
@@ -159,6 +174,12 @@ export default function Settings({ id, headingId, layout }: AndroidAppProps) {
   );
 }
 
+/** The Wallpaper & style thumbnail: the palette's real Pixel wallpaper in official mode, its gradient otherwise. */
+function wallpaperThumb(palette: 'sage' | 'blue' | 'violet' | 'coral') {
+  const asset = resolveAsset(palette === 'sage' ? 'wallpaper.android' : `wallpaper.android-${palette}`);
+  return asset.render === 'image' ? { ['--choice-wallpaper' as string]: `url("${asset.src}")` } : undefined;
+}
+
 function SettingsDetail({
   screen,
   prefs,
@@ -197,7 +218,7 @@ function SettingsDetail({
           <div className={styles.wallpaperChoices} role="radiogroup" aria-label="Wallpaper">
             {(['sage', 'blue', 'violet', 'coral'] as const).map((value) => (
               <label key={value}>
-                <span data-palette={value} />
+                <span data-palette={value} style={wallpaperThumb(value)} />
                 <input
                   type="radio"
                   name="palette"
@@ -343,7 +364,23 @@ function SettingsDetail({
               ] as const
             ).map(([value, label]) => (
               <label key={value}>
-                <span aria-hidden="true">{value === 'gesture' ? '━' : '◀  ●  ■'}</span>
+                <span aria-hidden="true">
+                  {value === 'gesture' ? (
+                    <i className={styles.navPreviewGesture} />
+                  ) : (
+                    <span className={styles.navPreviewButtons}>
+                      <svg viewBox="0 0 24 24">
+                        <path d="M17 5.3v13.4a1 1 0 0 1-1.5.87L4.8 13.3a1.5 1.5 0 0 1 0-2.6l10.7-6.27A1 1 0 0 1 17 5.3z" />
+                      </svg>
+                      <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="7.2" />
+                      </svg>
+                      <svg viewBox="0 0 24 24">
+                        <rect x="5.5" y="5.5" width="13" height="13" rx="2.2" />
+                      </svg>
+                    </span>
+                  )}
+                </span>
                 <b>{label}</b>
                 <input
                   type="radio"
@@ -387,13 +424,11 @@ function SettingsDetail({
         {section(
           'Installed apps',
           <ul className={styles.appInfoList}>
-            {['Chrome', 'Files', 'Gmail', 'GitHub', 'Keep', 'Settings'].map((name) => (
-              <li key={name}>
-                <span className={styles.tonalIcon}>
-                  <Symbol>apps</Symbol>
-                </span>
+            {ANDROID_ROLES.map((role) => (
+              <li key={role}>
+                <AdaptiveIcon app={role} />
                 <span>
-                  <strong>{name}</strong>
+                  <strong>{ROLE_LABEL[role]}</strong>
                   <small>Version 1.0 · Portfolio content app</small>
                 </span>
               </li>
@@ -409,7 +444,8 @@ function SettingsDetail({
           data={{
             credits: assetCredits(),
             contactEmail: getContact().email,
-            glyphCredit: 'Material-style symbols are rendered with original text glyphs.',
+            glyphCredit:
+              'Material Symbols Rounded by Google (Apache License 2.0); Google Sans Flex (SIL Open Font License)',
             assetMode: ASSET_MODE,
           }}
           headingLevel={4}

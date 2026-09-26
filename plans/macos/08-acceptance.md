@@ -116,6 +116,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | `MAC-NOTIF-04` | Spring in / ease out / swipe with velocity hand-off | P3 | built | spring in / 250 ms out / swipe with velocity hand-off (surfaces/Notifications.tsx); swipe + R1 fade e2e pending |  |
 | `MAC-NOTIF-05` | Never steals focus; status region semantics | P3 | verified | `component/macos/p3-surfaces.test.tsx` › MAC-NOTIF-01/05: one banner at a time; focus stays put; announced through the status region · green locally 2026-09-22 (vitest) |  |
 | `MAC-NOTIF-06` | Compact variants | P3 | built | compact full-width banner + sheet Center (notifications.module.css); M3 assertion pending |  |
+| `MAC-NOTIF-07` | "Now" widget in the Center from `person.now`, links to Safari About | P8 | verified | `component/macos/p3-surfaces.test.tsx` › MAC-NOTIF-07 shows person.now with its date and links to Safari About · green 2026-09-25 (vitest); screenshot on the production build | |
 
 ### `surfaces/spotlight.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
@@ -150,6 +151,7 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | `MAC-GH-05` | List ↔ detail flight, reversible | P3 | built | card → header flight, reversed by the in-app back chevron (apps/GitHub.tsx); mid-flight e2e pending |  |
 | `MAC-GH-06` | External link treatment | P3 | verified | `component/macos/p3-apps2.test.tsx` › MAC-GH-02/06: a project detail has README · Stack · Links tabs; external links open a new tab, announced · green locally 2026-09-22 (vitest) |  |
 | `MAC-GH-07` | Compact pushed-page layout | P3 | built | compact pushed page + segmented tabs (github.module.css); M3 assertion pending |  |
+| `MAC-GH-08` | Case study tab + Results in the About rail + `docs/` deep-dive file view | P8 | verified | `component/macos/p3-apps2.test.tsx` › MAC-GH-08 the Case study tab exists only with a case study; the About rail lists the results · a docs file opens in place with its path, focus moves to its title, and Esc returns focus to the file (axe clean) · `e2e` macOS suite chromium-desktop 55 passed (3 pre-existing failures: KRN-SWITCH-02, MAC-PREV-06, MAC-WM-01) · green 2026-09-25 (production build) | see log (2026-09-25) |
 
 ### `apps/mail.md`
 | ID | Feature | Phase | Status | Evidence | Deviation |
@@ -320,3 +322,4 @@ name / CI run / capture. An OS is flipped to `released` only when every row is `
 | 2026-09-22 | `MAC-RESP-01` | Compact mode collapses the menu bar to `Apple · AppName ▾`; this is the one DOM difference between postures (`RESP-DOM-01`) | The collapsed menu is a different menubar model; everything else is hidden by CSS only | For review at the P3 gate |
 | 2026-09-22 | — | The P2 placeholder `apps/AppBody.tsx` is removed; every app has its own chunk | All eight apps are built in P3 | For review at the P3 gate |
 | 2026-09-22 | — | P2 e2e tests adapted to P3 behaviour: desktop items open on double-click, the first chooser entry now shows the lock screen (an unlock step in `macos-chooser.spec.ts` and in `chooser.spec.ts` R1 · X1), the GitHub window is named "GitHub — Repositories", the drag grab point avoids the new ⋯ button | The P2 assertions described the vertical slice; the behaviours they check are unchanged | For review at the P3 gate |
+| 2026-09-25 | MAC-GH-02 · MAC-GH-08 | The detail grid drops the About rail below the content when the window's main column is under 620 px (container query), and the tabs scroll instead of wrapping | With four tabs the fixed 220 px rail overlapped the tab strip in a default-size window | Owner-approved content-depth work (2026-09-25); for review |

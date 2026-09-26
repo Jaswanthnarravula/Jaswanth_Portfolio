@@ -5,12 +5,14 @@
  *     chips, the repository list (featured first);
  *   · list: pinned cards (name, tagline, language dot, ★, year), the contribution heatmap (53 × 7, 5 levels, a summary
  *     + a table alternative — absent when the snapshot has none), "More on GitHub";
- *   · detail (/macos/github/{slug}): breadcrumb `jaswanth / {project}`, tabs README · Stack · Links, the About rail;
+ *   · detail (/macos/github/{slug}): breadcrumb `jaswanth / {project}`, tabs README · Case study · Stack · Links, the
+ *     About rail (+ Results); a deep dive opens in place as `docs/{slug}.md` (`MAC-GH-08`, shared/23);
  *   · list → detail: the card flies into the header (a shared-element flight); Back reverses it, mid-flight too;
  *   · external links open a new tab with `rel="noopener noreferrer"`, marked ↗ and announced.
  * Résumé data decides which projects exist; GitHub only enriches them (`GH-MERGE-01`, `GH-OFF-01`).
  */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { DeepDiveArticle, deepDiveFile, ProjectCaseStudy } from '@/components/content';
 import { KernelLink } from '@/components/shell/KernelLink';
 import type { GithubSnapshot } from '@/data/github-schema';
 import { refSlug } from '@/data/schema';
@@ -21,7 +23,16 @@ import { prefersReducedMotion } from '@/lib/motion/dur';
 import { dispatch } from '@/stores/kernel-store';
 import { useAppCommands } from '../commands';
 import { ChevronLeft } from '../icons';
-import { BookGlyph, ExternalGlyph, ForkGlyph, LayersGlyph, LinkGlyph, StarGlyph } from '../glyphs';
+import {
+  BookGlyph,
+  ExternalGlyph,
+  FileGlyph,
+  ForkGlyph,
+  LayersGlyph,
+  LinkGlyph,
+  StarGlyph,
+  TextGlyph,
+} from '../glyphs';
 import { setAppState } from '../ui';
 import type { WindowBodyProps } from '../window/Window';
 import app from './app.module.css';
@@ -40,7 +51,7 @@ const LANGUAGE_COLORS: Readonly<Record<string, string>> = {
 const languageColor = (language: string | null | undefined) =>
   language ? (LANGUAGE_COLORS[language] ?? '#8b949e') : null;
 
-type Tab = 'readme' | 'stack' | 'links';
+type Tab = 'readme' | 'case' | 'stack' | 'links';
 /** Where the card was when it was clicked (the flight's origin), by project slug. */
 const origins = new Map<string, DOMRect>();
 
@@ -119,6 +130,10 @@ export default function GitHub({ window: win, titleId, compact }: WindowBodyProp
   const person = getPerson();
   const [filters, setFilters] = useState<readonly string[]>([]);
   const [tab, setTab] = useState<Tab>('readme');
+  /** The open deep dive (`docs/{slug}.md`) — session state, like the tabs (shared/23). */
+  const [doc, setDoc] = useState<string | null>(null);
+  /** Where focus returns when the document closes. */
+  const returnTo = useRef<string | null>(null);
   const [shown, setShown] = useState<string | null>(slug);
   /** The project whose detail is flying back into its card (it stays on screen until the reverse lands). */
   const [leaving, setLeaving] = useState<string | null>(null);
@@ -130,6 +145,7 @@ export default function GitHub({ window: win, titleId, compact }: WindowBodyProp
   if (slug && slug !== shown) {
     setShown(slug);
     setTab('readme');
+    setDoc(null);
     setLeaving(null);
   } else if (!slug && shown && leaving !== shown) setShown(null);
 
@@ -143,8 +159,41 @@ export default function GitHub({ window: win, titleId, compact }: WindowBodyProp
   }, [projects]);
   const visible = projects.filter(({ project }) => filters.every((filter) => project.stack.includes(filter)));
   const detail = shown ? projects.find(({ project }) => project.slug === shown) : undefined;
+  const openDive = (doc && detail?.project.deepDives?.find((dive) => dive.slug === doc)) || null;
 
   useEffect(() => setAppState('github:project', shown ?? undefined), [shown]);
+
+  // Opening a document moves focus to its title; closing it returns focus to its row in the docs list.
+  useEffect(() => {
+    if (doc) {
+      const title = document.getElementById(`cv-dive-${doc}`);
+      title?.setAttribute('tabindex', '-1');
+      title?.focus({ preventScroll: true });
+      return;
+    }
+    const slugToFocus = returnTo.current;
+    returnTo.current = null;
+    if (slugToFocus) document.querySelector<HTMLElement>(`[data-gh-doc="${slugToFocus}"]`)?.focus();
+  }, [doc]);
+  const openDoc = (diveSlug: string) => {
+    returnTo.current = diveSlug;
+    setDoc(diveSlug);
+  };
+  const closeDoc = () => setDoc(null);
+  // Esc and ⌘[ close the document (listened on the view itself: it is a region, not a control).
+  const docView = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = docView.current;
+    if (!doc || !el) return;
+    const onKey = (event: globalThis.KeyboardEvent) => {
+      if (event.key === 'Escape' || (event.key === '[' && (event.metaKey || event.ctrlKey))) {
+        event.preventDefault();
+        setDoc(null);
+      }
+    };
+    el.addEventListener('keydown', onKey);
+    return () => el.removeEventListener('keydown', onKey);
+  }, [doc]);
 
   // List → detail: the card flies into the header (the in-app back chevron reverses it, mid-flight too).
   useLayoutEffect(() => {
@@ -203,6 +252,7 @@ export default function GitHub({ window: win, titleId, compact }: WindowBodyProp
   const tabs: readonly { id: Tab; label: string }[] = detail
     ? [
         { id: 'readme', label: 'README' },
+        ...(detail.project.caseStudy ? [{ id: 'case' as const, label: 'Case study' }] : []),
         { id: 'stack', label: 'Stack' },
         ...(detail.project.repo || detail.project.live ? [{ id: 'links' as const, label: 'Links' }] : []),
       ]
@@ -348,88 +398,136 @@ export default function GitHub({ window: win, titleId, compact }: WindowBodyProp
                 <p className={styles.detailTagline}>{detail.project.tagline}</p>
               </header>
               <div className={styles.detailGrid}>
-                <div>
-                  <div role="tablist" aria-label="Project" className={compact ? styles.segmented : styles.tabs}>
-                    {tabs.map((entry, index) => (
-                      <button
-                        key={entry.id}
-                        type="button"
-                        role="tab"
-                        id={`gh-tab-${entry.id}`}
-                        aria-selected={tab === entry.id}
-                        aria-controls={`gh-panel-${entry.id}`}
-                        tabIndex={tab === entry.id ? 0 : -1}
-                        onClick={() => setTab(entry.id)}
-                        onKeyDown={(event) => onTabKey(event, index)}
-                      >
-                        {entry.id === 'readme' ? (
-                          <BookGlyph size={14} />
-                        ) : entry.id === 'stack' ? (
-                          <LayersGlyph size={14} />
-                        ) : (
-                          <LinkGlyph size={14} />
-                        )}{' '}
-                        {entry.label}
+                <div className={styles.detailMain}>
+                  {openDive ? (
+                    <section className={styles.docView} aria-label={`docs/${deepDiveFile(openDive)}`} ref={docView}>
+                      <p className={styles.docCrumbs}>
+                        <span>{snapshot.user?.login ?? 'jaswanth'}</span> / <span>{detail.project.slug}</span> /{' '}
+                        <span>docs</span> / <strong>{deepDiveFile(openDive)}</strong>
+                      </p>
+                      <button type="button" className={styles.docBack} onClick={closeDoc}>
+                        <ChevronLeft size={12} /> Back to Case study
                       </button>
-                    ))}
-                  </div>
-                  {tab === 'readme' ? (
-                    <section
-                      id="gh-panel-readme"
-                      role="tabpanel"
-                      aria-labelledby="gh-tab-readme"
-                      className={styles.readme}
-                    >
-                      <p className={styles.context}>{detail.project.context}</p>
-                      {detail.project.description.map((paragraph) => (
-                        <p key={paragraph.slice(0, 32)}>{paragraph}</p>
+                      <div className={styles.readme}>
+                        <DeepDiveArticle data={openDive} headingLevel={4} />
+                      </div>
+                    </section>
+                  ) : null}
+                  <div hidden={Boolean(openDive)}>
+                    <div role="tablist" aria-label="Project" className={compact ? styles.segmented : styles.tabs}>
+                      {tabs.map((entry, index) => (
+                        <button
+                          key={entry.id}
+                          type="button"
+                          role="tab"
+                          id={`gh-tab-${entry.id}`}
+                          aria-selected={tab === entry.id}
+                          aria-controls={`gh-panel-${entry.id}`}
+                          tabIndex={tab === entry.id ? 0 : -1}
+                          onClick={() => setTab(entry.id)}
+                          onKeyDown={(event) => onTabKey(event, index)}
+                        >
+                          {entry.id === 'readme' ? (
+                            <BookGlyph size={14} />
+                          ) : entry.id === 'case' ? (
+                            <TextGlyph size={14} />
+                          ) : entry.id === 'stack' ? (
+                            <LayersGlyph size={14} />
+                          ) : (
+                            <LinkGlyph size={14} />
+                          )}{' '}
+                          {entry.label}
+                        </button>
                       ))}
-                      <h4>Highlights</h4>
-                      <ul>
-                        {detail.project.highlights.map((item) => (
-                          <li key={item}>{item}</li>
+                    </div>
+                    {tab === 'readme' ? (
+                      <section
+                        id="gh-panel-readme"
+                        role="tabpanel"
+                        aria-labelledby="gh-tab-readme"
+                        className={styles.readme}
+                      >
+                        <p className={styles.context}>{detail.project.context}</p>
+                        {detail.project.description.map((paragraph) => (
+                          <p key={paragraph.slice(0, 32)}>{paragraph}</p>
                         ))}
-                      </ul>
-                      {detail.project.closedSource && !detail.project.repo ? (
-                        <p className={styles.note}>Built in production; the source is proprietary.</p>
-                      ) : null}
-                    </section>
-                  ) : null}
-                  {tab === 'stack' ? (
-                    <section
-                      id="gh-panel-stack"
-                      role="tabpanel"
-                      aria-labelledby="gh-tab-stack"
-                      className={styles.readme}
-                    >
-                      <ul className={styles.topics} aria-label="Stack">
-                        {detail.project.stack.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    </section>
-                  ) : null}
-                  {tab === 'links' ? (
-                    <section
-                      id="gh-panel-links"
-                      role="tabpanel"
-                      aria-labelledby="gh-tab-links"
-                      className={styles.readme}
-                    >
-                      <ul className={styles.links}>
-                        {detail.project.repo ? (
-                          <li>
-                            <External href={detail.project.repo}>Repository</External>
-                          </li>
+                        <h4>Highlights</h4>
+                        <ul>
+                          {detail.project.highlights.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                        {detail.project.closedSource && !detail.project.repo ? (
+                          <p className={styles.note}>Built in production; the source is proprietary.</p>
                         ) : null}
-                        {detail.project.live ? (
-                          <li>
-                            <External href={detail.project.live}>Live site</External>
-                          </li>
+                      </section>
+                    ) : null}
+                    {tab === 'case' && detail.project.caseStudy ? (
+                      <section
+                        id="gh-panel-case"
+                        role="tabpanel"
+                        aria-labelledby="gh-tab-case"
+                        className={`${styles.readme} ${styles.caseStudy}`}
+                      >
+                        <ProjectCaseStudy data={detail.project} headingLevel={4} />
+                        {detail.project.deepDives?.length ? (
+                          <section aria-labelledby="gh-docs" className={styles.docs}>
+                            <h4 id="gh-docs">docs</h4>
+                            <ul>
+                              {detail.project.deepDives.map((dive) => (
+                                <li key={dive.slug}>
+                                  <button
+                                    type="button"
+                                    data-gh-doc={dive.slug}
+                                    aria-describedby={`gh-doc-${dive.slug}`}
+                                    onClick={() => openDoc(dive.slug)}
+                                  >
+                                    <FileGlyph size={14} /> {deepDiveFile(dive)}
+                                  </button>
+                                  <span id={`gh-doc-${dive.slug}`}>{dive.title}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </section>
                         ) : null}
-                      </ul>
-                    </section>
-                  ) : null}
+                      </section>
+                    ) : null}
+                    {tab === 'stack' ? (
+                      <section
+                        id="gh-panel-stack"
+                        role="tabpanel"
+                        aria-labelledby="gh-tab-stack"
+                        className={styles.readme}
+                      >
+                        <ul className={styles.topics} aria-label="Stack">
+                          {detail.project.stack.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </section>
+                    ) : null}
+                    {tab === 'links' ? (
+                      <section
+                        id="gh-panel-links"
+                        role="tabpanel"
+                        aria-labelledby="gh-tab-links"
+                        className={styles.readme}
+                      >
+                        <ul className={styles.links}>
+                          {detail.project.repo ? (
+                            <li>
+                              <External href={detail.project.repo}>Repository</External>
+                            </li>
+                          ) : null}
+                          {detail.project.live ? (
+                            <li>
+                              <External href={detail.project.live}>Live site</External>
+                            </li>
+                          ) : null}
+                        </ul>
+                      </section>
+                    ) : null}
+                  </div>
                 </div>
                 <aside className={styles.about} aria-label="About">
                   <h4 className={styles.sectionTitle}>About</h4>
@@ -470,6 +568,19 @@ export default function GitHub({ window: win, titleId, compact }: WindowBodyProp
                       </>
                     ) : null}
                   </dl>
+                  {detail.project.caseStudy ? (
+                    <>
+                      <h4 className={styles.sectionTitle}>Results</h4>
+                      <dl className={styles.results}>
+                        {detail.project.caseStudy.results.map((metric) => (
+                          <div key={metric.label}>
+                            <dt>{metric.label}</dt>
+                            <dd>{metric.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </>
+                  ) : null}
                   {detail.github?.topics.length ? (
                     <ul className={styles.topics} aria-label="Topics">
                       {detail.github.topics.map((topic) => (

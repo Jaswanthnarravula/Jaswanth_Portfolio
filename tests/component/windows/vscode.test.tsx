@@ -256,8 +256,12 @@ describe('WIN-CODE-02 the shared editor body over the shared generated files', (
 
     await user.dblClick(item('skills.json'));
     const panel = screen.getByRole('tabpanel', { name: 'skills.json' });
-    const text = files.find((file) => fileKey(file) === 'skills.json')!.text;
-    expect(codeLines(panel).map((line) => line.querySelector('[data-lc]')!.textContent)).toEqual(text.split('\n'));
+    const skillsFile = files.find((file) => fileKey(file) === 'skills.json')!;
+    const text = skillsFile.text;
+    // Each line is the generated text plus, where the data publishes years, its inlay hint.
+    expect(codeLines(panel).map((line) => line.querySelector('[data-lc]')!.textContent)).toEqual(
+      text.split('\n').map((line, index) => line + (skillsFile.hints?.[index] ?? '')),
+    );
     expect(codeLines(panel)[0]!.firstElementChild).toHaveAttribute('aria-hidden', 'true');
     expect(codeLines(panel)[0]!.firstElementChild).toHaveTextContent('1');
     expect(screen.getByText('JSON')).toBeInTheDocument();
@@ -631,7 +635,7 @@ describe('MAC-CODE-04 read-only message (once per session) and inlay skill hints
     expect(lines[0]).toHaveAttribute('data-caret');
     await user.keyboard('{ArrowDown}{ArrowDown}');
     expect(panel.querySelector('[data-caret]')).toBe(lines[2]);
-    expect(lines[2]).toHaveTextContent('"Go",4/5 · 6 yrs');
+    expect(lines[2]).toHaveTextContent('"Go",4/5 · 6+ yrs');
     expect(lines[3]!.textContent).toBe('4    "TypeScript"');
     expect(screen.getByText('Ln 3, Col 1')).toBeInTheDocument();
     await user.keyboard('{End}');

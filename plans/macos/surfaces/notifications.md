@@ -22,7 +22,10 @@ Max one banner visible at a time; others queue (max 3, oldest dropped into the C
 **Banner:** 344 × auto px card, top-right, 12 px below the menu bar, `--material-thick`, radius 16 px; app icon
 24 px, app name (11 px caps), title (13 px semibold), body (13 px), hover reveals ✕ and action buttons.
 **Notification Center:** right-side panel 360 px wide, full workspace height, opened by clicking the clock;
-contains "Notifications" list (grouped by app) and a small widget area (date, "Open to work" status, résumé shortcut).
+contains "Notifications" list (grouped by app) and a small widget area (date, "Open to work" status, **"Now"**
+widget, résumé shortcut). The **Now** widget (`MAC-NOTIF-07`, `shared/23`) shows `person.now.text` with "Updated
+{now.updated}" in the widget caption style and is a link to Safari's About (`/macos/safari`). It is static (no
+timer), a widget and not a banner, so the trigger table above is unchanged.
 
 ## Behaviour & states
 - Banner dwell 6 s minimum; **pauses on hover and on focus**; ✕ or swipe-right dismisses; clicking the body performs
@@ -58,6 +61,7 @@ motion → no slide. Notification referencing a closed app → action re-opens i
 | `MAC-NOTIF-04` | Spring in / ease out / swipe with velocity hand-off | `e2e: swipe dismiss; R1 fade-only under reduced motion` | P3 |
 | `MAC-NOTIF-05` | Never steals focus; status region semantics | `cmp: focus unchanged when a banner appears` | P3 |
 | `MAC-NOTIF-06` | Compact variants | `e2e: M3 full-width banner + sheet Center` | P3 |
+| `MAC-NOTIF-07` | "Now" widget in the Center from `person.now`, links to Safari About | `cmp: widget text equals data; link opens Safari; absent when now is missing` | P8 |
 
 ## Not like the others
 Top-right banners and a right-side Center opened from the **clock** (Windows: bottom-right toasts + a Center that

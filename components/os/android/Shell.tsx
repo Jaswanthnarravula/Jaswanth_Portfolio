@@ -1,10 +1,11 @@
 'use client';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { preload } from 'react-dom';
 import { hrefFor } from '@/components/shell/KernelLink';
-import { AssetIcon } from '@/components/ui/AssetIcon';
 import { contentIndex } from '@/data/content-index';
 import type { ContentRef } from '@/data/schema';
 import { getFeaturedProjects, getPerson, getProjects, getResume } from '@/data/selectors';
+import { resolveAsset } from '@/lib/assets/manifest';
 import { createKonami, recordEgg } from '@/lib/eggs';
 import type { AppRole } from '@/lib/kernel/ids';
 import { matchShortcut } from '@/lib/kernel/keymap';
@@ -19,7 +20,7 @@ import { dispatch, dispatchSoon, getKernel } from '@/stores/kernel-store';
 import { AppSurface } from './AppSurface';
 import { prefetchApp } from './apps/registry';
 import { AndroidProvider, type AndroidServices } from './shell-context';
-import { IconButton, Symbol } from './ui';
+import { AdaptiveIcon, IconButton, Symbol, type SymbolName } from './ui';
 import { ANDROID_DURATION } from './motion';
 import {
   ANDROID_ROLES,
@@ -27,7 +28,6 @@ import {
   FAVORITES,
   HOME_APPS,
   ROLE_LABEL,
-  androidIcon,
   appShortcutLabels,
   baseNotifications,
   navMode,
@@ -38,6 +38,25 @@ import {
 import styles from './android.module.css';
 
 export const OS_CHUNK_MARKER = 'pf-os-chunk:android';
+
+/** Google Sans Flex (OFL), loaded only by this chunk (plans/android/01-identity AND-ID-06). */
+const FACE_SRC = '/assets/fonts/google-sans-flex-latin-var.c59d5c0ad9.woff2';
+const FACE_CSS = `@font-face{font-family:'Google Sans Flex';src:url(${FACE_SRC}) format('woff2');font-weight:400 700;font-style:normal;font-display:swap}`;
+
+/** One genuine Pixel wallpaper per palette in official mode; `null` keeps the palette's CSS gradient (original mode). */
+const WALLPAPERS = (() => {
+  const src = (id: string) => {
+    const asset = resolveAsset(id);
+    return asset.render === 'image' ? asset.src : null;
+  };
+  return {
+    sage: src('wallpaper.android'),
+    blue: src('wallpaper.android-blue'),
+    violet: src('wallpaper.android-violet'),
+    coral: src('wallpaper.android-coral'),
+  } as const;
+})();
+
 const isRole = (role: AppRole): role is AndroidRole => (ANDROID_ROLES as readonly string[]).includes(role);
 const roleOf = (id: WindowId | null): AndroidRole | null => {
   if (!id) return null;
@@ -46,11 +65,15 @@ const roleOf = (id: WindowId | null): AndroidRole | null => {
 };
 const inText = (target: EventTarget | null) =>
   target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
+/** Pixel's status-bar clock: 12-hour, no AM/PM. */
+const clock = (date: Date) =>
+  date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(/\s?[AP]M$/i, '');
+
+type OpenApp = (role: AndroidRole, location?: AppLocation, origin?: HTMLElement | null) => void;
 
 export default function AndroidShell({ heading }: OsShellProps) {
   const root = useRef<HTMLDivElement>(null);
   const statusButton = useRef<HTMLButtonElement>(null);
-  const allAppsButton = useRef<HTMLButtonElement>(null);
   const launchSearchButton = useRef<HTMLButtonElement>(null);
   const viewport = useKernel((state) => state.viewport);
   const pointer = useKernel((state) => state.capabilities.pointer);
@@ -62,6 +85,9 @@ export default function AndroidShell({ heading }: OsShellProps) {
   const navigation = navMode(prefs.androidNavigation, pointer);
   const foreground = roleOf(session.focused);
   const activeWindow = foreground ? session.windows[`android:${foreground}` as WindowId] : undefined;
+  const wallpaper = WALLPAPERS[prefs.androidPalette];
+  if (wallpaper) preload(wallpaper, { as: 'image', type: 'image/avif', fetchPriority: 'low' });
+  preload(FACE_SRC, { as: 'font', type: 'font/woff2', crossOrigin: '' });
   const [overlay, setOverlay] = useState<AndroidOverlay | null>(null);
   const [shadeExpanded, setShadeExpanded] = useState(false);
   const [query, setQuery] = useState('');
@@ -76,6 +102,7 @@ export default function AndroidShell({ heading }: OsShellProps) {
   const [snackbar, setSnackbar] = useState<{ text: string; action?: { label: string; run: () => void } } | null>(null);
   const [headsUp, setHeadsUp] = useState(false);
   const [appOpening, setAppOpening] = useState(false);
+  const [now, setNow] = useState(() => new Date());
   const backHandler = useRef<(() => boolean) | null>(null);
   const longPress = useRef<number | null>(null);
   const person = getPerson();
@@ -93,8 +120,7 @@ export default function AndroidShell({ heading }: OsShellProps) {
     [resume.updated, projects.length, featured?.name, person.openTo],
   );
   const visibleNotifications = notifications.filter((item) => !dismissed.includes(item.id));
-  const now = useMemo(() => new Date(), []);
-  const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: false });
+  const time = clock(now);
   const date = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   const homePointer = useRef<{ x: number; y: number } | null>(null);
 
@@ -149,8 +175,8 @@ export default function AndroidShell({ heading }: OsShellProps) {
     );
   }, [activeWindow, closeOverlay, folder, foreground, home, overlay, query, shadeExpanded, shortcuts]);
 
-  const openApp = useCallback(
-    (role: AndroidRole, location?: AppLocation, origin?: HTMLElement | null) => {
+  const openApp = useCallback<OpenApp>(
+    (role, location, origin) => {
       closeOverlay();
       setAppOpening(true);
       prefetchApp(role);
@@ -196,6 +222,10 @@ export default function AndroidShell({ heading }: OsShellProps) {
     notify('Résumé.pdf · Download complete');
   }, [notify, resume]);
   const switchOs = useCallback(() => setOverlay('switch-os'), []);
+  const openDrawer = useCallback((focusSearch = false) => {
+    setOverlay('drawer');
+    if (focusSearch) setTimeout(() => document.querySelector<HTMLInputElement>('[data-drawer-search]')?.focus(), 0);
+  }, []);
   const services = useMemo<AndroidServices>(
     () => ({
       layout,
@@ -215,6 +245,11 @@ export default function AndroidShell({ heading }: OsShellProps) {
   );
 
   useEffect(() => {
+    // The status-bar clock follows the real minute.
+    const tick = window.setInterval(() => setNow(new Date()), 15_000);
+    return () => clearInterval(tick);
+  }, []);
+  useEffect(() => {
     if (!appOpening) return;
     const timer = setTimeout(() => {
       setAppOpening(false);
@@ -228,9 +263,7 @@ export default function AndroidShell({ heading }: OsShellProps) {
     if (!foreground) backHandler.current = null;
   }, [foreground]);
   useEffect(() => {
-    const controller = new AbortController();
     for (const role of FAVORITES) prefetchApp(role);
-    return () => controller.abort();
   }, []);
   useEffect(() => {
     if (lock || arrival !== 'chooser' || !prefs.notifications) return;
@@ -252,8 +285,7 @@ export default function AndroidShell({ heading }: OsShellProps) {
         back();
       } else if (shortcut === 'search' || shortcut === 'search-slash') {
         event.preventDefault();
-        setOverlay('drawer');
-        setTimeout(() => document.querySelector<HTMLInputElement>('[data-drawer-search]')?.focus(), 0);
+        openDrawer(true);
       } else if (shortcut === 'home') {
         event.preventDefault();
         home();
@@ -267,7 +299,7 @@ export default function AndroidShell({ heading }: OsShellProps) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [back, home, prefs.singleKeyShortcuts, switchOs]);
+  }, [back, home, openDrawer, prefs.singleKeyShortcuts, switchOs]);
   useEffect(() => {
     const konami = createKonami();
     const onKey = (event: KeyboardEvent) => {
@@ -328,9 +360,28 @@ export default function AndroidShell({ heading }: OsShellProps) {
     else if (label === 'Switch OS') switchOs();
     else openApp(role);
   };
+  const onShortcuts = (role: AndroidRole, target: HTMLElement) => setShortcuts({ role, anchor: target });
+  const favorites = (
+    <Favorites
+      layout={layout}
+      navigation={navigation}
+      session={session}
+      onOpen={openApp}
+      onDrawer={() => openDrawer()}
+      onBack={back}
+      onHome={home}
+      onRecents={() => setOverlay('recents')}
+      onShortcuts={onShortcuts}
+    />
+  );
+  // What the status bar and gesture handle sit on: the wallpaper (Home), an app's surface, or the dark shade.
+  const statusTone = overlay === 'shade' || overlay === 'recents' ? 'shade' : foreground ? 'app' : 'wallpaper';
 
   return (
     <AndroidProvider value={services}>
+      <style href="android-face" precedence="default">
+        {FACE_CSS}
+      </style>
       <div
         ref={root}
         className={styles.android}
@@ -340,7 +391,10 @@ export default function AndroidShell({ heading }: OsShellProps) {
         data-palette={prefs.androidPalette}
         data-themed-icons={prefs.androidThemedIcons || undefined}
         data-nav-mode={navigation}
+        data-status-tone={statusTone}
+        data-wallpaper-official={wallpaper ? '' : undefined}
         data-os-chunk={OS_CHUNK_MARKER}
+        style={wallpaper ? { ['--android-wallpaper-official' as string]: `url("${wallpaper}")` } : undefined}
       >
         <div className={styles.wallpaper} data-wallpaper="" aria-hidden="true" />
         <button
@@ -349,8 +403,15 @@ export default function AndroidShell({ heading }: OsShellProps) {
           aria-label="Notifications and quick settings"
           onClick={() => setOverlay('shade')}
         >
-          <time>{time}</time>
-          <span aria-hidden="true">▾ ◢ █</span>
+          <span className={styles.statusStart}>
+            <time>{time}</time>
+            {layout === 'large' ? <span className={styles.statusDate}>{date}</span> : null}
+          </span>
+          <span className={styles.statusIcons} aria-hidden="true">
+            <Symbol filled>signal_wifi_4_bar</Symbol>
+            {layout === 'phone' ? <Symbol filled>signal_cellular_4_bar</Symbol> : null}
+            <Symbol filled>battery_full</Symbol>
+          </span>
         </button>
         <main className={styles.main}>
           {heading}
@@ -376,42 +437,35 @@ export default function AndroidShell({ heading }: OsShellProps) {
               homePointer.current = null;
               if (!start) return;
               const dy = event.clientY - start.y;
-              if (dy < -60) setOverlay('drawer');
+              if (dy < -60) openDrawer();
               else if (dy > 60) setOverlay('shade');
             }}
           >
             <section className={styles.atAGlance} aria-label="At a glance">
               <time dateTime={now.toISOString()}>{date}</time>
               <button
+                className={styles.smartspace}
                 onClick={(event) =>
                   continuity
                     ? openContent(continuity, event.currentTarget)
                     : openContent({ section: 'resume' }, event.currentTarget)
                 }
               >
-                {continuity ? `Continue: ${contentIndex.get(continuity)?.title ?? 'Your work'}` : 'Résumé ready · Open'}
+                <Symbol>{continuity ? 'history' : 'description'}</Symbol>
+                <span>
+                  {continuity
+                    ? `Continue: ${contentIndex.get(continuity)?.title ?? 'Your work'}`
+                    : 'Résumé ready · Open'}
+                </span>
               </button>
             </section>
-            <button
-              ref={launchSearchButton}
-              className={styles.launchSearch}
-              aria-label="Search apps and more"
-              onClick={() => {
-                setOverlay('drawer');
-                setTimeout(() => document.querySelector<HTMLInputElement>('[data-drawer-search]')?.focus(), 0);
-              }}
-            >
-              <b>G</b>
-              <span>Search apps and more</span>
-            </button>
             <ul className={styles.homeGrid}>
+              <li>
+                <ResumeShortcut onOpen={openContent} />
+              </li>
               {HOME_APPS.map((role) => (
                 <li key={role}>
-                  <AppIcon
-                    role={role}
-                    onOpen={openApp}
-                    onShortcuts={(target) => setShortcuts({ role, anchor: target })}
-                  />
+                  <AppIcon role={role} onOpen={openApp} onShortcuts={(target) => onShortcuts(role, target)} />
                 </li>
               ))}
               <li>
@@ -421,22 +475,35 @@ export default function AndroidShell({ heading }: OsShellProps) {
                   aria-haspopup="dialog"
                   onClick={() => setFolder(true)}
                 >
-                  <span className={styles.folderArt}>
-                    <AssetIcon id={androidIcon('files')} size={22} />
-                    <AssetIcon id={androidIcon('notes')} size={22} />
-                    <AssetIcon id={androidIcon('mail')} size={22} />
+                  <span className={styles.folderArt} aria-hidden="true">
+                    {(['files', 'notes', 'mail', 'github'] as const).map((role) => (
+                      <AdaptiveIcon key={role} app={role} />
+                    ))}
                   </span>
-                  <span>Career</span>
+                  <span className={styles.iconLabel}>Career</span>
                 </button>
               </li>
             </ul>
+            {layout === 'phone' ? (
+              <>
+                <button className={styles.drawerHint} onClick={() => openDrawer()} aria-label="All apps">
+                  <Symbol>keyboard_arrow_up</Symbol>
+                </button>
+                {favorites}
+              </>
+            ) : null}
             <button
-              ref={allAppsButton}
-              className={styles.drawerHint}
-              onClick={() => setOverlay('drawer')}
-              aria-label="All apps"
+              ref={launchSearchButton}
+              className={styles.launchSearch}
+              aria-label="Search apps and more"
+              onClick={() => openDrawer(true)}
             >
-              <Symbol>keyboard_arrow_up</Symbol>
+              <GoogleG />
+              <span className={styles.searchPlaceholder}>Search apps and more</span>
+              <span className={styles.searchTools} aria-hidden="true">
+                <Symbol filled>mic</Symbol>
+                <LensMark />
+              </span>
             </button>
           </section>
           {foreground && activeWindow ? (
@@ -451,17 +518,7 @@ export default function AndroidShell({ heading }: OsShellProps) {
             />
           ) : null}
         </main>
-        <Favorites
-          layout={layout}
-          navigation={navigation}
-          session={session}
-          onOpen={openApp}
-          onDrawer={() => setOverlay('drawer')}
-          onBack={back}
-          onHome={home}
-          onRecents={() => setOverlay('recents')}
-          onShortcuts={(role, target) => setShortcuts({ role, anchor: target })}
-        />
+        {layout === 'large' ? favorites : null}
         {navigation === 'gesture' ? (
           <nav className={styles.gestureNav} aria-label="System navigation">
             <button className={styles.keyboardOnly} onClick={back}>
@@ -491,41 +548,45 @@ export default function AndroidShell({ heading }: OsShellProps) {
             role="presentation"
             onMouseDown={(event) => event.target === event.currentTarget && setFolder(false)}
           >
-            <section className={styles.folder} role="dialog" aria-modal="true" aria-label="Career">
-              <h3>Career</h3>
+            <section className={styles.folder} role="dialog" aria-modal="true" aria-labelledby="android-folder-title">
+              <h3 id="android-folder-title">Career</h3>
               <ul>
-                <li>
-                  <button onClick={(event) => openContent({ section: 'experience' }, event.currentTarget)}>
-                    <Symbol>work</Symbol>Experience
-                  </button>
-                </li>
-                <li>
-                  <button onClick={(event) => openContent({ section: 'education' }, event.currentTarget)}>
-                    <Symbol>school</Symbol>Education
-                  </button>
-                </li>
-                <li>
-                  <button onClick={(event) => openContent({ section: 'resume' }, event.currentTarget)}>
-                    <Symbol>description</Symbol>Résumé
-                  </button>
-                </li>
+                {(
+                  [
+                    ['experience', 'work', 'Experience'],
+                    ['education', 'school', 'Education'],
+                    ['resume', 'description', 'Résumé'],
+                  ] as const
+                ).map(([section, glyph, label]) => (
+                  <li key={section}>
+                    <button onClick={(event) => openContent({ section }, event.currentTarget)}>
+                      <span className={styles.shortcutGlyph}>
+                        <Symbol filled>{glyph}</Symbol>
+                      </span>
+                      <span className={styles.iconLabel}>{label}</span>
+                    </button>
+                  </li>
+                ))}
               </ul>
             </section>
           </div>
         ) : null}
         {overlay === 'drawer' ? (
           <Drawer
+            layout={layout}
             query={query}
             setQuery={setQuery}
             results={drawerResults}
             onClose={closeOverlay}
             onOpen={openApp}
             onContent={openContent}
-            onShortcuts={(role, target) => setShortcuts({ role, anchor: target })}
+            onShortcuts={onShortcuts}
           />
         ) : null}
         {overlay === 'shade' ? (
           <Shade
+            time={time}
+            date={date}
             expanded={shadeExpanded}
             setExpanded={setShadeExpanded}
             brightness={brightness}
@@ -544,6 +605,7 @@ export default function AndroidShell({ heading }: OsShellProps) {
         {shortcuts ? (
           <Shortcuts
             role={shortcuts.role}
+            anchor={shortcuts.anchor}
             labels={appShortcutLabels(
               shortcuts.role,
               projects.map((project) => project.name),
@@ -558,17 +620,19 @@ export default function AndroidShell({ heading }: OsShellProps) {
         ) : null}
         {headsUp && !lock && prefs.notifications ? (
           <aside className={styles.headsUp} role="status">
-            <span className={styles.tonalIcon}>
-              <Symbol>android</Symbol>
+            <span className={styles.headsUpIcon}>
+              <Symbol filled>android</Symbol>
             </span>
             <span>
-              <strong>Welcome</strong>
-              <small>Swipe up for all apps. Back always takes you back.</small>
+              <small>System · now</small>
+              <strong>Welcome to Android</strong>
+              <span>Swipe up for all apps. Back always takes you back.</span>
             </span>
             <button
+              className={styles.tonalButton}
               onClick={() => {
                 setHeadsUp(false);
-                setOverlay('drawer');
+                openDrawer();
               }}
             >
               All apps
@@ -612,6 +676,79 @@ export default function AndroidShell({ heading }: OsShellProps) {
   );
 }
 
+/** The Google "G" (official four-colour mark) that leads Pixel's search bar. */
+function GoogleG() {
+  return (
+    <svg className={styles.googleG} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+      />
+    </svg>
+  );
+}
+
+/** The Lens entry point at the end of Pixel's search bar (camera frame + lens). */
+function LensMark() {
+  return (
+    <svg className={styles.lensMark} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        d="M7 3.5H6A2.5 2.5 0 0 0 3.5 6v1M17 3.5h1A2.5 2.5 0 0 1 20.5 6v1M3.5 17v1A2.5 2.5 0 0 0 6 20.5h1"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <circle cx="12" cy="12" r="3.6" fill="none" stroke="currentColor" strokeWidth="2" />
+      <circle cx="18.2" cy="18.2" r="1.9" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** Pixel's pinned shortcut: the résumé PDF, badged with the Files icon (a deep link, not an app). */
+function ResumeShortcut({ onOpen }: { onOpen: (ref: ContentRef, origin?: HTMLElement | null) => void }) {
+  const location: AppLocation = { kind: 'content', ref: { section: 'resume' } };
+  return (
+    <div className={styles.iconWrap}>
+      <a
+        className={styles.appIcon}
+        id="android-icon-resume"
+        data-focus-key={focusKeys.launcher('android', 'files')}
+        href={hrefFor({ os: 'android', role: 'files', location })}
+        onClick={(event) => {
+          if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          event.preventDefault();
+          onOpen({ section: 'resume' }, event.currentTarget);
+        }}
+        onPointerEnter={() => prefetchApp('files')}
+        onFocus={() => prefetchApp('files')}
+      >
+        <span className={styles.pinned} aria-hidden="true">
+          <span className={styles.shortcutGlyph}>
+            <Symbol filled>picture_as_pdf</Symbol>
+          </span>
+          <span className={styles.pinnedBadge}>
+            <AdaptiveIcon app="files" />
+          </span>
+        </span>
+        <span className={styles.iconLabel}>Résumé</span>
+      </a>
+    </div>
+  );
+}
+
 function AppIcon({
   role,
   onOpen,
@@ -619,7 +756,7 @@ function AppIcon({
   compact = false,
 }: {
   role: AndroidRole;
-  onOpen: (role: AndroidRole, location?: AppLocation, origin?: HTMLElement | null) => void;
+  onOpen: OpenApp;
   onShortcuts: (target: HTMLElement) => void;
   compact?: boolean;
 }) {
@@ -636,7 +773,7 @@ function AppIcon({
         className={styles.appIcon}
         aria-label={compact ? (role === 'files' ? 'Files, Résumé' : ROLE_LABEL[role]) : undefined}
         data-focus-key={focusKeys.launcher('android', role)}
-        id={`android-icon-${role}`}
+        id={`android-icon-${role}${compact ? '-favorite' : ''}`}
         href={hrefFor({ os: 'android', role, location })}
         onClick={(event) => {
           if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -650,16 +787,16 @@ function AppIcon({
           onShortcuts(event.currentTarget);
         }}
         onPointerDown={(event) => {
-          timer.current = window.setTimeout(() => onShortcuts(event.currentTarget), 500);
+          const target = event.currentTarget;
+          timer.current = window.setTimeout(() => onShortcuts(target), 500);
         }}
         onPointerUp={cancel}
+        onPointerLeave={cancel}
         onPointerCancel={cancel}
         data-compact={compact || undefined}
       >
-        <span className={styles.iconArt}>
-          <AssetIcon id={androidIcon(role)} size={compact ? 44 : 58} fluid />
-        </span>
-        {compact ? null : <span>{ROLE_LABEL[role]}</span>}
+        <AdaptiveIcon app={role} />
+        {compact ? null : <span className={styles.iconLabel}>{ROLE_LABEL[role]}</span>}
       </a>
       <button
         className={styles.iconMore}
@@ -671,7 +808,7 @@ function AppIcon({
           )
         }
       >
-        ⋮
+        <Symbol>more_vert</Symbol>
       </button>
     </div>
   );
@@ -691,21 +828,30 @@ function Favorites({
   layout: 'phone' | 'large';
   navigation: string;
   session: ReturnType<typeof getKernel>['sessions']['android'];
-  onOpen: (role: AndroidRole, location?: AppLocation, origin?: HTMLElement | null) => void;
+  onOpen: OpenApp;
   onDrawer: () => void;
   onBack: () => void;
   onHome: () => void;
   onRecents: () => void;
   onShortcuts: (role: AndroidRole, target: HTMLElement) => void;
 }) {
+  const recent =
+    layout === 'large'
+      ? session.zOrder
+          .slice(-2)
+          .map((id) => ({ id, role: roleOf(id) }))
+          .filter((item): item is { id: WindowId; role: AndroidRole } => !!item.role && !FAVORITES.includes(item.role))
+      : [];
   return (
     <nav className={styles.favorites} aria-label="Favorites">
-      <button className={styles.allAppsTaskbar} aria-label="All apps" onClick={onDrawer}>
-        <Symbol>apps</Symbol>
-      </button>
+      {layout === 'large' ? (
+        <button className={styles.allAppsTaskbar} aria-label="All apps" onClick={onDrawer}>
+          <Symbol>apps</Symbol>
+        </button>
+      ) : null}
       <ul>
         {FAVORITES.map((role) => (
-          <li key={role}>
+          <li key={role} data-running={(layout === 'large' && session.focused === `android:${role}`) || undefined}>
             <AppIcon
               role={role}
               compact
@@ -719,17 +865,20 @@ function Favorites({
           </li>
         ))}
       </ul>
-      {layout === 'large' && session.zOrder.length ? (
+      {recent.length ? (
         <>
           <span className={styles.taskbarDivider} />
-          {session.zOrder.slice(-2).map((id) => {
-            const role = roleOf(id);
-            return role && !FAVORITES.includes(role) ? (
-              <button key={id} className={styles.recentTask} onClick={() => dispatchSoon({ type: 'FOCUS_WINDOW', id })}>
-                <AssetIcon id={androidIcon(role)} size={38} />
-              </button>
-            ) : null;
-          })}
+          {recent.map(({ id, role }) => (
+            <button
+              key={id}
+              className={styles.recentTask}
+              aria-label={ROLE_LABEL[role]}
+              data-running={session.focused === id || undefined}
+              onClick={() => dispatchSoon({ type: 'FOCUS_WINDOW', id })}
+            >
+              <AdaptiveIcon app={role} />
+            </button>
+          ))}
         </>
       ) : null}
       {layout === 'large' && navigation === 'buttons' ? (
@@ -739,23 +888,31 @@ function Favorites({
   );
 }
 
+/** Android's three-button navigation: the outline triangle, circle and rounded square. */
 function SystemButtons({ back, home, recents }: { back: () => void; home: () => void; recents: () => void }) {
   return (
     <nav className={styles.systemButtons} aria-label="System navigation">
       <button aria-label="Back" onClick={back}>
-        ◀
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M17 5.3v13.4a1 1 0 0 1-1.5.87L4.8 13.3a1.5 1.5 0 0 1 0-2.6l10.7-6.27A1 1 0 0 1 17 5.3z" />
+        </svg>
       </button>
       <button aria-label="Home" onClick={home}>
-        ●
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="7.2" />
+        </svg>
       </button>
       <button aria-label="Recent apps" onClick={recents}>
-        ■
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="5.5" y="5.5" width="13" height="13" rx="2.2" />
+        </svg>
       </button>
     </nav>
   );
 }
 
 function Drawer({
+  layout,
   query,
   setQuery,
   results,
@@ -764,24 +921,37 @@ function Drawer({
   onContent,
   onShortcuts,
 }: {
+  layout: 'phone' | 'large';
   query: string;
   setQuery: (value: string) => void;
   results: readonly (typeof contentIndex.entries)[number][];
   onClose: () => void;
-  onOpen: (role: AndroidRole, location?: AppLocation, origin?: HTMLElement | null) => void;
+  onOpen: OpenApp;
   onContent: (ref: ContentRef, origin?: HTMLElement | null) => void;
   onShortcuts: (role: AndroidRole, target: HTMLElement) => void;
 }) {
+  const sectionGlyph = (section: ContentRef['section']): SymbolName =>
+    section === 'projects'
+      ? 'code'
+      : section === 'experience'
+        ? 'work'
+        : section === 'skills'
+          ? 'lightbulb'
+          : section === 'education'
+            ? 'school'
+            : section === 'contact'
+              ? 'mail'
+              : 'description';
   return (
     <div
-      className={styles.overlayScrim}
+      className={styles.drawerScrim}
       role="presentation"
       onMouseDown={(event) => event.target === event.currentTarget && onClose()}
     >
-      <section className={styles.drawer} role="dialog" aria-modal="true" aria-label="All apps">
+      <section className={styles.drawer} role="dialog" aria-modal="true" aria-label="All apps" data-layout={layout}>
         <span className={styles.dragHandle} />
         <label className={styles.drawerSearch}>
-          <Symbol>search</Symbol>
+          <GoogleG />
           <input
             data-drawer-search=""
             role="combobox"
@@ -809,42 +979,43 @@ function Drawer({
                 aria-selected="false"
                 onClick={(event) => onContent(entry.ref, event.currentTarget)}
               >
-                <span className={styles.tonalIcon}>
-                  <Symbol>
-                    {entry.ref.section === 'projects'
-                      ? 'source'
-                      : entry.ref.section === 'experience'
-                        ? 'work'
-                        : entry.ref.section === 'skills'
-                          ? 'lightbulb'
-                          : 'description'}
-                  </Symbol>
+                <span className={styles.resultGlyph}>
+                  <Symbol>{sectionGlyph(entry.ref.section)}</Symbol>
                 </span>
                 <span>
                   <strong>{entry.title}</strong>
                   <small>{entry.summary}</small>
                 </span>
-                <Symbol>chevron_right</Symbol>
+                <Symbol>north_east</Symbol>
               </button>
             ))}
-            <a href="/plain">Search the plain portfolio</a>
+            <a href="/plain" className={styles.plainLink}>
+              Search the plain portfolio
+            </a>
             {results.length === 0 ? <p role="status">No results. Try projects, experience, skills or résumé.</p> : null}
           </div>
         ) : (
           <>
-            <h3>Suggestions</h3>
+            <h3>Suggested</h3>
             <ul className={styles.suggestionRow}>
               <li>
                 <button onClick={(event) => onContent({ section: 'resume' }, event.currentTarget)}>
-                  <AssetIcon id={androidIcon('files')} size={54} />
-                  <span>Résumé</span>
+                  <span className={styles.pinned} aria-hidden="true">
+                    <span className={styles.shortcutGlyph}>
+                      <Symbol filled>picture_as_pdf</Symbol>
+                    </span>
+                    <span className={styles.pinnedBadge}>
+                      <AdaptiveIcon app="files" />
+                    </span>
+                  </span>
+                  <span className={styles.iconLabel}>Résumé</span>
                 </button>
               </li>
-              {DRAWER_APPS.slice(0, 3).map((role) => (
+              {(['github', 'mail', 'notes'] as const).map((role) => (
                 <li key={role}>
                   <button onClick={(event) => onOpen(role, undefined, event.currentTarget)}>
-                    <AssetIcon id={androidIcon(role)} size={54} />
-                    <span>{ROLE_LABEL[role]}</span>
+                    <AdaptiveIcon app={role} />
+                    <span className={styles.iconLabel}>{ROLE_LABEL[role]}</span>
                   </button>
                 </li>
               ))}
@@ -860,8 +1031,8 @@ function Drawer({
                       onShortcuts(role, event.currentTarget);
                     }}
                   >
-                    <AssetIcon id={androidIcon(role)} size={58} />
-                    <span>{ROLE_LABEL[role]}</span>
+                    <AdaptiveIcon app={role} />
+                    <span className={styles.iconLabel}>{ROLE_LABEL[role]}</span>
                   </button>
                 </li>
               ))}
@@ -874,6 +1045,8 @@ function Drawer({
 }
 
 function Shade({
+  time,
+  date,
   expanded,
   setExpanded,
   brightness,
@@ -886,6 +1059,8 @@ function Shade({
   openSettings,
   switchOs,
 }: {
+  time: string;
+  date: string;
   expanded: boolean;
   setExpanded: (value: boolean) => void;
   brightness: number;
@@ -917,34 +1092,48 @@ function Shade({
         patch: { androidNavigation: prefs.androidNavigation === 'buttons' ? 'gesture' : 'buttons' },
       });
   };
-  const tiles = [
-    { id: 'sound', label: 'Sound', on: prefs.sound.enabled, glyph: 'volume_up' },
-    { id: 'motion', label: 'Reduce motion', on: prefs.motion === 'reduced', glyph: 'motion_photos_off' },
-    { id: 'solid', label: 'Solid surfaces', on: prefs.glass === 'solid', glyph: 'opacity' },
+  const tiles: readonly { id: string; label: string; on: boolean; glyph: SymbolName }[] = [
+    { id: 'sound', label: 'Sound', on: prefs.sound.enabled, glyph: prefs.sound.enabled ? 'volume_up' : 'volume_off' },
+    { id: 'motion', label: 'Reduce motion', on: prefs.motion === 'reduced', glyph: 'animation' },
+    { id: 'solid', label: 'Solid surfaces', on: prefs.glass === 'solid', glyph: 'contrast' },
     { id: 'dark', label: 'Dark theme', on: prefs.theme === 'dark', glyph: 'dark_mode' },
     { id: 'icons', label: 'Themed icons', on: prefs.androidThemedIcons, glyph: 'palette' },
     { id: 'nav', label: '3-button navigation', on: prefs.androidNavigation === 'buttons', glyph: 'navigation' },
-  ] as const;
+  ];
+  const groups = [
+    { title: 'Notifications', items: notifications.filter((item) => !item.silent) },
+    { title: 'Silent', items: notifications.filter((item) => item.silent) },
+  ].filter((group) => group.items.length);
   return (
     <div
-      className={styles.overlayScrim}
+      className={styles.shadeScrim}
       role="presentation"
       onMouseDown={(event) => event.target === event.currentTarget && onClose()}
     >
       <section className={styles.shade} role="dialog" aria-modal="true" aria-label="Notifications and quick settings">
-        <header>
-          <time>{new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</time>
-          <span aria-hidden="true">▾ ◢ █</span>
-          <IconButton label="Expand quick settings" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>
-            <Symbol>{expanded ? 'expand_less' : 'expand_more'}</Symbol>
-          </IconButton>
+        <header className={styles.shadeHeader}>
+          <time className={styles.shadeClock}>{time}</time>
+          <span className={styles.shadeDate}>{date}</span>
+          <span className={styles.shadeTools}>
+            <IconButton label="Settings" onClick={() => openSettings('root')}>
+              <Symbol>settings</Symbol>
+            </IconButton>
+            <IconButton label="Switch operating system" onClick={switchOs}>
+              <Symbol>power_settings_new</Symbol>
+            </IconButton>
+            <IconButton label="Expand quick settings" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>
+              <Symbol>{expanded ? 'expand_less' : 'expand_more'}</Symbol>
+            </IconButton>
+          </span>
         </header>
         <div className={styles.shadeColumns}>
-          <section>
+          <section className={styles.quickSettings} aria-label="Quick settings">
             <div className={styles.quickGrid} data-expanded={expanded || undefined}>
               {tiles.slice(0, expanded ? 6 : 4).map((tile) => (
                 <button key={tile.id} aria-pressed={tile.on} onClick={() => toggle(tile.id)}>
-                  <Symbol filled={tile.on}>{tile.glyph}</Symbol>
+                  <span className={styles.tileGlyph}>
+                    <Symbol filled={tile.on}>{tile.glyph}</Symbol>
+                  </span>
                   <span>
                     <strong>{tile.label}</strong>
                     <small>{tile.on ? 'On' : 'Off'}</small>
@@ -954,14 +1143,18 @@ function Shade({
               {expanded ? (
                 <>
                   <button onClick={(event) => openContent({ section: 'resume' }, event.currentTarget)}>
-                    <Symbol>description</Symbol>
+                    <span className={styles.tileGlyph}>
+                      <Symbol>description</Symbol>
+                    </span>
                     <span>
                       <strong>Résumé</strong>
                       <small>Open</small>
                     </span>
                   </button>
                   <button onClick={switchOs}>
-                    <Symbol>power_settings_new</Symbol>
+                    <span className={styles.tileGlyph}>
+                      <Symbol>power_settings_new</Symbol>
+                    </span>
                     <span>
                       <strong>Switch OS</strong>
                       <small>Choose</small>
@@ -971,62 +1164,43 @@ function Shade({
               ) : null}
             </div>
             <label className={styles.brightnessSlider}>
-              <Symbol>brightness_low</Symbol>
               <input
                 aria-label="Brightness"
                 type="range"
                 min="0"
                 max="30"
-                value={brightness}
-                onChange={(event) => setBrightness(Number(event.target.value))}
+                value={30 - brightness}
+                onChange={(event) => setBrightness(30 - Number(event.target.value))}
               />
-              <Symbol>brightness_high</Symbol>
+              <Symbol filled>brightness_medium</Symbol>
             </label>
-            {expanded ? (
-              <div className={styles.shadeTools}>
-                <span className={styles.avatar}>J</span>
-                <IconButton label="Settings" onClick={() => openSettings('root')}>
-                  <Symbol>settings</Symbol>
-                </IconButton>
-                <IconButton label="Switch operating system" onClick={switchOs}>
-                  <Symbol>power_settings_new</Symbol>
-                </IconButton>
-              </div>
-            ) : null}
           </section>
-          <section className={styles.notificationColumn}>
-            <h3>Notifications</h3>
-            <ul>
-              {notifications
-                .filter((item) => !item.silent)
-                .map((item) => (
-                  <NotificationCard
-                    key={item.id}
-                    item={item}
-                    onOpen={openContent}
-                    onDismiss={() => setDismissed([...dismissed, item.id])}
-                  />
-                ))}
-            </ul>
-            <h3>Silent</h3>
-            <ul>
-              {notifications
-                .filter((item) => item.silent)
-                .map((item) => (
-                  <NotificationCard
-                    key={item.id}
-                    item={item}
-                    onOpen={openContent}
-                    onDismiss={() => setDismissed([...dismissed, item.id])}
-                  />
-                ))}
-            </ul>
+          <section className={styles.notificationColumn} aria-label="Notifications">
+            {groups.map((group) => (
+              <div key={group.title}>
+                <h3>{group.title}</h3>
+                <ul>
+                  {group.items.map((item) => (
+                    <NotificationCard
+                      key={item.id}
+                      item={item}
+                      onOpen={openContent}
+                      onDismiss={() => setDismissed([...dismissed, item.id])}
+                    />
+                  ))}
+                </ul>
+              </div>
+            ))}
+            {groups.length === 0 ? <p className={styles.noNotifications}>No notifications</p> : null}
             <footer>
               <button onClick={() => openSettings('notifications')}>Manage</button>
-              <button onClick={() => setDismissed(notifications.map((item) => item.id))}>Clear all</button>
+              {groups.length ? (
+                <button onClick={() => setDismissed(notifications.map((item) => item.id))}>Clear all</button>
+              ) : null}
             </footer>
           </section>
         </div>
+        <span className={styles.shadeHandle} aria-hidden="true" />
       </section>
     </div>
   );
@@ -1048,9 +1222,7 @@ function NotificationCard({
         className={styles.notificationMain}
         onClick={(event) => item.ref && onOpen(item.ref, event.currentTarget)}
       >
-        <span className={styles.tonalIcon}>
-          <AssetIcon id={androidIcon(item.role)} size={34} />
-        </span>
+        <AdaptiveIcon app={item.role} />
         <span>
           <small>{item.app} · now</small>
           <strong>{item.title}</strong>
@@ -1060,15 +1232,17 @@ function NotificationCard({
           </span>
         </span>
       </button>
-      <IconButton
-        label={expanded ? 'Collapse notification' : 'Expand notification'}
-        onClick={() => setExpanded((value) => !value)}
-      >
-        <Symbol>{expanded ? 'expand_less' : 'expand_more'}</Symbol>
-      </IconButton>
-      <IconButton label={`Dismiss ${item.title}`} onClick={onDismiss}>
-        <Symbol>close</Symbol>
-      </IconButton>
+      <span className={styles.notificationActions}>
+        <IconButton
+          label={expanded ? 'Collapse notification' : 'Expand notification'}
+          onClick={() => setExpanded((value) => !value)}
+        >
+          <Symbol>{expanded ? 'expand_less' : 'expand_more'}</Symbol>
+        </IconButton>
+        <IconButton label={`Dismiss ${item.title}`} onClick={onDismiss}>
+          <Symbol>close</Symbol>
+        </IconButton>
+      </span>
     </li>
   );
 }
@@ -1104,10 +1278,11 @@ function Recents({
               .map((id) => {
                 const role = roleOf(id);
                 if (!role) return null;
+                const place = currentLocation(session.windows[id]!);
                 return (
                   <li key={id}>
                     <div className={styles.recentChip}>
-                      <AssetIcon id={androidIcon(role)} size={28} />
+                      <AdaptiveIcon app={role} />
                       <strong>{ROLE_LABEL[role]}</strong>
                       <IconButton label={`Close ${ROLE_LABEL[role]}`} onClick={() => remove(id)}>
                         <Symbol>close</Symbol>
@@ -1123,13 +1298,22 @@ function Recents({
                         if (event.key === 'Delete') remove(id);
                       }}
                     >
-                      <div>
-                        <AssetIcon id={androidIcon(role)} size={76} />
-                        <h3>{ROLE_LABEL[role]}</h3>
-                        <p>
-                          {currentLocation(session.windows[id]!).kind === 'root' ? 'App home' : 'Portfolio content'}
-                        </p>
-                      </div>
+                      <span className={styles.recentPreview} aria-hidden="true">
+                        <span className={styles.recentBar} />
+                        <AdaptiveIcon app={role} />
+                        <span className={styles.recentLines}>
+                          <i />
+                          <i />
+                          <i />
+                        </span>
+                      </span>
+                      <span className={styles.recentCaption}>
+                        {place.kind === 'root'
+                          ? `${ROLE_LABEL[role]} · App home`
+                          : place.kind === 'content'
+                            ? `${ROLE_LABEL[role]} · ${contentIndex.get(place.ref)?.title ?? 'Portfolio content'}`
+                            : `${ROLE_LABEL[role]} · Portfolio content`}
+                      </span>
                     </button>
                   </li>
                 );
@@ -1154,34 +1338,73 @@ function Recents({
 
 function Shortcuts({
   role,
+  anchor,
   labels,
   onChoose,
   onInfo,
   onClose,
 }: {
   role: AndroidRole;
+  anchor: HTMLElement;
   labels: readonly string[];
   onChoose: (label: string) => void;
   onInfo: () => void;
   onClose: () => void;
 }) {
+  const menu = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    // Pixel opens the shortcut popup beside the icon that was long-pressed: above it when there is room, else below.
+    const node = menu.current;
+    const host = node?.offsetParent as HTMLElement | null;
+    if (!node || !host) return;
+    const icon = anchor.getBoundingClientRect();
+    const box = host.getBoundingClientRect();
+    const width = node.offsetWidth;
+    const height = node.offsetHeight;
+    const left = Math.min(Math.max(12, icon.left + icon.width / 2 - width / 2 - box.left), box.width - width - 12);
+    const above = icon.top - box.top - height - 8;
+    const top = above >= 12 ? above : Math.min(icon.bottom - box.top + 8, box.height - height - 12);
+    node.style.left = `${left}px`;
+    node.style.top = `${top}px`;
+    node.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
+  }, [anchor]);
+  const glyphFor = (label: string): SymbolName =>
+    /résumé/i.test(label)
+      ? label.startsWith('Download')
+        ? 'download'
+        : 'description'
+      : label === 'Experience'
+        ? 'work'
+        : label === 'Education'
+          ? 'school'
+          : label === 'Compose'
+            ? 'edit'
+            : label === 'Copy address'
+              ? 'content_copy'
+              : label === 'Accessibility'
+                ? 'accessibility_new'
+                : label === 'Switch OS'
+                  ? 'power_settings_new'
+                  : role === 'github'
+                    ? 'code'
+                    : 'arrow_outward';
   return (
     <div
       className={styles.shortcutLayer}
       role="presentation"
       onMouseDown={(event) => event.target === event.currentTarget && onClose()}
     >
-      <div className={styles.shortcutMenu} role="menu" aria-label={`${ROLE_LABEL[role]} shortcuts`}>
+      <div ref={menu} className={styles.shortcutMenu} role="menu" aria-label={`${ROLE_LABEL[role]} shortcuts`}>
         {labels.map((label) => (
           <button key={label} role="menuitem" onClick={() => onChoose(label)}>
-            <span className={styles.tonalIcon}>
-              <Symbol>arrow_outward</Symbol>
+            <span className={styles.shortcutMenuGlyph}>
+              <Symbol>{glyphFor(label)}</Symbol>
             </span>
             {label}
           </button>
         ))}
         <button role="menuitem" onClick={onInfo}>
-          <span className={styles.tonalIcon}>
+          <span className={styles.shortcutMenuGlyph}>
             <Symbol>info</Symbol>
           </span>
           App info
@@ -1199,16 +1422,24 @@ function SwitchOs({ onClose }: { onClose: () => void }) {
       onMouseDown={(event) => event.target === event.currentTarget && onClose()}
     >
       <section className={styles.basicDialog} role="dialog" aria-modal="true" aria-labelledby="android-switch-title">
+        <span className={styles.dialogIcon}>
+          <Symbol>power_settings_new</Symbol>
+        </span>
         <h3 id="android-switch-title">Switch operating system</h3>
         <ul className={styles.osList}>
           {OS_IDS.filter((os) => os !== 'android' && OS_REGISTRY[os].released).map((os) => (
             <li key={os}>
-              <button onClick={() => dispatchSoon({ type: 'SWITCH_OS', to: os, via: 'switch' })}>{OS_NAMES[os]}</button>
+              <button onClick={() => dispatchSoon({ type: 'SWITCH_OS', to: os, via: 'switch' })}>
+                <span className={styles.osRadio} aria-hidden="true" />
+                {OS_NAMES[os]}
+              </button>
             </li>
           ))}
         </ul>
-        <button onClick={() => dispatchSoon({ type: 'SWITCH_OS', to: null, via: 'switch' })}>Back to chooser</button>
-        <button onClick={onClose}>Cancel</button>
+        <div>
+          <button onClick={onClose}>Cancel</button>
+          <button onClick={() => dispatchSoon({ type: 'SWITCH_OS', to: null, via: 'switch' })}>Back to chooser</button>
+        </div>
       </section>
     </div>
   );
@@ -1232,7 +1463,7 @@ function LockScreen({
   onDismiss: (id: string) => void;
 }) {
   const start = useRef<number | null>(null);
-  const parts = time.split(':');
+  const [hours, minutes] = time.split(':');
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Enter' || event.key === 'Escape' || event.key.length === 1) onUnlock();
@@ -1261,19 +1492,18 @@ function LockScreen({
         <h1 id="android-lock-title" className="sr-only">
           {person.name} — {person.headline}
         </h1>
+        <p className={styles.lockDate}>{date}</p>
         <time className={styles.lockClock} dateTime={new Date().toISOString()}>
-          <span>{parts[0]}</span>
-          <span>{parts[1]}</span>
+          <span>{hours?.padStart(2, '0')}</span>
+          <span>{minutes}</span>
         </time>
-        <p>
-          {date} · {person.openTo}
-        </p>
+        <p className={styles.lockOpenTo}>{person.openTo}</p>
       </header>
       <ul className={styles.lockCards}>
         {notifications.map((item) => (
           <li key={item.id}>
             <button className={styles.lockCard} onClick={() => onOpen(item)}>
-              <AssetIcon id={androidIcon(item.role)} size={40} />
+              <AdaptiveIcon app={item.role} />
               <span>
                 <small>{item.app}</small>
                 <strong>{item.title}</strong>
@@ -1291,7 +1521,7 @@ function LockScreen({
           <Symbol>description</Symbol>
         </button>
         <button className={styles.unlock} onClick={onUnlock}>
-          <Symbol>lock_open</Symbol>
+          <Symbol filled>lock_open</Symbol>
           <span>Swipe up to unlock</span>
         </button>
         <button

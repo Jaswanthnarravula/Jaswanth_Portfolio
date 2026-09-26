@@ -1,5 +1,5 @@
 import type { Credential, Education, Experience } from '@/data/schema';
-import { formatPeriod } from './format';
+import { formatCredential, formatPeriod } from './format';
 import { Heading, withSlots, type ViewProps } from './slots';
 
 const roleTitle = (role: Experience) => role.role ?? role.company;
@@ -60,6 +60,11 @@ export function ExperienceDetail({
         </Heading>
         {meta && <p className="cv-meta">{meta}</p>}
         <p className="cv-lede">{role.summary}</p>
+        {role.scope && (
+          <p className="cv-scope">
+            <strong>Scope:</strong> {role.scope}
+          </p>
+        )}
       </header>
       <ul className="cv-bullets">
         {role.highlights.map((item) => (
@@ -117,7 +122,18 @@ export function EducationList({ data, density = 'comfortable', slots, headingLev
           <ul className="cv-bullets">
             {data.credentials.map((credential) => (
               <li key={credential.name}>
-                {credential.name} <span className="cv-muted">— {credential.issuer}</span>
+                {credential.name}{' '}
+                <span className="cv-muted">
+                  — {credential.issuer} · {formatCredential(credential)}
+                </span>
+                {credential.verifyUrl && (
+                  <>
+                    {' '}
+                    <a className="cv-link" href={credential.verifyUrl} target="_blank" rel="noopener noreferrer">
+                      Verify<span className="sr-only"> {credential.name} (opens in a new tab)</span>
+                    </a>
+                  </>
+                )}
               </li>
             ))}
           </ul>

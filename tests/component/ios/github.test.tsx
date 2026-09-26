@@ -170,7 +170,8 @@ describe('IOS-GH-02 / IOS-GH-06 project detail: segmented README · Stack · Abo
   });
 
   it('IOS-GH-02 IOS-GH-06 the segmented control is a radiogroup; arrows move the checked segment', async () => {
-    const project = projects().find((item) => item.stack.length > 0)!;
+    // A project without a case study: exactly README · Stack · About (IOS-GH-07 covers the fourth segment).
+    const project = projects().find((item) => item.stack.length > 0 && !item.caseStudy)!;
     renderIosApp(GitHub, 'github', { location: projectAt(project.slug) });
     const group = within(top()).getByRole('radiogroup', { name: 'Project sections' });
     const radios = within(group).getAllByRole('radio');
@@ -353,5 +354,37 @@ describe('IOS-GH-04 search field + stack filter chips', () => {
     await settle();
     expect(win().ui).toMatchObject({ filter: tech, q: 'a' });
     expect(atRoot()).toBe(true);
+  });
+});
+
+describe('IOS-GH-07 Case Study segment and pushed deep dives', () => {
+  it('shows grouped inset lists; a deep-dive row pushes its document; the back chevron pops to the row', async () => {
+    renderIosApp(GitHub, 'github', { location: projectAt('enterprise-sso') });
+    const group = within(top()).getByRole('radiogroup', { name: 'Project sections' });
+    expect(within(group).getAllByRole('radio').map((radio) => radio.textContent)).toEqual([
+      'README',
+      'Case Study',
+      'Stack',
+      'About',
+    ]);
+    fireEvent.click(within(group).getByRole('radio', { name: 'Case Study' }));
+    await settle();
+    for (const header of ['The Problem', 'My Role', 'Key Decisions', 'Results', 'Deep Dives'])
+      expect(within(top()).getByRole('heading', { name: header })).toBeInTheDocument();
+    expect(within(top()).getByText(/^Rejected: Moving everything to a commercial IdP/)).toBeInTheDocument();
+    fireEvent.click(within(top()).getByRole('button', { name: /Rotating signing keys without logging anyone out/ }));
+    await settle();
+    expect(within(top()).getByRole('article', { name: 'Rotating signing keys without logging anyone out' })).toBeInTheDocument();
+    // Session state: the URL is still the project.
+    expect(here()).toEqual(projectAt('enterprise-sso'));
+    fireEvent.click(within(top()).getByRole('button', { name: /^Back/ }));
+    await settle();
+    expect(document.querySelector('[data-push-key="doc:rotating-signing-keys"]')).toHaveFocus();
+    const results = await axe.run(top(), { rules: { region: { enabled: false } } });
+    expect(results.violations.map((violation) => violation.id)).toEqual([]);
+  });
+  it('a project without a case study has no Case Study segment', () => {
+    renderIosApp(GitHub, 'github', { location: projectAt('asl-gesture-recognition') });
+    expect(within(top()).queryByRole('radio', { name: 'Case Study' })).toBeNull();
   });
 });

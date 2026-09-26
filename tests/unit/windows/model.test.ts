@@ -145,17 +145,25 @@ describe('WIN-START-02 Start from the registry and data', () => {
     ]);
     expect(pinned.slice(7).map((tile) => tile.label)).toEqual(['Résumé', 'Projects', 'Experience', 'Contact']);
   });
-  it('Recommended: Résumé.pdf first (updated date), the featured projects, the current role, Say hello — ≤ 6', () => {
+  it('WIN-START-09 · Recommended: Now first, Résumé.pdf (updated date), the featured projects, the current role — ≤ 6', () => {
     const recommended = startRecommended();
-    expect(recommended[0]).toMatchObject({ title: 'Résumé.pdf', kind: 'pdf' });
-    expect(recommended[0]!.detail).toContain(getResume().updated.slice(0, 4));
+    expect(recommended[0]).toMatchObject({
+      id: 'now',
+      kind: 'now',
+      title: 'Now — Building a clean-room OAuth/OIDC provider in Go — open source, no company code.',
+      detail: 'Updated Sep 2026',
+      to: { os: 'windows', ref: { section: 'about' } },
+    });
+    expect(recommended[1]).toMatchObject({ title: 'Résumé.pdf', kind: 'pdf' });
+    expect(recommended[1]!.detail).toContain(getResume().updated.slice(0, 4));
     expect(recommended.filter((item) => item.kind === 'project').map((item) => item.title)).toEqual(
       getFeaturedProjects()
         .slice(0, 3)
         .map((project) => project.name),
     );
-    expect(recommended.at(-1)).toMatchObject({ title: 'Say hello', kind: 'mail' });
-    expect(recommended.length).toBeLessThanOrEqual(6);
+    // Six slots: with Now first, the last generated item (Say hello) drops off.
+    expect(recommended.at(-1)).toMatchObject({ kind: 'role', detail: 'Most used' });
+    expect(recommended).toHaveLength(6);
   });
   it('All apps are alphabetical, grouped by letter', () => {
     const letters = allApps().map((group) => group.letter);

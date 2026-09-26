@@ -15,7 +15,7 @@
  */
 import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { preload } from 'react-dom';
-import { copyText, formatUpdated, goHref } from '@/components/content';
+import { copyText, formatUpdated, goHref, nowUpdated } from '@/components/content';
 import { contentIndex } from '@/data/content-index';
 import type { ContentRef } from '@/data/schema';
 import {
@@ -222,6 +222,7 @@ export default function IosShell({ heading }: OsShellProps) {
       updated: monthYear(resume.updated),
       openTo: person.openTo,
       location: person.location,
+      now: person.now ? { text: person.now.text, updated: nowUpdated(person) ?? '' } : null,
       hasPdf,
       project: pick
         ? {
@@ -235,8 +236,8 @@ export default function IosShell({ heading }: OsShellProps) {
     };
   }, [person, resume.updated, hasPdf, featured, enriched, entry]);
   const home = useMemo(
-    () => homeLayout(viewport, { hasProject: widgetData.project !== null }),
-    [viewport, widgetData.project],
+    () => homeLayout(viewport, { hasProject: widgetData.project !== null, hasNow: widgetData.now !== null }),
+    [viewport, widgetData.project, widgetData.now],
   );
   const mailRead = (() => {
     try {
@@ -827,7 +828,9 @@ export default function IosShell({ heading }: OsShellProps) {
           ? { section: 'resume' }
           : widget === 'open-to-work'
             ? { section: 'contact' }
-            : { section: 'projects', slug: widgetData.project?.slug ?? '' };
+            : widget === 'now'
+              ? { section: 'about' }
+              : { section: 'projects', slug: widgetData.project?.slug ?? '' };
       const role = OS_REGISTRY.ios.sectionOwner[target.section] as IosRole;
       const actions = widgetActions(target, { kind: 'open', role, location: { kind: 'content', ref: target } }, hasPdf);
       if (!request('quick-actions')) return;
@@ -836,7 +839,14 @@ export default function IosShell({ heading }: OsShellProps) {
         spec: {
           kind: 'icon',
           role: null,
-          label: widget === 'resume' ? 'Résumé' : widget === 'open-to-work' ? 'Open to work' : 'Projects',
+          label:
+            widget === 'resume'
+              ? 'Résumé'
+              : widget === 'open-to-work'
+                ? 'Open to work'
+                : widget === 'now'
+                  ? 'Now'
+                  : 'Projects',
           anchor,
           actions,
           onAction: (action) => runCommand(action.command, anchor),

@@ -10,6 +10,7 @@ Home Screen widgets that surface the most valuable content at a glance and act a
 | **Résumé** | medium (2 rows × 4 cols) | Name, headline, current role + company, "Updated {resume.updated}", two inline actions **Open** · **Download** | `/ios/files/resume` (Open) / PDF download |
 | **Open to work** | small (2 × 2), page 2 | `person.openTo` in one or two lines + location | `/ios/mail` |
 | **Projects** | small (2 × 2), page 2 | Featured project name + stack dots, cycles only on re-entry (no timers) | `/ios/github/{slug}` |
+| **Now** (`IOS-WIDG-05`, `shared/23`) | small (2 × 2), page 2, after Open to work | "Now" caption, `person.now.text` clamped to 3 lines, "Updated {now.updated}" | `/ios/safari` (About) |
 
 ## Anatomy
 Rounded rectangle, radius 22 pt, fills its grid cells exactly (icon-grid aligned), label under the widget like an app
@@ -50,6 +51,7 @@ Download hidden. No featured project → Projects widget hidden and its cells re
 | `IOS-WIDG-02` | Widget = link; separate Download control (no nested interactives) | `e2e: X1 axe clean; both actions work` | P5 |
 | `IOS-WIDG-03` | Flight from/to the widget rect | `e2e: I1 from the Résumé widget` | P5 |
 | `IOS-WIDG-04` | No timers/loops; static per session | `perf: no intervals/animations at rest` | P5 |
+| `IOS-WIDG-05` | Small "Now" widget on page 2 from `person.now`, opens Safari About | `cmp: widget text from data, clamped; packer places it without overlap; link opens Safari` | P8 |
 
 ## Not like the others
 Grid-aligned **rounded widgets with app-like labels** that launch apps with the icon flight (Android uses the
