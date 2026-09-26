@@ -3,6 +3,13 @@
 Single place to see where the project stands. Update this file in the same change that updates a ledger.
 Source of truth for each row is the ledger named in the first column.
 
+**Reader polish (owner-approved 2026-09-25):** `/plain` now includes the owner's LinkedIn portrait as a local,
+responsive, full-color circular WebP portrait. Follow-up adds visible text blur entrances and removes the duplicate
+résumé section heading. Owner clarified that the original portrait size, background placement and text overlay must
+remain; only its circular crop and original colors change. Scoped to the reader page; no OS behavior or shared styles changed.
+`ROUTE-PLAIN-01` deviation recorded in the shared ledger. Verified: typecheck, production build, desktop/mobile
+visual inspection, 320–1440 px overflow checks, WCAG axe scan, and reduced-motion fallback.
+
 **Current phase:** P7 Linux implementation and automated acceptance gate complete: all 89 P7 rows are verified.
 The release-wide P8 manual/polish gate remains open (details below).
 **In progress (P8, owner-approved 2026-09-25): content depth** — `shared/23-content-depth.md`, 19 IDs (`DATA-COPY-01`,
